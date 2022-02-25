@@ -1,8 +1,6 @@
 package tokens
 
-import (
-	"unicode"
-)
+import "unicode"
 
 func (t *Tokenizer) Tokenize() {
 	for t.s.HasNext() {
@@ -98,11 +96,15 @@ func (t *Tokenizer) addString() {
 	})
 }
 
+func isLetter(char rune) bool {
+	return char == '+' || char == '-' || char == '*' || char == '/' || char == '^' || unicode.IsLetter(char)
+}
+
 func (t *Tokenizer) addIdent() {
 	pos := t.s.Pos()
 	val := ""
 	for t.s.HasNext() {
-		if !unicode.IsLetter(t.s.Char()) {
+		if !isLetter(t.s.Char()) {
 			break
 		}
 

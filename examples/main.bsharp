@@ -1,1 +1,2 @@
 [PRINT "Hello, World!"]
+[PRINT [MATH 1 + 1]]

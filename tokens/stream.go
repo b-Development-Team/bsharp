@@ -47,6 +47,7 @@ func (s *Stream) Pos() *Pos {
 func (s *Stream) Eat() {
 	if s.Char() == '\n' {
 		s.line++
+		s.char = 0
 	} else {
 		s.char++
 	}
