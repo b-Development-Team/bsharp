@@ -7,7 +7,7 @@ func (t *Tokenizer) Tokenize() {
 		switch t.s.Char() {
 		case '[':
 			t.addToken(Token{
-				Typ:   TokenTypeBrack,
+				Typ:   TokenTypeLBrack,
 				Value: "[",
 				Pos:   t.s.Pos(),
 			})
@@ -15,7 +15,7 @@ func (t *Tokenizer) Tokenize() {
 
 		case ']':
 			t.addToken(Token{
-				Typ:   TokenTypeBrack,
+				Typ:   TokenTypeRBrack,
 				Value: "]",
 				Pos:   t.s.Pos(),
 			})

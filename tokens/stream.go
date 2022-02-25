@@ -16,6 +16,14 @@ func (p *Pos) String() string {
 	return fmt.Sprintf("%s:%d:%d", p.File, p.Line+1, p.Char+1)
 }
 
+func (p *Pos) Dup() *Pos {
+	return &Pos{
+		File: p.File,
+		Line: p.Line,
+		Char: p.Char,
+	}
+}
+
 type Stream struct {
 	code []rune
 	pos  int
