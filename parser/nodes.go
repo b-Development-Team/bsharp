@@ -2,7 +2,6 @@ package parser
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/Nv7-Github/bsharp/tokens"
@@ -62,7 +61,7 @@ func (s *StringNode) String() string {
 
 type NumberNode struct {
 	pos   *tokens.Pos
-	Value float64
+	Value string
 }
 
 func (n *NumberNode) Pos() *tokens.Pos {
@@ -70,5 +69,5 @@ func (n *NumberNode) Pos() *tokens.Pos {
 }
 
 func (n *NumberNode) String() string {
-	return fmt.Sprintf("Number(%s, %s)", strconv.FormatFloat(n.Value, 'f', -1, 64), n.Pos().String())
+	return fmt.Sprintf("Number(%s, %s)", n.Value, n.Pos().String())
 }

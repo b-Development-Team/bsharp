@@ -10,6 +10,7 @@ type ScopeType int
 const (
 	ScopeTypeGlobal ScopeType = iota
 	ScopeTypeFunction
+	ScopeTypeBlock
 )
 
 type Variable struct {
@@ -64,6 +65,11 @@ func (s *Scope) GetVar(name string) (int, bool) {
 		}
 	}
 	return out, existsOut
+}
+
+func (s *Scope) CurrScopeGetVar(name string) (int, bool) {
+	v, exists := s.scopes[len(s.scopes)-1].Variables[name]
+	return v, exists
 }
 
 func (s *Scope) Variable(id int) *Variable {

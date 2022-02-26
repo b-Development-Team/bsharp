@@ -1,8 +1,6 @@
 package parser
 
 import (
-	"strconv"
-
 	"github.com/Nv7-Github/bsharp/tokens"
 )
 
@@ -26,15 +24,11 @@ func (p *Parser) ParseNode() (Node, error) {
 		}, nil
 
 	case tokens.TokenTypeNumber:
-		v, err := strconv.ParseFloat(p.t.Tok().Value, 64)
-		if err != nil {
-			return nil, p.t.Tok().Pos.Error("invalid number")
-		}
 		t := p.t.Tok()
 		p.t.Eat()
 		return &NumberNode{
 			pos:   t.Pos,
-			Value: v,
+			Value: t.Value,
 		}, nil
 	}
 

@@ -30,17 +30,19 @@ func (b *Builder) buildNode(node parser.Node) (Node, error) {
 	case *parser.CallNode:
 		builder, exists := nodeBuilders[n.Name]
 		if !exists {
-			// Function def
-			if n.Name == "FUNC" {
+			// Special case?
+			switch n.Name {
+			case "FUNC":
 				return nil, b.buildFnDef(n)
-			}
 
-			// Import
-			if n.Name == "IMPORT" {
+			case "IMPORT":
 				if b.Scope.CurrType() != ScopeTypeGlobal {
 					return nil, n.Pos().Error("import must be at the top level")
 				}
 				return nil, nil
+
+			case "BLOCK":
+				return b.addBlockNode(n)
 			}
 
 			// Is function?
@@ -58,6 +60,10 @@ func (b *Builder) buildNode(node parser.Node) (Node, error) {
 			}
 			args[i] = node
 		}
+		err := MatchTypes(n.Pos(), args, builder.ArgTypes)
+		if err != nil {
+			return nil, err
+		}
 		call, err := builder.Build(b, n.Pos(), args)
 		if err != nil {
 			return nil, err
@@ -74,7 +80,7 @@ func (b *Builder) buildNode(node parser.Node) (Node, error) {
 		return b.buildString(n), nil
 
 	case *parser.NumberNode:
-		return b.buildNumber(n), nil
+		return b.buildNumber(n)
 
 	default:
 		return nil, n.Pos().Error("unknown node type: %T", n)
