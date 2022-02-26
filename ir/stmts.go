@@ -35,6 +35,14 @@ func (b *Builder) buildNode(node parser.Node) (Node, error) {
 				return nil, b.buildFnDef(n)
 			}
 
+			// Import
+			if n.Name == "IMPORT" {
+				if b.Scope.CurrType() != ScopeTypeGlobal {
+					return nil, n.Pos().Error("import must be at the top level")
+				}
+				return nil, nil
+			}
+
 			// Is function?
 			_, exists := b.Funcs[n.Name]
 			if exists {
@@ -58,6 +66,15 @@ func (b *Builder) buildNode(node parser.Node) (Node, error) {
 			pos:  n.Pos(),
 			Call: call,
 		}, nil
+
+	case *parser.IdentNode:
+		return b.buildIdent(n), nil
+
+	case *parser.StringNode:
+		return b.buildString(n), nil
+
+	case *parser.NumberNode:
+		return b.buildNumber(n), nil
 
 	default:
 		return nil, n.Pos().Error("unknown node type: %T", n)

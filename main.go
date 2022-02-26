@@ -2,6 +2,7 @@ package main
 
 import (
 	_ "embed"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -48,7 +49,13 @@ func main() {
 		panic(err)
 	}
 
-	for _, node := range builder.Funcs {
+	for _, fn := range builder.Funcs {
+		spew.Dump(fn)
+		fmt.Println()
+		fmt.Println()
+	}
+
+	for _, node := range builder.Body {
 		spew.Dump(node)
 	}
 }

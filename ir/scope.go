@@ -55,15 +55,15 @@ func (s *Scope) CurrType() ScopeType {
 
 func (s *Scope) GetVar(name string) (int, bool) {
 	out := 0
-	exists := false
+	existsOut := false
 	for _, scope := range s.scopes {
 		v, exists := scope.Variables[name]
 		if exists {
 			out = v
-			exists = true
+			existsOut = true
 		}
 	}
-	return out, exists
+	return out, existsOut
 }
 
 func (s *Scope) Variable(id int) *Variable {

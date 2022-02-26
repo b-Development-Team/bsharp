@@ -1,6 +1,9 @@
 package types
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type Type interface {
 	fmt.Stringer
@@ -23,6 +26,7 @@ const (
 	// Special types
 	ANY
 	VARIADIC
+	IDENT
 )
 
 var basicTypeNames = map[BasicType]string{
@@ -108,4 +112,35 @@ func (m *MapType) Equal(b Type) bool {
 
 func (m *MapType) String() string {
 	return fmt.Sprintf("{%s, %s}", m.KeyType.String(), m.ValType.String())
+}
+
+type MulType struct {
+	Typs []Type
+}
+
+func (a *MulType) Equal(b Type) bool {
+	for _, typ := range a.Typs {
+		if typ.Equal(b) {
+			return true
+		}
+	}
+	return false
+}
+
+func (a *MulType) String() string {
+	typs := make([]string, len(a.Typs))
+	for i, typ := range a.Typs {
+		typs[i] = typ.String()
+	}
+	return "(" + strings.Join(typs, "|") + ")"
+}
+
+func (a *MulType) BasicType() BasicType {
+	return ANY
+}
+
+func NewMulType(typs ...Type) *MulType {
+	return &MulType{
+		Typs: typs,
+	}
 }
