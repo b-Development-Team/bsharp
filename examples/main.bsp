@@ -1,3 +1,4 @@
+# Functions
 [IMPORT "math.bsp"]
 
 [FUNC HELLO 
@@ -6,3 +7,30 @@
 
 [HELLO]
 [PRINT [ADD 1 2]]
+
+# Some basic Functions
+[DEFINE a 1]
+[PRINT [VAR a]]
+[PRINT [CONCAT "hello w" "orld"]]
+[IF [COMPARE 6 != 4] [BLOCK 
+  [PRINT "6 is not 4"]
+] ELSE [BLOCK 
+  [PRINT "6 is 4, uh oh!"]
+]]
+[INDEX "Hi!" 0]
+[PRINT [LENGTH "Hello, World!"]]
+
+[DEFINE i 0]
+[WHILE [COMPARE [VAR i] < 100] [BLOCK
+  [PRINT [VAR i]]
+  [DEFINE i [MATH [VAR i] + 1]]
+]]
+
+[PRINT [FLOAT 100]]
+
+[PRINT [RANDINT 1 100]]
+[PRINT [RANDOM 1 100]]
+[PRINT [FLOOR 1.5]]
+[PRINT [CEIL 1.5]]
+[PRINT [ROUND 1.5]]
+[PRINT [ARGS 0]]
