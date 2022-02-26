@@ -13,11 +13,10 @@ const (
 )
 
 type Variable struct {
-	Type  types.Type
-	Name  string
-	ID    int
-	Scope ScopeType
-	Pos   *tokens.Pos
+	Type types.Type
+	Name string
+	ID   int
+	Pos  *tokens.Pos
 }
 
 type scope struct {
@@ -50,6 +49,10 @@ func (s *Scope) HasType(typ ScopeType) bool {
 	return false
 }
 
+func (s *Scope) CurrType() ScopeType {
+	return s.scopes[len(s.scopes)-1].Type
+}
+
 func (s *Scope) GetVar(name string) (int, bool) {
 	out := 0
 	exists := false
@@ -67,21 +70,23 @@ func (s *Scope) Variable(id int) *Variable {
 	return s.Variables[id]
 }
 
-func (s *Scope) AddVariable(name string, typ types.Type, pos *tokens.Pos) {
+func (s *Scope) AddVariable(name string, typ types.Type, pos *tokens.Pos) int {
 	v := &Variable{
-		Name:  name,
-		Type:  typ,
-		ID:    len(s.Variables),
-		Pos:   pos,
-		Scope: s.scopes[len(s.scopes)-1].Type,
+		Name: name,
+		Type: typ,
+		ID:   len(s.Variables),
+		Pos:  pos,
 	}
 	s.Variables = append(s.Variables, v)
 	s.scopes[len(s.scopes)-1].Variables[name] = v.ID
+	return v.ID
 }
 
 func NewScope() *Scope {
-	return &Scope{
+	s := &Scope{
 		Variables: make([]*Variable, 0),
 		scopes:    make([]scope, 0),
 	}
+	s.Push(ScopeTypeGlobal)
+	return s
 }

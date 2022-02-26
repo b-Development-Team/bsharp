@@ -1,0 +1,8 @@
+[IMPORT "math.bsp"]
+
+[FUNC HELLO 
+  [PRINT "Hello, World!"]
+]
+
+[HELLO]
+[PRINT [ADD 1 2]]

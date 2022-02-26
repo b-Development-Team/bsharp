@@ -13,5 +13,17 @@ func (b *Builder) Build(p *parser.Parser, fs FS) error {
 	if err != nil {
 		return err
 	}
+
+	// Build nodes
+	for _, node := range p.Nodes {
+		node, err := b.buildNode(node)
+		if err != nil {
+			return err
+		}
+		if node != nil {
+			b.Body = append(b.Body, node)
+		}
+	}
+
 	return nil
 }
