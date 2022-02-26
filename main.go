@@ -25,7 +25,10 @@ func (d *dirFS) Parse(name string) (*parser.Parser, error) {
 		return nil, err
 	}
 	stream := tokens.NewTokenizer(tokens.NewStream(name, string(src)))
-	stream.Tokenize()
+	err = stream.Tokenize()
+	if err != nil {
+		return nil, err
+	}
 	parser := parser.NewParser(stream)
 
 	err = parser.Parse()
@@ -35,10 +38,13 @@ func (d *dirFS) Parse(name string) (*parser.Parser, error) {
 func main() {
 	stream := tokens.NewStream("main.bsp", code)
 	tok := tokens.NewTokenizer(stream)
-	tok.Tokenize()
+	err := tok.Tokenize()
+	if err != nil {
+		panic(err)
+	}
 
 	parser := parser.NewParser(tok)
-	err := parser.Parse()
+	err = parser.Parse()
 	if err != nil {
 		panic(err)
 	}

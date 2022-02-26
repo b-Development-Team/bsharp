@@ -34,3 +34,8 @@
 [PRINT [STRING [CEIL 1.5]]]
 [PRINT [STRING [ROUND 1.5]]]
 [PRINT [INDEX [ARGS] 0]]
+
+# Maps
+[DEFINE b [MAKE MAP{STRING}STRING]]
+[SET [VAR b] "Hello" "World"]
+[PRINT [GET [VAR b] "Hello"]]

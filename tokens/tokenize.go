@@ -4,7 +4,7 @@ import (
 	"unicode"
 )
 
-func (t *Tokenizer) Tokenize() {
+func (t *Tokenizer) Tokenize() error {
 	for t.s.HasNext() {
 		switch t.s.Char() {
 		case '[':
@@ -29,10 +29,6 @@ func (t *Tokenizer) Tokenize() {
 		case '"':
 			t.addString()
 
-		case ' ', '\n':
-			// Just ignore
-			t.s.Eat()
-
 		case '#': // Comment
 			t.s.Eat()
 			for t.s.HasNext() {
@@ -49,10 +45,19 @@ func (t *Tokenizer) Tokenize() {
 				t.s.Eat()
 			}
 
+		case ' ', '\n', '\t', '\r':
+			// Just ignore
+			t.s.Eat()
+
 		default:
+			if !isLetter(t.s.Char()) {
+				return t.s.Pos().Error("unexpected character: %s", string(t.s.Char()))
+			}
 			t.addIdent()
 		}
 	}
+
+	return nil
 }
 
 func (t *Tokenizer) addNum() {
@@ -115,7 +120,7 @@ func (t *Tokenizer) addString() {
 }
 
 func isLetter(char rune) bool {
-	return char == '+' || char == '-' || char == '*' || char == '/' || char == '^' || char == '=' || char == '!' || char == '<' || char == '>' || unicode.IsLetter(char)
+	return char == '+' || char == '-' || char == '*' || char == '/' || char == '^' || char == '=' || char == '!' || char == '<' || char == '>' || char == '{' || char == '}' || unicode.IsLetter(char)
 }
 
 func (t *Tokenizer) addIdent() {
