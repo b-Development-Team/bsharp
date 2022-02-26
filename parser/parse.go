@@ -55,16 +55,16 @@ func (p *Parser) ParseNode() (Node, error) {
 	// Args
 	args := make([]Node, 0)
 	for p.t.HasNext() {
+		if p.t.Tok().Typ == tokens.TokenTypeRBrack { // Eat ]
+			p.t.Eat()
+			break
+		}
+
 		arg, err := p.ParseNode()
 		if err != nil {
 			return nil, err
 		}
 		args = append(args, arg)
-
-		if p.t.Tok().Typ == tokens.TokenTypeRBrack { // Eat ]
-			p.t.Eat()
-			break
-		}
 	}
 
 	return &CallNode{

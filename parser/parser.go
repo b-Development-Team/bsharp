@@ -24,3 +24,7 @@ func (p *Parser) Parse() error {
 	}
 	return nil
 }
+
+func (p *Parser) Filename() string {
+	return p.t.Filename()
+}

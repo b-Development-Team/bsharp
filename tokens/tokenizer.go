@@ -57,3 +57,7 @@ func (t *Tokenizer) Last() *Pos {
 	p.Char += len(tok.Value)
 	return p
 }
+
+func (t *Tokenizer) Filename() string {
+	return t.s.file
+}

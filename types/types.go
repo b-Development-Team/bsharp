@@ -26,13 +26,13 @@ const (
 )
 
 var basicTypeNames = map[BasicType]string{
-	INT:    "int",
-	FLOAT:  "float",
-	STRING: "string",
-	BOOL:   "bool",
-	ARRAY:  "array",
-	MAP:    "map",
-	NULL:   "null",
+	INT:    "INT",
+	FLOAT:  "FLOAT",
+	STRING: "STRING",
+	BOOL:   "BOOL",
+	ARRAY:  "ARRAY",
+	MAP:    "MAP",
+	NULL:   "NULL",
 }
 
 func (b BasicType) BasicType() BasicType {

@@ -31,6 +31,22 @@ func (t *Tokenizer) Tokenize() {
 			// Just ignore
 			t.s.Eat()
 
+		case '#': // Comment
+			t.s.Eat()
+			for t.s.HasNext() {
+				if t.s.Char() == '\n' {
+					t.s.Eat()
+					break
+				}
+
+				if t.s.Char() == '#' {
+					t.s.Eat()
+					break
+				}
+
+				t.s.Eat()
+			}
+
 		default:
 			t.addIdent()
 		}

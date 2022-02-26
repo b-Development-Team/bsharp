@@ -1,0 +1,3 @@
+[FUNC ADD [PARAM a INT] [PARAM b INT] [RETURNS INT]
+  [RETURN [MATH [VAR a] + [VAR b]]]
+]

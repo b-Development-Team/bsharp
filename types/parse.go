@@ -26,7 +26,7 @@ func ParseType(typ string) (Type, error) {
 	}
 
 	// Map or nothing
-	if strings.HasPrefix(typ, "map{") {
+	if strings.HasPrefix(typ, "MAP{") {
 		// Get key and value types
 		typ = typ[4:]
 
