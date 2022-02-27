@@ -35,6 +35,21 @@ func (i *Interpreter) evalNode(node ir.Node) (*Value, error) {
 		case *ir.ConcatNode:
 			return i.evalConcat(c)
 
+		case *ir.IfNode:
+			return NewValue(types.NULL, nil), i.evalIfNode(c)
+
+		case *ir.CompareNode:
+			return i.evalCompareNode(n.Pos(), c)
+
+		case *ir.IndexNode:
+			return i.evalIndex(n.Pos(), c)
+
+		case *ir.LengthNode:
+			return i.evalLength(n.Pos(), c)
+
+		case *ir.WhileNode:
+			return NewValue(types.NULL, nil), i.evalWhileNode(c)
+
 		default:
 			return nil, n.Pos().Error("unknown call node: %T", c)
 		}

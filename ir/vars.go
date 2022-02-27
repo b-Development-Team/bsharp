@@ -43,13 +43,19 @@ func init() {
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
 			// Get var
 			name := args[0].(*Const).Value.(string)
-			id, exists := b.Scope.CurrScopeGetVar(name) // Only check in current scope
+			id, exists := b.Scope.GetVar(name)
 			if !exists {
 				id = b.Scope.AddVariable(name, args[1].Type(), pos)
 			} else {
 				v := b.Scope.Variable(id)
 				if v.Type != args[1].Type() {
-					return nil, fmt.Errorf("cannot redefine variable %s to type %s", name, args[1].Type())
+					// Check if in current scope, if so redefine
+					_, exists = b.Scope.CurrScopeGetVar(name)
+					if !exists {
+						id = b.Scope.AddVariable(name, args[1].Type(), pos)
+					} else {
+						return nil, fmt.Errorf("cannot redefine variable %s to type %s", name, args[1].Type())
+					}
 				}
 			}
 

@@ -21,14 +21,14 @@ func (i *Interpreter) evalMathNode(pos *tokens.Pos, node *ir.MathNode) (*Value, 
 
 	switch left.Type {
 	case types.INT:
-		v := intOp(left.Value.(int), right.Value.(int), node.Op)
+		v := intMathOp(left.Value.(int), right.Value.(int), node.Op)
 		if v == nil {
 			return nil, pos.Error("unknown math operation: %s", node.Op)
 		}
 		return NewValue(types.INT, *v), nil
 
 	case types.FLOAT:
-		v := floatOp(left.Value.(float64), right.Value.(float64), node.Op)
+		v := floatMathOp(left.Value.(float64), right.Value.(float64), node.Op)
 		if v == nil {
 			return nil, pos.Error("unknown math operation: %s", node.Op)
 		}
@@ -39,7 +39,7 @@ func (i *Interpreter) evalMathNode(pos *tokens.Pos, node *ir.MathNode) (*Value, 
 	}
 }
 
-func intOp(lhs int, rhs int, op ir.MathOperation) *int {
+func intMathOp(lhs int, rhs int, op ir.MathOperation) *int {
 	var out int
 	switch op {
 	case ir.MathOperationAdd:
@@ -67,7 +67,7 @@ func intOp(lhs int, rhs int, op ir.MathOperation) *int {
 	return &out
 }
 
-func floatOp(lhs float64, rhs float64, op ir.MathOperation) *float64 {
+func floatMathOp(lhs float64, rhs float64, op ir.MathOperation) *float64 {
 	var out float64
 	switch op {
 	case ir.MathOperationAdd:
@@ -87,6 +87,126 @@ func floatOp(lhs float64, rhs float64, op ir.MathOperation) *float64 {
 
 	case ir.MathOperationMod:
 		out = math.Mod(lhs, rhs)
+
+	default:
+		return nil
+	}
+
+	return &out
+}
+
+func (i *Interpreter) evalCompareNode(pos *tokens.Pos, node *ir.CompareNode) (*Value, error) {
+	left, err := i.evalNode(node.Lhs)
+	if err != nil {
+		return nil, err
+	}
+	right, err := i.evalNode(node.Rhs)
+	if err != nil {
+		return nil, err
+	}
+	switch left.Type {
+	case types.INT:
+		v := intCompOp(left.Value.(int), right.Value.(int), node.Op)
+		if v == nil {
+			return nil, pos.Error("unknown compare operation: %s", node.Op)
+		}
+		return NewValue(types.BOOL, *v), nil
+
+	case types.FLOAT:
+		v := floatCompOp(left.Value.(float64), right.Value.(float64), node.Op)
+		if v == nil {
+			return nil, pos.Error("unknown compare operation: %s", node.Op)
+		}
+		return NewValue(types.BOOL, *v), nil
+
+	case types.STRING:
+		v := stringCompOp(left.Value.(string), right.Value.(string), node.Op)
+		if v == nil {
+			return nil, pos.Error("unknown compare operation: %s", node.Op)
+		}
+		return NewValue(types.BOOL, *v), nil
+
+	default:
+		return nil, pos.Error("cannot perform comparison on type %s", left.Type.String())
+	}
+}
+
+func intCompOp(lhs int, rhs int, op ir.CompareOperation) *bool {
+	var out bool
+	switch op {
+	case ir.CompareOperationEqual:
+		out = lhs == rhs
+
+	case ir.CompareOperationNotEqual:
+		out = lhs != rhs
+
+	case ir.CompareOperationGreater:
+		out = lhs > rhs
+
+	case ir.CompareOperationGreaterEqual:
+		out = lhs >= rhs
+
+	case ir.CompareOperationLess:
+		out = lhs < rhs
+
+	case ir.CompareOperationLessEqual:
+		out = lhs <= rhs
+
+	default:
+		return nil
+	}
+
+	return &out
+}
+
+func floatCompOp(lhs float64, rhs float64, op ir.CompareOperation) *bool {
+	var out bool
+	switch op {
+	case ir.CompareOperationEqual:
+		out = lhs == rhs
+
+	case ir.CompareOperationNotEqual:
+		out = lhs != rhs
+
+	case ir.CompareOperationGreater:
+		out = lhs > rhs
+
+	case ir.CompareOperationGreaterEqual:
+		out = lhs >= rhs
+
+	case ir.CompareOperationLess:
+		out = lhs < rhs
+
+	case ir.CompareOperationLessEqual:
+		out = lhs <= rhs
+
+	default:
+		return nil
+	}
+
+	return &out
+}
+
+func stringCompOp(lhs string, rhs string, op ir.CompareOperation) *bool {
+	var out bool
+	switch op {
+	case ir.CompareOperationEqual:
+		out = lhs == rhs
+
+	case ir.CompareOperationNotEqual:
+		out = lhs != rhs
+
+	case ir.CompareOperationGreater:
+		out = lhs > rhs
+
+	case ir.CompareOperationGreaterEqual:
+		out = lhs >= rhs
+
+	case ir.CompareOperationLess:
+		out = lhs < rhs
+
+	case ir.CompareOperationLessEqual:
+		out = lhs <= rhs
 
 	default:
 		return nil

@@ -14,6 +14,7 @@ type Interpreter struct {
 	Variables []*Value
 
 	retVal *Value
+	scope  *Scope
 }
 
 type Value struct {
@@ -33,6 +34,7 @@ func NewInterpreter(ir *ir.IR, stdout io.Writer) *Interpreter {
 		ir:        ir,
 		stdout:    stdout,
 		Variables: make([]*Value, len(ir.Variables)),
+		scope:     NewScope(),
 	}
 }
 
@@ -41,10 +43,19 @@ func (i *Interpreter) SetStdout(stdout io.Writer) {
 }
 
 func (i *Interpreter) Run() error {
+	i.scope.Push()
 	for _, node := range i.ir.Body {
 		if _, err := i.evalNode(node); err != nil {
 			return err
 		}
 	}
+	i.pop()
 	return nil
+}
+
+func (i *Interpreter) pop() {
+	vals := i.scope.Pop()
+	for _, v := range vals {
+		i.Variables[v] = nil
+	}
 }

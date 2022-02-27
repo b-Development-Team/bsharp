@@ -142,10 +142,6 @@ func init() {
 			if !args[0].Type().Equal(args[2].Type()) {
 				return nil, fmt.Errorf("cannot compare type %s to type %s", args[0].Type(), args[2].Type())
 			}
-			if (op == CompareOperationGreaterEqual || op == CompareOperationLessEqual) && args[0].Type().Equal(types.STRING) { // Cannot do these ops on strings
-				return nil, fmt.Errorf("cannot use operation \"%s\" on type STRING", args[1].(*Const).Value.(string))
-			}
-
 			// Return node
 			return &CompareNode{
 				Op:  op,

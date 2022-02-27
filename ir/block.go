@@ -10,13 +10,7 @@ type IfNode struct {
 	NullCall
 	Condition Node
 	Body      []Node
-}
-
-type IfElseNode struct {
-	NullCall
-	Condition Node
-	Body      []Node
-	Else      []Node
+	Else      []Node // nil if no else
 }
 
 type WhileNode struct {
@@ -86,16 +80,10 @@ func init() {
 			}
 			b.Scope.Pop()
 
-			if hasElse {
-				return &IfElseNode{
-					Condition: cond,
-					Body:      body,
-					Else:      els,
-				}, nil
-			}
 			return &IfNode{
 				Condition: cond,
 				Body:      body,
+				Else:      els,
 			}, nil
 		},
 	}
