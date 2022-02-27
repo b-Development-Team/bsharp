@@ -34,10 +34,24 @@ type Builder struct {
 	currFn   string
 }
 
+type IR struct {
+	Funcs     map[string]*Function
+	Variables []*Variable
+	Body      []Node
+}
+
 func NewBuilder() *Builder {
 	return &Builder{
 		Scope:    NewScope(),
 		Funcs:    make(map[string]*Function),
 		imported: make(map[string]empty),
+	}
+}
+
+func (b *Builder) IR() *IR {
+	return &IR{
+		Funcs:     b.Funcs,
+		Variables: b.Scope.Variables,
+		Body:      b.Body,
 	}
 }

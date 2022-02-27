@@ -2,14 +2,13 @@ package main
 
 import (
 	_ "embed"
-	"fmt"
 	"os"
 	"path/filepath"
 
+	"github.com/Nv7-Github/bsharp/backends/interpreter"
 	"github.com/Nv7-Github/bsharp/ir"
 	"github.com/Nv7-Github/bsharp/parser"
 	"github.com/Nv7-Github/bsharp/tokens"
-	"github.com/davecgh/go-spew/spew"
 )
 
 //go:embed examples/main.bsp
@@ -55,13 +54,9 @@ func main() {
 		panic(err)
 	}
 
-	for _, fn := range builder.Funcs {
-		spew.Dump(fn)
-		fmt.Println()
-		fmt.Println()
-	}
-
-	for _, node := range builder.Body {
-		spew.Dump(node)
+	interp := interpreter.NewInterpreter(builder.IR(), os.Stdout)
+	err = interp.Run()
+	if err != nil {
+		panic(err)
 	}
 }
