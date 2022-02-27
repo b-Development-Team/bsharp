@@ -2,7 +2,6 @@ package main
 
 import (
 	_ "embed"
-	"fmt"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -71,7 +70,6 @@ func main() {
 	rand.Seed(time.Now().UnixNano())
 	interp := interpreter.NewInterpreter(builder.IR(), os.Stdout)
 	interp.AddExtension(ext)
-	fmt.Println(ext.Call([]interface{}{1, 2}))
 	err = interp.Run()
 	if err != nil {
 		panic(err)
