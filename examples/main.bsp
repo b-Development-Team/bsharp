@@ -12,19 +12,19 @@
 [DEFINE a 1]
 [PRINT [STRING [VAR a]]]
 [PRINT [CONCAT "hello w" "orld"]]
-[IF [COMPARE 6 != 4] [BLOCK 
+[IF [COMPARE 6 != 4]
   [PRINT "6 is not 4"]
-] ELSE [BLOCK 
+ELSE
   [PRINT "6 is 4, uh oh!"]
-]]
+]
 [INDEX "Hi!" 0]
 [PRINT [STRING [LENGTH "Hello, World!"]]]
 
 [DEFINE i 0]
-[WHILE [COMPARE [VAR i] < 100] [BLOCK
+[WHILE [COMPARE [VAR i] < 100]
   [PRINT [STRING [VAR i]]]
   [DEFINE i [MATH [VAR i] + 1]]
-]]
+]
 
 [PRINT [STRING [FLOAT 100]]]
 
@@ -39,3 +39,18 @@
 [DEFINE b [MAKE MAP{STRING}STRING]]
 [SET [VAR b] "Hello" "World"]
 [PRINT [GET [VAR b] "Hello"]]
+
+# Switch-case
+[SWITCH "Hello"
+  [CASE "World"
+    [PRINT "The value was world!"]
+  ]
+
+  [CASE "Hello"
+    [PRINT "The value was hello!"]
+  ]
+
+  [DEFAULT
+    [PRINT "Unknown value!"]
+  ]
+]

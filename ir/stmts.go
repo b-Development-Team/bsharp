@@ -17,6 +17,12 @@ type nodeBuilder struct {
 
 var nodeBuilders = make(map[string]nodeBuilder)
 
+type blockBuilder struct {
+	Build func(b *Builder, pos *tokens.Pos, args []parser.Node) (Call, error)
+}
+
+var blockBuilders = make(map[string]blockBuilder)
+
 type CallNode struct {
 	pos  *tokens.Pos
 	Call Call
@@ -30,6 +36,16 @@ func (b *Builder) buildNode(node parser.Node) (Node, error) {
 	case *parser.CallNode:
 		builder, exists := nodeBuilders[n.Name]
 		if !exists {
+			// Block?
+			blkBuilder, exists := blockBuilders[n.Name]
+			if exists {
+				call, err := blkBuilder.Build(b, n.Pos(), n.Args)
+				if err != nil {
+					return nil, err
+				}
+				return &CallNode{n.Pos(), call}, nil
+			}
+
 			// Special case?
 			switch n.Name {
 			case "FUNC":
@@ -40,13 +56,10 @@ func (b *Builder) buildNode(node parser.Node) (Node, error) {
 					return nil, n.Pos().Error("import must be at the top level")
 				}
 				return nil, nil
-
-			case "BLOCK":
-				return b.addBlockNode(n)
 			}
 
 			// Is function?
-			_, exists := b.Funcs[n.Name]
+			_, exists = b.Funcs[n.Name]
 			if exists {
 				return b.buildFnCall(n)
 			}

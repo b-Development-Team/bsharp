@@ -5,6 +5,8 @@ import (
 	"github.com/Nv7-Github/bsharp/types"
 )
 
+var hashable = types.NewMulType(types.INT, types.STRING, types.FLOAT) // Only types as key to map and switch
+
 type ArrayNode struct {
 	Values []Node
 	typ    types.Type
@@ -108,6 +110,9 @@ func init() {
 			if !types.MAP.Equal(typ) {
 				return nil, args[0].Pos().Error("expected map type, got %s", typ.String())
 			}
+			if !hashable.Equal(typ.(*types.MapType).KeyType) {
+				return nil, args[0].Pos().Error("unhashable key type: %s", typ.(*types.MapType).KeyType.String())
+			}
 			return &MakeNode{
 				typ: typ,
 			}, nil
@@ -115,7 +120,7 @@ func init() {
 	}
 
 	nodeBuilders["SET"] = nodeBuilder{
-		ArgTypes: []types.Type{types.MAP, types.ANY, types.ANY},
+		ArgTypes: []types.Type{types.MAP, hashable, types.ANY},
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
 			// Check types
 			mapTyp := args[0].Type().(*types.MapType)
@@ -135,7 +140,7 @@ func init() {
 	}
 
 	nodeBuilders["GET"] = nodeBuilder{
-		ArgTypes: []types.Type{types.MAP, types.ANY},
+		ArgTypes: []types.Type{types.MAP, hashable},
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
 			// Check types
 			mapTyp := args[0].Type().(*types.MapType)

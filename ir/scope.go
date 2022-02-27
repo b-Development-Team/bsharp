@@ -10,7 +10,10 @@ type ScopeType int
 const (
 	ScopeTypeGlobal ScopeType = iota
 	ScopeTypeFunction
-	ScopeTypeBlock
+	ScopeTypeIf
+	ScopeTypeWhile
+	ScopeTypeSwitch
+	ScopeTypeCase
 )
 
 type Variable struct {
