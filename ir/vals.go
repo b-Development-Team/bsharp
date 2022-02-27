@@ -177,6 +177,7 @@ func init() {
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
 			return &MathFunctionNode{
 				Func: MathFunctionFloor,
+				Arg:  args[0],
 				typ:  types.INT,
 			}, nil
 		},
@@ -187,6 +188,7 @@ func init() {
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
 			return &MathFunctionNode{
 				Func: MathFunctionCeil,
+				Arg:  args[0],
 				typ:  types.INT,
 			}, nil
 		},
@@ -197,6 +199,7 @@ func init() {
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
 			return &MathFunctionNode{
 				Func: MathFunctionRound,
+				Arg:  args[0],
 				typ:  types.INT,
 			}, nil
 		},

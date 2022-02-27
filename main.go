@@ -2,8 +2,10 @@ package main
 
 import (
 	_ "embed"
+	"math/rand"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/Nv7-Github/bsharp/backends/interpreter"
 	"github.com/Nv7-Github/bsharp/ir"
@@ -54,6 +56,7 @@ func main() {
 		panic(err)
 	}
 
+	rand.Seed(time.Now().UnixNano())
 	interp := interpreter.NewInterpreter(builder.IR(), os.Stdout)
 	err = interp.Run()
 	if err != nil {

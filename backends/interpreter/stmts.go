@@ -50,6 +50,27 @@ func (i *Interpreter) evalNode(node ir.Node) (*Value, error) {
 		case *ir.WhileNode:
 			return NewValue(types.NULL, nil), i.evalWhileNode(c)
 
+		case *ir.RandintNode:
+			return i.evalRandint(c)
+
+		case *ir.RandomNode:
+			return i.evalRandom(c)
+
+		case *ir.MathFunctionNode:
+			return i.evalMathFn(n.Pos(), c)
+
+		case *ir.MakeNode:
+			return i.evalMake(n.Pos(), c)
+
+		case *ir.SetNode:
+			return i.evalSet(n.Pos(), c)
+
+		case *ir.GetNode:
+			return i.evalGet(n.Pos(), c)
+
+		case *ir.SwitchNode:
+			return NewValue(types.NULL, nil), i.evalSwitchNode(c)
+
 		default:
 			return nil, n.Pos().Error("unknown call node: %T", c)
 		}

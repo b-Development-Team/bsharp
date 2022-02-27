@@ -50,3 +50,36 @@ func (i *Interpreter) evalWhileNode(n *ir.WhileNode) error {
 	}
 	return nil
 }
+
+func (i *Interpreter) evalSwitchNode(n *ir.SwitchNode) error {
+	v, err := i.evalNode(n.Value)
+	if err != nil {
+		return err
+	}
+
+	// Check cases (O(n), not O(1) like expected from switch)
+	for _, cs := range n.Cases {
+		if cs.Value.Value == v.Value { // This works for int, float, string, all the hashable types
+			i.scope.Push()
+			for _, node := range cs.Body {
+				if _, err := i.evalNode(node); err != nil {
+					return err
+				}
+			}
+			i.pop()
+			return nil
+		}
+	}
+
+	// Default case
+	if n.Default != nil {
+		i.scope.Push()
+		for _, node := range n.Default {
+			if _, err := i.evalNode(node); err != nil {
+				return err
+			}
+		}
+		i.pop()
+	}
+	return nil
+}

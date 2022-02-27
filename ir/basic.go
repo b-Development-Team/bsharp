@@ -30,10 +30,6 @@ type RandomNode struct {
 
 func (r *RandomNode) Type() types.Type { return types.FLOAT }
 
-type ArgsNode struct{}
-
-func (a *ArgsNode) Type() types.Type { return types.NewArrayType(types.STRING) }
-
 func init() {
 	nodeBuilders["PRINT"] = nodeBuilder{
 		ArgTypes: []types.Type{types.STRING},
@@ -70,13 +66,6 @@ func init() {
 				Lower: args[0],
 				Upper: args[1],
 			}, nil
-		},
-	}
-
-	nodeBuilders["ARGS"] = nodeBuilder{
-		ArgTypes: []types.Type{},
-		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
-			return &ArgsNode{}, nil
 		},
 	}
 }
