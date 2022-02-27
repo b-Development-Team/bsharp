@@ -27,11 +27,16 @@ type Function struct {
 type empty struct{}
 
 type Builder struct {
-	Scope    *Scope
-	Funcs    map[string]*Function
-	Body     []Node
-	imported map[string]empty
-	currFn   string
+	Scope      *Scope
+	Funcs      map[string]*Function
+	Body       []Node
+	imported   map[string]empty
+	currFn     string
+	extensions map[string]*Extension
+}
+
+func (b *Builder) AddExtension(e *Extension) {
+	b.extensions[e.Name] = e
 }
 
 type IR struct {
@@ -42,9 +47,10 @@ type IR struct {
 
 func NewBuilder() *Builder {
 	return &Builder{
-		Scope:    NewScope(),
-		Funcs:    make(map[string]*Function),
-		imported: make(map[string]empty),
+		Scope:      NewScope(),
+		Funcs:      make(map[string]*Function),
+		imported:   make(map[string]empty),
+		extensions: make(map[string]*Extension),
 	}
 }
 

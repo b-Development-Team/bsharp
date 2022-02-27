@@ -2,6 +2,7 @@ package main
 
 import (
 	_ "embed"
+	"fmt"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -36,6 +37,10 @@ func (d *dirFS) Parse(name string) (*parser.Parser, error) {
 	return parser, err
 }
 
+func extadd(a, b int) int {
+	return a + b
+}
+
 func main() {
 	stream := tokens.NewStream("main.bsp", code)
 	tok := tokens.NewTokenizer(stream)
@@ -50,7 +55,14 @@ func main() {
 		panic(err)
 	}
 
+	// Extensions
+	ext, err := interpreter.NewExtension(extadd, "EXTADD")
+	if err != nil {
+		panic(err)
+	}
+
 	builder := ir.NewBuilder()
+	builder.AddExtension(ext.IRExtension())
 	err = builder.Build(parser, &dirFS{dir: "examples"})
 	if err != nil {
 		panic(err)
@@ -58,6 +70,8 @@ func main() {
 
 	rand.Seed(time.Now().UnixNano())
 	interp := interpreter.NewInterpreter(builder.IR(), os.Stdout)
+	interp.AddExtension(ext)
+	fmt.Println(ext.Call([]interface{}{1, 2}))
 	err = interp.Run()
 	if err != nil {
 		panic(err)

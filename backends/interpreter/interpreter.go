@@ -10,8 +10,9 @@ import (
 type Interpreter struct {
 	ir *ir.IR
 
-	stdout    io.Writer
-	Variables []*Value
+	stdout     io.Writer
+	Variables  []*Value
+	extensions map[string]*Extension
 
 	retVal *Value
 	scope  *Scope
@@ -31,11 +32,16 @@ func NewValue(typ types.Type, val interface{}) *Value {
 
 func NewInterpreter(ir *ir.IR, stdout io.Writer) *Interpreter {
 	return &Interpreter{
-		ir:        ir,
-		stdout:    stdout,
-		Variables: make([]*Value, len(ir.Variables)),
-		scope:     NewScope(),
+		ir:         ir,
+		stdout:     stdout,
+		Variables:  make([]*Value, len(ir.Variables)),
+		scope:      NewScope(),
+		extensions: make(map[string]*Extension),
 	}
+}
+
+func (i *Interpreter) AddExtension(e *Extension) {
+	i.extensions[e.Name] = e
 }
 
 func (i *Interpreter) SetStdout(stdout io.Writer) {

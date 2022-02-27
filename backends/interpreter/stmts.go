@@ -81,6 +81,9 @@ func (i *Interpreter) evalNode(node ir.Node) (*Value, error) {
 	case *ir.Const:
 		return i.evalConst(n)
 
+	case *ir.ExtensionCall:
+		return i.evalExtensionCall(n)
+
 	default:
 		return nil, n.Pos().Error("unknown node type: %T", node)
 	}

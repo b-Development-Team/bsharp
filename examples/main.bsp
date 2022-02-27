@@ -53,3 +53,6 @@ ELSE
     [PRINT "Unknown value!"]
   ]
 ]
+
+# Extensions
+[PRINT [STRING [EXTADD 1 2]]]

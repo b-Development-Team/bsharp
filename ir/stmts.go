@@ -63,6 +63,13 @@ func (b *Builder) buildNode(node parser.Node) (Node, error) {
 			if exists {
 				return b.buildFnCall(n)
 			}
+
+			// Is extension?
+			_, exists = b.extensions[n.Name]
+			if exists {
+				return b.buildExtensionCall(n)
+			}
+
 			return nil, n.Pos().Error("unknown function: " + n.Name)
 		}
 		args := make([]Node, len(n.Args))
