@@ -32,6 +32,9 @@ func (i *Interpreter) evalNode(node ir.Node) (*Value, error) {
 		case *ir.DefineNode:
 			return i.evalDefineNode(c)
 
+		case *ir.ConcatNode:
+			return i.evalConcat(c)
+
 		default:
 			return nil, n.Pos().Error("unknown call node: %T", c)
 		}
