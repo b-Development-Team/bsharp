@@ -17,6 +17,21 @@ func (i *Interpreter) evalNode(node ir.Node) (*Value, error) {
 		case *ir.PrintNode:
 			return NewValue(types.NULL, nil), i.evalPrint(c)
 
+		case *ir.CastNode:
+			return i.evalCast(c)
+
+		case *ir.ReturnNode:
+			return i.evalReturnNode(c)
+
+		case *ir.MathNode:
+			return i.evalMathNode(n.Pos(), c)
+
+		case *ir.VarNode:
+			return i.evalVarNode(c)
+
+		case *ir.DefineNode:
+			return i.evalDefineNode(c)
+
 		default:
 			return nil, n.Pos().Error("unknown call node: %T", c)
 		}

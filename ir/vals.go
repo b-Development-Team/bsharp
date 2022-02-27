@@ -31,6 +31,7 @@ const (
 	MathOperationMul
 	MathOperationDiv
 	MathOperationPow
+	MathOperationMod
 )
 
 var mathOps = map[string]MathOperation{
@@ -39,6 +40,7 @@ var mathOps = map[string]MathOperation{
 	"*": MathOperationMul,
 	"/": MathOperationDiv,
 	"^": MathOperationPow,
+	"%": MathOperationMod,
 }
 
 type MathNode struct {
@@ -161,7 +163,7 @@ func init() {
 	}
 
 	nodeBuilders["STRING"] = nodeBuilder{
-		ArgTypes: []types.Type{types.NewMulType(types.INT, types.FLOAT)},
+		ArgTypes: []types.Type{types.NewMulType(types.INT, types.FLOAT, types.BOOL)},
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
 			return NewCastNode(args[0], types.STRING), nil
 		},

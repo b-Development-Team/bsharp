@@ -54,6 +54,6 @@ func (b *Builder) buildNumber(n *parser.NumberNode) (Node, error) {
 	return &Const{
 		typ:   types.INT,
 		pos:   n.Pos(),
-		Value: v,
+		Value: int(v),
 	}, nil
 }
