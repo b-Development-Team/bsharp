@@ -33,4 +33,11 @@ func main() {
 
 	fmt.Println("Stopping...")
 	bot.Close()
+
+	/*
+		TODO:
+		- Editing
+		- Comment/Image
+		- Leaderboards
+	*/
 }

@@ -69,7 +69,48 @@ var (
 							Description: "The file to create a tag from!",
 							Required:    true,
 						},
-					}, // Code is entered through a modal
+					},
+				},
+			},
+		},
+		{
+			Name:        "edit",
+			Description: "Edit a B# tag!",
+			Type:        discordgo.ChatApplicationCommand,
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Name:        "tag",
+					Type:        discordgo.ApplicationCommandOptionSubCommand,
+					Description: "Edit a tag from the source code of a B# program!",
+					Options: []*discordgo.ApplicationCommandOption{
+						{
+							Type:         discordgo.ApplicationCommandOptionString,
+							Name:         "id",
+							Description:  "The ID of the tag to edit!",
+							Required:     true,
+							Autocomplete: true,
+						},
+					},
+				},
+				{
+					Name:        "file",
+					Type:        discordgo.ApplicationCommandOptionSubCommand,
+					Description: "Edit a tag from a file!",
+					Options: []*discordgo.ApplicationCommandOption{
+						{
+							Type:         discordgo.ApplicationCommandOptionString,
+							Name:         "id",
+							Description:  "The ID of the tag to create!",
+							Required:     true,
+							Autocomplete: true,
+						},
+						{
+							Type:        discordgo.ApplicationCommandOptionAttachment,
+							Name:        "file",
+							Description: "The file to create a tag from!",
+							Required:    true,
+						},
+					},
 				},
 			},
 		},
@@ -114,10 +155,37 @@ var (
 				b.CreateFileCmd(id, name, url, ctx)
 			}
 		},
+		"edit": func(ctx *Ctx, dat discordgo.ApplicationCommandInteractionData, b *Bot) {
+			data := dat.Options[0]
+			switch data.Name {
+			case "tag":
+				b.EditCodeCmd(data.Options[0].StringValue(), ctx)
+
+			case "file":
+				var url string
+				var id string
+				for _, opt := range data.Options {
+					switch opt.Name {
+					case "id":
+						id = opt.StringValue()
+
+					case "file":
+						id := opt.Value.(string)
+						attachment := dat.Resolved.Attachments[id]
+						url = attachment.URL
+					}
+				}
+
+				b.EditFileCmd(id, url, ctx)
+			}
+		},
 	}
 
 	autocomplete = map[string]func(*db.Data, discordgo.ApplicationCommandInteractionData) []*discordgo.ApplicationCommandOptionChoice{
 		"run": func(d *db.Data, dat discordgo.ApplicationCommandInteractionData) []*discordgo.ApplicationCommandOptionChoice {
+			return d.Autocomplete(dat.Options[0].Options[0].StringValue())
+		},
+		"edit": func(d *db.Data, dat discordgo.ApplicationCommandInteractionData) []*discordgo.ApplicationCommandOptionChoice {
 			return d.Autocomplete(dat.Options[0].Options[0].StringValue())
 		},
 	}

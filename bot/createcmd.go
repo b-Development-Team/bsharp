@@ -37,7 +37,7 @@ func (b *Bot) CreateCmd(src string, id, name string, ctx *Ctx) {
 	if ctx.Error(err) {
 		return
 	}
-	ctx.Message(fmt.Sprintf("🆕 Created new program **%s**!", prog.Name))
+	ctx.Message(fmt.Sprintf("🆕 Created new tag **%s**!", prog.Name))
 }
 
 func (b *Bot) CreateCodeCmd(ctx *Ctx) {
