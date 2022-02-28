@@ -18,7 +18,7 @@ func (i *Interpreter) evalIndex(pos *tokens.Pos, n *ir.IndexNode) (*Value, error
 	ind := indV.Value.(int)
 	switch v.Type.BasicType() {
 	case types.ARRAY:
-		a := v.Value.([]interface{})
+		a := *v.Value.(*[]interface{})
 		if ind < 0 || ind >= len(a) {
 			return nil, pos.Error("index out of bounds: %d with length %d", ind, len(a))
 		}
@@ -43,7 +43,7 @@ func (i *Interpreter) evalLength(pos *tokens.Pos, n *ir.LengthNode) (*Value, err
 	}
 	switch v.Type.BasicType() {
 	case types.ARRAY:
-		a := v.Value.([]interface{})
+		a := *v.Value.(*[]interface{})
 		return NewValue(types.INT, len(a)), nil
 
 	case types.STRING:
@@ -130,4 +130,32 @@ func (i *Interpreter) evalGet(pos *tokens.Pos, n *ir.GetNode) (*Value, error) {
 	}
 
 	return NewValue(n.Type(), out), nil
+}
+
+func (i *Interpreter) evalArray(n *ir.ArrayNode) (*Value, error) {
+	out := make([]interface{}, len(n.Values))
+	for ind, v := range n.Values {
+		val, err := i.evalNode(v)
+		if err != nil {
+			return nil, err
+		}
+		out[ind] = val.Value
+	}
+	return NewValue(types.ARRAY, &out), nil
+}
+
+func (i *Interpreter) evalAppend(n *ir.AppendNode) (*Value, error) {
+	arr, err := i.evalNode(n.Array)
+	if err != nil {
+		return nil, err
+	}
+	v := arr.Value.(*[]interface{})
+
+	val, err := i.evalNode(n.Value)
+	if err != nil {
+		return nil, err
+	}
+
+	*v = append(*v, val)
+	return NewValue(types.NULL, nil), nil
 }

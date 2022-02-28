@@ -71,6 +71,12 @@ func (i *Interpreter) evalNode(node ir.Node) (*Value, error) {
 		case *ir.SwitchNode:
 			return NewValue(types.NULL, nil), i.evalSwitchNode(c)
 
+		case *ir.ArrayNode:
+			return i.evalArray(c)
+
+		case *ir.AppendNode:
+			return i.evalAppend(c)
+
 		default:
 			return nil, n.Pos().Error("unknown call node: %T", c)
 		}

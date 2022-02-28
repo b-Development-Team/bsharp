@@ -39,6 +39,11 @@ ELSE
 [SET [VAR b] "Hello" "World"]
 [PRINT [GET [VAR b] "Hello"]]
 
+# Arrays
+[DEFINE c [ARRAY 1 2 3]]
+[PRINT [STRING [INDEX [VAR c] 0]]]
+[APPEND [VAR c] 4]
+
 # Switch-case
 [SWITCH "Hello"
   [CASE "World"
