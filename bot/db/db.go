@@ -101,6 +101,11 @@ func newDB(path string) *DB {
 }
 
 func NewDB(path string) (*DB, error) {
+	err := os.MkdirAll(path, os.ModePerm)
+	if err != nil {
+		return nil, err
+	}
+
 	db := newDB(path)
 	folders, err := os.ReadDir(path)
 	if err != nil {
