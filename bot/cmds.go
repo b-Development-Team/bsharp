@@ -1,6 +1,8 @@
 package bot
 
 import (
+	"strings"
+
 	"github.com/Nv7-Github/bsharp/bot/db"
 	"github.com/bwmarrin/discordgo"
 )
@@ -114,6 +116,68 @@ var (
 				},
 			},
 		},
+		{
+			Name:        "description",
+			Type:        discordgo.ChatApplicationCommand,
+			Description: "Edit the description of a tag!",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Type:         discordgo.ApplicationCommandOptionString,
+					Name:         "id",
+					Description:  "The ID of the tag to edit!",
+					Required:     true,
+					Autocomplete: true,
+				},
+			},
+		},
+		{
+			Name:        "image",
+			Type:        discordgo.ChatApplicationCommand,
+			Description: "Edit the image of a tag!",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Type:         discordgo.ApplicationCommandOptionString,
+					Name:         "id",
+					Description:  "The ID of the tag to edit!",
+					Required:     true,
+					Autocomplete: true,
+				},
+				{
+					Type:        discordgo.ApplicationCommandOptionAttachment,
+					Name:        "image",
+					Description: "The new image!",
+					Required:    true,
+				},
+			},
+		},
+		{
+			Name:        "info",
+			Type:        discordgo.ChatApplicationCommand,
+			Description: "Get the info of a tag!",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Type:         discordgo.ApplicationCommandOptionString,
+					Name:         "id",
+					Description:  "The ID of the tag to view!",
+					Required:     true,
+					Autocomplete: true,
+				},
+			},
+		},
+		{
+			Name:        "source",
+			Type:        discordgo.ChatApplicationCommand,
+			Description: "Get the source code of a tag!",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Type:         discordgo.ApplicationCommandOptionString,
+					Name:         "id",
+					Description:  "The ID of the tag to view the source of!",
+					Required:     true,
+					Autocomplete: true,
+				},
+			},
+		},
 	}
 
 	handlers = map[string]func(*Ctx, discordgo.ApplicationCommandInteractionData, *Bot){
@@ -179,6 +243,35 @@ var (
 				b.EditFileCmd(id, url, ctx)
 			}
 		},
+		"description": func(ctx *Ctx, dat discordgo.ApplicationCommandInteractionData, b *Bot) {
+			b.DescriptionCmd(dat.Options[0].StringValue(), ctx)
+		},
+		"image": func(ctx *Ctx, dat discordgo.ApplicationCommandInteractionData, b *Bot) {
+			var url string
+			var id string
+			for _, opt := range dat.Options {
+				switch opt.Name {
+				case "id":
+					id = opt.StringValue()
+
+				case "image":
+					id := opt.Value.(string)
+					attachment := dat.Resolved.Attachments[id]
+					if !strings.HasPrefix(attachment.ContentType, "image/") {
+						ctx.ErrorMessage("Invalid image!")
+						return
+					}
+					url = attachment.URL
+				}
+			}
+			b.ImageCmd(id, url, ctx)
+		},
+		"info": func(ctx *Ctx, dat discordgo.ApplicationCommandInteractionData, b *Bot) {
+			b.InfoCmd(dat.Options[0].StringValue(), ctx)
+		},
+		"source": func(ctx *Ctx, dat discordgo.ApplicationCommandInteractionData, b *Bot) {
+			b.SourceCmd(dat.Options[0].StringValue(), ctx)
+		},
 	}
 
 	autocomplete = map[string]func(*db.Data, discordgo.ApplicationCommandInteractionData) []*discordgo.ApplicationCommandOptionChoice{
@@ -187,6 +280,24 @@ var (
 		},
 		"edit": func(d *db.Data, dat discordgo.ApplicationCommandInteractionData) []*discordgo.ApplicationCommandOptionChoice {
 			return d.Autocomplete(dat.Options[0].Options[0].StringValue())
+		},
+		"description": func(d *db.Data, dat discordgo.ApplicationCommandInteractionData) []*discordgo.ApplicationCommandOptionChoice {
+			return d.Autocomplete(dat.Options[0].StringValue())
+		},
+		"image": func(d *db.Data, dat discordgo.ApplicationCommandInteractionData) []*discordgo.ApplicationCommandOptionChoice {
+			query := ""
+			for _, opt := range dat.Options {
+				if opt.Focused {
+					query = opt.StringValue()
+				}
+			}
+			return d.Autocomplete(query)
+		},
+		"info": func(d *db.Data, dat discordgo.ApplicationCommandInteractionData) []*discordgo.ApplicationCommandOptionChoice {
+			return d.Autocomplete(dat.Options[0].StringValue())
+		},
+		"source": func(d *db.Data, dat discordgo.ApplicationCommandInteractionData) []*discordgo.ApplicationCommandOptionChoice {
+			return d.Autocomplete(dat.Options[0].StringValue())
 		},
 	}
 )

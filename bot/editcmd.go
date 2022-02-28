@@ -33,7 +33,7 @@ func (b *Bot) EditCmd(src string, id string, ctx *Ctx) {
 	if ctx.Error(err) {
 		return
 	}
-	ctx.Message(fmt.Sprintf("🖋️ Edited tag **%s**!", prog.Name))
+	ctx.Message(fmt.Sprintf("📝 Edited tag **%s**!", prog.Name))
 }
 
 func (b *Bot) EditCodeCmd(id string, ctx *Ctx) {
@@ -81,4 +81,74 @@ func (b *Bot) EditFileCmd(id, url string, ctx *Ctx) {
 	}
 
 	b.EditCmd(string(dat), id, ctx)
+}
+
+func (b *Bot) DescriptionCmd(id string, ctx *Ctx) {
+	err := ctx.Modal(&discordgo.InteractionResponseData{
+		Title: "Describe Tag",
+		Components: []discordgo.MessageComponent{
+			discordgo.ActionsRow{
+				Components: []discordgo.MessageComponent{
+					discordgo.TextInput{
+						CustomID:    "description",
+						Label:       "New Description",
+						Style:       discordgo.TextInputParagraph,
+						Placeholder: `Description...`,
+						Required:    true,
+						MaxLength:   2048,
+						MinLength:   1,
+					},
+				},
+			},
+		},
+	}, func(dat discordgo.ModalSubmitInteractionData, ctx *Ctx) {
+		ctx.Followup()
+
+		// Actually run code
+		desc := dat.Components[0].(*discordgo.ActionsRow).Components[0].(*discordgo.TextInput).Value
+		data, err := b.Get(ctx.Guild())
+		if ctx.Error(err) {
+			return
+		}
+		prog, rsp := data.GetProgram(id)
+		if !rsp.Suc {
+			ctx.ErrorMessage(rsp.Msg)
+			return
+		}
+		if ctx.Author() != prog.Creator {
+			ctx.ErrorMessage("Only the creator can change the description of their tag!")
+			return
+		}
+		prog.Description = desc
+		err = data.SaveProgram(prog)
+		if ctx.Error(err) {
+			return
+		}
+		ctx.Message(fmt.Sprintf("📝 Edited tag **%s**!", prog.Name))
+	})
+	ctx.Error(err)
+}
+
+func (b *Bot) ImageCmd(id, url string, ctx *Ctx) {
+	ctx.Followup()
+
+	data, err := b.Get(ctx.Guild())
+	if ctx.Error(err) {
+		return
+	}
+	prog, rsp := data.GetProgram(id)
+	if !rsp.Suc {
+		ctx.ErrorMessage(rsp.Msg)
+		return
+	}
+	if ctx.Author() != prog.Creator {
+		ctx.ErrorMessage("Only the creator can change the image of their tag!")
+		return
+	}
+	prog.Image = url
+	err = data.SaveProgram(prog)
+	if ctx.Error(err) {
+		return
+	}
+	ctx.Message(fmt.Sprintf("📝 Edited tag **%s**!", prog.Name))
 }

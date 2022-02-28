@@ -41,14 +41,14 @@ func (d *Data) NewProgram(id, name, creator string) (*Program, Resp) {
 		return nil, Resp{Msg: fmt.Sprintf("Tag with name **%s** already exists!", name), Suc: false}
 	}
 	return &Program{
-		ID:       id,
-		Name:     name,
-		Creator:  creator,
-		Uses:     0,
-		Created:  time.Now(),
-		LastUsed: time.Now(),
-		Comment:  "",
-		Image:    "",
+		ID:          id,
+		Name:        name,
+		Creator:     creator,
+		Uses:        0,
+		Created:     time.Now(),
+		LastUsed:    time.Now(),
+		Description: "None",
+		Image:       "",
 	}, Resp{Msg: "", Suc: true}
 }
 

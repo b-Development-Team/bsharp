@@ -57,6 +57,7 @@ func (c *ctxWriter) Setup() {
 	c.data = &strings.Builder{}
 	c.Embed(&discordgo.MessageEmbed{
 		Title:       "Program Output",
+		Color:       3447003, // Blue
 		Description: "Running...",
 	})
 	c.lastSent = time.Now()
@@ -65,7 +66,11 @@ func (c *ctxWriter) Setup() {
 func (c *ctxWriter) Flush() error {
 	var err error
 	if len(c.data.String()) == 0 {
-		err = c.Message("**WARNING**: No program output!")
+		err = c.Embed(&discordgo.MessageEmbed{
+			Title:       "Program Successful",
+			Color:       5763719, // Green
+			Description: "⚠️ **WARNING**: No program output!",
+		})
 	} else {
 		err = c.Embed(&discordgo.MessageEmbed{
 			Title:       "Program Output",

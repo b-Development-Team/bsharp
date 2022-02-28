@@ -13,14 +13,14 @@ type Resp struct {
 }
 
 type Program struct {
-	ID       string
-	Name     string
-	Creator  string // User ID
-	Uses     int
-	Created  time.Time
-	LastUsed time.Time
-	Comment  string
-	Image    string
+	ID          string
+	Name        string
+	Creator     string // User ID
+	Uses        int
+	Created     time.Time
+	LastUsed    time.Time
+	Description string
+	Image       string
 }
 
 type Data struct {

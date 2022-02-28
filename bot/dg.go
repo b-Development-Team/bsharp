@@ -42,7 +42,7 @@ func (c *Ctx) Resp(m string) error {
 	})
 }
 
-func (c *Ctx) Message(m string) error {
+func (c *Ctx) Message(m string, attachments ...*discordgo.File) error {
 	c.Lock()
 	defer c.Unlock()
 
@@ -51,11 +51,13 @@ func (c *Ctx) Message(m string) error {
 			_, err := c.DG.FollowupMessageEdit(c.b.appID, c.i, *c.hasResponded, &discordgo.WebhookEdit{
 				Content: m,
 				Embeds:  make([]*discordgo.MessageEmbed, 0),
+				Files:   attachments,
 			})
 			return err
 		}
 		msg, err := c.DG.FollowupMessageCreate(c.b.appID, c.i, true, &discordgo.WebhookParams{
 			Content: m,
+			Files:   attachments,
 		})
 		if err != nil {
 			return err
@@ -67,6 +69,7 @@ func (c *Ctx) Message(m string) error {
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
 			Content: m,
+			Files:   attachments,
 		},
 	})
 }

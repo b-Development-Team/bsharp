@@ -36,7 +36,6 @@ func main() {
 
 	/*
 		TODO:
-		- Editing
 		- Comment/Image
 		- Leaderboards
 	*/
