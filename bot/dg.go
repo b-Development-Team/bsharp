@@ -22,6 +22,10 @@ func (c *Ctx) Guild() string {
 	return c.i.GuildID
 }
 
+func (c *Ctx) Author() string {
+	return c.i.Member.User.ID
+}
+
 func (c *Ctx) Resp(m string) error {
 	c.Lock()
 	defer c.Unlock()
@@ -182,6 +186,25 @@ func (b *Bot) InteractionHandler(s *discordgo.Session, i *discordgo.InteractionC
 				b:  b,
 			}
 			h(d, ctx)
+		}
+
+	case discordgo.InteractionApplicationCommandAutocomplete:
+		d := i.ApplicationCommandData()
+		h, ok := autocomplete[d.Name]
+		if ok {
+			dat, err := b.Get(i.GuildID)
+			if err != nil {
+				return
+			}
+			res := h(dat, d)
+			if res != nil {
+				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionApplicationCommandAutocompleteResult,
+					Data: &discordgo.InteractionResponseData{
+						Choices: res,
+					},
+				})
+			}
 		}
 	}
 }

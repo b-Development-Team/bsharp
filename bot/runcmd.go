@@ -1,6 +1,8 @@
 package bot
 
 import (
+	"time"
+
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -30,5 +32,38 @@ func (b *Bot) RunCodeCmd(ctx *Ctx) {
 		err := b.RunCode("main.bsp", src, ctx)
 		ctx.Error(err)
 	})
+	ctx.Error(err)
+}
+
+func (b *Bot) RunTagCmd(id string, ctx *Ctx) {
+	dat, err := b.Get(ctx.Guild())
+	if ctx.Error(err) {
+		return
+	}
+	ctx.Followup()
+
+	// Get program
+	prog, rsp := dat.GetProgram(id)
+	if !rsp.Suc {
+		ctx.ErrorMessage(rsp.Msg)
+		return
+	}
+	src, rsp := dat.GetSource(id)
+	if !rsp.Suc {
+		ctx.ErrorMessage(rsp.Msg)
+		return
+	}
+
+	// Run
+	startTime := time.Now()
+	err = b.RunCode(prog.ID+".bsp", src, ctx)
+	if ctx.Error(err) {
+		return
+	}
+
+	// Increment uses
+	prog.Uses++
+	prog.LastUsed = startTime
+	err = dat.SaveProgram(prog)
 	ctx.Error(err)
 }

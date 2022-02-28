@@ -114,26 +114,31 @@ func (c *ctxWriter) Error(err error) error {
 	})
 }
 
-func (b *Bot) RunCode(filename string, src string, ctx *Ctx) error {
+func (b *Bot) BuildCode(filename string, src string, ctx *Ctx) (*ir.IR, error) {
 	stream := tokens.NewStream(filename, src)
 	tok := tokens.NewTokenizer(stream)
 	err := tok.Tokenize()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	parser := parser.NewParser(tok)
 	err = parser.Parse()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	bld := ir.NewBuilder()
 	err = bld.Build(parser, &fs{b: b, gld: ctx.Guild()})
 	if err != nil {
+		return nil, err
+	}
+	return bld.IR(), nil
+}
+
+func (b *Bot) RunCode(filename string, src string, ctx *Ctx) error {
+	ir, err := b.BuildCode(filename, src, ctx)
+	if err != nil {
 		return err
 	}
-
-	// Get ready to run
-	ir := bld.IR()
 	stdout := newCtxWriter(ctx)
 	stdout.Setup()
 	interp := interpreter.NewInterpreter(ir, stdout)

@@ -17,7 +17,7 @@ func (d *Data) GetProgram(id string) (*Program, Resp) {
 	return p, Resp{Msg: "", Suc: true}
 }
 
-var validIDChars = "abcdefghijklmnopqrstuvwxyz_"
+var validIDChars = "abcdefghijklmnopqrstuvwxyz_-0123456789"
 
 const maxNameLength = 128
 
@@ -30,6 +30,15 @@ func (d *Data) NewProgram(id, name, creator string) (*Program, Resp) {
 	}
 	if len([]rune(name)) > maxNameLength {
 		return nil, Resp{Msg: "Program name must be under 128 characters!", Suc: false}
+	}
+	// Check if already exists
+	_, rsp := d.GetProgram(id)
+	if rsp.Suc {
+		return nil, Resp{Msg: fmt.Sprintf("Tag with ID `%s` already exists!", id), Suc: false}
+	}
+	_, rsp = d.GetProgramByName(id)
+	if rsp.Suc {
+		return nil, Resp{Msg: fmt.Sprintf("Tag with name **%s** already exists!", name), Suc: false}
 	}
 	return &Program{
 		ID:       id,
