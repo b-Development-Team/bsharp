@@ -1,6 +1,7 @@
 package bot
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/Nv7-Github/bsharp/bot/db"
@@ -37,4 +38,21 @@ func NewBot(path string, token string, appID string, guild string) (*Bot, error)
 func (b *Bot) Close() {
 	b.DB.Close()
 	b.dg.Close()
+}
+
+func (b *Bot) DeleteCmds(guild string) error {
+	cmds, err := b.dg.ApplicationCommands(b.appID, guild)
+	if err != nil {
+		return err
+	}
+	for _, cmd := range cmds {
+		fmt.Printf("Deleting command: %s\n", cmd.Name)
+		err = b.dg.ApplicationCommandDelete(b.appID, guild, cmd.ID)
+		if err != nil {
+			return err
+		}
+	}
+	fmt.Println("Deleted!")
+
+	return nil
 }

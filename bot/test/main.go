@@ -13,10 +13,12 @@ import (
 //go:embed token.txt
 var token string
 
+const guild = "903380812135825459"
+
 func main() {
 	start := time.Now()
 	fmt.Println("Loading Bot...")
-	bot, err := bot.NewBot("data", token, "947593278147162113", "903380812135825459")
+	bot, err := bot.NewBot("data", token, "947593278147162113", guild)
 	if err != nil {
 		panic(err)
 	}
@@ -28,11 +30,14 @@ func main() {
 	<-stop
 
 	fmt.Println("Stopping...")
+	err = bot.DeleteCmds(guild)
+	if err != nil {
+		panic(err)
+	}
 	bot.Close()
 
 	/*
 		TODO:
-		- Comment/Image
 		- Leaderboards
 	*/
 }
