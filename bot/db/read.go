@@ -2,6 +2,7 @@ package db
 
 import (
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -16,7 +17,20 @@ func (d *Data) GetProgram(id string) (*Program, Resp) {
 	return p, Resp{Msg: "", Suc: true}
 }
 
-func (d *Data) NewProgram(id, name, creator string) *Program {
+var validIDChars = "abcdefghijklmnopqrstuvwxyz_"
+
+const maxNameLength = 128
+
+func (d *Data) NewProgram(id, name, creator string) (*Program, Resp) {
+	// Validate id
+	for _, char := range id {
+		if !strings.Contains(validIDChars, string(char)) {
+			return nil, Resp{Msg: fmt.Sprintf("Character \"%s\" isn't allowed in program IDs!", string(char)), Suc: false}
+		}
+	}
+	if len([]rune(name)) > maxNameLength {
+		return nil, Resp{Msg: "Program name must be under 128 characters!", Suc: false}
+	}
 	return &Program{
 		ID:       id,
 		Name:     name,
@@ -26,7 +40,7 @@ func (d *Data) NewProgram(id, name, creator string) *Program {
 		LastUsed: time.Now(),
 		Comment:  "",
 		Image:    "",
-	}
+	}, Resp{Msg: "", Suc: true}
 }
 
 func (d *Data) GetProgramByName(name string) (string, Resp) {

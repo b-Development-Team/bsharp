@@ -49,10 +49,25 @@ func newData(path, guild string) *Data {
 	}
 }
 
+func (d *Data) Close() {
+	for _, f := range d.programFiles {
+		f.Close()
+	}
+	for _, f := range d.sourceFiles {
+		f.Close()
+	}
+}
+
 type DB struct {
 	*sync.RWMutex
 	datas map[string]*Data
 	path  string
+}
+
+func (d *DB) Close() {
+	for _, data := range d.datas {
+		data.Close()
+	}
 }
 
 func (d *DB) Get(gld string) (*Data, error) {
