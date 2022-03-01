@@ -14,6 +14,7 @@ type Bot struct {
 
 	dg     *discordgo.Session // use Ctx.DG whenever possible
 	modals map[string]func(discordgo.ModalSubmitInteractionData, *Ctx)
+	btns   map[string]func(discordgo.MessageComponentInteractionData, *Ctx)
 	appID  string
 }
 
@@ -22,6 +23,7 @@ func NewBot(path string, token string, appID string, guild string) (*Bot, error)
 		RWMutex: &sync.RWMutex{},
 		appID:   appID,
 		modals:  make(map[string]func(discordgo.ModalSubmitInteractionData, *Ctx)),
+		btns:    make(map[string]func(discordgo.MessageComponentInteractionData, *Ctx)),
 	}
 	d, err := db.NewDB(path)
 	if err != nil {

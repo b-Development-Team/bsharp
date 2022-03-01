@@ -178,6 +178,25 @@ var (
 				},
 			},
 		},
+		{
+			Name:        "lb",
+			Type:        discordgo.ChatApplicationCommand,
+			Description: "Get the source code of a tag!",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Type:        discordgo.ApplicationCommandOptionString,
+					Name:        "type",
+					Description: "The type of leaderboard to display!",
+					Choices: []*discordgo.ApplicationCommandOptionChoice{
+						{
+							Name:  "Uses",
+							Value: "uses",
+						},
+					},
+					Required: false,
+				},
+			},
+		},
 	}
 
 	handlers = map[string]func(*Ctx, discordgo.ApplicationCommandInteractionData, *Bot){
@@ -271,6 +290,16 @@ var (
 		},
 		"source": func(ctx *Ctx, dat discordgo.ApplicationCommandInteractionData, b *Bot) {
 			b.SourceCmd(dat.Options[0].StringValue(), ctx)
+		},
+		"lb": func(ctx *Ctx, dat discordgo.ApplicationCommandInteractionData, b *Bot) {
+			typ := "uses"
+			if len(dat.Options) > 0 {
+				typ = dat.Options[0].StringValue()
+			}
+			switch typ {
+			case "uses":
+				b.LbUsedCmd(ctx)
+			}
 		},
 	}
 

@@ -15,6 +15,7 @@ type Ctx struct {
 	b  *Bot
 
 	followup     bool
+	isButton     bool
 	hasResponded *string
 }
 
@@ -24,6 +25,12 @@ func (c *Ctx) Guild() string {
 
 func (c *Ctx) Author() string {
 	return c.i.Member.User.ID
+}
+
+func (c *Ctx) BtnHandler(handler func(data discordgo.MessageComponentInteractionData, ctx *Ctx)) {
+	c.b.Lock()
+	c.b.btns[c.i.Message.ID] = handler
+	c.b.Unlock()
 }
 
 func (c *Ctx) Resp(m string) error {
@@ -59,6 +66,7 @@ func (c *Ctx) Message(m string, attachments ...*discordgo.File) error {
 			Content: m,
 			Files:   attachments,
 		})
+		c.i.Message = msg
 		if err != nil {
 			return err
 		}
@@ -74,21 +82,36 @@ func (c *Ctx) Message(m string, attachments ...*discordgo.File) error {
 	})
 }
 
-func (c *Ctx) Embed(emb *discordgo.MessageEmbed) error {
+func (c *Ctx) Embed(emb *discordgo.MessageEmbed, components ...discordgo.MessageComponent) error {
 	c.Lock()
 	defer c.Unlock()
+
+	if c.isButton {
+		err := c.DG.InteractionRespond(c.i, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseUpdateMessage,
+			Data: &discordgo.InteractionResponseData{
+				Content:    "",
+				Embeds:     []*discordgo.MessageEmbed{emb},
+				Components: components,
+			},
+		})
+		return err
+	}
 
 	if c.followup {
 		if c.hasResponded != nil {
 			_, err := c.DG.FollowupMessageEdit(c.b.appID, c.i, *c.hasResponded, &discordgo.WebhookEdit{
-				Content: "",
-				Embeds:  []*discordgo.MessageEmbed{emb},
+				Content:    "",
+				Embeds:     []*discordgo.MessageEmbed{emb},
+				Components: components,
 			})
 			return err
 		}
 		msg, err := c.DG.FollowupMessageCreate(c.b.appID, c.i, true, &discordgo.WebhookParams{
-			Embeds: []*discordgo.MessageEmbed{emb},
+			Embeds:     []*discordgo.MessageEmbed{emb},
+			Components: components,
 		})
+		c.i.Message = msg
 		if err != nil {
 			return err
 		}
@@ -98,7 +121,8 @@ func (c *Ctx) Embed(emb *discordgo.MessageEmbed) error {
 	return c.DG.InteractionRespond(c.i, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Embeds: []*discordgo.MessageEmbed{emb},
+			Embeds:     []*discordgo.MessageEmbed{emb},
+			Components: components,
 		},
 	})
 }
@@ -187,6 +211,21 @@ func (b *Bot) InteractionHandler(s *discordgo.Session, i *discordgo.InteractionC
 				i:  i.Interaction,
 				DG: s,
 				b:  b,
+			}
+			h(d, ctx)
+		}
+
+	case discordgo.InteractionMessageComponent:
+		d := i.MessageComponentData()
+		b.RLock()
+		h, ok := b.btns[i.Message.ID]
+		b.RUnlock()
+		if ok {
+			ctx := &Ctx{
+				i:        i.Interaction,
+				DG:       s,
+				b:        b,
+				isButton: true,
 			}
 			h(d, ctx)
 		}

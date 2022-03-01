@@ -38,7 +38,6 @@ func main() {
 
 	/*
 		TODO:
-		- Leaderboards
 		- Discord extension in interpreter
 	*/
 }
