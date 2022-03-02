@@ -214,3 +214,32 @@ func stringCompOp(lhs string, rhs string, op ir.CompareOperation) *bool {
 
 	return &out
 }
+
+func (i *Interpreter) evalLogicalOp(pos *tokens.Pos, node *ir.LogicalOpNode) (*Value, error) {
+	val, err := i.evalNode(node.Val)
+	if err != nil {
+		return nil, err
+	}
+
+	var right *Value
+	if node.Rhs != nil {
+		right, err = i.evalNode(node.Rhs)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	switch node.Op {
+	case ir.LogicalOpAnd:
+		return NewValue(types.BOOL, val.Value.(bool) && right.Value.(bool)), nil
+
+	case ir.LogicalOpOr:
+		return NewValue(types.BOOL, val.Value.(bool) || right.Value.(bool)), nil
+
+	case ir.LogicalOpNot:
+		return NewValue(types.BOOL, !val.Value.(bool)), nil
+
+	default:
+		return nil, pos.Error("unknown logical operation: %d", node.Op)
+	}
+}

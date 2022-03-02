@@ -1,8 +1,6 @@
 package ir
 
 import (
-	"fmt"
-
 	"github.com/Nv7-Github/bsharp/tokens"
 	"github.com/Nv7-Github/bsharp/types"
 )
@@ -96,13 +94,29 @@ type MathFunctionNode struct {
 
 func (m *MathFunctionNode) Type() types.Type { return m.typ }
 
+type LogicalOp int
+
+const (
+	LogicalOpAnd LogicalOp = iota
+	LogicalOpOr
+	LogicalOpNot
+)
+
+type LogicalOpNode struct {
+	Op  LogicalOp
+	Val Node
+	Rhs Node // nil in NOT
+}
+
+func (l *LogicalOpNode) Type() types.Type { return types.BOOL }
+
 func init() {
 	nodeBuilders["MATH"] = nodeBuilder{
 		ArgTypes: []types.Type{types.NewMulType(types.INT, types.FLOAT), types.IDENT, types.NewMulType(types.INT, types.FLOAT)},
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
 			op, exists := mathOps[args[1].(*Const).Value.(string)]
 			if !exists {
-				return nil, fmt.Errorf("unknown math operation: %s", args[1].(*Const).Value.(string))
+				return nil, args[1].Pos().Error("unknown math operation: %s", args[1].(*Const).Value.(string))
 			}
 
 			// Get common type
@@ -135,12 +149,12 @@ func init() {
 			// Get op
 			op, exists := compareOps[args[1].(*Const).Value.(string)]
 			if !exists {
-				return nil, fmt.Errorf("unknown math operation: %s", args[1].(*Const).Value.(string))
+				return nil, args[1].Pos().Error("unknown compare operation: %s", args[1].(*Const).Value.(string))
 			}
 
 			// Check if can compare
 			if !args[0].Type().Equal(args[2].Type()) {
-				return nil, fmt.Errorf("cannot compare type %s to type %s", args[0].Type(), args[2].Type())
+				return nil, pos.Error("cannot compare type %s to type %s", args[0].Type(), args[2].Type())
 			}
 			// Return node
 			return &CompareNode{
@@ -201,6 +215,38 @@ func init() {
 				Func: MathFunctionRound,
 				Arg:  args[0],
 				typ:  types.INT,
+			}, nil
+		},
+	}
+
+	nodeBuilders["AND"] = nodeBuilder{
+		ArgTypes: []types.Type{types.BOOL, types.BOOL},
+		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
+			return &LogicalOpNode{
+				Op:  LogicalOpAnd,
+				Val: args[0],
+				Rhs: args[1],
+			}, nil
+		},
+	}
+
+	nodeBuilders["OR"] = nodeBuilder{
+		ArgTypes: []types.Type{types.BOOL, types.BOOL},
+		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
+			return &LogicalOpNode{
+				Op:  LogicalOpOr,
+				Val: args[0],
+				Rhs: args[1],
+			}, nil
+		},
+	}
+
+	nodeBuilders["NOT"] = nodeBuilder{
+		ArgTypes: []types.Type{types.BOOL},
+		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
+			return &LogicalOpNode{
+				Op:  LogicalOpNot,
+				Val: args[0],
 			}, nil
 		},
 	}

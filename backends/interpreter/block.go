@@ -1,6 +1,8 @@
 package interpreter
 
-import "github.com/Nv7-Github/bsharp/ir"
+import (
+	"github.com/Nv7-Github/bsharp/ir"
+)
 
 func (i *Interpreter) evalIfNode(n *ir.IfNode) error {
 	cond, err := i.evalNode(n.Condition)

@@ -11,6 +11,7 @@ type Interpreter struct {
 	ir *ir.IR
 
 	stdout     io.Writer
+	varStack   [][]*Value
 	Variables  []*Value
 	extensions map[string]*Extension
 
@@ -37,6 +38,7 @@ func NewInterpreter(ir *ir.IR, stdout io.Writer) *Interpreter {
 		Variables:  make([]*Value, len(ir.Variables)),
 		scope:      NewScope(),
 		extensions: make(map[string]*Extension),
+		varStack:   make([][]*Value, 0),
 	}
 }
 

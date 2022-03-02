@@ -77,6 +77,9 @@ func (i *Interpreter) evalNode(node ir.Node) (*Value, error) {
 		case *ir.AppendNode:
 			return i.evalAppend(c)
 
+		case *ir.LogicalOpNode:
+			return i.evalLogicalOp(n.Pos(), c)
+
 		default:
 			return nil, n.Pos().Error("unknown call node: %T", c)
 		}

@@ -129,11 +129,13 @@ func init() {
 			if err != nil {
 				return nil, args[0].Pos().Error("%s", err.Error())
 			}
-			if !types.MAP.Equal(typ) {
-				return nil, args[0].Pos().Error("expected map type, got %s", typ.String())
+			if !types.ARRAY.Equal(typ) && !types.MAP.Equal(typ) {
+				return nil, args[0].Pos().Error("expected map or array type, got %s", typ.String())
 			}
-			if !hashable.Equal(typ.(*types.MapType).KeyType) {
-				return nil, args[0].Pos().Error("unhashable key type: %s", typ.(*types.MapType).KeyType.String())
+			if types.MAP.Equal(typ) { // Check key type
+				if !hashable.Equal(typ.(*types.MapType).KeyType) {
+					return nil, args[0].Pos().Error("unhashable key type: %s", typ.(*types.MapType).KeyType.String())
+				}
 			}
 			return &MakeNode{
 				typ: typ,

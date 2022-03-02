@@ -192,10 +192,10 @@ func init() {
 			}
 
 			// Get cases
-			cases := make([]*Case, len(args)-1)
+			cases := make([]*Case, 0, len(args)-1)
 			var def []Node
 			b.Scope.Push(ScopeTypeSwitch)
-			for i, v := range args[1:] {
+			for _, v := range args[1:] {
 				node, err := b.buildNode(v)
 				if err != nil {
 					return nil, err
@@ -220,7 +220,7 @@ func init() {
 				if !cs.Value.Type().Equal(val.Type()) {
 					return nil, v.Pos().Error("expected case with type %s", val.Type())
 				}
-				cases[i] = cs
+				cases = append(cases, cs)
 			}
 			b.Scope.Pop()
 			return &SwitchNode{

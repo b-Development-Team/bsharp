@@ -20,7 +20,7 @@ func (i *Interpreter) evalCast(c *ir.CastNode) (*Value, error) {
 		return nil, err
 	}
 
-	switch v.Type.BasicType() {
+	switch c.Value.Type().BasicType() {
 	case types.INT:
 		switch c.Type().BasicType() {
 		case types.FLOAT:

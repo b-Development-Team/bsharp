@@ -1,8 +1,6 @@
 package ir
 
 import (
-	"fmt"
-
 	"github.com/Nv7-Github/bsharp/tokens"
 	"github.com/Nv7-Github/bsharp/types"
 )
@@ -27,7 +25,7 @@ func init() {
 			name := args[0].(*Const).Value.(string)
 			v, exists := b.Scope.GetVar(name)
 			if !exists {
-				return nil, fmt.Errorf("unknown variable: %s", name)
+				return nil, args[0].Pos().Error("unknown variable: %s", name)
 			}
 			va := b.Scope.Variable(v)
 
@@ -54,7 +52,7 @@ func init() {
 					if !exists {
 						id = b.Scope.AddVariable(name, args[1].Type(), pos)
 					} else {
-						return nil, fmt.Errorf("cannot redefine variable %s to type %s", name, args[1].Type())
+						return nil, pos.Error("cannot redefine variable %s to type %s", name, args[1].Type())
 					}
 				}
 			}

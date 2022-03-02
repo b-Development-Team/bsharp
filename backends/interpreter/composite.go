@@ -56,7 +56,11 @@ func (i *Interpreter) evalLength(pos *tokens.Pos, n *ir.LengthNode) (*Value, err
 }
 
 func (i *Interpreter) evalMake(pos *tokens.Pos, n *ir.MakeNode) (*Value, error) {
-	typ := n.Type().(*types.MapType)
+	typ, ok := n.Type().(*types.MapType)
+	if !ok { // Its an array if not map
+		v := make([]interface{}, 0)
+		return NewValue(n.Type(), &v), nil
+	}
 	var out interface{}
 	switch typ.KeyType.BasicType() {
 	case types.INT:
@@ -156,6 +160,6 @@ func (i *Interpreter) evalAppend(n *ir.AppendNode) (*Value, error) {
 		return nil, err
 	}
 
-	*v = append(*v, val)
+	*v = append(*v, val.Value)
 	return NewValue(types.NULL, nil), nil
 }

@@ -103,6 +103,9 @@ func (t *Tokenizer) addString() {
 
 			case '\\':
 				val += "\\"
+
+			case '"':
+				val += "\""
 			}
 			t.s.Eat()
 			continue

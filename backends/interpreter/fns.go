@@ -7,6 +7,12 @@ import (
 
 func (i *Interpreter) evalCallNode(n *ir.FnCallNode) (*Value, error) {
 	fn := i.ir.Funcs[n.Name]
+	// Push to stack
+	newVars := make([]*Value, len(i.Variables))
+	copy(newVars, i.Variables)
+	i.varStack = append(i.varStack, i.Variables)
+	i.Variables = newVars
+
 	// Build args
 	args, err := i.evalNodes(n.Args)
 	if err != nil {
@@ -27,6 +33,10 @@ func (i *Interpreter) evalCallNode(n *ir.FnCallNode) (*Value, error) {
 		retVal = NewValue(types.NULL, nil)
 	}
 	i.retVal = nil // Un-return
+
+	// Pop stack
+	i.Variables = i.varStack[len(i.varStack)-1]
+	i.varStack = i.varStack[:len(i.varStack)-1]
 	return retVal, nil
 }
 
