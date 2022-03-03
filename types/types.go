@@ -21,6 +21,7 @@ const (
 	STRING
 	ARRAY
 	MAP
+	FUNCTION
 	NULL
 
 	// Special types
@@ -36,6 +37,7 @@ var basicTypeNames = map[BasicType]string{
 	BOOL:     "BOOL",
 	ARRAY:    "ARRAY",
 	MAP:      "MAP",
+	FUNCTION: "FUNCTION",
 	NULL:     "NULL",
 	ANY:      "ANY",
 	VARIADIC: "VARIADIC",
@@ -145,5 +147,51 @@ func (a *MulType) BasicType() BasicType {
 func NewMulType(typs ...Type) *MulType {
 	return &MulType{
 		Typs: typs,
+	}
+}
+
+type FuncType struct {
+	ParTypes []Type
+	RetType  Type
+}
+
+func (f *FuncType) BasicType() BasicType {
+	return FUNCTION
+}
+
+func (f *FuncType) Equal(t Type) bool {
+	if t.BasicType() != FUNCTION {
+		return false
+	}
+
+	v := t.(*FuncType)
+	if len(v.ParTypes) != len(f.ParTypes) {
+		return false
+	}
+	for i, par := range f.ParTypes {
+		if !v.ParTypes[i].Equal(par) {
+			return false
+		}
+	}
+	return f.RetType.Equal(v.RetType)
+}
+
+func (f *FuncType) String() string {
+	out := &strings.Builder{}
+	out.WriteString("FUNC{")
+	for i, parType := range f.ParTypes {
+		out.WriteString(parType.String())
+		if i != len(f.ParTypes)-1 {
+			out.WriteString(", ")
+		}
+	}
+	out.WriteString(f.RetType.String())
+	return out.String()
+}
+
+func NewFuncType(parTyps []Type, retType Type) Type {
+	return &FuncType{
+		ParTypes: parTyps,
+		RetType:  retType,
 	}
 }
