@@ -22,7 +22,10 @@ type Function struct {
 	Params  []*Param
 	RetType types.Type
 	Body    []Node
+	pos     *tokens.Pos
 }
+
+func (f *Function) Pos() *tokens.Pos { return f.pos }
 
 type empty struct{}
 

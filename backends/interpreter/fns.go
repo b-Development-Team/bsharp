@@ -6,7 +6,12 @@ import (
 )
 
 func (i *Interpreter) evalCallNode(n *ir.FnCallNode) (*Value, error) {
-	fn := i.ir.Funcs[n.Name]
+	fnName, err := i.evalNode(n.Fn)
+	if err != nil {
+		return nil, err
+	}
+
+	fn := i.ir.Funcs[fnName.Value.(string)]
 	// Push to stack
 	newVars := make([]*Value, len(i.Variables))
 	copy(newVars, i.Variables)
@@ -47,4 +52,11 @@ func (i *Interpreter) evalReturnNode(n *ir.ReturnNode) (*Value, error) {
 	}
 	i.retVal = v
 	return nil, nil
+}
+
+func (i *Interpreter) evalFnNode(n *ir.FnNode) (*Value, error) {
+	return &Value{
+		Type:  n.Type(),
+		Value: n.Name,
+	}, nil
 }

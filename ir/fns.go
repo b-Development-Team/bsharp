@@ -122,6 +122,7 @@ func (b *Builder) functionPass(p *parser.Parser) error {
 			Name:    name,
 			Params:  params,
 			RetType: retType,
+			pos:     call.Pos(),
 		}
 		b.Funcs[name] = fn
 	}
@@ -130,7 +131,7 @@ func (b *Builder) functionPass(p *parser.Parser) error {
 }
 
 type FnCallNode struct {
-	Name string
+	Fn   Node
 	Args []Node
 
 	typ types.Type
@@ -162,7 +163,13 @@ func (b *Builder) buildFnCall(n *parser.CallNode) (Node, error) {
 	}
 
 	return &FnCallNode{
-		Name: n.Name,
+		Fn: &CallNode{
+			Call: &FnNode{
+				Name: n.Name,
+				typ:  types.NewFuncType(expected, fn.RetType),
+			},
+			pos: n.Pos(),
+		},
 		Args: args,
 		typ:  fn.RetType,
 		pos:  n.Pos(),
@@ -222,6 +229,13 @@ type ReturnNode struct {
 	Value Node
 }
 
+type FnNode struct {
+	Name string
+	typ  types.Type
+}
+
+func (f *FnNode) Type() types.Type { return f.typ }
+
 func init() {
 	nodeBuilders["RETURN"] = nodeBuilder{
 		ArgTypes: []types.Type{types.ANY},
@@ -235,6 +249,47 @@ func init() {
 			}
 			return &ReturnNode{
 				Value: args[0],
+			}, nil
+		},
+	}
+
+	nodeBuilders["FN"] = nodeBuilder{
+		ArgTypes: []types.Type{types.IDENT},
+		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
+			name := args[0].(*Const).Value.(string)
+			fn, exists := b.Funcs[name]
+			if !exists {
+				return nil, pos.Error("unknown function: %s", name)
+			}
+			pars := make([]types.Type, len(fn.Params))
+			for i, par := range fn.Params {
+				pars[i] = par.Type
+			}
+
+			return &FnNode{
+				Name: name,
+				typ:  types.NewFuncType(pars, fn.RetType),
+			}, nil
+		},
+	}
+
+	nodeBuilders["CALL"] = nodeBuilder{
+		ArgTypes: []types.Type{types.FUNCTION, types.ANY, types.VARIADIC},
+		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
+			// Match types
+			typ := args[0].Type().(*types.FuncType)
+			if len(typ.ParTypes) > 0 {
+				err := MatchTypes(pos, args[1:], typ.ParTypes)
+				if err != nil {
+					return nil, err
+				}
+			}
+
+			return &FnCallNode{
+				Fn:   args[0],
+				Args: args[1:],
+				typ:  typ.RetType,
+				pos:  pos,
 			}, nil
 		},
 	}

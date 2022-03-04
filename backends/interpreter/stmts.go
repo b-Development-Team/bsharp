@@ -80,6 +80,12 @@ func (i *Interpreter) evalNode(node ir.Node) (*Value, error) {
 		case *ir.LogicalOpNode:
 			return i.evalLogicalOp(n.Pos(), c)
 
+		case *ir.FnNode:
+			return i.evalFnNode(c)
+
+		case *ir.FnCallNode:
+			return i.evalCallNode(c)
+
 		default:
 			return nil, n.Pos().Error("unknown call node: %T", c)
 		}

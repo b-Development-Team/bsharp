@@ -58,3 +58,10 @@ ELSE
     [PRINT "Unknown value!"]
   ]
 ]
+
+# First-class Functions
+[HELLO] # Call function with alias
+[CALL [FN HELLO] ""] # Call function without alias
+[DEFINE fns [MAKE MAP{STRING}FUNC{}NULL]] # Make a dictionary of functions
+[SET [VAR fns] "hello" [FN HELLO]]
+[CALL [GET [VAR fns] "hello"] ""] # Call function from dictionary

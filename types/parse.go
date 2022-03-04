@@ -25,29 +25,39 @@ func ParseType(typ string) (Type, error) {
 		return NewArrayType(typ), nil
 	}
 
+	// Function
+	if strings.HasPrefix(typ, "FUNC{") {
+		typ = strings.TrimPrefix(typ, "FUNC{")
+		var v string
+		argTyps := make([]Type, 0)
+		for len(typ) > 0 && typ[0] != '}' { // Match until closing brace
+			v, typ = matchBrackets(typ)
+			argTyp, err := ParseType(v)
+			if err != nil {
+				return nil, err
+			}
+			argTyps = append(argTyps, argTyp)
+		}
+		typ = typ[1:] // Get rid of closing bracket
+		retTyp := Type(NULL)
+		// Check if return type
+		if len(typ) > 0 {
+			var err error
+			retTyp, err = ParseType(typ)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return NewFuncType(argTyps, retTyp), nil
+	}
+
 	// Map or nothing
 	if strings.HasPrefix(typ, "MAP{") {
 		// Get key and value types
 		typ = typ[4:]
 
 		// Get key by matching brackets
-		openBrackets := 1
-		key := ""
-		for len(typ) > 0 {
-			c := typ[0]
-			if c == '{' {
-				openBrackets++
-			} else if c == '}' {
-				openBrackets--
-			}
-
-			if openBrackets == 0 {
-				break
-			} else {
-				key += string(c)
-				typ = typ[1:]
-			}
-		}
+		key, typ := matchBrackets(typ)
 
 		// Parse types
 		keyType, err := ParseType(key)
@@ -61,4 +71,25 @@ func ParseType(typ string) (Type, error) {
 		return NewMapType(keyType, valTyp), nil
 	}
 	return nil, fmt.Errorf("unknown type: %s", typ)
+}
+
+func matchBrackets(val string) (string, string) {
+	openBrackets := 1
+	key := ""
+	for len(val) > 0 {
+		c := val[0]
+		if c == '{' {
+			openBrackets++
+		} else if c == '}' {
+			openBrackets--
+		}
+
+		if openBrackets == 0 {
+			break
+		} else {
+			key += string(c)
+			val = val[1:]
+		}
+	}
+	return key, val
 }
