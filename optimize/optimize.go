@@ -3,12 +3,12 @@ package optimize
 import "github.com/Nv7-Github/bsharp/ir"
 
 type VariableInfo struct {
-	AlwaysConst bool
+	CurrValue *Result // may be nil
 }
 
 type Optimizer struct {
-	ir        *ir.IR
-	Variables []VariableInfo
+	ir    *ir.IR
+	scope Scope
 }
 
 type Result struct {
@@ -18,9 +18,11 @@ type Result struct {
 }
 
 func NewOptimizer(i *ir.IR) *Optimizer {
+	s := Scope{scopes: make([]scope, 0)}
+	s.Push()
 	return &Optimizer{
-		ir:        i,
-		Variables: make([]VariableInfo, len(i.Variables)),
+		ir:    i,
+		scope: s,
 	}
 }
 

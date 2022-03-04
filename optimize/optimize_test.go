@@ -10,7 +10,9 @@ import (
 	"github.com/davecgh/go-spew/spew"
 )
 
-const code = `[PRINT [STRING [MATH 1 + 1]]]`
+const code = `[DEFINE a [STRING [MATH 1 + 1]]]
+[PRINT [VAR a]]
+`
 
 type fs struct{}
 
