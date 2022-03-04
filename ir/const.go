@@ -35,6 +35,14 @@ func (b *Builder) buildIdent(n *parser.IdentNode) Node {
 	}
 }
 
+func NewConst(typ types.Type, pos *tokens.Pos, val interface{}) *Const {
+	return &Const{
+		typ:   typ,
+		pos:   pos,
+		Value: val,
+	}
+}
+
 func (b *Builder) buildNumber(n *parser.NumberNode) (Node, error) {
 	if strings.Contains(n.Value, ".") {
 		v, err := strconv.ParseFloat(n.Value, 64)

@@ -5,6 +5,7 @@ go 1.17
 require (
 	github.com/alexflint/go-arg v1.4.3
 	github.com/bwmarrin/discordgo v0.23.3-0.20220227163103-4b615bec361d
+	github.com/davecgh/go-spew v1.1.1
 )
 
 require (

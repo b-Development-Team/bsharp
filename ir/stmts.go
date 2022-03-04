@@ -31,6 +31,13 @@ type CallNode struct {
 func (c *CallNode) Pos() *tokens.Pos { return c.pos }
 func (c *CallNode) Type() types.Type { return c.Call.Type() }
 
+func NewCallNode(call Call, pos *tokens.Pos) *CallNode {
+	return &CallNode{
+		pos:  pos,
+		Call: call,
+	}
+}
+
 func (b *Builder) buildNode(node parser.Node) (Node, error) {
 	switch n := node.(type) {
 	case *parser.CallNode:

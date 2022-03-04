@@ -110,6 +110,15 @@ type LogicalOpNode struct {
 
 func (l *LogicalOpNode) Type() types.Type { return types.BOOL }
 
+func NewMathNode(op MathOperation, lhs, rhs Node, typ types.Type) *MathNode {
+	return &MathNode{
+		Op:  op,
+		Lhs: lhs,
+		Rhs: rhs,
+		typ: typ,
+	}
+}
+
 func init() {
 	nodeBuilders["MATH"] = nodeBuilder{
 		ArgTypes: []types.Type{types.NewMulType(types.INT, types.FLOAT), types.IDENT, types.NewMulType(types.INT, types.FLOAT)},
