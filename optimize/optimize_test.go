@@ -12,6 +12,12 @@ import (
 
 const code = `[DEFINE a [STRING [MATH 1 + 1]]]
 [PRINT [VAR a]]
+
+[DEFINE i 0]
+[WHILE [COMPARE [VAR i] < 10]
+	[PRINT [STRING [VAR i]]]
+	[DEFINE i [MATH [VAR i] + 1]]
+]
 `
 
 type fs struct{}

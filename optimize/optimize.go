@@ -2,10 +2,6 @@ package optimize
 
 import "github.com/Nv7-Github/bsharp/ir"
 
-type VariableInfo struct {
-	CurrValue *Result // may be nil
-}
-
 type Optimizer struct {
 	ir    *ir.IR
 	scope Scope
@@ -18,7 +14,7 @@ type Result struct {
 }
 
 func NewOptimizer(i *ir.IR) *Optimizer {
-	s := Scope{scopes: make([]scope, 0)}
+	s := Scope{Scopes: make([]scope, 0)}
 	s.Push()
 	return &Optimizer{
 		ir:    i,

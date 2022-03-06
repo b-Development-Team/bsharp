@@ -14,6 +14,7 @@ const (
 	ScopeTypeWhile
 	ScopeTypeSwitch
 	ScopeTypeCase
+	ScopeTypeBlock
 )
 
 type Variable struct {

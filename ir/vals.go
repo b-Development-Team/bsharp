@@ -113,7 +113,7 @@ type CompareNode struct {
 
 func (c *CompareNode) Type() types.Type { return types.BOOL }
 func (c *CompareNode) Code(cnf CodeConfig) string {
-	return fmt.Sprintf("[MATH %s %s %s]", c.Lhs.Code(cnf), compareOpsNames[c.Op], c.Rhs.Code(cnf))
+	return fmt.Sprintf("[COMPARE %s %s %s]", c.Lhs.Code(cnf), compareOpsNames[c.Op], c.Rhs.Code(cnf))
 }
 
 type MathFunction int

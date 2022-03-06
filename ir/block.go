@@ -33,9 +33,9 @@ type IfNode struct {
 
 func (i *IfNode) Code(cnf CodeConfig) string {
 	if i.Else != nil {
-		return fmt.Sprintf("[IF %s\n%s\nELSE\n%s\n]", i.Condition.Code(cnf), bodyCode(cnf, i.Body), bodyCode(cnf, i.Else))
+		return fmt.Sprintf("[IF %s\n%sELSE\n%s]", i.Condition.Code(cnf), bodyCode(cnf, i.Body), bodyCode(cnf, i.Else))
 	}
-	return fmt.Sprintf("[IF %s\n%s\n]", i.Condition.Code(cnf), bodyCode(cnf, i.Body))
+	return fmt.Sprintf("[IF %s\n%s]", i.Condition.Code(cnf), bodyCode(cnf, i.Body))
 }
 
 type WhileNode struct {
@@ -45,7 +45,7 @@ type WhileNode struct {
 }
 
 func (w *WhileNode) Code(cnf CodeConfig) string {
-	return fmt.Sprintf("[WHILE %s\n%s\n]", w.Condition.Code(cnf), bodyCode(cnf, w.Body))
+	return fmt.Sprintf("[WHILE %s\n%s]", w.Condition.Code(cnf), bodyCode(cnf, w.Body))
 }
 
 type Case struct {
@@ -55,7 +55,7 @@ type Case struct {
 }
 
 func (c *Case) Code(cnf CodeConfig) string {
-	return fmt.Sprintf("[CASE %s\n%s\n]", c.Value.Code(cnf), bodyCode(cnf, c.Body))
+	return fmt.Sprintf("[CASE %s\n%s]", c.Value.Code(cnf), bodyCode(cnf, c.Body))
 }
 
 type Default struct {
@@ -64,7 +64,7 @@ type Default struct {
 }
 
 func (d *Default) Code(cnf CodeConfig) string {
-	return fmt.Sprintf("[DEFAULT\n%s\n]", bodyCode(cnf, d.Body))
+	return fmt.Sprintf("[DEFAULT\n%s]", bodyCode(cnf, d.Body))
 }
 
 type SwitchNode struct {
@@ -72,6 +72,15 @@ type SwitchNode struct {
 	Value   Node
 	Cases   []*Case
 	Default []Node // if nil, no default
+}
+
+type BlockNode struct {
+	NullCall
+	Body []Node
+}
+
+func (b *BlockNode) Code(cnf CodeConfig) string {
+	return fmt.Sprintf("[BLOCK\n%s]", bodyCode(cnf, b.Body))
 }
 
 func (s *SwitchNode) Code(cnf CodeConfig) string {
@@ -96,7 +105,7 @@ func (s *SwitchNode) Code(cnf CodeConfig) string {
 			args.WriteString("\n")
 		}
 	}
-	return fmt.Sprintf("[SWITCH\n%s\n]", args.String())
+	return fmt.Sprintf("[SWITCH\n%s]", args.String())
 }
 
 func init() {
@@ -289,6 +298,28 @@ func init() {
 				Value:   val,
 				Cases:   cases,
 				Default: def,
+			}, nil
+		},
+	}
+
+	blockBuilders["BLOCK"] = blockBuilder{
+		Build: func(b *Builder, pos *tokens.Pos, args []parser.Node) (Call, error) {
+			if len(args) < 1 {
+				return nil, pos.Error("BLOCK requires at least 1 argument")
+			}
+			body := make([]Node, len(args)-1)
+			var err error
+			b.Scope.Push(ScopeTypeBlock)
+			for i, v := range args[1:] {
+				body[i], err = b.buildNode(v)
+				if err != nil {
+					return nil, err
+				}
+			}
+			b.Scope.Pop()
+
+			return &BlockNode{
+				Body: body,
 			}, nil
 		},
 	}

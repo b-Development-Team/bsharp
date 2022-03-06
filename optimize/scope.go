@@ -1,39 +1,48 @@
 package optimize
 
+type variableInfo struct {
+	Value   *Result
+	Defines int
+}
+
 type scope struct {
-	variables map[int]*Result
+	Variables map[int]*variableInfo
 }
 
 type Scope struct {
-	scopes []scope
+	Scopes []scope
 }
 
 func (s *Scope) Push() {
-	s.scopes = append(s.scopes, scope{
-		variables: make(map[int]*Result),
+	s.Scopes = append(s.Scopes, scope{
+		Variables: make(map[int]*variableInfo),
 	})
 }
 
 func (s *Scope) Pop() {
-	s.scopes = s.scopes[:len(s.scopes)-1]
+	s.Scopes = s.Scopes[:len(s.Scopes)-1]
 }
 
-func (s *Scope) SetVar(id int, val *Result) {
-	for i, scope := range s.scopes { // Remove the variable const val from all above scopes
-		if i != len(s.scopes)-1 {
-			delete(scope.variables, id)
+func (s *Scope) SetVal(id int, val *Result) {
+	for i, scope := range s.Scopes { // Remove the variable const val from all above scopes
+		if i != len(s.Scopes)-1 {
+			delete(scope.Variables, id)
 		}
 	}
 
-	s.scopes[len(s.scopes)-1].variables[id] = val
+	sc := s.Scopes[len(s.Scopes)-1]
+	if sc.Variables[id] == nil {
+		sc.Variables[id] = &variableInfo{}
+	}
+	sc.Variables[id].Value = val
 }
 
-func (s *Scope) GetVar(id int) *Result {
+func (s *Scope) GetVal(id int) *Result {
 	var out *Result = nil
-	for _, scope := range s.scopes {
-		v, exists := scope.variables[id]
-		if exists {
-			out = v
+	for _, scope := range s.Scopes {
+		v, exists := scope.Variables[id]
+		if exists && v.Value != nil {
+			out = v.Value
 		}
 	}
 	return out

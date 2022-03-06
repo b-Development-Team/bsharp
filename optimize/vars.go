@@ -7,7 +7,7 @@ import (
 
 func (o *Optimizer) optimizeDefine(n *ir.DefineNode, pos *tokens.Pos) *Result {
 	v := o.OptimizeNode(n.Value)
-	o.scope.SetVar(n.Var, v)
+	o.scope.SetVal(n.Var, v)
 	return &Result{
 		Stmt:    ir.NewCallNode(ir.NewDefineNode(n.Var, v.Stmt, o.ir), pos),
 		NotDead: true,
@@ -15,7 +15,7 @@ func (o *Optimizer) optimizeDefine(n *ir.DefineNode, pos *tokens.Pos) *Result {
 }
 
 func (o *Optimizer) optimizeVar(n *ir.VarNode, pos *tokens.Pos) *Result {
-	v := o.scope.GetVar(n.ID)
+	v := o.scope.GetVal(n.ID)
 	if v != nil {
 		return v
 	}
