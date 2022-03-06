@@ -20,7 +20,25 @@ type Const struct {
 func (c *Const) Type() types.Type { return c.typ }
 func (c *Const) Pos() *tokens.Pos { return c.pos }
 func (c *Const) Code(cnf CodeConfig) string {
-	return fmt.Sprintf("%v", c.Value)
+	switch c.typ.BasicType() {
+	case types.INT:
+		return fmt.Sprintf("%d", c.Value.(int))
+
+	case types.FLOAT:
+		return strconv.FormatFloat(c.Value.(float64), 'f', -1, 64)
+
+	case types.STRING:
+		return fmt.Sprintf(`"%s"`, c.Value.(string))
+
+	case types.IDENT:
+		return c.Value.(string)
+
+	case types.BOOL:
+		return fmt.Sprintf("%t", c.Value.(bool))
+
+	default:
+		return "[UNKNOWN CONST]"
+	}
 }
 
 func (b *Builder) buildString(n *parser.StringNode) Node {
