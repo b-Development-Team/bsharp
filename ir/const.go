@@ -1,6 +1,7 @@
 package ir
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -18,6 +19,9 @@ type Const struct {
 
 func (c *Const) Type() types.Type { return c.typ }
 func (c *Const) Pos() *tokens.Pos { return c.pos }
+func (c *Const) Code(cnf CodeConfig) string {
+	return fmt.Sprintf("%v", c.Value)
+}
 
 func (b *Builder) buildString(n *parser.StringNode) Node {
 	return &Const{

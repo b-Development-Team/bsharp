@@ -1,6 +1,9 @@
 package ir
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/Nv7-Github/bsharp/tokens"
 	"github.com/Nv7-Github/bsharp/types"
 )
@@ -13,12 +16,26 @@ type ArrayNode struct {
 }
 
 func (a *ArrayNode) Type() types.Type { return a.typ }
+func (a *ArrayNode) Code(cnf CodeConfig) string {
+	args := &strings.Builder{}
+	for i, v := range a.Values {
+		args.WriteString(v.Code(cnf))
+		if i != len(a.Values)-1 {
+			args.WriteString(" ")
+		}
+	}
+	return fmt.Sprintf("[ARRAY %s]", args.String())
+}
 
 type AppendNode struct {
 	NullCall
 
 	Array Node
 	Value Node
+}
+
+func (a *AppendNode) Code(cnf CodeConfig) string {
+	return fmt.Sprintf("[APPEND %s %s]", a.Array.Code(cnf), a.Value.Code(cnf))
 }
 
 type IndexNode struct {
@@ -29,11 +46,19 @@ type IndexNode struct {
 
 func (i *IndexNode) Type() types.Type { return i.typ }
 
+func (i *IndexNode) Code(cnf CodeConfig) string {
+	return fmt.Sprintf("[INDEX %s %s]", i.Value.Code(cnf), i.Index.Code(cnf))
+}
+
 type LengthNode struct {
 	Value Node
 }
 
 func (l *LengthNode) Type() types.Type { return types.INT }
+
+func (l *LengthNode) Code(cnf CodeConfig) string {
+	return fmt.Sprintf("[LENGTH %s]", l.Value.Code(cnf))
+}
 
 type MakeNode struct {
 	typ types.Type
@@ -41,12 +66,20 @@ type MakeNode struct {
 
 func (m *MakeNode) Type() types.Type { return m.typ }
 
+func (m *MakeNode) Code(cnf CodeConfig) string {
+	return fmt.Sprintf("[MAKE %s]", m.Type().String())
+}
+
 type SetNode struct {
 	NullCall
 
 	Map   Node
 	Key   Node
 	Value Node
+}
+
+func (s *SetNode) Code(cnf CodeConfig) string {
+	return fmt.Sprintf("[SET %s %s %s]", s.Map.Code(cnf), s.Key.Code(cnf), s.Value.Code(cnf))
 }
 
 type GetNode struct {
@@ -57,6 +90,10 @@ type GetNode struct {
 }
 
 func (g *GetNode) Type() types.Type { return g.typ }
+
+func (g *GetNode) Code(cnf CodeConfig) string {
+	return fmt.Sprintf("[GET %s %s]", g.Map.Code(cnf), g.Key.Code(cnf))
+}
 
 func init() {
 	nodeBuilders["ARRAY"] = nodeBuilder{

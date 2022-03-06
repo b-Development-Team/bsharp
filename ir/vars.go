@@ -1,6 +1,8 @@
 package ir
 
 import (
+	"fmt"
+
 	"github.com/Nv7-Github/bsharp/tokens"
 	"github.com/Nv7-Github/bsharp/types"
 )
@@ -8,14 +10,33 @@ import (
 type VarNode struct {
 	ID  int
 	typ types.Type
+
+	name string // Variable name for use in Code()
 }
 
 func (v *VarNode) Type() types.Type { return v.typ }
+func (v *VarNode) Code(cnf CodeConfig) string {
+	return fmt.Sprintf("[VAR %s]", v.name)
+}
 
 type DefineNode struct {
 	NullCall
 	Var   int
 	Value Node
+
+	name string // Variable name for use in Code()
+}
+
+func (d *DefineNode) Code(cnf CodeConfig) string {
+	return fmt.Sprintf("[DEFINE %s %s]", d.name, d.Value.Code(cnf))
+}
+
+func NewDefineNode(id int, val Node, i *IR) *DefineNode {
+	return &DefineNode{
+		Var:   id,
+		Value: val,
+		name:  i.Variables[id].Name,
+	}
 }
 
 func init() {
@@ -30,8 +51,9 @@ func init() {
 			va := b.Scope.Variable(v)
 
 			return &VarNode{
-				ID:  v,
-				typ: va.Type,
+				ID:   v,
+				typ:  va.Type,
+				name: name,
 			}, nil
 		},
 	}
@@ -60,6 +82,7 @@ func init() {
 			return &DefineNode{
 				Var:   id,
 				Value: args[1],
+				name:  name,
 			}, nil
 		},
 	}

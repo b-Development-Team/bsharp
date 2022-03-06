@@ -1,6 +1,8 @@
 package ir
 
 import (
+	"fmt"
+
 	"github.com/Nv7-Github/bsharp/tokens"
 	"github.com/Nv7-Github/bsharp/types"
 )
@@ -13,6 +15,20 @@ type CastNode struct {
 
 func (c *CastNode) Type() types.Type { return c.typ }
 func (c *CastNode) Pos() *tokens.Pos { return c.Value.Pos() }
+func (c *CastNode) Code(cnf CodeConfig) string {
+	var fn string
+	switch c.Type().BasicType() {
+	case types.INT:
+		fn = "INT"
+
+	case types.FLOAT:
+		fn = "FLOAT"
+
+	case types.STRING:
+		fn = "STRING"
+	}
+	return fmt.Sprintf("[%s %s]", fn, c.Value.Code(cnf))
+}
 
 func NewCastNode(val Node, typ types.Type) *CastNode {
 	return &CastNode{
@@ -41,6 +57,14 @@ var mathOps = map[string]MathOperation{
 	"%": MathOperationMod,
 }
 
+var mathOpsNames = make(map[MathOperation]string)
+
+func init() {
+	for k, v := range mathOps {
+		mathOpsNames[v] = k
+	}
+}
+
 type MathNode struct {
 	Op  MathOperation
 	Lhs Node
@@ -49,6 +73,9 @@ type MathNode struct {
 }
 
 func (m *MathNode) Type() types.Type { return m.typ }
+func (m *MathNode) Code(cnf CodeConfig) string {
+	return fmt.Sprintf("[MATH %s %s %s]", m.Lhs.Code(cnf), mathOpsNames[m.Op], m.Rhs.Code(cnf))
+}
 
 type CompareOperation int
 
@@ -70,6 +97,14 @@ var compareOps = map[string]CompareOperation{
 	">=": CompareOperationGreaterEqual,
 }
 
+var compareOpsNames = make(map[CompareOperation]string)
+
+func init() {
+	for k, v := range compareOps {
+		compareOpsNames[v] = k
+	}
+}
+
 type CompareNode struct {
 	Op  CompareOperation
 	Lhs Node
@@ -77,6 +112,9 @@ type CompareNode struct {
 }
 
 func (c *CompareNode) Type() types.Type { return types.BOOL }
+func (c *CompareNode) Code(cnf CodeConfig) string {
+	return fmt.Sprintf("[MATH %s %s %s]", c.Lhs.Code(cnf), compareOpsNames[c.Op], c.Rhs.Code(cnf))
+}
 
 type MathFunction int
 
@@ -86,6 +124,12 @@ const (
 	MathFunctionRound
 )
 
+var mathFunctionNames = map[MathFunction]string{
+	MathFunctionCeil:  "CEIL",
+	MathFunctionFloor: "FLOOR",
+	MathFunctionRound: "ROUND",
+}
+
 type MathFunctionNode struct {
 	Func MathFunction
 	Arg  Node
@@ -93,6 +137,9 @@ type MathFunctionNode struct {
 }
 
 func (m *MathFunctionNode) Type() types.Type { return m.typ }
+func (m *MathFunctionNode) Code(cnf CodeConfig) string {
+	return fmt.Sprintf("[%s %s]", mathFunctionNames[m.Func], m.Arg.Code(cnf))
+}
 
 type LogicalOp int
 
@@ -102,6 +149,12 @@ const (
 	LogicalOpNot
 )
 
+var logicalOpNames = map[LogicalOp]string{
+	LogicalOpAnd: "AND",
+	LogicalOpOr:  "OR",
+	LogicalOpNot: "NOT",
+}
+
 type LogicalOpNode struct {
 	Op  LogicalOp
 	Val Node
@@ -109,6 +162,12 @@ type LogicalOpNode struct {
 }
 
 func (l *LogicalOpNode) Type() types.Type { return types.BOOL }
+func (l *LogicalOpNode) Code(cnf CodeConfig) string {
+	if l.Rhs != nil {
+		return fmt.Sprintf("[%s %s %s]", logicalOpNames[l.Op], l.Val.Code(cnf), l.Rhs.Code(cnf))
+	}
+	return fmt.Sprintf("[%s %s]", logicalOpNames[l.Op], l.Val.Code(cnf))
+}
 
 func NewMathNode(op MathOperation, lhs, rhs Node, typ types.Type) *MathNode {
 	return &MathNode{

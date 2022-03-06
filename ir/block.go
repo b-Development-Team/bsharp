@@ -1,10 +1,28 @@
 package ir
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/Nv7-Github/bsharp/parser"
 	"github.com/Nv7-Github/bsharp/tokens"
 	"github.com/Nv7-Github/bsharp/types"
 )
+
+func bodyCode(cnf CodeConfig, body []Node) string {
+	tab := strings.Repeat(" ", cnf.Indent)
+	out := &strings.Builder{}
+	for _, node := range body {
+		code := node.Code(cnf)
+		lines := strings.Split(code, "\n")
+		for _, line := range lines {
+			out.WriteString(tab)
+			out.WriteString(line)
+			out.WriteString("\n")
+		}
+	}
+	return out.String()
+}
 
 type IfNode struct {
 	NullCall
@@ -13,10 +31,21 @@ type IfNode struct {
 	Else      []Node // nil if no else
 }
 
+func (i *IfNode) Code(cnf CodeConfig) string {
+	if i.Else != nil {
+		return fmt.Sprintf("[IF %s\n%s\nELSE\n%s\n]", i.Condition.Code(cnf), bodyCode(cnf, i.Body), bodyCode(cnf, i.Else))
+	}
+	return fmt.Sprintf("[IF %s\n%s\n]", i.Condition.Code(cnf), bodyCode(cnf, i.Body))
+}
+
 type WhileNode struct {
 	NullCall
 	Condition Node
 	Body      []Node
+}
+
+func (w *WhileNode) Code(cnf CodeConfig) string {
+	return fmt.Sprintf("[WHILE %s\n%s\n]", w.Condition.Code(cnf), bodyCode(cnf, w.Body))
 }
 
 type Case struct {
@@ -25,9 +54,17 @@ type Case struct {
 	Body  []Node
 }
 
+func (c *Case) Code(cnf CodeConfig) string {
+	return fmt.Sprintf("[CASE %s\n%s\n]", c.Value.Code(cnf), bodyCode(cnf, c.Body))
+}
+
 type Default struct {
 	NullCall
 	Body []Node
+}
+
+func (d *Default) Code(cnf CodeConfig) string {
+	return fmt.Sprintf("[DEFAULT\n%s\n]", bodyCode(cnf, d.Body))
 }
 
 type SwitchNode struct {
@@ -35,6 +72,31 @@ type SwitchNode struct {
 	Value   Node
 	Cases   []*Case
 	Default []Node // if nil, no default
+}
+
+func (s *SwitchNode) Code(cnf CodeConfig) string {
+	args := &strings.Builder{}
+	tab := strings.Repeat(" ", cnf.Indent)
+	for i, c := range s.Cases {
+		lines := strings.Split(c.Code(cnf), "\n")
+		for _, line := range lines {
+			args.WriteString(tab)
+			args.WriteString(line)
+			args.WriteString("\n")
+		}
+		if i != len(s.Cases)-1 {
+			args.WriteString("\n")
+		}
+	}
+	if s.Default != nil {
+		lines := strings.Split(bodyCode(cnf, s.Default), "\n")
+		for _, line := range lines {
+			args.WriteString(tab)
+			args.WriteString(line)
+			args.WriteString("\n")
+		}
+	}
+	return fmt.Sprintf("[SWITCH\n%s\n]", args.String())
 }
 
 func init() {

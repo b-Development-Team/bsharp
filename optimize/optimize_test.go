@@ -2,12 +2,12 @@ package optimize
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/Nv7-Github/bsharp/ir"
 	"github.com/Nv7-Github/bsharp/parser"
 	"github.com/Nv7-Github/bsharp/tokens"
-	"github.com/davecgh/go-spew/spew"
 )
 
 const code = `[DEFINE a [STRING [MATH 1 + 1]]]
@@ -26,10 +26,19 @@ func TestOptimizer(t *testing.T) {
 	tok.Tokenize()
 	parse := parser.NewParser(tok)
 	parse.Parse()
+	cnf := ir.CodeConfig{
+		Indent: 4,
+	}
 	ir := ir.NewBuilder()
 	ir.Build(parse, &fs{})
 
-	opt := NewOptimizer(ir.IR())
+	i := ir.IR()
+	fmt.Println("BEFORE: ")
+	fmt.Println(i.Code(cnf))
+
+	opt := NewOptimizer(i)
 	out := opt.Optimize()
-	spew.Dump(out)
+
+	fmt.Println("AFTER: ")
+	fmt.Println(out.Code(cnf))
 }

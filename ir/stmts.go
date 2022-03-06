@@ -6,10 +6,6 @@ import (
 	"github.com/Nv7-Github/bsharp/types"
 )
 
-type Call interface {
-	Type() types.Type
-}
-
 type nodeBuilder struct {
 	ArgTypes []types.Type
 	Build    func(b *Builder, pos *tokens.Pos, args []Node) (Call, error)
@@ -28,8 +24,9 @@ type CallNode struct {
 	Call Call
 }
 
-func (c *CallNode) Pos() *tokens.Pos { return c.pos }
-func (c *CallNode) Type() types.Type { return c.Call.Type() }
+func (c *CallNode) Pos() *tokens.Pos           { return c.pos }
+func (c *CallNode) Type() types.Type           { return c.Call.Type() }
+func (c *CallNode) Code(cnf CodeConfig) string { return c.Call.Code(cnf) }
 
 func NewCallNode(call Call, pos *tokens.Pos) *CallNode {
 	return &CallNode{
