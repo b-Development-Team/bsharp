@@ -66,3 +66,71 @@ func (o *Optimizer) optimizeWhile(n *ir.WhileNode, pos *tokens.Pos) *Result {
 		NotDead: true,
 	}
 }
+
+func (o *Optimizer) optimizeIf(i *ir.IfNode, pos *tokens.Pos) *Result {
+	cond := o.OptimizeNode(i.Condition)
+	if cond.IsConst {
+		var out []ir.Node
+		if cond.Stmt.(*ir.Const).Value.(bool) {
+			out = make([]ir.Node, 0, len(i.Body))
+			o.scope.Push()
+			for _, node := range i.Body {
+				v := o.OptimizeNode(node)
+				if v.Stmt != nil && v.NotDead {
+					out = append(out, v.Stmt)
+				}
+			}
+			o.scope.Pop()
+		} else {
+			out = make([]ir.Node, 0, len(i.Else))
+			o.scope.Push()
+			for _, node := range i.Else {
+				v := o.OptimizeNode(node)
+				if v.Stmt != nil && v.NotDead {
+					out = append(out, v.Stmt)
+				}
+			}
+			o.scope.Pop()
+		}
+
+		return &Result{
+			Stmt: ir.NewCallNode(&ir.BlockNode{
+				Body: out,
+			}, pos),
+			NotDead: len(out) > 0,
+		}
+	}
+
+	// Build
+	body := make([]ir.Node, 0, len(i.Body))
+	o.scope.Push()
+	for _, node := range i.Body {
+		r := o.OptimizeNode(node)
+		if r.Stmt != nil && r.NotDead {
+			body = append(body, r.Stmt)
+		}
+	}
+	o.scope.Pop()
+
+	var els []ir.Node
+	if i.Else != nil {
+		els = make([]ir.Node, 0, len(i.Else))
+		o.scope.Push()
+		for _, node := range i.Else {
+			r := o.OptimizeNode(node)
+			if r.Stmt != nil && r.NotDead {
+				els = append(els, r.Stmt)
+			}
+		}
+		o.scope.Pop()
+	}
+
+	return &Result{
+		Stmt: ir.NewCallNode(&ir.IfNode{
+			Condition: cond.Stmt,
+			Body:      body,
+			Else:      els,
+		}, pos),
+		NotDead: true,
+	}
+}

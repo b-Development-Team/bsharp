@@ -98,12 +98,14 @@ func (s *SwitchNode) Code(cnf CodeConfig) string {
 		}
 	}
 	if s.Default != nil {
+		args.WriteString("\n" + tab + "[DEFAULT\n")
 		lines := strings.Split(bodyCode(cnf, s.Default), "\n")
 		for _, line := range lines {
 			args.WriteString(tab)
 			args.WriteString(line)
 			args.WriteString("\n")
 		}
+		args.WriteString(tab + "]\n")
 	}
 	return fmt.Sprintf("[SWITCH\n%s]", args.String())
 }

@@ -85,7 +85,7 @@ func (a *ArrayType) Equal(b Type) bool {
 }
 
 func (a *ArrayType) String() string {
-	return fmt.Sprintf("[]%s", a.ElemType.String())
+	return fmt.Sprintf("%s{}", a.ElemType.String())
 }
 
 type MapType struct {
@@ -116,7 +116,7 @@ func (m *MapType) Equal(b Type) bool {
 }
 
 func (m *MapType) String() string {
-	return fmt.Sprintf("{%s, %s}", m.KeyType.String(), m.ValType.String())
+	return fmt.Sprintf("MAP{%s}%s", m.KeyType.String(), m.ValType.String())
 }
 
 type MulType struct {
@@ -185,6 +185,7 @@ func (f *FuncType) String() string {
 			out.WriteString(", ")
 		}
 	}
+	out.WriteString("}")
 	out.WriteString(f.RetType.String())
 	return out.String()
 }

@@ -31,6 +31,12 @@ func (o *Optimizer) OptimizeNode(node ir.Node) *Result {
 		case *ir.CompareNode:
 			return o.optimizeCompare(c, n.Pos())
 
+		case *ir.ConcatNode:
+			return o.optimizeConcat(c, n.Pos())
+
+		case *ir.IfNode:
+			return o.optimizeIf(c, n.Pos())
+
 		default:
 			panic(fmt.Errorf("optimize: unknown call node type: %T", c)) // This shouldn't happen
 		}
