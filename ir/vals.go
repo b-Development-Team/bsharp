@@ -141,6 +141,14 @@ func (m *MathFunctionNode) Code(cnf CodeConfig) string {
 	return fmt.Sprintf("[%s %s]", mathFunctionNames[m.Func], m.Arg.Code(cnf))
 }
 
+func NewMathFunctionNode(fn MathFunction, arg Node, typ types.Type) *MathFunctionNode {
+	return &MathFunctionNode{
+		Func: fn,
+		Arg:  arg,
+		typ:  typ,
+	}
+}
+
 type LogicalOp int
 
 const (

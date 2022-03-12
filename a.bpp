@@ -1,0 +1,80 @@
+[DEFINE words [GLOBAL VAR wordle_words]]
+[DEFINE cumu_guesses [GLOBAL VAR cumu_guesses]]
+
+[DEFINE seen_a 0][DEFINE seen_b 0][DEFINE seen_c 0][DEFINE seen_d 0][DEFINE seen_e 0][DEFINE seen_f 0][DEFINE seen_g 0][DEFINE seen_h 0][DEFINE seen_i 0][DEFINE seen_j 0][DEFINE seen_k 0][DEFINE seen_l 0][DEFINE seen_m 0][DEFINE seen_n 0][DEFINE seen_o 0][DEFINE seen_p 0][DEFINE seen_q 0][DEFINE seen_r 0][DEFINE seen_s 0][DEFINE seen_t 0][DEFINE seen_u 0][DEFINE seen_v 0][DEFINE seen_w 0][DEFINE seen_x 0][DEFINE seen_y 0][DEFINE seen_z 0]
+
+[DEFINE guess [ARGS 0]]
+[DEFINE solution [GLOBAL VAR wordle_solution]]
+
+[IF [COMPARE [LENGTH [VAR guess]] = 5] [IF [COMPARE [REPLACE [VAR words] [VAR guess] @@@@@] != [VAR words]] [DEFINE invalid_flag 0] [DEFINE invalid_flag 1]] [DEFINE invalid_flag 1]]
+
+[DEFINE blank_flag [COMPARE [VAR guess] = ""]]
+
+[IF [VAR invalid_flag] [DEFINE guess "zzzzz"] ""]
+
+[DEFINE string "01234"]
+
+[DEFINE ng_solution ""]
+
+# handle greens
+
+[IF [COMPARE [INDEX [VAR guess] 0] = [INDEX [VAR solution] 0]] [DEFINE string [REPLACE [VAR string] 0 G]] ""]
+[DEFINE ng_solution [CONCAT [VAR ng_solution] [IF [COMPARE [INDEX [VAR string] 0] = G] "_" [INDEX [VAR solution] 0]]]]
+
+[IF [COMPARE [INDEX [VAR guess] 1] = [INDEX [VAR solution] 1]] [DEFINE string [REPLACE [VAR string] 1 G]] ""]
+[DEFINE ng_solution [CONCAT [VAR ng_solution] [IF [COMPARE [INDEX [VAR string] 1] = G] "_" [INDEX [VAR solution] 1]]]]
+
+[IF [COMPARE [INDEX [VAR guess] 2] = [INDEX [VAR solution] 2]] [DEFINE string [REPLACE [VAR string] 2 G]] ""]
+[DEFINE ng_solution [CONCAT [VAR ng_solution] [IF [COMPARE [INDEX [VAR string] 2] = G] "_" [INDEX [VAR solution] 2]]]]
+
+[IF [COMPARE [INDEX [VAR guess] 3] = [INDEX [VAR solution] 3]] [DEFINE string [REPLACE [VAR string] 3 G]] ""]
+[DEFINE ng_solution [CONCAT [VAR ng_solution] [IF [COMPARE [INDEX [VAR string] 3] = G] "_" [INDEX [VAR solution] 3]]]]
+
+[IF [COMPARE [INDEX [VAR guess] 4] = [INDEX [VAR solution] 4]] [DEFINE string [REPLACE [VAR string] 4 G]] ""]
+[DEFINE ng_solution [CONCAT [VAR ng_solution] [IF [COMPARE [INDEX [VAR string] 4] = G] "_" [INDEX [VAR solution] 4]]]]
+
+# handle yellows
+
+[DEFINE let [INDEX [VAR guess] 0]]
+[IF [COMPARE [INDEX [VAR string] 0] != "G"] [IF [COMPARE [MATH [LENGTH [REPLACE [VAR ng_solution] [INDEX [VAR guess] 0] "@@"]] - [LENGTH [VAR ng_solution]]] > [VAR [CONCAT "seen_" [VAR let]]]] [CONCAT [DEFINE string [REPLACE [VAR string] 0 Y]] [DEFINE [CONCAT "seen_" [VAR let]] [MATH [VAR [CONCAT "seen_" [VAR let]]] + 1]]] ""] ""]
+
+[DEFINE let [INDEX [VAR guess] 1]]
+[IF [COMPARE [INDEX [VAR string] 1] != "G"] [IF [COMPARE [MATH [LENGTH [REPLACE [VAR ng_solution] [INDEX [VAR guess] 1] "@@"]] - [LENGTH [VAR ng_solution]]] > [VAR [CONCAT "seen_" [VAR let]]]] [CONCAT [DEFINE string [REPLACE [VAR string] 1 Y]] [DEFINE [CONCAT "seen_" [VAR let]] [MATH [VAR [CONCAT "seen_" [VAR let]]] + 1]]] ""] ""]
+
+[DEFINE let [INDEX [VAR guess] 2]]
+[IF [COMPARE [INDEX [VAR string] 2] != "G"] [IF [COMPARE [MATH [LENGTH [REPLACE [VAR ng_solution] [INDEX [VAR guess] 2] "@@"]] - [LENGTH [VAR ng_solution]]] > [VAR [CONCAT "seen_" [VAR let]]]] [CONCAT [DEFINE string [REPLACE [VAR string] 2 Y]] [DEFINE [CONCAT "seen_" [VAR let]] [MATH [VAR [CONCAT "seen_" [VAR let]]] + 1]]] ""] ""]
+
+[DEFINE let [INDEX [VAR guess] 3]]
+[IF [COMPARE [INDEX [VAR string] 3] != "G"] [IF [COMPARE [MATH [LENGTH [REPLACE [VAR ng_solution] [INDEX [VAR guess] 3] "@@"]] - [LENGTH [VAR ng_solution]]] > [VAR [CONCAT "seen_" [VAR let]]]] [CONCAT [DEFINE string [REPLACE [VAR string] 3 Y]] [DEFINE [CONCAT "seen_" [VAR let]] [MATH [VAR [CONCAT "seen_" [VAR let]]] + 1]]] ""] ""]
+
+[DEFINE let [INDEX [VAR guess] 4]]
+[IF [COMPARE [INDEX [VAR string] 4] != "G"] [IF [COMPARE [MATH [LENGTH [REPLACE [VAR ng_solution] [INDEX [VAR guess] 4] "@@"]] - [LENGTH [VAR ng_solution]]] > [VAR [CONCAT "seen_" [VAR let]]]] [CONCAT [DEFINE string [REPLACE [VAR string] 4 Y]] [DEFINE [CONCAT "seen_" [VAR let]] [MATH [VAR [CONCAT "seen_" [VAR let]]] + 1]]] ""] ""]
+
+[DEFINE string [REPLACE [REPLACE [REPLACE [REPLACE [REPLACE [VAR string] 0 B] 1 B] 2 B] 3 B] 4 B]]
+
+[DEFINE B "[0m"]
+[DEFINE Y "[33m"]
+[DEFINE G "[32m"]
+
+[DEFINE final_guess [CONCAT [VAR B] [VAR [INDEX [VAR string] 0]] "[" [INDEX [VAR guess] 0] "]" [VAR [INDEX [VAR string] 1]] "[" [INDEX [VAR guess] 1] "]" [VAR [INDEX [VAR string] 2]] "[" [INDEX [VAR guess] 2] "]" [VAR [INDEX [VAR string] 3]] "[" [INDEX [VAR guess] 3] "]" [VAR [INDEX [VAR string] 4]] "[" [INDEX [VAR guess] 4] "]"]]
+
+[IF [COMPARE [VAR invalid_flag] = 0] [DEFINE cumu_guesses [CONCAT [VAR cumu_guesses] "
+" [VAR final_guess]]] ""]
+[DEFINE num_guesses [MATH [LENGTH [REPLACE [VAR cumu_guesses] "
+" "@@"]] - [LENGTH [VAR cumu_guesses]]]]
+
+[# 0 = continue, 1 = win, 2 = loss, 3 = invalid]
+[DEFINE gameend_state [IF [COMPARE [VAR string] = "GGGGG"] 1 [IF [COMPARE [VAR num_guesses] = 6] 2 [IF [VAR invalid_flag] 3 0]]]]
+
+[DEFINE gameend_array [ARRAY "Use `tc/tag wordle [guess]` to guess again." "You got it! Use `tc/tag wordle [first guess]` to start a new game." [CONCAT "And that's 6 guesses! The word was `" [VAR solution] "`. Use tc/tag wordle [first guess] to start a new game!"] [IF [VAR blank_flag] "This tag takes a five-letter word as an argument. (If you do not know what Wordle is, it's a word guessing game available at <https://powerlanguage.co.uk/wordle/>. This tag is a recreation of that game to the best of my and B++'s abilities.)" "Your guess is invalid! Make sure it's exactly five letters long, all lowercase, and a dictionary word, then do `tc/tag wordle [guess]` to submit your new guess."]]]
+
+```ansi
+[IF [COMPARE [VAR cumu_guesses] = ""] "No guesses yet!" [VAR cumu_guesses]]```
+[INDEX [VAR gameend_array] [VAR gameend_state]]
+
+[# this produces 1-6 for wins in 1-6 guesses, and 7 for a loss]
+[DEFINE guesses_varname [CONCAT "wordle_guess" [MATH [MATH [VAR num_guesses] + [VAR gameend_state]] - 1]]]
+
+[IF [MATH [COMPARE [VAR gameend_state] = 1] + [COMPARE [VAR gameend_state] = 2]] [CONCAT [DEFINE solutions [GLOBAL VAR wordle_solutions]] [DEFINE index [RANDINT 0 [FLOOR [MATH [LENGTH [VAR solutions]] / 5]]]] [GLOBAL DEFINE wordle_solution [SLICE [VAR solutions] [MATH [VAR index] * 5] [MATH [MATH [VAR index] * 5] + 5]]] [DEFINE cumu_guesses ""] [GLOBAL DEFINE [VAR guesses_varname] [MATH [GLOBAL VAR [VAR guesses_varname]] + 1]]] ""]
+
+[GLOBAL DEFINE cumu_guesses [VAR cumu_guesses]]

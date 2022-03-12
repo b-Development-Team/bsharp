@@ -15,6 +15,13 @@ type ArrayNode struct {
 	typ    types.Type
 }
 
+func NewArrayNode(vals []Node, typ types.Type) *ArrayNode {
+	return &ArrayNode{
+		Values: vals,
+		typ:    typ,
+	}
+}
+
 func (a *ArrayNode) Type() types.Type { return a.typ }
 func (a *ArrayNode) Code(cnf CodeConfig) string {
 	args := &strings.Builder{}
@@ -48,6 +55,14 @@ func (i *IndexNode) Type() types.Type { return i.typ }
 
 func (i *IndexNode) Code(cnf CodeConfig) string {
 	return fmt.Sprintf("[INDEX %s %s]", i.Value.Code(cnf), i.Index.Code(cnf))
+}
+
+func NewIndexNode(val, index Node) *IndexNode {
+	return &IndexNode{
+		Value: val,
+		Index: index,
+		typ:   val.Type().(*types.ArrayType).ElemType,
+	}
 }
 
 type LengthNode struct {
@@ -93,6 +108,14 @@ func (g *GetNode) Type() types.Type { return g.typ }
 
 func (g *GetNode) Code(cnf CodeConfig) string {
 	return fmt.Sprintf("[GET %s %s]", g.Map.Code(cnf), g.Key.Code(cnf))
+}
+
+func NewGetNode(m, k Node) *GetNode {
+	return &GetNode{
+		Map: m,
+		Key: k,
+		typ: m.Type().(*types.MapType).ValType,
+	}
 }
 
 func init() {

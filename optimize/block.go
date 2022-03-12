@@ -134,3 +134,52 @@ func (o *Optimizer) optimizeIf(i *ir.IfNode, pos *tokens.Pos) *Result {
 		NotDead: true,
 	}
 }
+
+func (o *Optimizer) optimizeCase(i *ir.Case) []ir.Node {
+	out := make([]ir.Node, 0, len(i.Body))
+	o.scope.Push()
+	for _, node := range i.Body {
+		r := o.OptimizeNode(node)
+		if r.Stmt != nil && r.NotDead {
+			out = append(out, r.Stmt)
+		}
+	}
+	o.scope.Pop()
+	return out
+}
+
+func (o *Optimizer) optimizeSwitch(i *ir.SwitchNode, pos *tokens.Pos) *Result {
+	v := o.OptimizeNode(i.Value)
+
+	// Cases
+	cases := make([]*ir.Case, len(i.Cases))
+	for i, cse := range i.Cases {
+		cases[i] = &ir.Case{
+			Value: cse.Value,
+			Body:  o.optimizeCase(cse),
+		}
+	}
+
+	// Default
+	var def []ir.Node
+	if i.Default != nil {
+		def = make([]ir.Node, 0, len(i.Default))
+		o.scope.Push()
+		for _, node := range i.Default {
+			r := o.OptimizeNode(node)
+			if r.Stmt != nil && r.NotDead {
+				def = append(def, r.Stmt)
+			}
+		}
+		o.scope.Pop()
+	}
+
+	return &Result{
+		Stmt: ir.NewCallNode(&ir.SwitchNode{
+			Value:   v.Stmt,
+			Cases:   cases,
+			Default: def,
+		}, pos),
+		NotDead: true,
+	}
+}
