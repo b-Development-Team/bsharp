@@ -29,7 +29,12 @@ func (b *Bot) RunCodeCmd(ctx *Ctx) {
 
 		// Actually run code
 		src := dat.Components[0].(*discordgo.ActionsRow).Components[0].(*discordgo.TextInput).Value
-		err := b.RunCode("main.bsp", src, ctx)
+		d, err := b.Get(ctx.Guild())
+		if err != nil {
+			ctx.Error(err)
+			return
+		}
+		err = b.RunCode("main.bsp", src, ctx, NewExtensionCtx("_run", d, ctx))
 		ctx.Error(err)
 	})
 	ctx.Error(err)
@@ -56,7 +61,7 @@ func (b *Bot) RunTagCmd(id string, ctx *Ctx) {
 
 	// Run
 	startTime := time.Now()
-	err = b.RunCode(prog.ID+".bsp", src, ctx)
+	err = b.RunCode(prog.ID+".bsp", src, ctx, NewExtensionCtx(id, dat, ctx))
 	if ctx.Error(err) {
 		return
 	}

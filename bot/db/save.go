@@ -2,6 +2,8 @@ package db
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 )
@@ -71,4 +73,63 @@ func (d *Data) SaveSource(id, source string) error {
 	d.source[id] = source
 	_, err := f.WriteString(source)
 	return err
+}
+
+func (d *Data) DataSet(id string, key, val string) error {
+	d.Lock()
+	defer d.Unlock()
+
+	if len(key) > MaxKeySize {
+		return errors.New("db: key exceeds max size (256)")
+	}
+
+	// Get data
+	v, exists := d.data[id]
+	if !exists {
+		v = make(map[string]string)
+		d.data[id] = v
+	}
+
+	// Get file
+	f, exists := d.dataFiles[id]
+	if !exists {
+		var err error
+		f, err = os.Create(filepath.Join(d.path, "data", id+".json"))
+		if err != nil {
+			return err
+		}
+		d.dataFiles[id] = f
+	}
+
+	// Calc size
+	newsize := d.datasize
+	e, exists := v[key]
+	if !exists {
+		newsize += len(key) + len(val)
+	} else {
+		newsize -= len(e)
+		newsize += len(val)
+	}
+
+	if newsize > MaxSize {
+		return fmt.Errorf("db: max size (1MB) exceeded")
+	}
+
+	// Write
+	op, err := json.Marshal(dataOp{
+		Key:   key,
+		Value: val,
+	})
+	if err != nil {
+		return err
+	}
+	_, err = f.WriteString(string(op) + "\n")
+	if err != nil {
+		return err
+	}
+
+	// Save
+	v[key] = val
+
+	return nil
 }

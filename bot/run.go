@@ -132,6 +132,9 @@ func (b *Bot) BuildCode(filename string, src string, ctx *Ctx) (*ir.IR, error) {
 		return nil, err
 	}
 	bld := ir.NewBuilder()
+	for _, ext := range exts {
+		bld.AddExtension(ext)
+	}
 	err = bld.Build(parser, &fs{b: b, gld: ctx.Guild()})
 	if err != nil {
 		return nil, err
@@ -139,7 +142,7 @@ func (b *Bot) BuildCode(filename string, src string, ctx *Ctx) (*ir.IR, error) {
 	return bld.IR(), nil
 }
 
-func (b *Bot) RunCode(filename string, src string, ctx *Ctx) error {
+func (b *Bot) RunCode(filename string, src string, ctx *Ctx, extensionCtx *extensionCtx) error {
 	ir, err := b.BuildCode(filename, src, ctx)
 	if err != nil {
 		return err
@@ -147,6 +150,11 @@ func (b *Bot) RunCode(filename string, src string, ctx *Ctx) error {
 	stdout := newCtxWriter(ctx)
 	stdout.Setup()
 	interp := interpreter.NewInterpreter(ir, stdout)
+
+	exts := getExtensions(extensionCtx)
+	for _, ext := range exts {
+		interp.AddExtension(ext)
+	}
 
 	// Run
 	err = interp.Run()

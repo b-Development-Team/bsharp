@@ -7,6 +7,9 @@ import (
 	"time"
 )
 
+const MaxSize = 1024 * 1024 // 1MB
+const MaxKeySize = 256
+
 type Resp struct {
 	Msg string
 	Suc bool
@@ -31,6 +34,10 @@ type Data struct {
 	Guild    string
 	path     string
 
+	data      map[string]map[string]string
+	datasize  int
+	dataFiles map[string]*os.File
+
 	programFiles map[string]*os.File
 	sourceFiles  map[string]*os.File
 }
@@ -46,6 +53,8 @@ func newData(path, guild string) *Data {
 		sourceFiles:  make(map[string]*os.File),
 		names:        make(map[string]string),
 		source:       make(map[string]string),
+		data:         make(map[string]map[string]string),
+		dataFiles:    make(map[string]*os.File),
 	}
 }
 
@@ -120,6 +129,10 @@ func NewDB(path string) (*DB, error) {
 				return nil, err
 			}
 			err = data.loadSource()
+			if err != nil {
+				return nil, err
+			}
+			err = data.loadData()
 			if err != nil {
 				return nil, err
 			}

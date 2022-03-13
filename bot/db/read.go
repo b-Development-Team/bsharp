@@ -23,6 +23,9 @@ const maxNameLength = 128
 
 func (d *Data) NewProgram(id, name, creator string) (*Program, Resp) {
 	// Validate id
+	if id[0] == '_' {
+		return nil, Resp{Msg: "IDs can't start with underscores!", Suc: false}
+	}
 	for _, char := range id {
 		if !strings.Contains(validIDChars, string(char)) {
 			return nil, Resp{Msg: fmt.Sprintf("Character \"%s\" isn't allowed in program IDs!", string(char)), Suc: false}
@@ -72,4 +75,19 @@ func (d *Data) GetSource(id string) (string, Resp) {
 		return "", Resp{Msg: fmt.Sprintf("Source for `%s` doesn't exist!", id), Suc: false}
 	}
 	return src, Resp{Msg: "", Suc: true}
+}
+
+func (d *Data) DataGet(id string, key string) (string, Resp) {
+	d.RLock()
+	defer d.RUnlock()
+
+	v, exists := d.data[id]
+	if !exists {
+		return "", Resp{Msg: fmt.Sprintf("Key **%s** doesn't exist!", key), Suc: false}
+	}
+	val, exists := v[key]
+	if !exists {
+		return "", Resp{Msg: fmt.Sprintf("Key **%s** doesn't exist!", key), Suc: false}
+	}
+	return val, Resp{Msg: "", Suc: true}
 }
