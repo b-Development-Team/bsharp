@@ -79,6 +79,9 @@ func (o *Optimizer) OptimizeNode(node ir.Node) *Result {
 		case *ir.FnNode:
 			return o.optimizeFn(c, n.Pos())
 
+		case *ir.LogicalOpNode:
+			return o.optimizeLogicalOp(c, n.Pos())
+
 		default:
 			panic(fmt.Errorf("optimize: unknown call node type: %T", c)) // This shouldn't happen
 		}

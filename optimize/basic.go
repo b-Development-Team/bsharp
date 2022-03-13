@@ -97,3 +97,56 @@ func (o *Optimizer) optimizeMathFunction(n *ir.MathFunctionNode, pos *tokens.Pos
 		IsConst: false,
 	}
 }
+
+func (o *Optimizer) optimizeLogicalOp(c *ir.LogicalOpNode, pos *tokens.Pos) *Result {
+	lhs := o.OptimizeNode(c.Val)
+	var rhs *Result
+	if c.Rhs != nil {
+		rhs = o.OptimizeNode(c.Rhs)
+	}
+	switch c.Op {
+	case ir.LogicalOpAnd:
+		if lhs.IsConst && rhs.IsConst {
+			return &Result{
+				Stmt:    ir.NewConst(types.BOOL, pos, lhs.Stmt.(*ir.Const).Value.(bool) && rhs.Stmt.(*ir.Const).Value.(bool)),
+				IsConst: true,
+			}
+		}
+
+	case ir.LogicalOpOr:
+		if lhs.IsConst && rhs.IsConst {
+			return &Result{
+				Stmt:    ir.NewConst(types.BOOL, pos, lhs.Stmt.(*ir.Const).Value.(bool) || rhs.Stmt.(*ir.Const).Value.(bool)),
+				IsConst: true,
+			}
+		}
+
+	case ir.LogicalOpNot:
+		if lhs.IsConst {
+			return &Result{
+				Stmt:    ir.NewConst(types.BOOL, pos, !lhs.Stmt.(*ir.Const).Value.(bool)),
+				IsConst: true,
+			}
+		}
+	}
+
+	// Return non-const val
+	if rhs != nil {
+		return &Result{
+			Stmt: ir.NewCallNode(&ir.LogicalOpNode{
+				Op:  c.Op,
+				Val: lhs.Stmt,
+				Rhs: rhs.Stmt,
+			}, pos),
+			IsConst: false,
+		}
+	}
+
+	return &Result{
+		Stmt: ir.NewCallNode(&ir.LogicalOpNode{
+			Op:  c.Op,
+			Val: lhs.Stmt,
+		}, pos),
+		IsConst: false,
+	}
+}

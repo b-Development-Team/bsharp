@@ -34,7 +34,10 @@ func (c *Const) Code(cnf CodeConfig) string {
 		return c.Value.(string)
 
 	case types.BOOL:
-		return fmt.Sprintf("%t", c.Value.(bool))
+		if c.Value.(bool) {
+			return "[COMPARE 1 == 1]"
+		}
+		return "[COMPARE 1 == 0]"
 
 	default:
 		return "[UNKNOWN CONST]"

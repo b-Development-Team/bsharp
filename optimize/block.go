@@ -1,9 +1,6 @@
 package optimize
 
 import (
-	"fmt"
-	"reflect"
-
 	"github.com/Nv7-Github/bsharp/ir"
 	"github.com/Nv7-Github/bsharp/tokens"
 )
@@ -16,7 +13,6 @@ func (o *Optimizer) optimizeWhile(n *ir.WhileNode, pos *tokens.Pos) *Result {
 	for {
 		cond := o.OptimizeNode(n.Condition)
 		if !cond.IsConst {
-			fmt.Println(reflect.TypeOf(cond.Stmt.(*ir.CallNode).Call))
 			canUnroll = false
 			break
 		}

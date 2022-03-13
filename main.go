@@ -31,6 +31,7 @@ func main() {
 		for _, f := range args.Run.Files {
 			files[f] = struct{}{}
 		}
+
 		// Build
 		fs := &dirFS{files}
 		v, err := fs.Parse(args.Run.Files[0])

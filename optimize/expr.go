@@ -106,7 +106,7 @@ func (o *Optimizer) optimizeCompare(c *ir.CompareNode, pos *tokens.Pos) *Result 
 				out = lhs <= rhs
 			}
 			return &Result{
-				Stmt:    ir.NewConst(types.FLOAT, pos, out),
+				Stmt:    ir.NewConst(types.BOOL, pos, out),
 				IsConst: true,
 			}
 
@@ -134,7 +134,7 @@ func (o *Optimizer) optimizeCompare(c *ir.CompareNode, pos *tokens.Pos) *Result 
 				out = lhs <= rhs
 			}
 			return &Result{
-				Stmt:    ir.NewConst(types.FLOAT, pos, out),
+				Stmt:    ir.NewConst(types.BOOL, pos, out),
 				IsConst: true,
 			}
 
@@ -162,7 +162,7 @@ func (o *Optimizer) optimizeCompare(c *ir.CompareNode, pos *tokens.Pos) *Result 
 				out = lhs <= rhs
 			}
 			return &Result{
-				Stmt:    ir.NewConst(types.FLOAT, pos, out),
+				Stmt:    ir.NewConst(types.BOOL, pos, out),
 				IsConst: true,
 			}
 		}

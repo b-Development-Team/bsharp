@@ -58,10 +58,14 @@ func (i *IndexNode) Code(cnf CodeConfig) string {
 }
 
 func NewIndexNode(val, index Node) *IndexNode {
+	outTyp := types.Type(types.STRING)
+	if types.ARRAY.Equal(val.Type()) {
+		outTyp = val.Type().(*types.ArrayType).ElemType
+	}
 	return &IndexNode{
 		Value: val,
 		Index: index,
-		typ:   val.Type().(*types.ArrayType).ElemType,
+		typ:   outTyp,
 	}
 }
 
