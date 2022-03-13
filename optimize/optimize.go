@@ -23,6 +23,10 @@ func NewOptimizer(i *ir.IR) *Optimizer {
 }
 
 func (o *Optimizer) Optimize() *ir.IR {
+	for k := range o.ir.Funcs {
+		o.optimizeFunc(k)
+	}
+
 	out := make([]ir.Node, 0, len(o.ir.Body))
 	for _, node := range o.ir.Body {
 		res := o.OptimizeNode(node)

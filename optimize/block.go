@@ -1,6 +1,9 @@
 package optimize
 
 import (
+	"fmt"
+	"reflect"
+
 	"github.com/Nv7-Github/bsharp/ir"
 	"github.com/Nv7-Github/bsharp/tokens"
 )
@@ -13,6 +16,7 @@ func (o *Optimizer) optimizeWhile(n *ir.WhileNode, pos *tokens.Pos) *Result {
 	for {
 		cond := o.OptimizeNode(n.Condition)
 		if !cond.IsConst {
+			fmt.Println(reflect.TypeOf(cond.Stmt.(*ir.CallNode).Call))
 			canUnroll = false
 			break
 		}
@@ -71,26 +75,27 @@ func (o *Optimizer) optimizeIf(i *ir.IfNode, pos *tokens.Pos) *Result {
 	cond := o.OptimizeNode(i.Condition)
 	if cond.IsConst {
 		var out []ir.Node
+		// Don't need scope for block nodes, since they are guarenteed to be executed
 		if cond.Stmt.(*ir.Const).Value.(bool) {
 			out = make([]ir.Node, 0, len(i.Body))
-			o.scope.Push()
+			//o.scope.Push()
 			for _, node := range i.Body {
 				v := o.OptimizeNode(node)
 				if v.Stmt != nil && v.NotDead {
 					out = append(out, v.Stmt)
 				}
 			}
-			o.scope.Pop()
+			//o.scope.Pop()
 		} else {
 			out = make([]ir.Node, 0, len(i.Else))
-			o.scope.Push()
+			//	o.scope.Push()
 			for _, node := range i.Else {
 				v := o.OptimizeNode(node)
 				if v.Stmt != nil && v.NotDead {
 					out = append(out, v.Stmt)
 				}
 			}
-			o.scope.Pop()
+			//o.scope.Pop()
 		}
 
 		return &Result{

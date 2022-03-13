@@ -153,6 +153,14 @@ func (c *FnCallNode) Code(cnf CodeConfig) string {
 	}
 	return fmt.Sprintf("[CALL %s %s]", c.Fn.Code(cnf), args.String())
 }
+func NewFnCallNode(fn Node, args []Node, typ types.Type, pos *tokens.Pos) *FnCallNode {
+	return &FnCallNode{
+		Fn:   fn,
+		Args: args,
+		typ:  typ,
+		pos:  pos,
+	}
+}
 
 func (b *Builder) buildFnCall(n *parser.CallNode) (Node, error) {
 	fn := b.Funcs[n.Name] // We know this exists because this function won't be called if the function doesn't exist

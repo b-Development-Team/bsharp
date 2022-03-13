@@ -70,6 +70,15 @@ func (o *Optimizer) OptimizeNode(node ir.Node) *Result {
 		case *ir.SwitchNode:
 			return o.optimizeSwitch(c, n.Pos())
 
+		case *ir.ReturnNode:
+			return o.optimizeRet(c, n.Pos())
+
+		case *ir.FnCallNode:
+			return o.optimizeCall(c, n.Pos())
+
+		case *ir.FnNode:
+			return o.optimizeFn(c, n.Pos())
+
 		default:
 			panic(fmt.Errorf("optimize: unknown call node type: %T", c)) // This shouldn't happen
 		}
@@ -79,6 +88,9 @@ func (o *Optimizer) OptimizeNode(node ir.Node) *Result {
 			Stmt:    n,
 			IsConst: true,
 		}
+
+	case *ir.FnCallNode:
+		return o.optimizeCall(n, n.Pos())
 
 	default:
 		panic(fmt.Errorf("optimize: unknown node type: %T", n)) // This shouldn't happen
