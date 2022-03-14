@@ -19,7 +19,7 @@ func (i *Interpreter) evalMathNode(pos *tokens.Pos, node *ir.MathNode) (*Value, 
 		return nil, err
 	}
 
-	switch left.Type {
+	switch left.Type.BasicType() {
 	case types.INT:
 		v := intMathOp(left.Value.(int), right.Value.(int), node.Op)
 		if v == nil {
@@ -55,7 +55,7 @@ func intMathOp(lhs int, rhs int, op ir.MathOperation) *int {
 		out = lhs / rhs
 
 	case ir.MathOperationPow:
-		out = lhs ^ rhs
+		out = int(math.Pow(float64(lhs), float64(rhs)))
 
 	case ir.MathOperationMod:
 		out = lhs % rhs
@@ -104,7 +104,7 @@ func (i *Interpreter) evalCompareNode(pos *tokens.Pos, node *ir.CompareNode) (*V
 	if err != nil {
 		return nil, err
 	}
-	switch left.Type {
+	switch node.Lhs.Type().BasicType() {
 	case types.INT:
 		v := intCompOp(left.Value.(int), right.Value.(int), node.Op)
 		if v == nil {

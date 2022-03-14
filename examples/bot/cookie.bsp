@@ -25,18 +25,20 @@
     ]
     [DEFINE i [MATH [VAR i] + 1]]
   ]
-  [APPEND [VAR out] [VAR curr]]
+  [IF [COMPARE [VAR curr] != ""]
+    [APPEND [VAR out] [VAR curr]]
+  ]
   [RETURN [VAR out]]
 ]
 
-[FUNC FORMATINT [PARAM a FLOAT] [RETURNS STRING]
-  [IF [COMPARE [VAR a] < [FLOAT 1000]]
+[FUNC FORMATINT [PARAM a INT] [RETURNS STRING]
+  [IF [COMPARE [VAR a] < 1000]
     [RETURN [STRING [VAR a]]]
   ]
-  [IF [AND [COMPARE [VAR a] > [FLOAT 1000]] [COMPARE [VAR a] < [FLOAT 1000000]]]
+  [IF [AND [COMPARE [VAR a] > 1000] [COMPARE [VAR a] < 1000000]]
     [RETURN [CONCAT [STRING [MATH [VAR a] / 1000]] "k"]]
   ]
-  [IF [AND [COMPARE [VAR a] > [FLOAT 1000000]] [COMPARE [VAR a] < [FLOAT 1000000000]]]
+  [IF [AND [COMPARE [VAR a] > 1000000] [COMPARE [VAR a] < 1000000000]]
     [RETURN [CONCAT [STRING [MATH [VAR a] / 1000000]] "m"]]
   ]
   [RETURN [STRING [VAR a]]]
@@ -45,6 +47,7 @@
 # Upgrades
 [DEFINE upgrades [MAKE MAP{STRING}INT]] # MAP{Name}Price (price ^ (quantity + 1) is cost), (quantity ^ price is CPS benefit) 
 [DEFINE icons [MAKE MAP{STRING}STRING]] # MAP{Name}Icon
+[DEFINE names [ARRAY "Clicker" "Granny" "Miner" "Factory" "Wizard"]]
 [SET [VAR upgrades] "Clicker" 2]
 [SET [VAR icons] "Clicker" "🖱️"]
 [SET [VAR upgrades] "Granny" 5]
@@ -90,7 +93,7 @@
   [DEFINE price [GET [VAR upgrades] [VAR item]]]
   [DEFINE quantity [GET [VAR counts] [VAR item]]]
   [DEFINE benefit [MATH [VAR quantity] ^ [VAR price]]]
-  [DEFINE cps [MATH [VAR cps] + [FLOOR [MATH [FLOAT [VAR benefit]] / 60]]]]
+  [DEFINE cps [MATH [VAR cps] + [VAR benefit]]]
   [DEFINE i [MATH [VAR i] + 1]]
 ]
 
@@ -107,26 +110,36 @@
   [DEFINE made [MATH [VAR cps] * [MATH [VAR currtime] - [VAR lastsaved]]]]
   [DEFINE money [MATH [VAR money] + [VAR made]]]
   [DB SET [CONCAT "money_" [USERID]] [STRING [VAR money]]]
+ELSE
+  [DB SET [CONCAT "lastsaved_" [USERID]] [STRING [TIME]]]
 ]
 
 # Print output
-[PRINT "==Cookie Clicker==\n```"]
+[PRINT "==Cookie Clicker==```"]
 [PRINT [CONCAT "**Money**: " [STRING [VAR money]]]]
 [PRINT [CONCAT "**CPS**: " [STRING [VAR cps]]]]
 
 # Print inv
-[DEFINE keys [KEYS [VAR upgrades]]]
 [DEFINE i 0]
-[WHILE [COMPARE [VAR i] < [LENGTH [VAR keys]]]
-  [DEFINE item [INDEX [VAR keys] [VAR i]]]
-  [DEFINE price [GET [VAR upgrades] [VAR item]]]
-  [DEFINE count [GET [VAR counts] [VAR item]]]
-  [DEFINE [VAR price] [MATH [VAR price] ^ [MATH [VAR count]] + 1]]
+[WHILE [COMPARE [VAR i] < [LENGTH [VAR names]]]
+  [DEFINE item [INDEX [VAR names] [VAR i]]]
+  [DEFINE price [GET [VAR upgrades] [VAR item]]] # Price value
+  [DEFINE count 0]
+  [IF [EXISTS [VAR counts] [VAR item]]
+    [DEFINE count [GET [VAR counts] [VAR item]]]
+  ]
+  [DEFINE price [MATH [VAR price] ^ [MATH [VAR count] + 1]]] # Raise to power of upgrades
+  [DEFINE price [MATH [VAR price] * 60]] # Multiply by 60
   [DEFINE canbuy "🚫"]
-  [IF [COMPARE [VAR money] > [VAR price]]
+  [IF [COMPARE [VAR money] > [FLOAT [VAR price]]]
     [DEFINE canbuy "✅"]
   ]
-  [PRINT [CONCAT [VAR canbuy] "**" [VAR item] "** - " [FORMATINT [VAR price]] " (" [STRING [VAR count]] ")"]]
+  [PRINT [CONCAT [VAR canbuy] " **" [VAR item] "** - " [FORMATINT [VAR price]] " (" [STRING [VAR count]] ")"]]
 
   [DEFINE i [MATH [VAR i] + 1]]
 ]
+
+[PRINT "```==Cookie Clicker=="]
+
+# TODO: Buying (no input method yet)
+# - When implementing buying, make sure to check if it exists and if you have the money

@@ -16,6 +16,8 @@ type Bot struct {
 	modals map[string]func(discordgo.ModalSubmitInteractionData, *Ctx)
 	btns   map[string]func(discordgo.MessageComponentInteractionData, *Ctx)
 	appID  string
+
+	debug bool
 }
 
 func NewBot(path string, token string, appID string, guild string) (*Bot, error) {

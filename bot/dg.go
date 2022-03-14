@@ -172,11 +172,17 @@ func (c *Ctx) Modal(m *discordgo.InteractionResponseData, handler func(discordgo
 }
 
 func (b *Bot) initDG(token string, appID string, guild string) error {
+	b.debug = guild != ""
 	dg, err := discordgo.New("Bot " + strings.TrimSpace(token))
 	if err != nil {
 		return err
 	}
 	b.dg = dg
+	if b.debug {
+		for i, cmd := range commands {
+			commands[i].Name = "test" + cmd.Name
+		}
+	}
 	_, err = b.dg.ApplicationCommandBulkOverwrite(appID, guild, commands)
 	if err != nil {
 		return err
@@ -196,6 +202,9 @@ func (b *Bot) InteractionHandler(s *discordgo.Session, i *discordgo.InteractionC
 	switch i.Type {
 	case discordgo.InteractionApplicationCommand:
 		d := i.ApplicationCommandData()
+		if b.debug {
+			d.Name = strings.TrimPrefix(d.Name, "test")
+		}
 		h, ok := handlers[d.Name]
 		if ok {
 			h(ctx, d, b)

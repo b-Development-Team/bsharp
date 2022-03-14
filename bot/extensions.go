@@ -115,6 +115,6 @@ func getExtensions(c *extensionCtx) []*interpreter.Extension {
 		}, []types.Type{}, types.STRING),
 		interpreter.NewExtension("TIME", func(pars []interface{}) (interface{}, error) {
 			return int(time.Now().Unix()), nil
-		}, []types.Type{}, types.STRING),
+		}, []types.Type{}, types.INT),
 	}
 }

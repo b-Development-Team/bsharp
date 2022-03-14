@@ -119,18 +119,23 @@ func (i *Interpreter) evalGet(pos *tokens.Pos, n *ir.GetNode) (*Value, error) {
 		return nil, err
 	}
 	var out interface{}
+	var exists bool
 	switch k.Type.BasicType() {
 	case types.INT:
-		out = m.Value.(map[int]interface{})[k.Value.(int)]
+		out, exists = m.Value.(map[int]interface{})[k.Value.(int)]
 
 	case types.FLOAT:
-		out = m.Value.(map[float64]interface{})[k.Value.(float64)]
+		out, exists = m.Value.(map[float64]interface{})[k.Value.(float64)]
 
 	case types.STRING:
-		out = m.Value.(map[string]interface{})[k.Value.(string)]
+		out, exists = m.Value.(map[string]interface{})[k.Value.(string)]
 
 	default:
 		return nil, pos.Error("cannot get map with key type %s", k.Type.String())
+	}
+
+	if !exists {
+		return nil, pos.Error("key not in map: %v", k.Value)
 	}
 
 	return NewValue(n.Type(), out), nil
