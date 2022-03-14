@@ -78,7 +78,7 @@ func (b *Bot) CreateCodeCmd(ctx *Ctx) {
 						Style:       discordgo.TextInputParagraph,
 						Placeholder: `[PRINT "Hello, World!"]`,
 						Required:    true,
-						MaxLength:   10240,
+						MaxLength:   4000,
 						MinLength:   1,
 					},
 				},
