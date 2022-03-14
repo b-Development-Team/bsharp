@@ -223,7 +223,7 @@ var (
 				b.RunTagCmd(data.Options[0].StringValue(), ctx)
 
 			case "file":
-				id := data.Options[1].Value.(string)
+				id := data.Options[0].Value.(string)
 				att := dat.Resolved.Attachments[id]
 				b.RunFileCmd(att.URL, ctx)
 			}
