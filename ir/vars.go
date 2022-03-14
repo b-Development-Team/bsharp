@@ -68,7 +68,7 @@ func init() {
 				id = b.Scope.AddVariable(name, args[1].Type(), pos)
 			} else {
 				v := b.Scope.Variable(id)
-				if v.Type != args[1].Type() {
+				if !v.Type.Equal(args[1].Type()) {
 					// Check if in current scope, if so redefine
 					_, exists = b.Scope.CurrScopeGetVar(name)
 					if !exists {
