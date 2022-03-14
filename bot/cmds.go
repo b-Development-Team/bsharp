@@ -34,6 +34,19 @@ var (
 						},
 					}, // Code is entered through a modal
 				},
+				{
+					Name:        "file",
+					Type:        discordgo.ApplicationCommandOptionSubCommand,
+					Description: "Run the source code of a B# program, uploaded as a file!",
+					Options: []*discordgo.ApplicationCommandOption{
+						{
+							Type:        discordgo.ApplicationCommandOptionAttachment,
+							Name:        "file",
+							Description: "The file to run.",
+							Required:    true,
+						},
+					}, // Code is entered through a modal
+				},
 			},
 		},
 		{
@@ -208,6 +221,11 @@ var (
 
 			case "tag":
 				b.RunTagCmd(data.Options[0].StringValue(), ctx)
+
+			case "file":
+				id := data.Options[1].Value.(string)
+				att := dat.Resolved.Attachments[id]
+				b.RunFileCmd(att.URL, ctx)
 			}
 		},
 		"create": func(ctx *Ctx, dat discordgo.ApplicationCommandInteractionData, b *Bot) {

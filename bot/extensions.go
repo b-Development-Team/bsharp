@@ -3,6 +3,7 @@ package bot
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/Nv7-Github/bsharp/backends/interpreter"
 	"github.com/Nv7-Github/bsharp/bot/db"
@@ -39,6 +40,11 @@ var exts = []*ir.Extension{
 		Name:    "USERID",
 		Params:  []types.Type{},
 		RetType: types.STRING,
+	},
+	{
+		Name:    "TIME",
+		Params:  []types.Type{},
+		RetType: types.INT,
 	},
 }
 
@@ -106,6 +112,9 @@ func getExtensions(c *extensionCtx) []*interpreter.Extension {
 		}, []types.Type{types.IDENT, types.STRING, types.VARIADIC}, types.STRING),
 		interpreter.NewExtension("USERID", func(pars []interface{}) (interface{}, error) {
 			return c.Author, nil
+		}, []types.Type{}, types.STRING),
+		interpreter.NewExtension("TIME", func(pars []interface{}) (interface{}, error) {
+			return int(time.Now().Unix()), nil
 		}, []types.Type{}, types.STRING),
 	}
 }

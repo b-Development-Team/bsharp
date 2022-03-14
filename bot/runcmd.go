@@ -1,6 +1,8 @@
 package bot
 
 import (
+	"io"
+	"net/http"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
@@ -18,7 +20,7 @@ func (b *Bot) RunCodeCmd(ctx *Ctx) {
 						Style:       discordgo.TextInputParagraph,
 						Placeholder: `[PRINT "Hello, World!"]`,
 						Required:    true,
-						MaxLength:   1536,
+						MaxLength:   10240,
 						MinLength:   1,
 					},
 				},
@@ -70,5 +72,31 @@ func (b *Bot) RunTagCmd(id string, ctx *Ctx) {
 	prog.Uses++
 	prog.LastUsed = startTime
 	err = dat.SaveProgram(prog)
+	ctx.Error(err)
+}
+
+func (b *Bot) RunFileCmd(url string, ctx *Ctx) {
+	ctx.Followup()
+
+	resp, err := http.Get(url)
+	if ctx.Error(err) {
+		return
+	}
+	defer resp.Body.Close()
+	dat, err := io.ReadAll(resp.Body)
+	if ctx.Error(err) {
+		return
+	}
+	if len(dat) > 1048576 {
+		ctx.ErrorMessage("The maximum program size is **1MB**!")
+		return
+	}
+
+	d, err := b.Get(ctx.Guild())
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	err = b.RunCode("main.bsp", string(dat), ctx, NewExtensionCtx("_run", d, ctx))
 	ctx.Error(err)
 }

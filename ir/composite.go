@@ -133,6 +133,16 @@ func (e *ExistsNode) Code(cnf CodeConfig) string {
 	return fmt.Sprintf("[EXISTS %s %s]", e.Map.Code(cnf), e.Key.Code(cnf))
 }
 
+type KeysNode struct {
+	Map Node
+	typ types.Type
+}
+
+func (k *KeysNode) Type() types.Type { return k.typ }
+func (k *KeysNode) Code(cnf CodeConfig) string {
+	return fmt.Sprintf("[KEYS %s]", k.Map.Code(cnf))
+}
+
 func init() {
 	nodeBuilders["ARRAY"] = nodeBuilder{
 		ArgTypes: []types.Type{types.ANY, types.VARIADIC},
@@ -267,6 +277,16 @@ func init() {
 			return &ExistsNode{
 				Map: args[0],
 				Key: args[1],
+			}, nil
+		},
+	}
+
+	nodeBuilders["KEYS"] = nodeBuilder{
+		ArgTypes: []types.Type{types.MAP},
+		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
+			return &KeysNode{
+				Map: args[0],
+				typ: types.NewArrayType(args[0].Type().(*types.MapType).KeyType),
 			}, nil
 		},
 	}
