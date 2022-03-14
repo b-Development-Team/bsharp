@@ -122,6 +122,17 @@ func NewGetNode(m, k Node) *GetNode {
 	}
 }
 
+type ExistsNode struct {
+	Map Node
+	Key Node
+}
+
+func (g *ExistsNode) Type() types.Type { return types.BOOL }
+
+func (e *ExistsNode) Code(cnf CodeConfig) string {
+	return fmt.Sprintf("[EXISTS %s %s]", e.Map.Code(cnf), e.Key.Code(cnf))
+}
+
 func init() {
 	nodeBuilders["ARRAY"] = nodeBuilder{
 		ArgTypes: []types.Type{types.ANY, types.VARIADIC},
@@ -240,6 +251,22 @@ func init() {
 				Map: args[0],
 				Key: args[1],
 				typ: mapTyp.ValType,
+			}, nil
+		},
+	}
+
+	nodeBuilders["EXISTS"] = nodeBuilder{
+		ArgTypes: []types.Type{types.MAP, hashable},
+		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
+			// Check types
+			mapTyp := args[0].Type().(*types.MapType)
+			if !mapTyp.KeyType.Equal(args[1].Type()) {
+				return nil, args[1].Pos().Error("expected type %s for map key, got %s", mapTyp.KeyType.String(), args[1].Type().String())
+			}
+
+			return &ExistsNode{
+				Map: args[0],
+				Key: args[1],
 			}, nil
 		},
 	}

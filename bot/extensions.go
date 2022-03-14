@@ -89,6 +89,17 @@ func getExtensions(c *extensionCtx) []*interpreter.Extension {
 					return nil, errors.New(rsp.Msg)
 				}
 				return val, nil
+
+			case "EXISTS":
+				if len(args) != 1 {
+					return nil, fmt.Errorf("db: EXISTS requires 1 argument (key)")
+				}
+
+				val := c.Dat.DataExists(c.CurrDB, args[0])
+				if val {
+					return "true", nil
+				}
+				return "false", nil
 			}
 
 			return nil, fmt.Errorf("db: unknown operation %s", op)

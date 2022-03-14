@@ -86,6 +86,9 @@ func (i *Interpreter) evalNode(node ir.Node) (*Value, error) {
 		case *ir.FnCallNode:
 			return i.evalCallNode(c)
 
+		case *ir.ExistsNode:
+			return i.evalExists(n.Pos(), c)
+
 		default:
 			return nil, n.Pos().Error("unknown call node: %T", c)
 		}

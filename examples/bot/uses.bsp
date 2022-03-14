@@ -1,0 +1,16 @@
+# DB Schema: MAP{USERID}USES (Note: Uses stored as string)
+
+[DEFINE uses 0]
+[IF [COMPARE [DB EXISTS [USERID]] == "true"] # Note: [DB EXISTS] returns "true" if true, "false" if false
+  [DEFINE uses [INT [DB GET [USERID]]]]
+]
+
+[DEFINE uses [MATH [VAR uses] + 1]]
+[DEFINE s ""]
+[IF [COMPARE [VAR uses] == 1]
+  [DEFINE s "s"]
+]
+[PRINT [CONCAT "You have used this program " [STRING [VAR uses]] " time" [VAR s] "."]]
+
+# Save
+[DB SET [USERID] [STRING [VAR uses]]]

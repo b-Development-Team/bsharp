@@ -91,3 +91,15 @@ func (d *Data) DataGet(id string, key string) (string, Resp) {
 	}
 	return val, Resp{Msg: "", Suc: true}
 }
+
+func (d *Data) DataExists(id string, key string) bool {
+	d.RLock()
+	defer d.RUnlock()
+
+	v, exists := d.data[id]
+	if !exists {
+		return false
+	}
+	_, exists = v[key]
+	return exists
+}

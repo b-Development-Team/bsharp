@@ -136,6 +136,33 @@ func (i *Interpreter) evalGet(pos *tokens.Pos, n *ir.GetNode) (*Value, error) {
 	return NewValue(n.Type(), out), nil
 }
 
+func (i *Interpreter) evalExists(pos *tokens.Pos, n *ir.ExistsNode) (*Value, error) {
+	m, err := i.evalNode(n.Map)
+	if err != nil {
+		return nil, err
+	}
+	k, err := i.evalNode(n.Key)
+	if err != nil {
+		return nil, err
+	}
+	var exists bool
+	switch k.Type.BasicType() {
+	case types.INT:
+		_, exists = m.Value.(map[int]interface{})[k.Value.(int)]
+
+	case types.FLOAT:
+		_, exists = m.Value.(map[float64]interface{})[k.Value.(float64)]
+
+	case types.STRING:
+		_, exists = m.Value.(map[string]interface{})[k.Value.(string)]
+
+	default:
+		return nil, pos.Error("cannot get map with key type %s", k.Type.String())
+	}
+
+	return NewValue(types.BOOL, exists), nil
+}
+
 func (i *Interpreter) evalArray(n *ir.ArrayNode) (*Value, error) {
 	out := make([]interface{}, len(n.Values))
 	for ind, v := range n.Values {
