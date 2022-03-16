@@ -18,6 +18,9 @@
   - [String Manipulation](#string-maniplation)
 - [Functions](#functions)
 - [Imports](#imports)
+- [Standard Library](#standard-library)
+  - [Math](#math)
+- [Other Functions](#other-functions)
 
 ## Introduction
 There are 3 major B.x languages:
@@ -292,13 +295,37 @@ Above is an example of a function that takes and returns values. However, functi
 ## Imports
 Use the `IMPORT` function to import other B# files. This adds all functions in that file to the global scope and will run the code in that file. It will also add all global variables in that file to the current scope.
 
-The files that are available to import are implementation-specific.
+The files that are available to import are implementation-specific, except for the standard library files.
+
+## Standard Library
+### Math
+Import with
+```scala
+[IMPORT "math.bsp"]
+```
+Functions:
+| Usage | Description |
+| - | - |
+| `[FLOOR val]` | Returns the floor of a float as an integer |
+| `[CEIL val]` | Returns the ceil of a float as an integer |
+| `[ROUND val]` | Rounds a float to an integer |
+| `[RANDINT lower upper]` | Generates a pseudorandom number between two integers |
+| `[RANDOM lower upper]` | Generates a pseuodorandom number between two floats |
+
+### Strings
+Import with
+```scala
+[IMPORT "strings.bsp"]
+```
+Functions:
+| Usage | Description |
+| - | - |
+| `[JOIN vals joiner]` | Joins vals (an array of strings) with the joiner in between |
+| `[SPLIT str substr]` | Splits the string into an array of strings using the substr as a seperator |
+
+:warning: **WARNING**: Currently, only single char strings are allowed in the `substr` parameter of `SPLIT`
 
 ## Other Functions
 | Name | Description |
 | - | - |
-| `[RANDINT lower upper]` | Gets a random integer in between `lower` and `upper` |
-| `[RANDOM lower upper]` | Gets a random float in between `lower` and `upper` |
-| `[FLOOR val]` | Gets the floor of a float, returning an integer |
-| `[CEIL val]` | Gets the ceil of a float, returning an integer |
-| `[ROUND val]` | Rounds a float, returning an integer |
+| `[TIME]` | Returns the current unix timestamp |

@@ -11,12 +11,10 @@ type Interpreter struct {
 	ir *ir.IR
 
 	stdout     io.Writer
-	varStack   [][]*Value
-	Variables  []*Value
+	stack      *stack
 	extensions map[string]*Extension
 
 	retVal *Value
-	scope  *Scope
 }
 
 type Value struct {
@@ -35,10 +33,10 @@ func NewInterpreter(ir *ir.IR, stdout io.Writer) *Interpreter {
 	return &Interpreter{
 		ir:         ir,
 		stdout:     stdout,
-		Variables:  make([]*Value, len(ir.Variables)),
-		scope:      NewScope(),
 		extensions: make(map[string]*Extension),
-		varStack:   make([][]*Value, 0),
+		stack: &stack{
+			vals: make([]scope, 0),
+		},
 	}
 }
 
@@ -51,19 +49,12 @@ func (i *Interpreter) SetStdout(stdout io.Writer) {
 }
 
 func (i *Interpreter) Run() error {
-	i.scope.Push()
+	i.stack.Push()
 	for _, node := range i.ir.Body {
 		if _, err := i.evalNode(node); err != nil {
 			return err
 		}
 	}
-	i.pop()
+	i.stack.Pop()
 	return nil
-}
-
-func (i *Interpreter) pop() {
-	vals := i.scope.Pop()
-	for _, v := range vals {
-		i.Variables[v] = nil
-	}
 }

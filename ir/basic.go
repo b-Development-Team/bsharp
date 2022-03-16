@@ -53,6 +53,11 @@ func (r *RandomNode) Code(cnf CodeConfig) string {
 	return fmt.Sprintf("[RANDOM %s %s]", r.Lower.Code(cnf), r.Upper.Code(cnf))
 }
 
+type TimeNode struct{}
+
+func (t *TimeNode) Code(cnf CodeConfig) string { return "[TIME]" }
+func (t *TimeNode) Type() types.Type           { return types.INT }
+
 func init() {
 	nodeBuilders["PRINT"] = nodeBuilder{
 		ArgTypes: []types.Type{types.STRING},
@@ -89,6 +94,13 @@ func init() {
 				Lower: args[0],
 				Upper: args[1],
 			}, nil
+		},
+	}
+
+	nodeBuilders["TIME"] = nodeBuilder{
+		ArgTypes: []types.Type{},
+		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
+			return &TimeNode{}, nil
 		},
 	}
 }

@@ -1,6 +1,8 @@
 package interpreter
 
 import (
+	"time"
+
 	"github.com/Nv7-Github/bsharp/ir"
 	"github.com/Nv7-Github/bsharp/types"
 )
@@ -91,6 +93,9 @@ func (i *Interpreter) evalNode(node ir.Node) (*Value, error) {
 
 		case *ir.KeysNode:
 			return i.evalKeys(n.Pos(), c)
+
+		case *ir.TimeNode:
+			return NewValue(types.INT, int(time.Now().Unix())), nil
 
 		default:
 			return nil, n.Pos().Error("unknown call node: %T", c)

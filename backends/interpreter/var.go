@@ -6,7 +6,7 @@ import (
 )
 
 func (i *Interpreter) evalVarNode(n *ir.VarNode) (*Value, error) {
-	return i.Variables[n.ID], nil
+	return i.stack.Get(n.ID), nil
 }
 
 func (i *Interpreter) evalDefineNode(n *ir.DefineNode) (*Value, error) {
@@ -14,6 +14,6 @@ func (i *Interpreter) evalDefineNode(n *ir.DefineNode) (*Value, error) {
 	if err != nil {
 		return nil, err
 	}
-	i.Variables[n.Var] = v
+	i.stack.Set(n.Var, v, n.InScope)
 	return NewValue(types.NULL, nil), nil
 }

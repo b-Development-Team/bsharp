@@ -13,10 +13,7 @@ func (i *Interpreter) evalCallNode(n *ir.FnCallNode) (*Value, error) {
 
 	fn := i.ir.Funcs[fnName.Value.(string)]
 	// Push to stack
-	newVars := make([]*Value, len(i.Variables))
-	copy(newVars, i.Variables)
-	i.varStack = append(i.varStack, i.Variables)
-	i.Variables = newVars
+	i.stack.Push()
 
 	// Build args
 	args, err := i.evalNodes(n.Args)
@@ -24,7 +21,7 @@ func (i *Interpreter) evalCallNode(n *ir.FnCallNode) (*Value, error) {
 		return nil, err
 	}
 	for ind, par := range fn.Params {
-		i.Variables[par.ID] = args[ind]
+		i.stack.Set(par.ID, args[ind], true)
 	}
 	// Run
 	for _, v := range fn.Body {
@@ -40,8 +37,7 @@ func (i *Interpreter) evalCallNode(n *ir.FnCallNode) (*Value, error) {
 	i.retVal = nil // Un-return
 
 	// Pop stack
-	i.Variables = i.varStack[len(i.varStack)-1]
-	i.varStack = i.varStack[:len(i.varStack)-1]
+	i.stack.Pop()
 	return retVal, nil
 }
 

@@ -44,6 +44,10 @@ func (s *Stream) Char() rune {
 	return s.code[s.pos]
 }
 
+func (s *Stream) Peek(off int) rune {
+	return s.code[s.pos+off]
+}
+
 func (s *Stream) Pos() *Pos {
 	return &Pos{
 		File: s.file,

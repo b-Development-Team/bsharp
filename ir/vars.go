@@ -21,8 +21,9 @@ func (v *VarNode) Code(cnf CodeConfig) string {
 
 type DefineNode struct {
 	NullCall
-	Var   int
-	Value Node
+	Var     int
+	Value   Node
+	InScope bool // Check if accessing var outside of function (helps with recursion)
 
 	name string // Variable name for use in Code()
 }
@@ -78,11 +79,13 @@ func init() {
 					}
 				}
 			}
+			_, exists = b.Scope.CurrScopeGetVar(name)
 
 			return &DefineNode{
-				Var:   id,
-				Value: args[1],
-				name:  name,
+				Var:     id,
+				Value:   args[1],
+				name:    name,
+				InScope: exists,
 			}, nil
 		},
 	}

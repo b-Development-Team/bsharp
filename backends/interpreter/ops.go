@@ -19,7 +19,7 @@ func (i *Interpreter) evalMathNode(pos *tokens.Pos, node *ir.MathNode) (*Value, 
 		return nil, err
 	}
 
-	switch left.Type.BasicType() {
+	switch node.Lhs.Type().BasicType() {
 	case types.INT:
 		v := intMathOp(left.Value.(int), right.Value.(int), node.Op)
 		if v == nil {

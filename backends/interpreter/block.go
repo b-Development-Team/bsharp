@@ -10,21 +10,21 @@ func (i *Interpreter) evalIfNode(n *ir.IfNode) error {
 		return err
 	}
 	if cond.Value.(bool) {
-		i.scope.Push()
+		i.stack.Push()
 		for _, node := range n.Body {
 			if _, err := i.evalNode(node); err != nil {
 				return err
 			}
 		}
-		i.pop()
+		i.stack.Pop()
 	} else if n.Else != nil {
-		i.scope.Push()
+		i.stack.Push()
 		for _, node := range n.Else {
 			if _, err := i.evalNode(node); err != nil {
 				return err
 			}
 		}
-		i.pop()
+		i.stack.Pop()
 	}
 	return nil
 }
@@ -42,13 +42,13 @@ func (i *Interpreter) evalWhileNode(n *ir.WhileNode) error {
 			break
 		}
 
-		i.scope.Push()
+		i.stack.Push()
 		for _, node := range n.Body {
 			if _, err := i.evalNode(node); err != nil {
 				return err
 			}
 		}
-		i.pop()
+		i.stack.Pop()
 	}
 	return nil
 }
@@ -62,26 +62,26 @@ func (i *Interpreter) evalSwitchNode(n *ir.SwitchNode) error {
 	// Check cases (O(n), not O(1) like expected from switch)
 	for _, cs := range n.Cases {
 		if cs.Value.Value == v.Value { // This works for int, float, string, all the hashable types
-			i.scope.Push()
+			i.stack.Push()
 			for _, node := range cs.Body {
 				if _, err := i.evalNode(node); err != nil {
 					return err
 				}
 			}
-			i.pop()
+			i.stack.Pop()
 			return nil
 		}
 	}
 
 	// Default case
 	if n.Default != nil {
-		i.scope.Push()
+		i.stack.Push()
 		for _, node := range n.Default {
 			if _, err := i.evalNode(node); err != nil {
 				return err
 			}
 		}
-		i.pop()
+		i.stack.Pop()
 	}
 	return nil
 }

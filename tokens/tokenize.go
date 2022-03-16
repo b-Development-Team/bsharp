@@ -6,6 +6,7 @@ import (
 
 func (t *Tokenizer) Tokenize() error {
 	for t.s.HasNext() {
+	Tokens:
 		switch t.s.Char() {
 		case '[':
 			t.addToken(Token{
@@ -49,6 +50,14 @@ func (t *Tokenizer) Tokenize() error {
 			// Just ignore
 			t.s.Eat()
 
+		case '-':
+			switch t.s.Peek(1) {
+			case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+				t.addNum()
+				break Tokens
+			}
+			fallthrough
+
 		default:
 			if !isLetter(t.s.Char()) {
 				return t.s.Pos().Error("unexpected character: %s", string(t.s.Char()))
@@ -66,7 +75,7 @@ func (t *Tokenizer) addNum() {
 	for t.s.HasNext() {
 		isNum := true
 		switch t.s.Char() {
-		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.':
+		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '-':
 		default:
 			isNum = false
 		}
