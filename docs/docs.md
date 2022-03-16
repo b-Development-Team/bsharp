@@ -7,10 +7,17 @@
   - [Strings](#strings)
   - [Arrays](#arrays)
   - [Maps](#maps)
+  - [Type Conversions](#type-conversions)
 - [Statements](#statements)
   - [If](#if)
   - [While](#while)
   - [Switch](#switch)
+- [Variables](#variables)
+- [Basics](#basics)
+  - [Math](#math)
+  - [String Manipulation](#string-maniplation)
+- [Functions](#functions)
+- [Imports](#imports)
 
 ## Introduction
 There are 3 major B.x languages:
@@ -131,6 +138,9 @@ To initialize a map use the `MAKE` function. The `[SET]` and `[GET]` functions c
 [PRINT [GET [VAR a] "Favorite Language"]]
 ```
 
+### Type Conversions
+`INT`s, `FLOAT`s, and `STRING`s can all be converted to each other using type conversions. Use the `INT` tag to convert a float or string to an integer, the `FLOAT` tag to convert the other two to a float, and the `STRING` tag to convert an integer or float to a string.
+
 ## Statements
 ### If
 If statements execute code conditionally. For example:
@@ -200,3 +210,86 @@ However, this is messy and inneficient. Instead, it could be done with a switch 
 These both achieve the same result, however the second is much easier to read and is more efficient.
 
 **NOTE:** The `DEFAULT` statement is optional.
+
+## Variables
+Variables are defined and set using the `DEFINE` tag.
+```scala
+[DEFINE a 1]
+```
+Would set `a` to 1.
+
+The value of a variable is accessed using the `VAR` tag.
+```scala
+[DEFINE hello "Hello!"]
+[PRINT [VAR hello]]
+```
+Would print the variable `hello`, after defining it to `"Hello!"`.
+
+Variables can only store values of one type. In the previous example, the variable `hello` would have a type of `STRING`. Due to this, the code below is invalid.
+```scala
+[DEFINE hello "Hello!"]
+[DEFINE hello 1]
+```
+
+Variables cannot be accessed outside the scope they are defined in. This means the code below is invalid code, since the variable `a` cannot be accessed outside of the `IF`.
+```scala
+[IF [COMPARE 1 = 1]
+  [DEFINE a "a"]
+]
+[PRINT [VAR a]]
+```
+
+Variables can be re-declared with different types if a new scope is declared. That is why the code below is valid code.
+```scala
+[DEFINE hello "Hello!"]
+[IF [COMPARE 1 = 1]
+  [DEFINE hello 1]
+  [PRINT [STRING [VAR hello]]]
+]
+[PRINT [VAR hello]]
+```
+
+## Basics
+### Math
+Use the `MATH` tag to perform math operations. 
+```scala
+[MATH 1 + 1]
+```
+Would return `2`.
+
+The supported operators are listed below.
+
+| Operator | Effect |
+| - | - |
+| `+` | Addition |
+| `-` | Subtraction |
+| `/` | Division |
+| `*` | Multiplication |
+| `^` | Exponentiation |
+| `%` | Modulo |
+
+### String Maniplation
+Use the `CONCAT` tag to concatenate strings.
+```scala
+[PRINT [CONCAT "Hello, " "World!"]]
+```
+
+## Functions
+Functions are defined with the `FUNC` tag. Provide paremeters with the `PARAM` tag, and optionally, specify a return type with the `RETURNS` tag. Return values with the `RETURN` tag.
+```scala
+[FUNC ADD [PARAM a INT] [PARAM b INT] [RETURNS INT]
+  [DEFINE result [MATH [VAR a] + [VAR b]]]
+  [RETURN [VAR result]]
+]
+```
+Above is an example of a function that takes and returns values. However, functions don't need to do this. The following is also valid.
+```scala
+[FUNC PRINTHELLO
+  [PRINT "Hello"]
+]
+```
+
+## Imports
+Use the `IMPORT` function to import other B# files. This adds all functions in that file to the global scope and will run the code in that file. It will also add all global variables in that file to the current scope.
+
+The files that are available to import are implementation-specific.
