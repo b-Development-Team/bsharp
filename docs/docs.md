@@ -293,3 +293,12 @@ Above is an example of a function that takes and returns values. However, functi
 Use the `IMPORT` function to import other B# files. This adds all functions in that file to the global scope and will run the code in that file. It will also add all global variables in that file to the current scope.
 
 The files that are available to import are implementation-specific.
+
+## Other Functions
+| Name | Description |
+| - | - |
+| `[RANDINT lower upper]` | Gets a random integer in between `lower` and `upper` |
+| `[RANDOM lower upper]` | Gets a random float in between `lower` and `upper` |
+| `[FLOOR val]` | Gets the floor of a float, returning an integer |
+| `[CEIL val]` | Gets the ceil of a float, returning an integer |
+| `[ROUND val]` | Rounds a float, returning an integer |
