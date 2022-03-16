@@ -1,12 +1,9 @@
 package interpreter
 
 import (
-	"math"
-	"math/rand"
 	"strconv"
 
 	"github.com/Nv7-Github/bsharp/ir"
-	"github.com/Nv7-Github/bsharp/tokens"
 	"github.com/Nv7-Github/bsharp/types"
 )
 
@@ -72,53 +69,5 @@ func (i *Interpreter) evalCast(c *ir.CastNode) (*Value, error) {
 
 	default:
 		return nil, c.Pos().Error("cannot cast type \"%s\" to \"%s\"", v.Type.BasicType(), c.Type().BasicType())
-	}
-}
-
-func (i *Interpreter) evalRandint(n *ir.RandintNode) (*Value, error) {
-	lower, err := i.evalNode(n.Lower)
-	if err != nil {
-		return nil, err
-	}
-	upper, err := i.evalNode(n.Upper)
-	if err != nil {
-		return nil, err
-	}
-	min := lower.Value.(int)
-	max := upper.Value.(int)
-	return NewValue(types.INT, rand.Intn(max-min+1)+min), nil
-}
-
-func (i *Interpreter) evalRandom(n *ir.RandomNode) (*Value, error) {
-	lower, err := i.evalNode(n.Lower)
-	if err != nil {
-		return nil, err
-	}
-	upper, err := i.evalNode(n.Upper)
-	if err != nil {
-		return nil, err
-	}
-	min := lower.Value.(float64)
-	max := upper.Value.(float64)
-	return NewValue(types.FLOAT, min+rand.Float64()*(max-min)), nil
-}
-
-func (i *Interpreter) evalMathFn(pos *tokens.Pos, n *ir.MathFunctionNode) (*Value, error) {
-	arg, err := i.evalNode(n.Arg)
-	if err != nil {
-		return nil, err
-	}
-	switch n.Func {
-	case ir.MathFunctionCeil:
-		return NewValue(types.INT, int(math.Ceil(arg.Value.(float64)))), nil
-
-	case ir.MathFunctionFloor:
-		return NewValue(types.INT, int(math.Floor(arg.Value.(float64)))), nil
-
-	case ir.MathFunctionRound:
-		return NewValue(types.INT, int(math.Round(arg.Value.(float64)))), nil
-
-	default:
-		return nil, pos.Error("unknown math function \"%s\"", n.Func)
 	}
 }

@@ -116,39 +116,6 @@ func (c *CompareNode) Code(cnf CodeConfig) string {
 	return fmt.Sprintf("[COMPARE %s %s %s]", c.Lhs.Code(cnf), compareOpsNames[c.Op], c.Rhs.Code(cnf))
 }
 
-type MathFunction int
-
-const (
-	MathFunctionCeil MathFunction = iota
-	MathFunctionFloor
-	MathFunctionRound
-)
-
-var mathFunctionNames = map[MathFunction]string{
-	MathFunctionCeil:  "CEIL",
-	MathFunctionFloor: "FLOOR",
-	MathFunctionRound: "ROUND",
-}
-
-type MathFunctionNode struct {
-	Func MathFunction
-	Arg  Node
-	typ  types.Type
-}
-
-func (m *MathFunctionNode) Type() types.Type { return m.typ }
-func (m *MathFunctionNode) Code(cnf CodeConfig) string {
-	return fmt.Sprintf("[%s %s]", mathFunctionNames[m.Func], m.Arg.Code(cnf))
-}
-
-func NewMathFunctionNode(fn MathFunction, arg Node, typ types.Type) *MathFunctionNode {
-	return &MathFunctionNode{
-		Func: fn,
-		Arg:  arg,
-		typ:  typ,
-	}
-}
-
 type LogicalOp int
 
 const (
@@ -259,39 +226,6 @@ func init() {
 		ArgTypes: []types.Type{types.NewMulType(types.FLOAT, types.STRING)},
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
 			return NewCastNode(args[0], types.INT), nil
-		},
-	}
-
-	nodeBuilders["FLOOR"] = nodeBuilder{
-		ArgTypes: []types.Type{types.FLOAT},
-		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
-			return &MathFunctionNode{
-				Func: MathFunctionFloor,
-				Arg:  args[0],
-				typ:  types.INT,
-			}, nil
-		},
-	}
-
-	nodeBuilders["CEIL"] = nodeBuilder{
-		ArgTypes: []types.Type{types.FLOAT},
-		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
-			return &MathFunctionNode{
-				Func: MathFunctionCeil,
-				Arg:  args[0],
-				typ:  types.INT,
-			}, nil
-		},
-	}
-
-	nodeBuilders["ROUND"] = nodeBuilder{
-		ArgTypes: []types.Type{types.FLOAT},
-		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
-			return &MathFunctionNode{
-				Func: MathFunctionRound,
-				Arg:  args[0],
-				typ:  types.INT,
-			}, nil
 		},
 	}
 

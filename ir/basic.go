@@ -31,28 +31,6 @@ func (c *ConcatNode) Code(cnf CodeConfig) string {
 	return fmt.Sprintf("[CONCAT %s]", args.String())
 }
 
-type RandintNode struct {
-	Lower Node
-	Upper Node
-}
-
-func (r *RandintNode) Type() types.Type { return types.INT }
-
-func (r *RandintNode) Code(cnf CodeConfig) string {
-	return fmt.Sprintf("[RANDINT %s %s]", r.Lower.Code(cnf), r.Upper.Code(cnf))
-}
-
-type RandomNode struct {
-	Lower Node
-	Upper Node
-}
-
-func (r *RandomNode) Type() types.Type { return types.FLOAT }
-
-func (r *RandomNode) Code(cnf CodeConfig) string {
-	return fmt.Sprintf("[RANDOM %s %s]", r.Lower.Code(cnf), r.Upper.Code(cnf))
-}
-
 type TimeNode struct{}
 
 func (t *TimeNode) Code(cnf CodeConfig) string { return "[TIME]" }
@@ -73,26 +51,6 @@ func init() {
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
 			return &ConcatNode{
 				Values: args,
-			}, nil
-		},
-	}
-
-	nodeBuilders["RANDINT"] = nodeBuilder{
-		ArgTypes: []types.Type{types.INT, types.INT},
-		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
-			return &RandintNode{
-				Lower: args[0],
-				Upper: args[1],
-			}, nil
-		},
-	}
-
-	nodeBuilders["RANDOM"] = nodeBuilder{
-		ArgTypes: []types.Type{types.FLOAT, types.FLOAT},
-		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
-			return &RandomNode{
-				Lower: args[0],
-				Upper: args[1],
 			}, nil
 		},
 	}
