@@ -118,6 +118,9 @@ func getExtensions(c *extensionCtx) []*interpreter.Extension {
 		interpreter.NewExtension("INPUT", func(pars []interface{}) (interface{}, error) {
 			out := make(chan string)
 			prompt := pars[0].(string)
+			if len(prompt) > 45 {
+				return nil, errors.New("input: prompt must be 45 or fewer characters")
+			}
 			c.Stdout.Embed(&discordgo.MessageEmbed{
 				Title:       prompt,
 				Description: "Press the button below to respond.",
