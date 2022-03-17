@@ -47,10 +47,40 @@ type ctxWriter struct {
 	lastSent time.Time
 	data     *strings.Builder
 	prog     *interpreter.Interpreter
+	cmp      discordgo.ActionsRow
 }
 
 func newCtxWriter(ctx *Ctx) *ctxWriter {
 	return &ctxWriter{Ctx: ctx}
+}
+
+var runCmp = discordgo.ActionsRow{
+	Components: []discordgo.MessageComponent{
+		discordgo.Button{
+			Label:    "Stop",
+			Style:    discordgo.DangerButton,
+			CustomID: "stop",
+		},
+	},
+}
+
+var runCmpEnd = discordgo.ActionsRow{
+	Components: []discordgo.MessageComponent{
+		discordgo.Button{
+			Label:    "Stop",
+			Style:    discordgo.DangerButton,
+			CustomID: "stop",
+			Disabled: true,
+		},
+	},
+}
+
+func (c *ctxWriter) AddBtnHandler() {
+	c.BtnHandler(func(data discordgo.MessageComponentInteractionData, ctx *Ctx) {
+		c.prog.Stop("program stopped by user")
+		c.i = ctx.i
+		c.isButton = true
+	})
 }
 
 func (c *ctxWriter) Setup() {
@@ -60,20 +90,8 @@ func (c *ctxWriter) Setup() {
 		Title:       "Program Output",
 		Color:       3447003, // Blue
 		Description: "Running...",
-	}, discordgo.ActionsRow{
-		Components: []discordgo.MessageComponent{
-			discordgo.Button{
-				Label:    "Stop",
-				Style:    discordgo.DangerButton,
-				CustomID: "stop",
-			},
-		},
-	})
-	c.BtnHandler(func(data discordgo.MessageComponentInteractionData, ctx *Ctx) {
-		c.prog.Stop("program stopped by user")
-		c.i = ctx.i
-		c.isButton = true
-	})
+	}, c.cmp)
+	c.AddBtnHandler()
 	c.lastSent = time.Now()
 }
 
@@ -84,13 +102,13 @@ func (c *ctxWriter) Flush() error {
 			Title:       "Program Successful",
 			Color:       5763719, // Green
 			Description: "⚠️ **WARNING**: No program output!",
-		})
+		}, c.cmp)
 	} else {
 		err = c.Embed(&discordgo.MessageEmbed{
 			Title:       "Program Output",
 			Color:       5763719, // Green
 			Description: "```" + c.data.String() + "```",
-		})
+		}, c.cmp)
 	}
 	c.lastSent = time.Now()
 	return err
@@ -115,7 +133,7 @@ func (c *ctxWriter) Error(err error) error {
 					Value: "```" + err.Error() + "```",
 				},
 			},
-		})
+		}, c.cmp)
 	}
 	return c.Embed(&discordgo.MessageEmbed{
 		Title: "Runtime Error",
@@ -130,7 +148,7 @@ func (c *ctxWriter) Error(err error) error {
 				Value: "```" + err.Error() + "```",
 			},
 		},
-	})
+	}, c.cmp)
 }
 
 func (b *Bot) BuildCode(filename string, src string, ctx *Ctx) (*ir.IR, error) {
@@ -164,7 +182,9 @@ func (b *Bot) RunCode(filename string, src string, ctx *Ctx, extensionCtx *exten
 		return err
 	}
 	stdout := newCtxWriter(ctx)
+	stdout.cmp = runCmp
 	stdout.Setup()
+	extensionCtx.Stdout = stdout
 	interp := interpreter.NewInterpreter(ir, stdout)
 	stdout.prog = interp
 
@@ -183,6 +203,7 @@ func (b *Bot) RunCode(filename string, src string, ctx *Ctx, extensionCtx *exten
 	}()
 
 	err = interp.Run()
+	stdout.cmp = runCmpEnd
 	done = true
 	flusherr := stdout.Flush()
 	if err != nil {

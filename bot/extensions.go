@@ -3,17 +3,20 @@ package bot
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/Nv7-Github/bsharp/backends/interpreter"
 	"github.com/Nv7-Github/bsharp/bot/db"
 	"github.com/Nv7-Github/bsharp/ir"
 	"github.com/Nv7-Github/bsharp/types"
+	"github.com/bwmarrin/discordgo"
 )
 
 type extensionCtx struct {
 	Dat    *db.Data
 	Tag    string
 	CurrDB string
+	Stdout *ctxWriter
 
 	// Info
 	Author string
@@ -38,6 +41,11 @@ var exts = []*ir.Extension{
 	{
 		Name:    "USERID",
 		Params:  []types.Type{},
+		RetType: types.STRING,
+	},
+	{
+		Name:    "INPUT",
+		Params:  []types.Type{types.STRING},
 		RetType: types.STRING,
 	},
 }
@@ -107,5 +115,56 @@ func getExtensions(c *extensionCtx) []*interpreter.Extension {
 		interpreter.NewExtension("USERID", func(pars []interface{}) (interface{}, error) {
 			return c.Author, nil
 		}, []types.Type{}, types.STRING),
+		interpreter.NewExtension("INPUT", func(pars []interface{}) (interface{}, error) {
+			out := make(chan string)
+			prompt := pars[0].(string)
+			c.Stdout.Embed(&discordgo.MessageEmbed{
+				Title:       prompt,
+				Description: "Press the button below to respond.",
+				Color:       16776960, // Yellow
+			}, discordgo.ActionsRow{
+				Components: []discordgo.MessageComponent{
+					discordgo.Button{
+						Label:    "Respond",
+						Style:    discordgo.SuccessButton,
+						CustomID: "rsp",
+					},
+				},
+			})
+			c.Stdout.BtnHandler(func(data discordgo.MessageComponentInteractionData, ctx *Ctx) {
+				ctx.Modal(&discordgo.InteractionResponseData{
+					Title: "Respond",
+					Components: []discordgo.MessageComponent{
+						discordgo.ActionsRow{
+							Components: []discordgo.MessageComponent{
+								discordgo.TextInput{
+									CustomID:    "rsp",
+									Label:       prompt,
+									Style:       discordgo.TextInputParagraph,
+									Placeholder: `Your response...`,
+									Required:    true,
+									MaxLength:   4000,
+									MinLength:   1,
+								},
+							},
+						},
+					},
+				}, func(dat discordgo.ModalSubmitInteractionData, ctx *Ctx) {
+					v := dat.Components[0].(*discordgo.ActionsRow).Components[0].(*discordgo.TextInput).Value
+					c.Stdout.i = ctx.i
+					c.Stdout.isButton = true
+					c.Stdout.AddBtnHandler()
+					out <- v
+				})
+			})
+
+			select {
+			case rsp := <-out:
+				return rsp, nil
+
+			case <-time.After(time.Second * 30):
+				return "", errors.New("user took more than 30 seconds to respond")
+			}
+		}, []types.Type{types.STRING}, types.STRING),
 	}
 }
