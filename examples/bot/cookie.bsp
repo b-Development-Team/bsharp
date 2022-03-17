@@ -1,35 +1,4 @@
-# String manipulation code
-[FUNC JOIN [PARAM vals STRING{}] [PARAM joiner STRING] [RETURNS STRING]
-  [DEFINE out ""]
-  [DEFINE i 0]
-  [WHILE [COMPARE [VAR i] < [LENGTH [VAR vals]]]
-    [DEFINE out [CONCAT [VAR out] [INDEX [VAR vals] [VAR i]]]]
-    [IF [COMPARE [VAR i] != [MATH [LENGTH [VAR vals]] - 1]]
-      [DEFINE out [CONCAT [VAR out] [VAR joiner]]]
-    ]
-    [DEFINE i [MATH [VAR i] + 1]]
-  ]
-  [RETURN [VAR out]]
-]
-
-[FUNC SPLIT [PARAM val STRING] [PARAM joiner STRING] [RETURNS STRING{}]
-  [DEFINE out [MAKE STRING{}]]
-  [DEFINE i 0]
-  [DEFINE curr ""]
-  [WHILE [COMPARE [VAR i] < [LENGTH [VAR val]]]
-    [IF [COMPARE [INDEX [VAR val] [VAR i]] == [VAR joiner]]
-      [APPEND [VAR out] [VAR curr]]
-      [DEFINE curr ""]
-    ELSE
-      [DEFINE curr [CONCAT [VAR curr] [INDEX [VAR val] [VAR i]]]]
-    ]
-    [DEFINE i [MATH [VAR i] + 1]]
-  ]
-  [IF [COMPARE [VAR curr] != ""]
-    [APPEND [VAR out] [VAR curr]]
-  ]
-  [RETURN [VAR out]]
-]
+[IMPORT "strings.bsp"]
 
 [FUNC FORMATINT [PARAM a INT] [RETURNS STRING]
   [IF [COMPARE [VAR a] < 1000]
@@ -112,6 +81,42 @@
   [DB SET [CONCAT "money_" [USERID]] [STRING [VAR money]]]
 ELSE
   [DB SET [CONCAT "lastsaved_" [USERID]] [STRING [TIME]]]
+]
+
+# Check if anything wants to be bought
+[DEFINE tobuy [INPUT "Please enter an upgrade to buy (submit nothing to buy nothing)"]]
+[FUNC BUY
+  # Get price
+  [IF [NOT [EXISTS [VAR upgrades] [VAR tobuy]]]
+    [PRINT "ERROR: That upgrade does't exist!\n"]
+    [RETURN]
+  ]
+  [DEFINE price [GET [VAR upgrades] [VAR tobuy]]] # Price value
+  [DEFINE count 0]
+  [IF [EXISTS [VAR counts] [VAR tobuy]]
+    [DEFINE count [GET [VAR counts] [VAR tobuy]]]
+  ]
+  [DEFINE price [MATH [VAR price] ^ [MATH [VAR count] + 1]]] # Raise to power of upgrades
+  [DEFINE price [MATH [VAR price] * 60]] # Multiply by 60
+  [IF [COMPARE [VAR money] > [FLOAT [VAR price]]]
+    # Subtract from money
+    [DEFINE money [MATH [VAR money] - [FLOAT [VAR price]]]]
+    [DB SET [CONCAT "money_" [USERID]] [STRING [VAR money]]]
+
+    # Add to inventory
+    [APPEND [VAR inv] [VAR tobuy]]
+    [DB SET [USERID] [JOIN [VAR inv] "|"]]
+
+    # Increment count
+    [DEFINE count [MATH [VAR count] + 1]]
+    [SET [VAR counts] [VAR tobuy] [VAR count]]
+  ELSE
+    [PRINT "ERROR: You don't have enough money to buy that upgrade!\n"]
+    [RETURN]
+  ]
+]
+[IF [COMPARE [VAR tobuy] != ""]
+  [BUY]
 ]
 
 # Print output
