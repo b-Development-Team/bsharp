@@ -321,9 +321,7 @@ Functions:
 | Usage | Description |
 | - | - |
 | `[JOIN vals joiner]` | Joins vals (an array of strings) with the joiner in between |
-| `[SPLIT str substr]` | Splits the string into an array of strings using the substr as a seperator |
-
-:warning: **WARNING**: Currently, only single char strings are allowed in the `substr` parameter of `SPLIT`
+| `[SPLIT str sep]` | Splits the string into an array of strings using `sep` as a seperator |
 
 ## Other Functions
 | Name | Description |

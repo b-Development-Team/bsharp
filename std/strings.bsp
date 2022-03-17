@@ -11,17 +11,36 @@
   [RETURN [VAR out]]
 ]
 
-[FUNC SPLIT [PARAM val STRING] [PARAM substr STRING] [RETURNS STRING{}]
-  [DEFINE out [MAKE STRING{}]]
+[FUNC SPLIT [PARAM str STRING] [PARAM sep STRING] [RETURNS STRING{}]
   [DEFINE i 0]
   [DEFINE curr ""]
-  [WHILE [COMPARE [VAR i] < [LENGTH [VAR val]]]
-    [IF [COMPARE [INDEX [VAR val] [VAR i]] == [VAR substr]]
+  [DEFINE out [MAKE STRING{}]]
+  [WHILE [COMPARE [LENGTH [VAR sep]] <= [MATH [LENGTH [VAR str]] - [VAR i]]] # Loop until sep is not possible
+    # Check if the next characters are the seperator
+    [DEFINE j 0]
+    [DEFINE issep [COMPARE 1 == 1]]
+    [WHILE [AND [COMPARE [VAR j] < [LENGTH [VAR sep]]] [VAR issep]]
+      [IF [COMPARE [INDEX [VAR str] [MATH [VAR i] + [VAR j]]] != [INDEX [VAR sep] [VAR j]]]
+        [DEFINE issep [COMPARE 0 == 1]]
+      ]
+      [DEFINE j [MATH [VAR j] + 1]]
+    ]
+    [IF [VAR issep]
+      # It is sep, skip it and add curr to out
+      [DEFINE i [MATH [VAR i] + [LENGTH [VAR sep]]]]
       [APPEND [VAR out] [VAR curr]]
       [DEFINE curr ""]
-    ELSE
-      [DEFINE curr [CONCAT [VAR curr] [INDEX [VAR val] [VAR i]]]]
     ]
+    # Add curr char if not out of bounds
+    [IF [COMPARE [VAR i] < [LENGTH [VAR str]]]
+      [DEFINE curr [CONCAT [VAR curr] [INDEX [VAR str] [VAR i]]]]
+    ]
+    [DEFINE i [MATH [VAR i] + 1]]
+  ]
+
+  # Add remaining characters
+  [WHILE [COMPARE [VAR i] < [LENGTH [VAR str]]]
+    [DEFINE curr [CONCAT [VAR curr] [INDEX [VAR str] [VAR i]]]]
     [DEFINE i [MATH [VAR i] + 1]]
   ]
   [IF [COMPARE [VAR curr] != ""]
