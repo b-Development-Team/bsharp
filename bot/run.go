@@ -46,6 +46,7 @@ type ctxWriter struct {
 	*Ctx
 	lastSent time.Time
 	data     *strings.Builder
+	prog     *interpreter.Interpreter
 }
 
 func newCtxWriter(ctx *Ctx) *ctxWriter {
@@ -59,6 +60,19 @@ func (c *ctxWriter) Setup() {
 		Title:       "Program Output",
 		Color:       3447003, // Blue
 		Description: "Running...",
+	}, discordgo.ActionsRow{
+		Components: []discordgo.MessageComponent{
+			discordgo.Button{
+				Label:    "Stop",
+				Style:    discordgo.DangerButton,
+				CustomID: "stop",
+			},
+		},
+	})
+	c.BtnHandler(func(data discordgo.MessageComponentInteractionData, ctx *Ctx) {
+		c.prog.Stop("program stopped by user")
+		c.i = ctx.i
+		c.isButton = true
 	})
 	c.lastSent = time.Now()
 }
@@ -142,6 +156,8 @@ func (b *Bot) BuildCode(filename string, src string, ctx *Ctx) (*ir.IR, error) {
 	return bld.IR(), nil
 }
 
+const MaxTime = time.Second * 30
+
 func (b *Bot) RunCode(filename string, src string, ctx *Ctx, extensionCtx *extensionCtx) error {
 	ir, err := b.BuildCode(filename, src, ctx)
 	if err != nil {
@@ -150,6 +166,7 @@ func (b *Bot) RunCode(filename string, src string, ctx *Ctx, extensionCtx *exten
 	stdout := newCtxWriter(ctx)
 	stdout.Setup()
 	interp := interpreter.NewInterpreter(ir, stdout)
+	stdout.prog = interp
 
 	exts := getExtensions(extensionCtx)
 	for _, ext := range exts {
@@ -157,7 +174,16 @@ func (b *Bot) RunCode(filename string, src string, ctx *Ctx, extensionCtx *exten
 	}
 
 	// Run
+	var done = false
+	go func() {
+		time.Sleep(MaxTime)
+		if !done {
+			interp.Stop("program exceeded time limit of 30 seconds")
+		}
+	}()
+
 	err = interp.Run()
+	done = true
 	flusherr := stdout.Flush()
 	if err != nil {
 		err = stdout.Error(err)

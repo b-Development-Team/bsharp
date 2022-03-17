@@ -14,7 +14,8 @@ type Interpreter struct {
 	stack      *stack
 	extensions map[string]*Extension
 
-	retVal *Value
+	retVal  *Value
+	stopMsg *string
 }
 
 type Value struct {
@@ -57,4 +58,8 @@ func (i *Interpreter) Run() error {
 	}
 	i.stack.Pop()
 	return nil
+}
+
+func (i *Interpreter) Stop(msg string) {
+	i.stopMsg = &msg
 }

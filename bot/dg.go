@@ -95,6 +95,7 @@ func (c *Ctx) Embed(emb *discordgo.MessageEmbed, components ...discordgo.Message
 				Components: components,
 			},
 		})
+		c.isButton = false
 		return err
 	}
 

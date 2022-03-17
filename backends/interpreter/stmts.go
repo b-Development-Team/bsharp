@@ -8,6 +8,10 @@ import (
 )
 
 func (i *Interpreter) evalNode(node ir.Node) (*Value, error) {
+	if i.stopMsg != nil {
+		return nil, node.Pos().Error("%s", *i.stopMsg)
+	}
+
 	// If returned, ignore
 	if i.retVal != nil {
 		return nil, nil
