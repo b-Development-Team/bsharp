@@ -74,7 +74,6 @@ type LengthNode struct {
 }
 
 func (l *LengthNode) Type() types.Type { return types.INT }
-
 func (l *LengthNode) Code(cnf CodeConfig) string {
 	return fmt.Sprintf("[LENGTH %s]", l.Value.Code(cnf))
 }
@@ -84,7 +83,6 @@ type MakeNode struct {
 }
 
 func (m *MakeNode) Type() types.Type { return m.typ }
-
 func (m *MakeNode) Code(cnf CodeConfig) string {
 	return fmt.Sprintf("[MAKE %s]", m.Type().String())
 }
@@ -143,6 +141,22 @@ func (k *KeysNode) Code(cnf CodeConfig) string {
 	return fmt.Sprintf("[KEYS %s]", k.Map.Code(cnf))
 }
 
+type SliceNode struct {
+	Value Node
+	Start Node
+	End   Node
+}
+
+func (s *SliceNode) Type() types.Type {
+	if types.STRING.Equal(s.Value.Type()) {
+		return types.STRING // Strings are immutable
+	}
+	return types.NULL
+}
+func (s *SliceNode) Code(cnf CodeConfig) string {
+	return fmt.Sprintf("[SLICE %s %s %s]", s.Value.Code(cnf), s.Start.Code(cnf), s.End.Code(cnf))
+}
+
 func init() {
 	nodeBuilders["ARRAY"] = nodeBuilder{
 		ArgTypes: []types.Type{types.ANY, types.VARIADIC},
@@ -198,7 +212,7 @@ func init() {
 	}
 
 	nodeBuilders["LENGTH"] = nodeBuilder{
-		ArgTypes: []types.Type{types.NewMulType(types.STRING, types.ARRAY)},
+		ArgTypes: []types.Type{types.NewMulType(types.STRING, types.ARRAY, types.MAP)},
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
 			return &LengthNode{
 				Value: args[0],
@@ -287,6 +301,17 @@ func init() {
 			return &KeysNode{
 				Map: args[0],
 				typ: types.NewArrayType(args[0].Type().(*types.MapType).KeyType),
+			}, nil
+		},
+	}
+
+	nodeBuilders["SLICE"] = nodeBuilder{
+		ArgTypes: []types.Type{types.NewMulType(types.STRING, types.ARRAY), types.INT, types.INT},
+		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
+			return &SliceNode{
+				Value: args[0],
+				Start: args[1],
+				End:   args[2],
 			}, nil
 		},
 	}

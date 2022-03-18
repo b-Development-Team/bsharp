@@ -90,6 +90,9 @@ func (i *Interpreter) evalNode(node ir.Node) (*Value, error) {
 		case *ir.TimeNode:
 			return i.evalTime(c), nil
 
+		case *ir.SliceNode:
+			return i.evalSlice(n.Pos(), c)
+
 		default:
 			return nil, n.Pos().Error("unknown call node: %T", c)
 		}

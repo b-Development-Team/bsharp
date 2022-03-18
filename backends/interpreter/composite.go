@@ -50,9 +50,20 @@ func (i *Interpreter) evalLength(pos *tokens.Pos, n *ir.LengthNode) (*Value, err
 		a := []rune(v.Value.(string))
 		return NewValue(types.INT, len(a)), nil
 
-	default:
-		return nil, pos.Error("cannot get length of type %s", v.Type.String())
+	case types.MAP:
+		switch v.Type.(*types.MapType).KeyType {
+		case types.INT:
+			return NewValue(types.INT, len(v.Value.(map[int]interface{}))), nil
+
+		case types.FLOAT:
+			return NewValue(types.INT, len(v.Value.(map[float64]interface{}))), nil
+
+		case types.STRING:
+			return NewValue(types.INT, len(v.Value.(map[string]interface{}))), nil
+		}
 	}
+
+	return nil, pos.Error("cannot get length of type %s", v.Type.String())
 }
 
 func (i *Interpreter) evalMake(pos *tokens.Pos, n *ir.MakeNode) (*Value, error) {
@@ -232,4 +243,50 @@ func (i *Interpreter) evalAppend(n *ir.AppendNode) (*Value, error) {
 
 	*v = append(*v, val.Value)
 	return NewValue(types.NULL, nil), nil
+}
+
+func (i *Interpreter) evalSlice(pos *tokens.Pos, n *ir.SliceNode) (*Value, error) {
+	v, err := i.evalNode(n.Value)
+	if err != nil {
+		return nil, err
+	}
+	start, err := i.evalNode(n.Start)
+	if err != nil {
+		return nil, err
+	}
+	end, err := i.evalNode(n.End)
+	if err != nil {
+		return nil, err
+	}
+	if start.Value.(int) < 0 {
+		return nil, pos.Error("start index out of bounds: %d", start.Value.(int))
+	}
+	if end.Value.(int) < start.Value.(int) {
+		return nil, pos.Error("end index must be greater than start index")
+	}
+
+	switch v.Type.BasicType() {
+	case types.ARRAY:
+		a := v.Value.(*[]interface{})
+		if start.Value.(int) >= len(*a) {
+			return nil, pos.Error("start index out of bounds: %d with length %d", start.Value.(int), len(*a))
+		}
+		if end.Value.(int) > len(*a) {
+			return nil, pos.Error("end index out of bounds: %d with length %d", end.Value.(int), len(*a))
+		}
+		*a = (*a)[start.Value.(int):end.Value.(int)]
+		return NewValue(types.NULL, nil), nil
+
+	case types.STRING:
+		a := v.Value.(string)
+		if start.Value.(int) >= len(a) {
+			return nil, pos.Error("start index out of bounds: %d with length %d", start.Value.(int), len(a))
+		}
+		if end.Value.(int) > len(a) {
+			return nil, pos.Error("end index out of bounds: %d with length %d", end.Value.(int), len(a))
+		}
+		return NewValue(types.STRING, a[start.Value.(int):end.Value.(int)]), nil
+	}
+
+	return nil, pos.Error("cannot get length of type %s", v.Type.String())
 }

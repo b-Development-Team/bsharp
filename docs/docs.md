@@ -292,6 +292,25 @@ Above is an example of a function that takes and returns values. However, functi
 ]
 ```
 
+### Array and String Operatiosn
+An index of an array or character of a string can be gotten using the `INDEX` tag.
+For example
+```scala
+[INDEX [ARRAY 1 2 3] 0]
+```
+Would return `1`, the first index of `[1, 2, 3]`. This can also be used to get characters of strings.
+
+Arrays and strings can be sliced using the `SLICE` tag. 
+```scala
+[SLICE "abcde" 0 3]
+```
+Would return `abc`. Since arrays are pointers, `SLICE` doesn't return an array. Instead, use
+```scala
+[DEFINE arr [ARRAY 1 2 3 4 5]]
+[SLICE [VAR arr] 0 3]
+```
+Now, `arr` would be `[1, 2, 3]`.
+
 ## Imports
 Use the `IMPORT` function to import other B# files. This adds all functions in that file to the global scope and will run the code in that file. It will also add all global variables in that file to the current scope.
 
