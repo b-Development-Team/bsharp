@@ -87,11 +87,19 @@
     [DEFINE i [MATH [VAR i] + 1]]
   ]
 
+  # Check if won
+  [DEFINE guess [INDEX [VAR guesses] [MATH [LENGTH [VAR guesses]] - 1]]]
+  [IF [COMPARE [VAR guess] == [VAR currword]]
+    [DB SET [CONCAT [USERID] "_guesses"] ""]
+    [DB SET [CONCAT [USERID] "_curr"] ""]
+    [RETURN [PRINT "```\n```You got the word!"]]
+  ]
+
   # If done, then reset
   [IF [COMPARE [LENGTH [VAR guesses]] == 6]
     [DB SET [CONCAT [USERID] "_guesses"] ""]
     [DB SET [CONCAT [USERID] "_curr"] ""]
-    [RETURN [PRINT "```\n```Wordle completed!"]]
+    [RETURN [PRINT "```\n```Maybe you'll get it next time?"]]
   ]
 ]
 [DOGUESS]
