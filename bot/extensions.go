@@ -135,6 +135,10 @@ func getExtensions(c *extensionCtx) []*interpreter.Extension {
 				},
 			})
 			c.Stdout.BtnHandler(func(data discordgo.MessageComponentInteractionData, ctx *Ctx) {
+				if ctx.i.Member.User.ID != c.Stdout.i.Member.User.ID {
+					return
+				}
+
 				ctx.Modal(&discordgo.InteractionResponseData{
 					Title: "Respond",
 					Components: []discordgo.MessageComponent{

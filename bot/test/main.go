@@ -30,9 +30,9 @@ func main() {
 	<-stop
 
 	fmt.Println("Stopping...")
-	err = bot.DeleteCmds(guild)
+	/*err = bot.DeleteCmds(guild)
 	if err != nil {
 		panic(err)
-	}
+	}*/
 	bot.Close()
 }

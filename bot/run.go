@@ -77,6 +77,9 @@ var runCmpEnd = discordgo.ActionsRow{
 
 func (c *ctxWriter) AddBtnHandler() {
 	c.BtnHandler(func(data discordgo.MessageComponentInteractionData, ctx *Ctx) {
+		if ctx.i.Member.User.ID != c.i.Member.User.ID {
+			return
+		}
 		c.prog.Stop("program stopped by user")
 		c.i = ctx.i
 		c.isButton = true
