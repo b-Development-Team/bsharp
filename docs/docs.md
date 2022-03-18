@@ -326,4 +326,4 @@ Functions:
 ## Other Functions
 | Name | Description |
 | - | - |
-| `[TIME]` | Returns the current unix timestamp |
+| `[TIME mode]` | Returns the current unix timestamp. **NOTE**: The mode is optional. If provided, it must be `SECONDS`, `MICRO`, `MILLI`, or `NANO` |

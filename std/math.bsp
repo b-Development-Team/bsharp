@@ -13,7 +13,7 @@
   [RETURN [CEIL [MATH [VAR val] - 0.5]]]
 ]
 
-[DEFINE seed [TIME]]
+[DEFINE seed [TIME NANO]]
 
 # This uses the glibc random values, see https://en.wikipedia.org/wiki/Linear_congruential_generator
 

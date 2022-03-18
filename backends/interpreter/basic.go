@@ -2,6 +2,7 @@ package interpreter
 
 import (
 	"strings"
+	"time"
 
 	"github.com/Nv7-Github/bsharp/ir"
 	"github.com/Nv7-Github/bsharp/types"
@@ -26,4 +27,23 @@ func (i *Interpreter) evalConcat(c *ir.ConcatNode) (*Value, error) {
 		out.WriteString(v.Value.(string))
 	}
 	return NewValue(types.STRING, out.String()), nil
+}
+
+func (i *Interpreter) evalTime(c *ir.TimeNode) *Value {
+	now := time.Now()
+	var out int64
+	switch c.Mode {
+	case ir.TimeModeSeconds:
+		out = now.Unix()
+
+	case ir.TimeModeMicro:
+		out = now.UnixMicro()
+
+	case ir.TimeModeMilli:
+		out = now.UnixMilli()
+
+	case ir.TimeModeNano:
+		out = now.UnixNano()
+	}
+	return NewValue(types.INT, int(out))
 }
