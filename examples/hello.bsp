@@ -1,0 +1,5 @@
+[FUNC HELLO
+  [PRINT "Hello, World!"]
+]
+
+[HELLO]
