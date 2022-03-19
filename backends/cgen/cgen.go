@@ -46,10 +46,11 @@ func Indent(code string, cnf CodeConfig) string {
 }
 
 type CGen struct {
-	Config CodeConfig
-	stack  *stack
-	ir     *ir.IR
-	tmps   map[string]int
+	Config       CodeConfig
+	stack        *stack
+	ir           *ir.IR
+	tmps         map[string]int
+	declaredVars []bool
 }
 
 func NewCGen(i *ir.IR) *CGen {
@@ -58,8 +59,9 @@ func NewCGen(i *ir.IR) *CGen {
 		stack: &stack{
 			vals: make([]scope, 0),
 		},
-		tmps: make(map[string]int),
-		ir:   i,
+		tmps:         make(map[string]int),
+		ir:           i,
+		declaredVars: make([]bool, len(i.Variables)),
 	}
 }
 
@@ -123,10 +125,14 @@ func (c *CGen) Build() (string, error) {
 			return "", err
 		}
 		if code.Pre != "" {
-			out.WriteString(Indent(code.Pre+"\n", c.Config))
+			out.WriteString(Indent(code.Pre, c.Config))
 		}
 		if code.Value != "" {
-			out.WriteString(Indent(code.Value+"\n", c.Config))
+			if code.Pre != "" {
+				out.WriteString(Indent("\n"+code.Value+"\n", c.Config))
+			} else {
+				out.WriteString(Indent(code.Value, c.Config))
+			}
 		}
 	}
 	free := c.stack.FreeCode()

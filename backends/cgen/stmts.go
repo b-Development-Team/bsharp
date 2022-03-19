@@ -1,6 +1,10 @@
 package cgen
 
-import "github.com/Nv7-Github/bsharp/ir"
+import (
+	"strconv"
+
+	"github.com/Nv7-Github/bsharp/ir"
+)
 
 func (cg *CGen) AddNode(node ir.Node) (*Code, error) {
 	switch n := node.(type) {
@@ -14,6 +18,14 @@ func (cg *CGen) AddNode(node ir.Node) (*Code, error) {
 
 		case *ir.FnNode:
 			return cg.addFn(c), nil
+
+		case *ir.DefineNode:
+			return cg.addDefine(c)
+
+		case *ir.VarNode:
+			return &Code{
+				Value: Namespace + cg.ir.Variables[c.ID].Name + strconv.Itoa(c.ID),
+			}, nil
 
 		default:
 			return nil, n.Pos().Error("unknown call node: %T", c)

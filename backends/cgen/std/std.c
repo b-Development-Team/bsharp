@@ -68,6 +68,9 @@ string* string_slice(string* val, int start, int end) {
 }
 
 void string_free(string* val) {
+  if (val == NULL) {
+    return;
+  }
   val->refs--;
   if (val->refs == 0) {
     if (!val->is_static) {
