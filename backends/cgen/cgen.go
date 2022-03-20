@@ -113,7 +113,7 @@ func (c *CGen) Build() (string, error) {
 		}
 		top.WriteString(");\n")
 	}
-	top.WriteString("\n")
+	c.globaltyps = top
 
 	// Add fns
 	for _, fn := range c.ir.Funcs {
@@ -137,7 +137,6 @@ func (c *CGen) Build() (string, error) {
 		c.stack.Pop()
 		out.WriteString("}\n\n")
 	}
-	c.globaltyps = top
 
 	// Add main
 	out.WriteString("int main() {\n")
@@ -154,6 +153,7 @@ func (c *CGen) Build() (string, error) {
 	out.WriteString(c.Config.Tab + "return 0;\n}\n")
 
 	// Add globals
+	top.WriteString("\n")
 	top.WriteString(c.globals.String())
 	top.WriteString("\n")
 	top.WriteString(c.globalfns.String())

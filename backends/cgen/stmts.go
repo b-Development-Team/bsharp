@@ -78,6 +78,9 @@ func (cg *CGen) AddNode(node ir.Node) (*Code, error) {
 		case *ir.KeysNode:
 			return cg.addKeys(c)
 
+		case *ir.SwitchNode:
+			return cg.addSwitch(c)
+
 		default:
 			return nil, n.Pos().Error("unknown call node: %T", c)
 		}
