@@ -309,6 +309,8 @@ func init() {
 				if err != nil {
 					return nil, err
 				}
+			} else {
+				args = args[:1]
 			}
 
 			return &FnCallNode{

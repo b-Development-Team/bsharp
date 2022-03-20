@@ -39,9 +39,15 @@ ELSE
 [DEFINE b [MAKE MAP{STRING}STRING]]
 [SET [VAR b] "Hello" "World"]
 [PRINT [GET [VAR b] "Hello"]]
-[PRINT [STRING [LENGTH [KEYS [VAR b]]]]]
 
 # Arrays
 [DEFINE c [ARRAY 1 2 3]]
 [PRINT [STRING [INDEX [VAR c] 0]]]
 [APPEND [VAR c] 4]
+
+# First-class Functions
+[HELLO] # Call function with alias
+[CALL [FN HELLO] ""] # Call function without alias
+[DEFINE fns [MAKE MAP{STRING}FUNC{}NULL]] # Make a dictionary of functions
+[SET [VAR fns] "hello" [FN HELLO]]
+[CALL [GET [VAR fns] "hello"] ""] # Call function from dictionary

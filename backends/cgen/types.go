@@ -20,18 +20,30 @@ func (c *CGen) CType(typ types.Type) string {
 		return "string*"
 
 	case types.FUNCTION:
-		out := &strings.Builder{}
+		name := typName(typ) + "_typ"
+		_, exists := c.addedFns[name]
+		if exists {
+			return name
+		}
+
 		t := typ.(*types.FuncType)
+		out := &strings.Builder{}
+		out.WriteString("typedef ")
 		out.WriteString(c.CType(t.RetType))
-		out.WriteString(" (*)(")
+		out.WriteString(" (*")
+		out.WriteString(name)
+		out.WriteString(")(")
 		for i, arg := range t.ParTypes {
 			if i != 0 {
 				out.WriteString(", ")
 			}
 			out.WriteString(c.CType(arg))
 		}
-		out.WriteString(")")
-		return out.String()
+		out.WriteString(");\n")
+		c.globaltyps.WriteString(out.String())
+		c.addedFns[name] = struct{}{}
+
+		return name
 
 	case types.ARRAY:
 		return "array*"

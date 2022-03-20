@@ -28,8 +28,21 @@ func typName(typ types.Type) string {
 	case types.MAP:
 		return "m" + typName(typ.(*types.MapType).KeyType) + typName(typ.(*types.MapType).ValType)
 
+	case types.FUNCTION:
+		out := &strings.Builder{}
+		t := typ.(*types.FuncType)
+		out.WriteString("f")
+		for _, par := range t.ParTypes {
+			out.WriteString(typName(par))
+		}
+		out.WriteString(typName(t.RetType))
+		return out.String()
+
+	case types.NULL:
+		return "n"
+
 	default:
-		return "unknown"
+		panic("unknown")
 	}
 }
 

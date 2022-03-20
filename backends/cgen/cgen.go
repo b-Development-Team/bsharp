@@ -55,8 +55,9 @@ type CGen struct {
 	isReturn     bool
 	addedFns     map[string]struct{}
 
-	globals   *strings.Builder
-	globalfns *strings.Builder
+	globals    *strings.Builder
+	globalfns  *strings.Builder
+	globaltyps *strings.Builder
 }
 
 func NewCGen(i *ir.IR) *CGen {
@@ -136,6 +137,7 @@ func (c *CGen) Build() (string, error) {
 		c.stack.Pop()
 		out.WriteString("}\n\n")
 	}
+	c.globaltyps = top
 
 	// Add main
 	out.WriteString("int main() {\n")
