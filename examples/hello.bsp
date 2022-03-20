@@ -18,10 +18,28 @@
 ELSE
   [PRINT "6 is 4, uh oh!"]
 ]
+[PRINT [INDEX "Hi!" 0]]
+[PRINT [STRING [LENGTH "Hello, World!"]]]
 
-[PRINT [STRING [RANDINT 0 100]]]
+[DEFINE i 0]
+[WHILE [COMPARE [VAR i] < 100]
+  [PRINT [STRING [VAR i]]]
+  [DEFINE i [MATH [VAR i] + 1]]
+]
 
-[DEFINE abcdefg [FN HELLO]]
+[PRINT [STRING [FLOAT 100]]]
+
+[PRINT [STRING [RANDINT 1 100]]]
+[PRINT [STRING [RANDOM 1.0 100.0]]]
+[PRINT [STRING [CEIL 1.5]]]
+[PRINT [STRING [FLOOR 1.5]]]
+[PRINT [STRING [ROUND 1.5]]]
+
+# Maps
+[DEFINE b [MAKE MAP{STRING}STRING]]
+[SET [VAR b] "Hello" "World"]
+[PRINT [GET [VAR b] "Hello"]]
+[PRINT [STRING [LENGTH [KEYS [VAR b]]]]]
 
 # Arrays
 [DEFINE c [ARRAY 1 2 3]]

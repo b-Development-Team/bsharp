@@ -89,6 +89,15 @@ func (c *CGen) addIndex(n *ir.IndexNode) (*Code, error) {
 	if err != nil {
 		return nil, err
 	}
+	if types.STRING.Equal(n.Value.Type()) {
+		name := c.GetTmp("ind")
+		pre := fmt.Sprintf("string* %s = string_ind(%s, %s);", name, arr.Value, ind.Value)
+		c.stack.Add(c.FreeCode(name, types.STRING))
+		return &Code{
+			Pre:   JoinCode(arr.Pre, ind.Pre, pre),
+			Value: name,
+		}, nil
+	}
 	typ := c.CType(n.Type())
 	return &Code{
 		Pre:   JoinCode(arr.Pre, ind.Pre),
@@ -119,5 +128,17 @@ func (c *CGen) addAppend(n *ir.AppendNode) (*Code, error) {
 	pre = JoinCode(pre, fmt.Sprintf("array_append(%s, &(%s));", arr.Value, val.Value))
 	return &Code{
 		Pre: pre,
+	}, nil
+}
+
+func (c *CGen) addLength(n *ir.LengthNode) (*Code, error) {
+	arr, err := c.AddNode(n.Value)
+	if err != nil {
+		return nil, err
+	}
+	// Works for every type
+	return &Code{
+		Pre:   JoinCode(arr.Pre),
+		Value: fmt.Sprintf("%s->len", arr.Value),
 	}, nil
 }

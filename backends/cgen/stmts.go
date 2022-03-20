@@ -60,6 +60,24 @@ func (cg *CGen) AddNode(node ir.Node) (*Code, error) {
 		case *ir.AppendNode:
 			return cg.addAppend(c)
 
+		case *ir.MakeNode:
+			return cg.addMake(c)
+
+		case *ir.SetNode:
+			return cg.addSet(c)
+
+		case *ir.GetNode:
+			return cg.addGet(c)
+
+		case *ir.LengthNode:
+			return cg.addLength(c)
+
+		case *ir.WhileNode:
+			return cg.addWhile(c)
+
+		case *ir.KeysNode:
+			return cg.addKeys(c)
+
 		default:
 			return nil, n.Pos().Error("unknown call node: %T", c)
 		}

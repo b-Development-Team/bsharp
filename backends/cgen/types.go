@@ -36,6 +36,9 @@ func (c *CGen) CType(typ types.Type) string {
 	case types.ARRAY:
 		return "array*"
 
+	case types.MAP:
+		return "map*"
+
 	case types.NULL:
 		return "void"
 

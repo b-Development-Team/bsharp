@@ -85,6 +85,12 @@ void string_free(string* val) {
   }
 }
 
+string* string_ind(string* val, int index) {
+  char* data = malloc(1);
+  data[0] = val->data[index];
+  return string_new(data, 1);
+}
+
 string* string_itoa(int val) {
   int length = snprintf(NULL, 0, "%d", val);
   char* data = malloc(length);
@@ -210,6 +216,8 @@ void array_append(array* a, void* val) {
   memcpy(array_get(a, a->len), val, a->elemsize);
   a->len++;
 }
+
+// https://github.com/tidwall/hashmap.c
 
 // Copyright 2020 Joshua J Baker. All rights reserved.
 // Use of this source code is governed by an MIT-style
@@ -783,3 +791,30 @@ uint64_t hashmap_murmur(const void *data, size_t len,
 
 // End of hashmap
 
+typedef uint64_t (*hashfn)(const void* item, uint64_t seed0, uint64_t seed1);
+typedef int (*comparefn)(const void* a, const void* b, void *udata);
+typedef void (*freefn)(void* item);
+
+typedef struct map {
+  struct hashmap* map;
+  int refs;
+  int len;
+} map;
+
+map* map_new(int elemsize, comparefn comparefn, hashfn hashfn, freefn freefn) {
+  map* m = malloc(sizeof(map));
+  m->map = hashmap_new(elemsize, 0, 0, 0, hashfn, comparefn, freefn, NULL);
+  m->refs = 1;
+  return m;
+}
+
+void map_free(map* map) {
+  if (map == NULL) {
+    return;
+  }
+  map->refs--;
+  if (map->refs == 0) {
+    hashmap_free(map->map);
+    free(map);
+  }
+}
