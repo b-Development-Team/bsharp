@@ -39,6 +39,18 @@ func (cg *CGen) AddNode(node ir.Node) (*Code, error) {
 		case *ir.CastNode:
 			return cg.addCast(c)
 
+		case *ir.IfNode:
+			return cg.addIf(c)
+
+		case *ir.CompareNode:
+			return cg.addCompare(c)
+
+		case *ir.TimeNode:
+			return cg.addTime(c), nil
+
+		case *ir.ConcatNode:
+			return cg.addConcat(c)
+
 		default:
 			return nil, n.Pos().Error("unknown call node: %T", c)
 		}
@@ -48,6 +60,9 @@ func (cg *CGen) AddNode(node ir.Node) (*Code, error) {
 
 	case *ir.FnCallNode:
 		return cg.addFnCall(n)
+
+	case *ir.CastNode:
+		return cg.addCast(n)
 
 	default:
 		return nil, n.Pos().Error("unknown node: %T", node)

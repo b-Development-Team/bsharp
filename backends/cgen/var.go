@@ -17,6 +17,22 @@ func isDynamic(typ types.Type) bool {
 	return false
 }
 
+func (c *CGen) fnTypeName(t *types.FuncType, name string) string {
+	out := &strings.Builder{}
+	out.WriteString(c.CType(t.RetType))
+	out.WriteString(" (*")
+	out.WriteString(name)
+	out.WriteString(")(")
+	for i, arg := range t.ParTypes {
+		if i != 0 {
+			out.WriteString(", ")
+		}
+		out.WriteString(c.CType(arg))
+	}
+	out.WriteString(")")
+	return out.String()
+}
+
 func (c *CGen) addDefine(n *ir.DefineNode) (*Code, error) {
 	v := c.ir.Variables[n.Var]
 	name := Namespace + v.Name + strconv.Itoa(v.ID)
@@ -36,27 +52,30 @@ func (c *CGen) addDefine(n *ir.DefineNode) (*Code, error) {
 	code := fmt.Sprintf("%s = %s;", name, val.Value)
 	// If not declared, then declare
 	if !c.declaredVars[v.ID] {
-		c.declaredVars[v.ID] = true
-		if types.FUNCTION.Equal(v.Type) {
-			co := &strings.Builder{}
-			t := v.Type.(*types.FuncType)
-			co.WriteString(c.CType(t.RetType))
-			co.WriteString(" (*")
-			co.WriteString(name)
-			co.WriteString(")(")
-			for i, arg := range t.ParTypes {
-				if i != 0 {
-					co.WriteString(", ")
-				}
-				co.WriteString(c.CType(arg))
+		// Check if it is global
+		if v.ScopeType == ir.ScopeTypeGlobal {
+			if types.FUNCTION.Equal(v.Type) {
+				t := v.Type.(*types.FuncType)
+				fmt.Fprintf(c.globals, "%s;\n", c.fnTypeName(t, name))
+			} else {
+				fmt.Fprintf(c.globals, "%s %s;\n", c.CType(v.Type), name)
 			}
-			co.WriteString(") = ")
-			co.WriteString(val.Value)
-			co.WriteString(";")
-			code = co.String()
+			c.declaredVars[v.ID] = true
 		} else {
-			code = fmt.Sprintf("%s %s = %s;", c.CType(v.Type), name, val.Value)
+			if types.FUNCTION.Equal(v.Type) {
+				co := &strings.Builder{}
+				t := v.Type.(*types.FuncType)
+				co.WriteString(c.fnTypeName(t, name))
+				co.WriteString(" = ")
+				co.WriteString(val.Value)
+				co.WriteString(";")
+				code = co.String()
+			} else {
+				code = fmt.Sprintf("%s %s = %s;", c.CType(v.Type), name, val.Value)
+			}
+			c.declaredVars[v.ID] = true
 		}
+
 		if isDynamic(v.Type) {
 			c.stack.Add(c.FreeCode(name, v.Type))
 		}

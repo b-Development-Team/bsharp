@@ -18,10 +18,11 @@ const (
 )
 
 type Variable struct {
-	Type types.Type
-	Name string
-	ID   int
-	Pos  *tokens.Pos
+	Type      types.Type
+	Name      string
+	ID        int
+	Pos       *tokens.Pos
+	ScopeType ScopeType
 }
 
 type scope struct {
@@ -82,10 +83,11 @@ func (s *Scope) Variable(id int) *Variable {
 
 func (s *Scope) AddVariable(name string, typ types.Type, pos *tokens.Pos) int {
 	v := &Variable{
-		Name: name,
-		Type: typ,
-		ID:   len(s.Variables),
-		Pos:  pos,
+		Name:      name,
+		Type:      typ,
+		ID:        len(s.Variables),
+		Pos:       pos,
+		ScopeType: s.CurrType(),
 	}
 	s.Variables = append(s.Variables, v)
 	s.scopes[len(s.scopes)-1].Variables[name] = v.ID

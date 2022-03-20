@@ -1,14 +1,24 @@
-[FUNC HELLO
+# Functions
+[IMPORT "import.bsp"]
+[IMPORT "math.bsp"]
+
+[FUNC HELLO 
   [PRINT "Hello, World!"]
 ]
 
-[FUNC ADD [PARAM a INT] [PARAM b INT] [RETURNS INT]
-  [RETURN [MATH [VAR a] + [VAR b]]]
+[HELLO]
+[PRINT [STRING [ADD 1 2]]]
+
+# Some basic Functions
+[DEFINE a 1]
+[PRINT [STRING [VAR a]]]
+[PRINT [CONCAT "hello w" "orld"]]
+[IF [COMPARE 6 != 4]
+  [PRINT "6 is not 4"]
+ELSE
+  [PRINT "6 is 4, uh oh!"]
 ]
 
-[HELLO]
+[PRINT [STRING [RANDINT 0 100]]]
 
-[DEFINE a "Hi"]
-[DEFINE hello [FN HELLO]]
-[PRINT [STRING [ADD 1 2]]]
-[PRINT [VAR a]]
+[DEFINE abcdefg [FN HELLO]]

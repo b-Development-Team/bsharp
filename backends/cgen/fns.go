@@ -29,6 +29,16 @@ func (c *CGen) addFnCall(n *ir.FnCallNode) (*Code, error) {
 	}
 	call.WriteString(")")
 
+	if isDynamic(n.Type()) { // Ret type is dynamic, free
+		name := c.GetTmp("call")
+		pre = JoinCode(pre, fmt.Sprintf("%s %s = %s;", c.CType(n.Type()), name, call.String()))
+
+		return &Code{
+			Pre:   pre,
+			Value: name,
+		}, nil
+	}
+
 	return &Code{
 		Pre:   pre,
 		Value: call.String(),
@@ -47,7 +57,12 @@ func (c *CGen) addReturn(n *ir.ReturnNode) (*Code, error) {
 		return nil, err
 	}
 	c.isReturn = true
+	// Grab if dynamic
+	pre := JoinCode(c.stack.FreeCode(), v.Pre, fmt.Sprintf("return %s;", v.Value))
+	if isDynamic(n.Value.Type()) {
+		pre = JoinCode(c.GrabCode(v.Value, n.Value.Type()), pre)
+	}
 	return &Code{
-		Pre: JoinCode(c.stack.FreeCode(), v.Pre, fmt.Sprintf("return %s;", v.Value)),
+		Pre: pre,
 	}, nil
 }

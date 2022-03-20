@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <ctype.h>
+#include <sys/time.h>
 
 typedef struct string {
   char* data;
@@ -121,3 +122,35 @@ double bsharp_atof(string* s) {
   free(buf);
   return out;
 }
+
+int string_cmp(string* l, string* r) {
+  int len = l->len;
+  if (r->len < len) {
+    len = r->len;
+  }
+  return strncmp(l->data, r->data, len);
+}
+
+// Time
+long normaltime() {
+  return time(NULL);
+}
+
+long millitime() {
+  struct timeval tv;
+  gettimeofday(&tv, NULL);
+  return tv.tv_sec * 1000L + tv.tv_usec / 1000;
+}
+
+long microtime() {
+  struct timeval tv;
+  gettimeofday(&tv, NULL);
+  return tv.tv_sec * 1000000L + tv.tv_usec;
+}
+
+long nanotime() {
+  struct timespec tv;
+  clock_gettime(CLOCK_REALTIME, &tv);
+  return tv.tv_sec * 1000000000L + tv.tv_nsec;
+}
+

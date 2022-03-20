@@ -53,6 +53,8 @@ type CGen struct {
 	tmps         map[string]int
 	declaredVars []bool
 	isReturn     bool
+
+	globals *strings.Builder
 }
 
 func NewCGen(i *ir.IR) *CGen {
@@ -64,28 +66,49 @@ func NewCGen(i *ir.IR) *CGen {
 		tmps:         make(map[string]int),
 		ir:           i,
 		declaredVars: make([]bool, len(i.Variables)),
+		globals:      &strings.Builder{},
 	}
 }
 
 //go:embed std/std.c
 var std string
 
-func (c *CGen) Build() (string, error) {
-	out := &strings.Builder{}
-	out.WriteString(std)
+func (c *CGen) addCode(bld *strings.Builder, code *Code) {
+	if code.Pre != "" {
+		bld.WriteString(Indent(code.Pre, c.Config))
+	}
+	if code.Value != "" {
+		if code.Pre != "" {
+			bld.WriteString(Indent("\n"+code.Value+";\n", c.Config))
+		} else {
+			bld.WriteString(Indent(code.Value+";", c.Config))
+		}
+	}
+}
 
+func (c *CGen) addFree(bld *strings.Builder) {
+	free := c.stack.FreeCode()
+	if free != "" {
+		bld.WriteString(Indent(free, c.Config))
+	}
+}
+
+func (c *CGen) Build() (string, error) {
+	top := &strings.Builder{}
+	top.WriteString(std)
+	out := &strings.Builder{}
 	// Add fn types
 	for _, fn := range c.ir.Funcs {
-		fmt.Fprintf(out, "%s %s(", c.CType(fn.RetType), Namespace+fn.Name)
+		fmt.Fprintf(top, "%s %s(", c.CType(fn.RetType), Namespace+fn.Name)
 		for i, arg := range fn.Params {
-			fmt.Fprintf(out, "%s", c.CType(arg.Type))
+			fmt.Fprintf(top, "%s", c.CType(arg.Type))
 			if i != len(fn.Params)-1 {
-				out.WriteString(", ")
+				top.WriteString(", ")
 			}
 		}
-		out.WriteString(");\n")
+		top.WriteString(");\n")
 	}
-	out.WriteString("\n")
+	top.WriteString("\n")
 
 	// Add fns
 	for _, fn := range c.ir.Funcs {
@@ -103,18 +126,10 @@ func (c *CGen) Build() (string, error) {
 			if err != nil {
 				return "", err
 			}
-			if code.Pre != "" {
-				out.WriteString(Indent(code.Pre, c.Config))
-			}
-			if code.Value != "" {
-				out.WriteString("\n" + Indent(code.Value+";\n", c.Config))
-			}
+			c.addCode(out, code)
 		}
-		free := c.stack.FreeCode()
+		c.addFree(out)
 		c.stack.Pop()
-		if free != "" && !c.isReturn {
-			out.WriteString(Indent(free, c.Config))
-		}
 		out.WriteString("}\n\n")
 	}
 
@@ -126,25 +141,17 @@ func (c *CGen) Build() (string, error) {
 		if err != nil {
 			return "", err
 		}
-		if code.Pre != "" {
-			out.WriteString(Indent(code.Pre, c.Config))
-		}
-		if code.Value != "" {
-			if code.Pre != "" {
-				out.WriteString(Indent("\n"+code.Value+";\n", c.Config))
-			} else {
-				out.WriteString(Indent(code.Value+";", c.Config))
-			}
-		}
+		c.addCode(out, code)
 	}
-	free := c.stack.FreeCode()
+	c.addFree(out)
 	c.stack.Pop()
-	if free != "" {
-		out.WriteString(Indent(free, c.Config))
-	}
 	out.WriteString(c.Config.Tab + "return 0;\n}\n")
 
-	return out.String(), nil
+	// Add globals
+	top.WriteString(c.globals.String())
+	top.WriteString("\n")
+
+	return top.String() + out.String(), nil
 }
 
 func (c *CGen) GetTmp(name string) string {
