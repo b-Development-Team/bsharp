@@ -3,6 +3,7 @@ package cgen
 import (
 	_ "embed"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/Nv7-Github/bsharp/ir"
@@ -51,6 +52,7 @@ type CGen struct {
 	ir           *ir.IR
 	tmps         map[string]int
 	declaredVars []bool
+	isReturn     bool
 }
 
 func NewCGen(i *ir.IR) *CGen {
@@ -76,7 +78,7 @@ func (c *CGen) Build() (string, error) {
 	for _, fn := range c.ir.Funcs {
 		fmt.Fprintf(out, "%s %s(", c.CType(fn.RetType), Namespace+fn.Name)
 		for i, arg := range fn.Params {
-			fmt.Fprintf(out, "%s %s", c.CType(arg.Type), arg.Name)
+			fmt.Fprintf(out, "%s", c.CType(arg.Type))
 			if i != len(fn.Params)-1 {
 				out.WriteString(", ")
 			}
@@ -89,7 +91,7 @@ func (c *CGen) Build() (string, error) {
 	for _, fn := range c.ir.Funcs {
 		fmt.Fprintf(out, "%s %s(", c.CType(fn.RetType), Namespace+fn.Name)
 		for i, arg := range fn.Params {
-			fmt.Fprintf(out, "%s %s", c.CType(arg.Type), arg.Name)
+			fmt.Fprintf(out, "%s %s", c.CType(arg.Type), Namespace+arg.Name+strconv.Itoa(arg.ID))
 			if i != len(fn.Params)-1 {
 				out.WriteString(", ")
 			}
@@ -105,12 +107,12 @@ func (c *CGen) Build() (string, error) {
 				out.WriteString(Indent(code.Pre, c.Config))
 			}
 			if code.Value != "" {
-				out.WriteString("\n" + Indent(code.Value+"\n", c.Config))
+				out.WriteString("\n" + Indent(code.Value+";\n", c.Config))
 			}
 		}
 		free := c.stack.FreeCode()
 		c.stack.Pop()
-		if free != "" {
+		if free != "" && !c.isReturn {
 			out.WriteString(Indent(free, c.Config))
 		}
 		out.WriteString("}\n\n")
@@ -129,9 +131,9 @@ func (c *CGen) Build() (string, error) {
 		}
 		if code.Value != "" {
 			if code.Pre != "" {
-				out.WriteString(Indent("\n"+code.Value+"\n", c.Config))
+				out.WriteString(Indent("\n"+code.Value+";\n", c.Config))
 			} else {
-				out.WriteString(Indent(code.Value, c.Config))
+				out.WriteString(Indent(code.Value+";", c.Config))
 			}
 		}
 	}

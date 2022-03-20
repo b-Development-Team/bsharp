@@ -3,6 +3,8 @@
 #include <stdarg.h>
 #include <strings.h>
 #include <stdio.h>
+#include <math.h>
+#include <ctype.h>
 
 typedef struct string {
   char* data;
@@ -80,3 +82,42 @@ void string_free(string* val) {
   }
 }
 
+string* string_itoa(int val) {
+  int length = snprintf(NULL, 0, "%d", val);
+  char* data = malloc(length);
+  snprintf(data, length + 1, "%d", val);
+  string* s = string_new(data, length);
+  return s;
+}
+
+string* string_ftoa(float val) {
+  int length = snprintf(NULL, 0, "%f", val);
+  char* data = malloc(length);
+  snprintf(data, length + 1, "%f", val);
+  string* s = string_new(data, length);
+  s->is_static = false;
+  return s;
+}
+
+static inline string* string_btoa(bool val) {
+  return val ? string_new("true", 4) : string_new("false", 5);
+}
+
+// Parse int code
+long bsharp_atoi(string* s) {
+  // Make null terminated buffer
+  char* buf = calloc(s->len + 1, 0);
+  memcpy(buf, s->data, s->len);
+  long out = strtol(buf, NULL, 10);
+  free(buf);
+  return out;
+}
+
+double bsharp_atof(string* s) {
+  // Make null terminated buffer
+  char* buf = calloc(s->len + 1, 0);
+  memcpy(buf, s->data, s->len);
+  double out = strtod(buf, NULL);
+  free(buf);
+  return out;
+}

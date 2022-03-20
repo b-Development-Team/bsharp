@@ -2,7 +2,13 @@
   [PRINT "Hello, World!"]
 ]
 
+[FUNC ADD [PARAM a INT] [PARAM b INT] [RETURNS INT]
+  [RETURN [MATH [VAR a] + [VAR b]]]
+]
+
 [HELLO]
 
 [DEFINE a "Hi"]
+[DEFINE hello [FN HELLO]]
+[PRINT [STRING [ADD 1 2]]]
 [PRINT [VAR a]]

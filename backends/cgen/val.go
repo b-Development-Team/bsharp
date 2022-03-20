@@ -48,3 +48,77 @@ func (c *CGen) GrabCode(varName string, typ types.Type) string {
 
 	panic("invalid type")
 }
+
+func (c *CGen) addCast(n *ir.CastNode) (*Code, error) {
+	v, err := c.AddNode(n.Value)
+	if err != nil {
+		return nil, err
+	}
+
+	switch n.Value.Type().BasicType() {
+	case types.INT:
+		switch n.Type().BasicType() {
+		case types.FLOAT:
+			return &Code{
+				Pre:   v.Pre,
+				Value: fmt.Sprintf("(double)(%s)", v.Value),
+			}, nil
+
+		case types.STRING:
+			name := c.GetTmp("itoa")
+			pre := JoinCode(v.Pre, fmt.Sprintf("string* %s = string_itoa(%s);", name, v.Value))
+			c.stack.Add(c.FreeCode(name, types.STRING))
+			return &Code{
+				Pre:   pre,
+				Value: name,
+			}, nil
+		}
+
+	case types.FLOAT:
+		switch n.Type().BasicType() {
+		case types.INT:
+			return &Code{
+				Pre:   v.Pre,
+				Value: fmt.Sprintf("(long)(%s)", v.Value),
+			}, nil
+
+		case types.STRING:
+			name := c.GetTmp("ftoa")
+			pre := JoinCode(v.Pre, fmt.Sprintf("string* %s = string_ftoa(%s);", name, v.Value))
+			c.stack.Add(c.FreeCode(name, types.STRING))
+			return &Code{
+				Pre:   pre,
+				Value: name,
+			}, nil
+		}
+
+	case types.STRING:
+		switch n.Type().BasicType() {
+		case types.INT:
+			return &Code{
+				Pre:   v.Pre,
+				Value: fmt.Sprintf("bsharp_atoi(%s)", v.Value),
+			}, nil
+
+		case types.FLOAT:
+			return &Code{
+				Pre:   v.Pre,
+				Value: fmt.Sprintf("bsharp_atof(%s)", v.Value),
+			}, nil
+		}
+
+	case types.BOOL:
+		switch n.Type().BasicType() {
+		case types.STRING:
+			name := c.GetTmp("btoa")
+			pre := JoinCode(v.Pre, fmt.Sprintf("string* %s = string_btoa(%s);", name, v.Value))
+			c.stack.Add(c.FreeCode(name, types.STRING))
+			return &Code{
+				Pre:   pre,
+				Value: name,
+			}, nil
+		}
+	}
+
+	panic("cannot cast")
+}

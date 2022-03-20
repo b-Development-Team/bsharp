@@ -27,7 +27,7 @@ func (c *CGen) addFnCall(n *ir.FnCallNode) (*Code, error) {
 		call.WriteString(arg.Value)
 		pre = JoinCode(pre, fn.Pre)
 	}
-	call.WriteString(");")
+	call.WriteString(")")
 
 	return &Code{
 		Pre:   pre,
@@ -39,4 +39,15 @@ func (c *CGen) addFn(n *ir.FnNode) *Code {
 	return &Code{
 		Value: fmt.Sprintf("(&%s)", Namespace+n.Name),
 	}
+}
+
+func (c *CGen) addReturn(n *ir.ReturnNode) (*Code, error) {
+	v, err := c.AddNode(n.Value)
+	if err != nil {
+		return nil, err
+	}
+	c.isReturn = true
+	return &Code{
+		Pre: JoinCode(c.stack.FreeCode(), v.Pre, fmt.Sprintf("return %s;", v.Value)),
+	}, nil
 }
