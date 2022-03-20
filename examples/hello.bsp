@@ -22,3 +22,8 @@ ELSE
 [PRINT [STRING [RANDINT 0 100]]]
 
 [DEFINE abcdefg [FN HELLO]]
+
+# Arrays
+[DEFINE c [ARRAY 1 2 3]]
+[PRINT [STRING [INDEX [VAR c] 0]]]
+[APPEND [VAR c] 4]

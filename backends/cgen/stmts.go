@@ -51,6 +51,15 @@ func (cg *CGen) AddNode(node ir.Node) (*Code, error) {
 		case *ir.ConcatNode:
 			return cg.addConcat(c)
 
+		case *ir.ArrayNode:
+			return cg.addArray(c)
+
+		case *ir.IndexNode:
+			return cg.addIndex(c)
+
+		case *ir.AppendNode:
+			return cg.addAppend(c)
+
 		default:
 			return nil, n.Pos().Error("unknown call node: %T", c)
 		}

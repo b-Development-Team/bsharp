@@ -154,3 +154,57 @@ long nanotime() {
   return tv.tv_sec * 1000000000L + tv.tv_nsec;
 }
 
+// Arrays
+typedef struct array {
+  int len;
+  int cap;
+  void* data;
+
+  int elemsize;
+  int refs;
+} array;
+
+array* array_new(int elemsize, int cap) {
+  array* a = malloc(sizeof(array));
+  a->len = 0;
+  a->cap = cap;
+  a->data = malloc(elemsize * cap);
+  a->elemsize = elemsize;
+  a->refs = 1;
+  return a;
+}
+
+// Get pointer to element at index i.
+static inline void* array_get(array* a, int i) {
+  return a->data + (i * a->elemsize);
+}
+
+typedef void (*array_free_fn)(array*);
+
+void array_free(array* a, array_free_fn free_fn) {
+  if (a == NULL) {
+    return;
+  }
+
+  a->refs--;
+  if (a->refs == 0) {
+    if (free_fn != NULL) {
+      free_fn(a);
+    }
+    free(a->data);
+    free(a);
+  }
+}
+
+void array_grow(array* a, int len) {
+  if (a->cap < len) {
+    a->cap = len;
+    a->data = realloc(a->data, a->elemsize * a->cap);
+  }
+}
+
+void array_append(array* a, void* val) {
+  array_grow(a, a->len + 1);
+  memcpy(array_get(a, a->len), val, a->elemsize);
+  a->len++;
+}

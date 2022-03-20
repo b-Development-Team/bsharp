@@ -33,6 +33,9 @@ func (c *CGen) CType(typ types.Type) string {
 		out.WriteString(")")
 		return out.String()
 
+	case types.ARRAY:
+		return "array*"
+
 	case types.NULL:
 		return "void"
 

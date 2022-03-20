@@ -53,8 +53,10 @@ type CGen struct {
 	tmps         map[string]int
 	declaredVars []bool
 	isReturn     bool
+	addedFns     map[string]struct{}
 
-	globals *strings.Builder
+	globals   *strings.Builder
+	globalfns *strings.Builder
 }
 
 func NewCGen(i *ir.IR) *CGen {
@@ -67,6 +69,8 @@ func NewCGen(i *ir.IR) *CGen {
 		ir:           i,
 		declaredVars: make([]bool, len(i.Variables)),
 		globals:      &strings.Builder{},
+		addedFns:     make(map[string]struct{}),
+		globalfns:    &strings.Builder{},
 	}
 }
 
@@ -150,6 +154,7 @@ func (c *CGen) Build() (string, error) {
 	// Add globals
 	top.WriteString(c.globals.String())
 	top.WriteString("\n")
+	top.WriteString(c.globalfns.String())
 
 	return top.String() + out.String(), nil
 }
