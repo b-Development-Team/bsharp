@@ -197,3 +197,20 @@ func (c *CGen) addKeys(n *ir.KeysNode) (*Code, error) {
 		Value: name,
 	}, nil
 }
+
+func (c *CGen) addExists(n *ir.ExistsNode) (*Code, error) {
+	m, err := c.AddNode(n.Map)
+	if err != nil {
+		return nil, err
+	}
+	k, err := c.AddNode(n.Key)
+	if err != nil {
+		return nil, err
+	}
+	name := c.GetTmp("exists")
+	pre := fmt.Sprintf("bool %s = hashmap_get(%s->map, &(struct %s){ .key=%s }) != NULL;", name, m.Value, typName(n.Map.Type().(*types.MapType)), k.Value)
+	return &Code{
+		Pre:   JoinCode(m.Pre, k.Pre, pre),
+		Value: name,
+	}, nil
+}

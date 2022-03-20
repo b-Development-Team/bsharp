@@ -155,3 +155,34 @@ func (c *CGen) addLength(n *ir.LengthNode) (*Code, error) {
 		Value: fmt.Sprintf("%s->len", arr.Value),
 	}, nil
 }
+
+func (c *CGen) addSlice(n *ir.SliceNode) (*Code, error) {
+	v, err := c.AddNode(n.Value)
+	if err != nil {
+		return nil, err
+	}
+	start, err := c.AddNode(n.Start)
+	if err != nil {
+		return nil, err
+	}
+	end, err := c.AddNode(n.End)
+	if err != nil {
+		return nil, err
+	}
+	if types.STRING.Equal(n.Value.Type()) {
+		name := c.GetTmp("slice")
+		pre := fmt.Sprintf("string* %s = string_slice(%s, %s, %s);", name, v.Value, start.Value, end.Value)
+		c.stack.Add(c.FreeCode(name, types.STRING))
+		return &Code{
+			Pre:   JoinCode(v.Pre, start.Pre, end.Pre, pre),
+			Value: name,
+		}, nil
+	}
+
+	// Array
+	code := fmt.Sprintf("array_slice(%s, %s, %s);", v.Value, start.Value, end.Value)
+	return &Code{
+		Pre:   JoinCode(v.Pre, start.Pre, end.Pre),
+		Value: code,
+	}, nil
+}

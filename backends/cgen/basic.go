@@ -52,3 +52,39 @@ func (c *CGen) addConcat(n *ir.ConcatNode) (*Code, error) {
 		Value: name,
 	}, nil
 }
+
+func (c *CGen) addLogicalOp(n *ir.LogicalOpNode) (*Code, error) {
+	l, err := c.AddNode(n.Val)
+	if err != nil {
+		return nil, err
+	}
+	var r *Code
+	if n.Rhs != nil {
+		r, err = c.AddNode(n.Rhs)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	switch n.Op {
+	case ir.LogicalOpAnd:
+		return &Code{
+			Pre:   JoinCode(l.Pre, r.Pre),
+			Value: fmt.Sprintf("(%s && %s)", l.Value, r.Value),
+		}, nil
+
+	case ir.LogicalOpOr:
+		return &Code{
+			Pre:   JoinCode(l.Pre, r.Pre),
+			Value: fmt.Sprintf("(%s || %s)", l.Value, r.Value),
+		}, nil
+
+	case ir.LogicalOpNot:
+		return &Code{
+			Pre:   JoinCode(l.Pre, r.Pre),
+			Value: fmt.Sprintf("(!%s)", l.Value),
+		}, nil
+	}
+
+	panic("invalid op")
+}

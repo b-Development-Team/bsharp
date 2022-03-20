@@ -164,6 +164,7 @@ long nanotime() {
 
 // Arrays
 typedef struct array {
+  int off;
   int len;
   int cap;
   void* data;
@@ -175,6 +176,7 @@ typedef struct array {
 array* array_new(int elemsize, int cap) {
   array* a = malloc(sizeof(array));
   a->len = 0;
+  a->off = 0;
   a->cap = cap;
   a->data = malloc(elemsize * cap);
   a->elemsize = elemsize;
@@ -184,7 +186,7 @@ array* array_new(int elemsize, int cap) {
 
 // Get pointer to element at index i.
 static inline void* array_get(array* a, int i) {
-  return a->data + (i * a->elemsize);
+  return a->data + ((a->off + i) * a->elemsize);
 }
 
 typedef void (*array_free_fn)(array*);
@@ -197,6 +199,8 @@ void array_free(array* a, array_free_fn free_fn) {
   a->refs--;
   if (a->refs == 0) {
     if (free_fn != NULL) {
+      a->len += a->off;
+      a->off = 0;
       free_fn(a);
     }
     free(a->data);
@@ -205,8 +209,8 @@ void array_free(array* a, array_free_fn free_fn) {
 }
 
 void array_grow(array* a, int len) {
-  if (a->cap < len) {
-    a->cap = len;
+  if (a->cap < (a->off + len)) {
+    a->cap = len + a->off;
     a->data = realloc(a->data, a->elemsize * a->cap);
   }
 }
@@ -215,6 +219,11 @@ void array_append(array* a, void* val) {
   array_grow(a, a->len + 1);
   memcpy(array_get(a, a->len), val, a->elemsize);
   a->len++;
+}
+
+void array_slice(array* a, int start, int end) {
+  a->off = start;
+  a->len = end - start;
 }
 
 // https://github.com/tidwall/hashmap.c

@@ -81,6 +81,15 @@ func (cg *CGen) AddNode(node ir.Node) (*Code, error) {
 		case *ir.SwitchNode:
 			return cg.addSwitch(c)
 
+		case *ir.ExistsNode:
+			return cg.addExists(c)
+
+		case *ir.LogicalOpNode:
+			return cg.addLogicalOp(c)
+
+		case *ir.SliceNode:
+			return cg.addSlice(c)
+
 		default:
 			return nil, n.Pos().Error("unknown call node: %T", c)
 		}
