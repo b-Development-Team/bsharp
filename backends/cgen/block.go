@@ -43,7 +43,6 @@ func (c *CGen) addIf(i *ir.IfNode) (*Code, error) {
 	bld.WriteString("\n")
 
 	return &Code{
-		Pre:   cond.Pre,
-		Value: bld.String(),
+		Pre: JoinCode(cond.Pre, bld.String()),
 	}, nil
 }
