@@ -40,7 +40,6 @@ func (c *CGen) addIf(i *ir.IfNode) (*Code, error) {
 		c.stack.Pop()
 		bld.WriteString("}")
 	}
-	bld.WriteString("\n")
 
 	return &Code{
 		Pre: JoinCode(cond.Pre, bld.String()),
