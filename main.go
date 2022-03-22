@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 
 	"github.com/Nv7-Github/bsharp/backends/cgen"
@@ -18,8 +19,9 @@ type Run struct {
 }
 
 type Build struct {
-	Files  []string `arg:"positional,-i,--input" help:"input B# program"`
-	Output string   `arg:"required,-o,--output" help:"output executable"`
+	Files    []string `arg:"positional,-i,--input" help:"input B# program"`
+	Output   string   `arg:"required,-o,--output" help:"output executable"`
+	Optimize bool     `arg:"-O,--optimize" help:"whether to optimize during compiling"`
 }
 
 type Args struct {
@@ -102,6 +104,14 @@ func main() {
 		}
 
 		// Compile
+		if strings.HasSuffix(args.Build.Output, ".c") {
+			err = os.WriteFile(args.Build.Output, []byte(code), os.ModePerm)
+			if err != nil {
+				p.Fail(err.Error())
+			}
+			return
+		}
+
 		// Save code
 		start = time.Now()
 		f, err := os.CreateTemp("", "*.c")
@@ -115,7 +125,11 @@ func main() {
 		}
 
 		// Build
-		cmd := exec.Command("cc", f.Name(), "-o", args.Build.Output, "-O2") // TODO: Allow customizing optimizations
+		o := "-O0"
+		if args.Build.Optimize {
+			o = "-O2"
+		}
+		cmd := exec.Command("cc", f.Name(), "-o", args.Build.Output, o)
 		err = cmd.Run()
 		if err != nil {
 			p.Fail(err.Error())

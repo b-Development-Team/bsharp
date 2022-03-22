@@ -123,6 +123,7 @@ func (c *CGen) Build() (string, error) {
 			if i != len(fn.Params)-1 {
 				out.WriteString(", ")
 			}
+			c.declaredVars[arg.ID] = true
 		}
 		out.WriteString(") {\n")
 		c.stack.Push()
