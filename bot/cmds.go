@@ -50,6 +50,46 @@ var (
 			},
 		},
 		{
+			Name:        "build",
+			Description: "Compiles a B# program!",
+			Type:        discordgo.ChatApplicationCommand,
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Name:        "code",
+					Type:        discordgo.ApplicationCommandOptionSubCommand,
+					Description: "Build the source code of a B# program!",
+					Options:     []*discordgo.ApplicationCommandOption{}, // Code is entered through a modal
+				},
+				{
+					Name:        "tag",
+					Type:        discordgo.ApplicationCommandOptionSubCommand,
+					Description: "Builds a tag!",
+					Options: []*discordgo.ApplicationCommandOption{
+						{
+							Type:         discordgo.ApplicationCommandOptionString,
+							Name:         "id",
+							Description:  "The ID of the tag to build.",
+							Required:     true,
+							Autocomplete: true,
+						},
+					}, // Code is entered through a modal
+				},
+				{
+					Name:        "file",
+					Type:        discordgo.ApplicationCommandOptionSubCommand,
+					Description: "Builds the source code of a B# program, uploaded as a file!",
+					Options: []*discordgo.ApplicationCommandOption{
+						{
+							Type:        discordgo.ApplicationCommandOptionAttachment,
+							Name:        "file",
+							Description: "The file to build.",
+							Required:    true,
+						},
+					}, // Code is entered through a modal
+				},
+			},
+		},
+		{
 			Name:        "create",
 			Description: "Creates a B# tag!",
 			Type:        discordgo.ChatApplicationCommand,
@@ -228,6 +268,21 @@ var (
 				b.RunFileCmd(att.URL, ctx)
 			}
 		},
+		"build": func(ctx *Ctx, dat discordgo.ApplicationCommandInteractionData, b *Bot) {
+			data := dat.Options[0]
+			switch data.Name {
+			case "code":
+				b.BuildCodeCmd(ctx)
+
+			case "tag":
+				b.BuildTagCmd(data.Options[0].StringValue(), ctx)
+
+			case "file":
+				id := data.Options[0].Value.(string)
+				att := dat.Resolved.Attachments[id]
+				b.BuildFileCmd(att.URL, ctx)
+			}
+		},
 		"create": func(ctx *Ctx, dat discordgo.ApplicationCommandInteractionData, b *Bot) {
 			data := dat.Options[0]
 			switch data.Name {
@@ -323,6 +378,9 @@ var (
 
 	autocomplete = map[string]func(*db.Data, discordgo.ApplicationCommandInteractionData) []*discordgo.ApplicationCommandOptionChoice{
 		"run": func(d *db.Data, dat discordgo.ApplicationCommandInteractionData) []*discordgo.ApplicationCommandOptionChoice {
+			return d.Autocomplete(dat.Options[0].Options[0].StringValue())
+		},
+		"build": func(d *db.Data, dat discordgo.ApplicationCommandInteractionData) []*discordgo.ApplicationCommandOptionChoice {
 			return d.Autocomplete(dat.Options[0].Options[0].StringValue())
 		},
 		"edit": func(d *db.Data, dat discordgo.ApplicationCommandInteractionData) []*discordgo.ApplicationCommandOptionChoice {

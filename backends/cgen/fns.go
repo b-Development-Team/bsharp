@@ -32,6 +32,7 @@ func (c *CGen) addFnCall(n *ir.FnCallNode) (*Code, error) {
 	if isDynamic(n.Type()) { // Ret type is dynamic, free
 		name := c.GetTmp("call")
 		pre = JoinCode(pre, fmt.Sprintf("%s %s = %s;", c.CType(n.Type()), name, call.String()))
+		c.stack.Add(c.FreeCode(name, n.Type()))
 
 		return &Code{
 			Pre:   pre,

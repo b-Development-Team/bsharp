@@ -242,6 +242,12 @@ func (b *Bot) InteractionHandler(s *discordgo.Session, i *discordgo.InteractionC
 
 	case discordgo.InteractionApplicationCommandAutocomplete:
 		d := i.ApplicationCommandData()
+		if b.debug {
+			if !strings.HasPrefix(d.Name, "test") {
+				return
+			}
+			d.Name = strings.TrimPrefix(d.Name, "test")
+		}
 		h, ok := autocomplete[d.Name]
 		if ok {
 			dat, err := b.Get(i.GuildID)

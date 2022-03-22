@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"fmt"
 	"os"
+	"os/exec"
 	"time"
 
 	"github.com/Nv7-Github/bsharp/backends/cgen"
@@ -17,13 +18,14 @@ type Run struct {
 }
 
 type Build struct {
-	Files []string `arg:"positional,-i,--input" help:"input B# program"`
+	Files  []string `arg:"positional,-i,--input" help:"input B# program"`
+	Output string   `arg:"required,-o,--output" help:"output executable"`
 }
 
 type Args struct {
-	Run   *Run `arg:"subcommand:run" help:"run a B# program"`
-	Build *Run `arg:"subcommand:build" help:"compile a B# program"`
-	Time  bool `help:"print timing for each stage" arg:"-t"`
+	Run   *Run   `arg:"subcommand:run" help:"run a B# program"`
+	Build *Build `arg:"subcommand:build" help:"compile a B# program"`
+	Time  bool   `help:"print timing for each stage" arg:"-t"`
 }
 
 func main() {
@@ -88,7 +90,7 @@ func main() {
 			fmt.Println("Built in", time.Since(start))
 		}
 
-		// Run
+		// CGen
 		start = time.Now()
 		cgen := cgen.NewCGen(ir.IR())
 		code, err := cgen.Build()
@@ -96,10 +98,31 @@ func main() {
 			p.Fail(err.Error())
 		}
 		if args.Time {
-			fmt.Println("Ran in", time.Since(start))
+			fmt.Println("Generated code in", time.Since(start))
 		}
 
-		// TODO: Compile and save, put C code in tmp file
-		fmt.Println(code)
+		// Compile
+		// Save code
+		start = time.Now()
+		f, err := os.CreateTemp("", "*.c")
+		if err != nil {
+			p.Fail(err.Error())
+		}
+		defer f.Close()
+		_, err = f.WriteString(code)
+		if err != nil {
+			p.Fail(err.Error())
+		}
+
+		// Build
+		cmd := exec.Command("cc", f.Name(), "-o", args.Build.Output, "-O2") // TODO: Allow customizing optimizations
+		err = cmd.Run()
+		if err != nil {
+			p.Fail(err.Error())
+		}
+
+		if args.Time {
+			fmt.Println("Compiled in", time.Since(start))
+		}
 	}
 }

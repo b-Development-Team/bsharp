@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Nv7-Github/bsharp/backends/cgen"
 	"github.com/Nv7-Github/bsharp/backends/interpreter"
 	"github.com/Nv7-Github/bsharp/ir"
 	"github.com/Nv7-Github/bsharp/parser"
@@ -175,6 +176,15 @@ func (b *Bot) BuildCode(filename string, src string, ctx *Ctx) (*ir.IR, error) {
 		return nil, err
 	}
 	return bld.IR(), nil
+}
+
+func (b *Bot) CompileCode(filename, src string, ctx *Ctx) (string, error) {
+	ir, err := b.BuildCode(filename, src, ctx)
+	if err != nil {
+		return "", err
+	}
+	cgen := cgen.NewCGen(ir)
+	return cgen.Build()
 }
 
 const MaxTime = time.Second * 30
