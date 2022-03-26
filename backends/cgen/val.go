@@ -26,6 +26,16 @@ func (c *CGen) addConst(n *ir.Const) *Code {
 			Pre:   fmt.Sprintf("string* %s = string_from_const(%q);", name, n.Value),
 			Value: name,
 		}
+
+	case types.BOOL:
+		if n.Value.(bool) {
+			return &Code{
+				Value: "true",
+			}
+		}
+		return &Code{
+			Value: "false",
+		}
 	}
 
 	panic("invalid const")

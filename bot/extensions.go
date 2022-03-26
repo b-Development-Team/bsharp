@@ -57,13 +57,28 @@ var exts = []*ir.Extension{
 	},
 	{
 		Name:    "BUTTON",
-		Params:  []types.Type{types.STRING, types.STRING, types.INT, types.BOOL}, // text, id, color [1 for primary, 2 for secondary, 3 for danger, 4 for success], disabled
+		Params:  []types.Type{types.STRING, types.STRING}, // text, id
 		RetType: types.NewMapType(types.STRING, types.STRING),
 	},
 	{
 		Name:    "BUTTONS",
 		Params:  []types.Type{types.NewArrayType(types.NewArrayType(types.NewMapType(types.STRING, types.STRING)))}, // [][]btn
 		RetType: types.STRING,                                                                                       // id of button pressed
+	},
+	{
+		Name:    "DISABLE",
+		Params:  []types.Type{types.NewMapType(types.STRING, types.STRING)},
+		RetType: types.NewMapType(types.STRING, types.STRING),
+	},
+	{
+		Name:    "ENABLE",
+		Params:  []types.Type{types.NewMapType(types.STRING, types.STRING)},
+		RetType: types.NewMapType(types.STRING, types.STRING),
+	},
+	{
+		Name:    "COLOR",
+		Params:  []types.Type{types.NewMapType(types.STRING, types.STRING), types.INT},
+		RetType: types.NewMapType(types.STRING, types.STRING),
 	},
 }
 
@@ -195,28 +210,35 @@ func getExtensions(c *extensionCtx) []*interpreter.Extension {
 			}
 		}, []types.Type{types.STRING}, types.STRING),
 		interpreter.NewExtension("BUTTON", func(pars []interface{}) (interface{}, error) {
+			return map[string]interface{}{
+				"id":  pars[1].(string),
+				"txt": pars[0].(string),
+				"col": "Primary",
+				"dis": "false",
+			}, nil
+		}, []types.Type{types.STRING, types.STRING}, types.NewMapType(types.STRING, types.STRING)),
+		interpreter.NewExtension("DISABLE", func(pars []interface{}) (interface{}, error) {
+			pars[0].(map[string]interface{})["dis"] = "true"
+			return pars[0], nil
+		}, []types.Type{types.NewMapType(types.STRING, types.STRING)}, types.NewMapType(types.STRING, types.STRING)),
+		interpreter.NewExtension("ENABLE", func(pars []interface{}) (interface{}, error) {
+			pars[0].(map[string]interface{})["dis"] = "false"
+			return pars[0], nil
+		}, []types.Type{types.NewMapType(types.STRING, types.STRING)}, types.NewMapType(types.STRING, types.STRING)),
+		interpreter.NewExtension("COLOR", func(pars []interface{}) (interface{}, error) {
 			cols := map[int]string{
 				1: "Primary",
 				2: "Secondary",
 				3: "Danger",
 				4: "Success",
 			}
-			col, exists := cols[pars[2].(int)]
+			col, exists := cols[pars[1].(int)]
 			if !exists {
 				return nil, errors.New("invalid color")
 			}
-			disabled := "false"
-			if pars[3].(bool) {
-				disabled = "true"
-			}
-
-			return map[string]interface{}{
-				"id":  pars[1].(string),
-				"txt": pars[0].(string),
-				"col": col,
-				"dis": disabled,
-			}, nil
-		}, []types.Type{types.STRING, types.STRING, types.INT, types.BOOL}, types.NewMapType(types.STRING, types.STRING)),
+			pars[0].(map[string]interface{})["col"] = col
+			return pars[0], nil
+		}, []types.Type{types.NewMapType(types.STRING, types.STRING), types.INT}, types.NewMapType(types.STRING, types.STRING)),
 		interpreter.NewExtension("BUTTONS", func(pars []interface{}) (interface{}, error) {
 			// Build actions row
 			r := *(pars[0].(*[]interface{}))

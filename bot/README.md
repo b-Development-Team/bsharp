@@ -26,13 +26,7 @@ Tags can store data in between uses using the database system. There are 4 comma
 | `[DB USE id]` | Uses another tag's database. :warning: **NOTE**: Other tags' databases are read-only |
 
 ## Buttons
-The `BUTTON` function creates a button object, which is just a `MAP{STRING}STRING`. It accepts four arguments:
-| Index | Type | Name | Description |
-| - | - | - | - |
-| `0` | `STRING` | Label | The text on the button. |
-| `1` | `STIRNG` | ID | The ID of the button (used later). |
-| `2` | `INT` | Color | The Color of the button. See the table [here](#button-colors) for details. |
-| `3` | `BOOL` | Disabled | Whether the button is disabled or not. |
+The `BUTTON` function creates a button object, which is just a `MAP{STRING}STRING`. It accepts the ID of the button and it's Label as the first and second parameters respectively.
 
 The `BUTTONS` function accepts input. It accepts a 2-dimensional array of `BUTTON` objects. Each element in the array is a row of buttons. The return value is the ID of the button pressed. 
 
@@ -42,7 +36,7 @@ The user can be requested to press a button as such:
   [BUTTONS
     [ARRAY
       [ARRAY
-        [BUTTON "Click Me!" "clicked" 4 FALSE]
+        [BUTTON "Click Me!" "clicked"]
       ]
     ]
   ]
@@ -59,7 +53,7 @@ A grid of buttons can be generated as such:
   [DEFINE row [MAKE MAP{STRING}STRING{}]]
   [WHILE [COMPARE [VAR j] < 3]
     # Add btn
-    [APPEND [VAR row] [BUTTON "🔲" [CONCAT [STRING [VAR i]] "," [STRING [VAR j]]] 1 FALSE]]
+    [APPEND [VAR row] [BUTTON "🔲" [CONCAT [STRING [VAR i]] "," [STRING [VAR j]]]]]
 
     [DEFINE j [MATH [VAR j] + 1]]
   ]
@@ -76,16 +70,29 @@ A grid of buttons can be generated as such:
 It will print out the position of the button ont he grid when a button is pressed.
 
 
-### Button Colors
-The following button colors are available:
+### Button Styling
+The button styling functions accept a Button object and return it too. They can be chained together or done seperately. For example
+```scala
+[DISABLE [COLOR [BUTTON "Green!" "green"] 3]]
+```
+is the same as
+```scala
+[DEFINE btn [BUTTON "Green!" "green"]]
+[COLOR [VAR btn] 3]
+[DISABLE [VAR btn]]
+
+[VAR btn]
+```
+
+Buttons can be enabled using `ENABLE` and `DISABLE`.
+
+Button colors can be set using the `COLOR` function. The following button colors are available:
 | ID | Color |
 | - | - |
 | 1 | Primary |
 | 2 | Secondary |
 | 3 | Danger |
 | 4 | Success | 
-
-
 
 ## Additional Tags
 The following tags are available in the bot in addition to the builtin tags:
