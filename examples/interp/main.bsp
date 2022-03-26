@@ -19,11 +19,11 @@
       [CASE "8" [DEFINE i [MATH [VAR i] + 1]]]
       [CASE "9" [DEFINE i [MATH [VAR i] + 1]]]
       [DEFAULT
-        [RETURN [COMPARE 0 == 1]]
+        [RETURN FALSE]
       ]
     ]
   ]
-  [RETURN [COMPARE 1 == 1]]
+  [RETURN TRUE]
 ]
 
 [FUNC ISFLOAT [PARAM src STRING] [RETURNS BOOL]
@@ -42,11 +42,11 @@
       [CASE "9" [DEFINE i [MATH [VAR i] + 1]]]
       [CASE "." [DEFINE i [MATH [VAR i] + 1]]]
       [DEFAULT
-        [RETURN [COMPARE 0 == 1]]
+        [RETURN FALSE]
       ]
     ]
   ]
-  [RETURN [COMPARE 1 == 1]]
+  [RETURN TRUE]
 ]
 
 [FUNC EVAL [PARAM src STRING] [RETURNS INT]
@@ -98,7 +98,7 @@
       [DEFINE bracks 1]
     ELSE
       [IF [COMPARE [INDEX [VAR src] [VAR i]] == "\""] Eat quote
-        [DEFINE openQuote [COMPARE 1 == 1]]
+        [DEFINE openQuote TRUE]
         [DEFINE i [MATH [VAR i] + 1]]
         [DEFINE arg "\""]
       ]
@@ -119,7 +119,7 @@
           ] # Eat rbrack
           [DEFINE bracks [MATH [VAR bracks] - 1]]
           [IF [AND [COMPARE [VAR bracks] < 1] [NOT [VAR openQuote]]]
-            [DEFINE done [COMPARE 1 == 1]]
+            [DEFINE done TRUE]
           ]
         ]
 
@@ -131,7 +131,7 @@
 
         [CASE " "
           [IF [AND [COMPARE [VAR bracks] == 0] [NOT [VAR openQuote]]]
-            [DEFINE done [COMPARE 1 == 1]]
+            [DEFINE done TRUE]
           ELSE
             [DEFINE arg [CONCAT [VAR arg] [INDEX [VAR src] [VAR i]]]]
           ]

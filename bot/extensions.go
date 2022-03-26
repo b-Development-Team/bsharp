@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"time"
+	"unicode"
 
 	"github.com/Nv7-Github/bsharp/backends/interpreter"
 	"github.com/Nv7-Github/bsharp/bot/db"
@@ -19,7 +20,8 @@ type extensionCtx struct {
 	Stdout *ctxWriter
 
 	// Info
-	Author string
+	Author      string
+	Multiplayer bool
 }
 
 func NewExtensionCtx(id string, dat *db.Data, ctx *Ctx) *extensionCtx {
@@ -47,6 +49,21 @@ var exts = []*ir.Extension{
 		Name:    "INPUT",
 		Params:  []types.Type{types.STRING},
 		RetType: types.STRING,
+	},
+	{
+		Name:    "MULTIPLAYER", // allows anyone to interact with the buttons and input, or disables
+		Params:  []types.Type{types.BOOL},
+		RetType: types.NULL,
+	},
+	{
+		Name:    "BUTTON",
+		Params:  []types.Type{types.STRING, types.STRING, types.INT, types.BOOL}, // text, id, color [1 for primary, 2 for secondary, 3 for danger, 4 for success], disabled
+		RetType: types.NewMapType(types.STRING, types.STRING),
+	},
+	{
+		Name:    "BUTTONS",
+		Params:  []types.Type{types.NewArrayType(types.NewArrayType(types.NewMapType(types.STRING, types.STRING)))}, // [][]btn
+		RetType: types.STRING,                                                                                       // id of button pressed
 	},
 }
 
@@ -115,6 +132,10 @@ func getExtensions(c *extensionCtx) []*interpreter.Extension {
 		interpreter.NewExtension("USERID", func(pars []interface{}) (interface{}, error) {
 			return c.Author, nil
 		}, []types.Type{}, types.STRING),
+		interpreter.NewExtension("MULTIPLAYER", func(pars []interface{}) (interface{}, error) {
+			c.Multiplayer = pars[0].(bool)
+			return nil, nil
+		}, []types.Type{}, types.STRING),
 		interpreter.NewExtension("INPUT", func(pars []interface{}) (interface{}, error) {
 			out := make(chan string)
 			prompt := pars[0].(string)
@@ -135,7 +156,7 @@ func getExtensions(c *extensionCtx) []*interpreter.Extension {
 				},
 			})
 			c.Stdout.BtnHandler(func(data discordgo.MessageComponentInteractionData, ctx *Ctx) {
-				if ctx.i.Member.User.ID != c.Stdout.i.Member.User.ID {
+				if !c.Multiplayer && ctx.i.Member.User.ID != c.Stdout.i.Member.User.ID {
 					return
 				}
 
@@ -173,5 +194,108 @@ func getExtensions(c *extensionCtx) []*interpreter.Extension {
 				return "", errors.New("user took more than 30 seconds to respond")
 			}
 		}, []types.Type{types.STRING}, types.STRING),
+		interpreter.NewExtension("BUTTON", func(pars []interface{}) (interface{}, error) {
+			cols := map[int]string{
+				1: "Primary",
+				2: "Secondary",
+				3: "Danger",
+				4: "Success",
+			}
+			col, exists := cols[pars[2].(int)]
+			if !exists {
+				return nil, errors.New("invalid color")
+			}
+			disabled := "false"
+			if pars[3].(bool) {
+				disabled = "true"
+			}
+
+			return map[string]interface{}{
+				"id":  pars[1].(string),
+				"txt": pars[0].(string),
+				"col": col,
+				"dis": disabled,
+			}, nil
+		}, []types.Type{types.STRING, types.STRING, types.INT, types.BOOL}, types.NewMapType(types.STRING, types.STRING)),
+		interpreter.NewExtension("BUTTONS", func(pars []interface{}) (interface{}, error) {
+			// Build actions row
+			r := *(pars[0].(*[]interface{}))
+			rows := make([]discordgo.MessageComponent, len(r))
+
+			var cols = map[string]discordgo.ButtonStyle{
+				"Primary":   discordgo.PrimaryButton,
+				"Secondary": discordgo.SecondaryButton,
+				"Danger":    discordgo.DangerButton,
+				"Success":   discordgo.SuccessButton,
+			}
+			for i, val := range r {
+				v := *val.(*[]interface{})
+				r := make([]discordgo.MessageComponent, len(v))
+				for j, btn := range v {
+					b := btn.(map[string]interface{})
+					col, ok := b["col"].(string)
+					if !ok {
+						return nil, errors.New("invalid color")
+					}
+					s, exists := cols[col]
+					if !exists {
+						return nil, errors.New("invalid color")
+					}
+
+					txt := b["txt"].(string)
+					if len([]rune(txt)) == 1 && []rune(txt)[0] > unicode.MaxASCII {
+						r[j] = discordgo.Button{
+							Emoji: discordgo.ComponentEmoji{
+								Name: txt,
+							},
+							CustomID: b["id"].(string),
+							Style:    s,
+							Disabled: b["dis"] == "true",
+						}
+					} else {
+						r[j] = discordgo.Button{
+							Label:    txt,
+							CustomID: b["id"].(string),
+							Style:    s,
+							Disabled: b["dis"] == "true",
+						}
+					}
+				}
+
+				rows[i] = discordgo.ActionsRow{
+					Components: r,
+				}
+			}
+
+			// Send
+			cmp := c.Stdout.cmps
+			c.Stdout.cmps = rows
+			err := c.Stdout.Flush()
+			if err != nil {
+				return nil, err
+			}
+
+			out := make(chan string)
+			c.Stdout.BtnHandler(func(data discordgo.MessageComponentInteractionData, ctx *Ctx) {
+				if !c.Multiplayer && ctx.i.Member.User.ID != c.Stdout.i.Member.User.ID {
+					return
+				}
+
+				c.Stdout.i = ctx.i
+				c.Stdout.isButton = true
+				c.Stdout.cmps = cmp
+				c.Stdout.Flush()
+				c.Stdout.AddBtnHandler()
+				out <- data.CustomID
+			})
+
+			select {
+			case rsp := <-out:
+				return rsp, nil
+
+			case <-time.After(time.Second * 30):
+				return "", errors.New("user took more than 30 seconds to respond")
+			}
+		}, []types.Type{types.NewArrayType(types.NewArrayType(types.NewMapType(types.STRING, types.STRING)))}, types.STRING),
 	}
 }

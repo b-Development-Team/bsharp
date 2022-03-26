@@ -4,6 +4,7 @@
 - [Hello World](#hello-world)
 - [Data Types](#data-types)
   - [Numbers](#numbers)
+  - [Booleans](#booleans)
   - [Strings](#strings)
   - [Arrays](#arrays)
   - [Maps](#maps)
@@ -78,6 +79,8 @@ A boolean can be one of two values: `true`, or `false`. The `COMPARE` function c
 [COMPARE 1 == 0]
 ```
 would be false.
+
+`TRUE` and `FALSE` are constants.
 
 The compare operators are:
 | Operator | Description |

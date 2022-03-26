@@ -28,16 +28,16 @@ func (c *Const) Code(cnf CodeConfig) string {
 		return strconv.FormatFloat(c.Value.(float64), 'f', -1, 64)
 
 	case types.STRING:
-		return fmt.Sprintf(`"%s"`, c.Value.(string))
+		return fmt.Sprintf("%q", c.Value.(string))
 
 	case types.IDENT:
 		return c.Value.(string)
 
 	case types.BOOL:
 		if c.Value.(bool) {
-			return "[COMPARE 1 == 1]"
+			return "TRUE"
 		}
-		return "[COMPARE 1 == 0]"
+		return "FALSE"
 
 	default:
 		return "[UNKNOWN CONST]"
@@ -55,6 +55,14 @@ func (b *Builder) buildString(n *parser.StringNode) Node {
 func (b *Builder) buildIdent(n *parser.IdentNode) Node {
 	return &Const{
 		typ:   types.IDENT,
+		pos:   n.Pos(),
+		Value: n.Value,
+	}
+}
+
+func (b *Builder) buildBool(n *parser.BoolNode) Node {
+	return &Const{
+		typ:   types.BOOL,
 		pos:   n.Pos(),
 		Value: n.Value,
 	}

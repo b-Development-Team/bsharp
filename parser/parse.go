@@ -18,6 +18,12 @@ func (p *Parser) ParseNode() (Node, error) {
 	case tokens.TokenTypeIdent:
 		t := p.t.Tok()
 		p.t.Eat()
+		if t.Value == "TRUE" || t.Value == "FALSE" {
+			return &BoolNode{
+				pos:   t.Pos,
+				Value: t.Value == "TRUE",
+			}, nil
+		}
 		return &IdentNode{
 			pos:   t.Pos,
 			Value: t.Value,

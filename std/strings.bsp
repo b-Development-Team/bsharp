@@ -18,10 +18,10 @@
   [WHILE [COMPARE [LENGTH [VAR sep]] <= [MATH [LENGTH [VAR str]] - [VAR i]]] # Loop until sep is not possible
     # Check if the next characters are the seperator
     [DEFINE j 0]
-    [DEFINE issep [COMPARE 1 == 1]]
+    [DEFINE issep TRUE]
     [WHILE [AND [COMPARE [VAR j] < [LENGTH [VAR sep]]] [VAR issep]]
       [IF [COMPARE [INDEX [VAR str] [MATH [VAR i] + [VAR j]]] != [INDEX [VAR sep] [VAR j]]]
-        [DEFINE issep [COMPARE 0 == 1]]
+        [DEFINE issep FALSE]
       ]
       [DEFINE j [MATH [VAR j] + 1]]
     ]

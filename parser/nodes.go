@@ -46,6 +46,19 @@ func (i *IdentNode) String() string {
 	return fmt.Sprintf("Ident(%s, %s)", i.Value, i.Pos().String())
 }
 
+type BoolNode struct {
+	pos   *tokens.Pos
+	Value bool
+}
+
+func (b *BoolNode) Pos() *tokens.Pos {
+	return b.pos
+}
+
+func (b *BoolNode) String() string {
+	return fmt.Sprintf("Bool(%t, %s)", b.Value, b.Pos().String())
+}
+
 type StringNode struct {
 	pos   *tokens.Pos
 	Value string
