@@ -22,84 +22,75 @@
 [DEFINE Y "[33m"] # Yellow
 [DEFINE G "[32m"] # Green
 
-# Get current word
-[DEFINE currword ""]
-[IF [COMPARE [DB EXISTS [CONCAT [USERID] "_curr"]] == "true"]
-  [DEFINE currword [DB GET [CONCAT [USERID] "_curr"]]]
-]
-[IF [COMPARE [VAR currword] == ""]
-  [DEFINE possible [DB GET "possible"]]
-  [DEFINE ind [RANDINT 0 [MATH [MATH [LENGTH [VAR possible]] / 6] - 1]]]
-  [DEFINE currword [SLICE [VAR possible] [MATH [VAR ind] * 6] [MATH [MATH [VAR ind] * 6] + 5]]]
-  [DB SET [CONCAT [USERID] "_curr"] [VAR currword]]
-]
-
-# Get guesses
-[DEFINE gdata ""]
-[IF [COMPARE [DB EXISTS [CONCAT [USERID] "_guesses"]] == "true"]
-  [DEFINE gdata [DB GET [CONCAT [USERID] "_guesses"]]]
-]
-[DEFINE guesses [SPLIT [VAR gdata] "|"]]
+# Setup vars
+[DEFINE possible [DB GET "possible"]]
+[DEFINE ind [RANDINT 0 [MATH [MATH [LENGTH [VAR possible]] / 6] - 1]]]
+[DEFINE currword [SLICE [VAR possible] [MATH [VAR ind] * 6] [MATH [MATH [VAR ind] * 6] + 5]]]
+[DEFINE guesses [MAKE STRING{}]]
 
 [PRINT [CONCAT "Loaded in " [STRING [MATH [TIME MILLI] - [VAR start]]] "ms."]]
 
 # Guess
-[DEFINE guess [INPUT "Guess a word"]]
+[DEFINE running TRUE]
+[DEFINE started FALSE]
 [FUNC DOGUESS
+  [IF [NOT [VAR started]]
+    [PRINT "===== Guesses =====```\n```ansi"]
+    [DEFINE started TRUE]
+  ]
+
+  [DEFINE guess [INPUT "Guess a word"]]
+
   [IF [NOT [EXISTS [VAR allowed] [VAR guess]]]
     [RETURN [PRINT "That's not a word!"]]
   ]
 
   # Save guess
   [APPEND [VAR guesses] [VAR guess]]
-  [DEFINE gdata [JOIN [VAR guesses] "|"]]
-  [DB SET [CONCAT [USERID] "_guesses"] [VAR gdata]]
 
   # Print guesses
-  [PRINT "===== Guesses =====```\n```ansi"]
-  [DEFINE i 0]
-  [WHILE [COMPARE [VAR i] < [LENGTH [VAR guesses]]]
-    [DEFINE guess [INDEX [VAR guesses] [VAR i]]]
-    [DEFINE j 0]
-    [DEFINE line ""]
-    [WHILE [COMPARE [VAR j] < [LENGTH [VAR guess]]]
-      [DEFINE char [INDEX [VAR guess] [VAR j]]]
-      [DEFINE color [VAR C]]
-      # Check if char in currword, if so make it yellow
-      [DEFINE k 0]
-      [WHILE [COMPARE [VAR k] < [LENGTH [VAR currword]]]
-        [IF [COMPARE [INDEX [VAR currword] [VAR k]] == [VAR char]]
-          [DEFINE color [VAR Y]]
-        ]
-        [DEFINE k [MATH [VAR k] + 1]]
+  [DEFINE line ""]
+  [DEFINE j 0]
+  [WHILE [COMPARE [VAR j] < [LENGTH [VAR guess]]]
+    [DEFINE char [INDEX [VAR guess] [VAR j]]]
+    [DEFINE color [VAR C]]
+    # Check if char in currword, if so make it yellow
+    [DEFINE k 0]
+    [WHILE [COMPARE [VAR k] < [LENGTH [VAR currword]]]
+      [IF [COMPARE [INDEX [VAR currword] [VAR k]] == [VAR char]]
+        [DEFINE color [VAR Y]]
       ]
-      # Check if char is correct
-      [IF [COMPARE [INDEX [VAR currword] [VAR j]] == [VAR char]]
-        [DEFINE color [VAR G]]
-      ]
-
-      # Make line
-      [DEFINE line [CONCAT [VAR line] [VAR color] "[" [VAR char] "]"]]
-
-      [DEFINE j [MATH [VAR j] + 1]]
+      [DEFINE k [MATH [VAR k] + 1]]
     ]
-    [PRINT [VAR line]]
-    [DEFINE i [MATH [VAR i] + 1]]
+    # Check if char is correct
+    [IF [COMPARE [INDEX [VAR currword] [VAR j]] == [VAR char]]
+      [DEFINE color [VAR G]]
+    ]
+
+    # Make line
+    [DEFINE line [CONCAT [VAR line] [VAR color] "[" [VAR char] "]"]]
+
+    [DEFINE j [MATH [VAR j] + 1]]
   ]
+  [PRINT [VAR line]]
 
   # Check if won
   [DEFINE guess [INDEX [VAR guesses] [MATH [LENGTH [VAR guesses]] - 1]]]
   [IF [COMPARE [VAR guess] == [VAR currword]]
-    [DB SET [CONCAT [USERID] "_guesses"] ""]
-    [DB SET [CONCAT [USERID] "_curr"] ""]
+    [DEFINE running FALSE]
     [RETURN [PRINT "```\n```You got the word!"]]
   ]
 
   # If done, then reset
   [IF [COMPARE [LENGTH [VAR guesses]] == 6]
-    [DB SET [CONCAT [USERID] "_guesses"] ""]
-    [DB SET [CONCAT [USERID] "_curr"] ""]
+    [DEFINE running FALSE]
     [RETURN [PRINT "```\n```Maybe you'll get it next time?"]]
   ]
+
+  # Wait for input, then continue
 ]
-[DOGUESS]
+
+[WHILE [VAR running]
+  [BUTTONS [ARRAY [ARRAY [COLOR [BUTTON "Continue" "cont"] 4]]]]
+  [DOGUESS]
+]
