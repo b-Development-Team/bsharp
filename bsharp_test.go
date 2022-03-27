@@ -60,19 +60,19 @@ func FuzzIR(f *testing.F) {
 		tok := tokens.NewTokenizer(s)
 		err := tok.Tokenize()
 		if err != nil {
-			return
+			t.Skip("can't tokenize")
 		}
 
 		p := parser.NewParser(tok)
 		err = p.Parse()
 		if err != nil {
-			return
+			t.Skip("can't parse")
 		}
 
 		bld := ir.NewBuilder()
 		err = bld.Build(p, &FuzzFS{})
 		if err != nil {
-			return
+			t.Skip("can't build")
 		}
 	})
 }
