@@ -121,8 +121,9 @@ Arrays are pointers. This means that a change to an array, like appending to it,
 [DEFINE a [ARRAY 1 2 3]]
 [DEFINE b [VAR a]]
 [APPEND [VAR a] 4]
+[SETINDEX [VAR a] 0 0]
 ```
-In this case, `b` will also have `4` as the last element.
+In this case, `b` will also have `4` as the last element, and `0` as the first element.
 
 ### Maps
 Maps represent key-value data. For example, take the following table.
