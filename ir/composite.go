@@ -57,6 +57,18 @@ func (i *IndexNode) Code(cnf CodeConfig) string {
 	return fmt.Sprintf("[INDEX %s %s]", i.Value.Code(cnf), i.Index.Code(cnf))
 }
 
+type SetIndexNode struct {
+	NullCall
+
+	Array Node
+	Index Node
+	Value Node
+}
+
+func (s *SetIndexNode) Code(cnf CodeConfig) string {
+	return fmt.Sprintf("[SETINDEX %s %s %s]", s.Array.Code(cnf), s.Index.Code(cnf), s.Value.Code(cnf))
+}
+
 func NewIndexNode(val, index Node) *IndexNode {
 	outTyp := types.Type(types.STRING)
 	if types.ARRAY.Equal(val.Type()) {
@@ -238,6 +250,23 @@ func init() {
 			}
 			return &MakeNode{
 				typ: typ,
+			}, nil
+		},
+	}
+
+	nodeBuilders["SETINDEX"] = nodeBuilder{
+		ArgTypes: []types.Type{types.ARRAY, types.INT, types.ANY},
+		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
+			// Check types
+			arrTyp := args[0].Type().(*types.ArrayType)
+			if !arrTyp.ElemType.Equal(args[2].Type()) {
+				return nil, args[2].Pos().Error("expected type %s for array value, got %s", arrTyp.ElemType.String(), args[2].Type().String())
+			}
+
+			return &SetIndexNode{
+				Array: args[0],
+				Index: args[1],
+				Value: args[2],
 			}, nil
 		},
 	}

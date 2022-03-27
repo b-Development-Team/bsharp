@@ -93,6 +93,9 @@ func (i *Interpreter) evalNode(node ir.Node) (*Value, error) {
 		case *ir.SliceNode:
 			return i.evalSlice(n.Pos(), c)
 
+		case *ir.SetIndexNode:
+			return i.evalSetIndex(n.Pos(), c)
+
 		default:
 			return nil, n.Pos().Error("unknown call node: %T", c)
 		}

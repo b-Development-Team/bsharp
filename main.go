@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/Nv7-Github/bsharp/backends/cgen"
@@ -61,6 +63,14 @@ func main() {
 		// Run
 		start = time.Now()
 		interp := interpreter.NewInterpreter(ir.IR(), os.Stdout)
+		// Cleanup function
+		c := make(chan os.Signal)
+		signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+		go func() {
+			<-c
+			interp.Stop("interrupted")
+		}()
+
 		err = interp.Run()
 		if err != nil {
 			p.Fail(err.Error())

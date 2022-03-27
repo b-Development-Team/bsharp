@@ -36,6 +36,27 @@ func (i *Interpreter) evalIndex(pos *tokens.Pos, n *ir.IndexNode) (*Value, error
 	}
 }
 
+func (i *Interpreter) evalSetIndex(pos *tokens.Pos, n *ir.SetIndexNode) (*Value, error) {
+	a, err := i.evalNode(n.Array)
+	if err != nil {
+		return nil, err
+	}
+	v, err := i.evalNode(n.Value)
+	if err != nil {
+		return nil, err
+	}
+	indV, err := i.evalNode(n.Index)
+	if err != nil {
+		return nil, err
+	}
+	ind := indV.Value.(int)
+	if ind > len(*a.Value.(*[]interface{})) {
+		return nil, pos.Error("index out of bounds: %d with length %d", ind, len(*a.Value.(*[]interface{})))
+	}
+	(*a.Value.(*[]interface{}))[ind] = v.Value
+	return NewValue(types.NULL, nil), nil
+}
+
 func (i *Interpreter) evalLength(pos *tokens.Pos, n *ir.LengthNode) (*Value, error) {
 	v, err := i.evalNode(n.Value)
 	if err != nil {
