@@ -250,5 +250,20 @@
       # Print time
       [PRINT [CONCAT "Calculated move in " [STRING [MATH [TIME MILLI] - [VAR start]]] "ms."]]
     ]
+
+    [DEFINE winner [WINNER [VAR state] 0]]
+    [IF [COMPARE [VAR winner] != -1]
+      [PRINT "```\n**Result:**\n```"]
+      [IF [COMPARE [VAR winner] == [VAR AI]]
+        [PRINT "AI wins!"]
+      ELSE
+        [IF [COMPARE [VAR winner] == [VAR PLAYER]]
+          [PRINT "Player wins!"]
+        ELSE
+          [PRINT "Tie!"]
+        ]
+      ]
+      [DEFINE running FALSE]
+    ]
   ]
 ]
