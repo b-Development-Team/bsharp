@@ -205,6 +205,7 @@
 
     [DEFINE winner [WINNER [VAR state] 0]]
     [IF [COMPARE [VAR winner] != -1]
+      [PRINT "```\n**Result:**\n```"]
       [IF [COMPARE [VAR winner] == [VAR AI]]
         [PRINT "AI wins!"]
       ELSE
