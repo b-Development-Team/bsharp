@@ -191,7 +191,7 @@ func (b *Bot) CompileCode(filename, src string, ctx *Ctx) (string, error) {
 	return cgen.Build()
 }
 
-const MaxTime = time.Second * 30
+const MaxTime = time.Second * 60
 
 func (b *Bot) RunCode(filename string, src string, ctx *Ctx, extensionCtx *extensionCtx) error {
 	ir, err := b.BuildCode(filename, src, ctx)
@@ -215,7 +215,7 @@ func (b *Bot) RunCode(filename string, src string, ctx *Ctx, extensionCtx *exten
 	go func() {
 		time.Sleep(MaxTime)
 		if !done {
-			interp.Stop("program exceeded time limit of 30 seconds")
+			interp.Stop("program exceeded time limit of 60 seconds")
 		}
 	}()
 
