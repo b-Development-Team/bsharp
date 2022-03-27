@@ -217,7 +217,6 @@
       [DEFINE running FALSE]
     ELSE
       [DEFINE start [TIME MILLI]]
-      [PRINT "Calculating..."]
 
       # Do AI turn, check best move
       [DEFINE y 0]
@@ -248,7 +247,7 @@
       [SETINDEX [INDEX [VAR state] [INDEX [VAR best] 0]] [INDEX [VAR best] 1] [VAR AI]]
 
       # Print time
-      [PRINT [CONCAT "Calculated in " [STRING [MATH [TIME MILLI] - [VAR start]]] "ms."]]
+      [PRINT [CONCAT "Calculated move in " [STRING [MATH [TIME MILLI] - [VAR start]]] "ms."]]
     ]
   ]
 ]
