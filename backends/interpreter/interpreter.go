@@ -20,10 +20,10 @@ type Interpreter struct {
 
 type Value struct {
 	Type  types.Type
-	Value interface{}
+	Value any
 }
 
-func NewValue(typ types.Type, val interface{}) *Value {
+func NewValue(typ types.Type, val any) *Value {
 	return &Value{
 		Type:  typ,
 		Value: val,

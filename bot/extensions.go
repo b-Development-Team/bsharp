@@ -84,7 +84,7 @@ var exts = []*ir.Extension{
 
 func getExtensions(c *extensionCtx) []*interpreter.Extension {
 	return []*interpreter.Extension{
-		interpreter.NewExtension("DB", func(pars []interface{}) (interface{}, error) {
+		interpreter.NewExtension("DB", func(pars []any) (any, error) {
 			// Get args
 			op := pars[0].(string)
 			args := make([]string, len(pars)-1)
@@ -144,14 +144,14 @@ func getExtensions(c *extensionCtx) []*interpreter.Extension {
 
 			return nil, fmt.Errorf("db: unknown operation %s", op)
 		}, []types.Type{types.IDENT, types.STRING, types.VARIADIC}, types.STRING),
-		interpreter.NewExtension("USERID", func(pars []interface{}) (interface{}, error) {
+		interpreter.NewExtension("USERID", func(pars []any) (any, error) {
 			return c.Author, nil
 		}, []types.Type{}, types.STRING),
-		interpreter.NewExtension("MULTIPLAYER", func(pars []interface{}) (interface{}, error) {
+		interpreter.NewExtension("MULTIPLAYER", func(pars []any) (any, error) {
 			c.Multiplayer = pars[0].(bool)
 			return nil, nil
 		}, []types.Type{}, types.STRING),
-		interpreter.NewExtension("INPUT", func(pars []interface{}) (interface{}, error) {
+		interpreter.NewExtension("INPUT", func(pars []any) (any, error) {
 			out := make(chan string)
 			prompt := pars[0].(string)
 			if len(prompt) > 45 {
@@ -209,23 +209,23 @@ func getExtensions(c *extensionCtx) []*interpreter.Extension {
 				return "", errors.New("user took more than 30 seconds to respond")
 			}
 		}, []types.Type{types.STRING}, types.STRING),
-		interpreter.NewExtension("BUTTON", func(pars []interface{}) (interface{}, error) {
-			return map[string]interface{}{
+		interpreter.NewExtension("BUTTON", func(pars []any) (any, error) {
+			return map[string]any{
 				"id":  pars[1].(string),
 				"txt": pars[0].(string),
 				"col": "Primary",
 				"dis": "false",
 			}, nil
 		}, []types.Type{types.STRING, types.STRING}, types.NewMapType(types.STRING, types.STRING)),
-		interpreter.NewExtension("DISABLE", func(pars []interface{}) (interface{}, error) {
-			pars[0].(map[string]interface{})["dis"] = "true"
+		interpreter.NewExtension("DISABLE", func(pars []any) (any, error) {
+			pars[0].(map[string]any)["dis"] = "true"
 			return pars[0], nil
 		}, []types.Type{types.NewMapType(types.STRING, types.STRING)}, types.NewMapType(types.STRING, types.STRING)),
-		interpreter.NewExtension("ENABLE", func(pars []interface{}) (interface{}, error) {
-			pars[0].(map[string]interface{})["dis"] = "false"
+		interpreter.NewExtension("ENABLE", func(pars []any) (any, error) {
+			pars[0].(map[string]any)["dis"] = "false"
 			return pars[0], nil
 		}, []types.Type{types.NewMapType(types.STRING, types.STRING)}, types.NewMapType(types.STRING, types.STRING)),
-		interpreter.NewExtension("COLOR", func(pars []interface{}) (interface{}, error) {
+		interpreter.NewExtension("COLOR", func(pars []any) (any, error) {
 			cols := map[int]string{
 				1: "Primary",
 				2: "Secondary",
@@ -236,12 +236,12 @@ func getExtensions(c *extensionCtx) []*interpreter.Extension {
 			if !exists {
 				return nil, errors.New("invalid color")
 			}
-			pars[0].(map[string]interface{})["col"] = col
+			pars[0].(map[string]any)["col"] = col
 			return pars[0], nil
 		}, []types.Type{types.NewMapType(types.STRING, types.STRING), types.INT}, types.NewMapType(types.STRING, types.STRING)),
-		interpreter.NewExtension("BUTTONS", func(pars []interface{}) (interface{}, error) {
+		interpreter.NewExtension("BUTTONS", func(pars []any) (any, error) {
 			// Build actions row
-			r := *(pars[0].(*[]interface{}))
+			r := *(pars[0].(*[]any))
 			rows := make([]discordgo.MessageComponent, len(r))
 
 			var cols = map[string]discordgo.ButtonStyle{
@@ -251,10 +251,10 @@ func getExtensions(c *extensionCtx) []*interpreter.Extension {
 				"Success":   discordgo.SuccessButton,
 			}
 			for i, val := range r {
-				v := *val.(*[]interface{})
+				v := *val.(*[]any)
 				r := make([]discordgo.MessageComponent, len(v))
 				for j, btn := range v {
-					b := btn.(map[string]interface{})
+					b := btn.(map[string]any)
 					col, ok := b["col"].(string)
 					if !ok {
 						return nil, errors.New("invalid color")

@@ -14,7 +14,7 @@ type Const struct {
 	typ types.Type
 	pos *tokens.Pos
 
-	Value interface{}
+	Value any
 }
 
 func (c *Const) Type() types.Type { return c.typ }
@@ -68,7 +68,7 @@ func (b *Builder) buildBool(n *parser.BoolNode) Node {
 	}
 }
 
-func NewConst(typ types.Type, pos *tokens.Pos, val interface{}) *Const {
+func NewConst(typ types.Type, pos *tokens.Pos, val any) *Const {
 	return &Const{
 		typ:   typ,
 		pos:   pos,

@@ -7,7 +7,7 @@ import (
 
 type Extension struct {
 	Name     string
-	Fn       func([]interface{}) (interface{}, error) // reflect.FuncOf
+	Fn       func([]any) (any, error) // reflect.FuncOf
 	ParTypes []types.Type
 	RetType  types.Type
 }
@@ -20,7 +20,7 @@ func (e *Extension) IRExtension() *ir.Extension {
 	}
 }
 
-func NewExtension(name string, fn func([]interface{}) (interface{}, error), parTypes []types.Type, retTyp types.Type) *Extension {
+func NewExtension(name string, fn func([]any) (any, error), parTypes []types.Type, retTyp types.Type) *Extension {
 	return &Extension{
 		Fn:       fn,
 		Name:     name,
@@ -31,7 +31,7 @@ func NewExtension(name string, fn func([]interface{}) (interface{}, error), parT
 func (i *Interpreter) evalExtensionCall(n *ir.ExtensionCall) (*Value, error) {
 	ext := i.extensions[n.Name]
 	// Build args
-	args := make([]interface{}, len(n.Args))
+	args := make([]any, len(n.Args))
 	for ind, arg := range n.Args {
 		val, err := i.evalNode(arg)
 		if err != nil {

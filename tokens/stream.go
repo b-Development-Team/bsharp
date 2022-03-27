@@ -8,7 +8,7 @@ type Pos struct {
 	Char int
 }
 
-func (p *Pos) Error(format string, args ...interface{}) error {
+func (p *Pos) Error(format string, args ...any) error {
 	return fmt.Errorf("%s: %s", p.String(), fmt.Sprintf(format, args...))
 }
 

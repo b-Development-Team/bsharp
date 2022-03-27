@@ -18,7 +18,7 @@ func (i *Interpreter) evalIndex(pos *tokens.Pos, n *ir.IndexNode) (*Value, error
 	ind := indV.Value.(int)
 	switch v.Type.BasicType() {
 	case types.ARRAY:
-		a := *v.Value.(*[]interface{})
+		a := *v.Value.(*[]any)
 		if ind < 0 || ind >= len(a) {
 			return nil, pos.Error("index out of bounds: %d with length %d", ind, len(a))
 		}
@@ -50,10 +50,10 @@ func (i *Interpreter) evalSetIndex(pos *tokens.Pos, n *ir.SetIndexNode) (*Value,
 		return nil, err
 	}
 	ind := indV.Value.(int)
-	if ind > len(*a.Value.(*[]interface{})) {
-		return nil, pos.Error("index out of bounds: %d with length %d", ind, len(*a.Value.(*[]interface{})))
+	if ind > len(*a.Value.(*[]any)) {
+		return nil, pos.Error("index out of bounds: %d with length %d", ind, len(*a.Value.(*[]any)))
 	}
-	(*a.Value.(*[]interface{}))[ind] = v.Value
+	(*a.Value.(*[]any))[ind] = v.Value
 	return NewValue(types.NULL, nil), nil
 }
 
@@ -64,7 +64,7 @@ func (i *Interpreter) evalLength(pos *tokens.Pos, n *ir.LengthNode) (*Value, err
 	}
 	switch v.Type.BasicType() {
 	case types.ARRAY:
-		a := *v.Value.(*[]interface{})
+		a := *v.Value.(*[]any)
 		return NewValue(types.INT, len(a)), nil
 
 	case types.STRING:
@@ -74,13 +74,13 @@ func (i *Interpreter) evalLength(pos *tokens.Pos, n *ir.LengthNode) (*Value, err
 	case types.MAP:
 		switch v.Type.(*types.MapType).KeyType {
 		case types.INT:
-			return NewValue(types.INT, len(v.Value.(map[int]interface{}))), nil
+			return NewValue(types.INT, len(v.Value.(map[int]any))), nil
 
 		case types.FLOAT:
-			return NewValue(types.INT, len(v.Value.(map[float64]interface{}))), nil
+			return NewValue(types.INT, len(v.Value.(map[float64]any))), nil
 
 		case types.STRING:
-			return NewValue(types.INT, len(v.Value.(map[string]interface{}))), nil
+			return NewValue(types.INT, len(v.Value.(map[string]any))), nil
 		}
 	}
 
@@ -90,19 +90,19 @@ func (i *Interpreter) evalLength(pos *tokens.Pos, n *ir.LengthNode) (*Value, err
 func (i *Interpreter) evalMake(pos *tokens.Pos, n *ir.MakeNode) (*Value, error) {
 	typ, ok := n.Type().(*types.MapType)
 	if !ok { // Its an array if not map
-		v := make([]interface{}, 0)
+		v := make([]any, 0)
 		return NewValue(n.Type(), &v), nil
 	}
-	var out interface{}
+	var out any
 	switch typ.KeyType.BasicType() {
 	case types.INT:
-		out = make(map[int]interface{})
+		out = make(map[int]any)
 
 	case types.FLOAT:
-		out = make(map[float64]interface{})
+		out = make(map[float64]any)
 
 	case types.STRING:
-		out = make(map[string]interface{})
+		out = make(map[string]any)
 
 	default:
 		return nil, pos.Error("cannot make map with key type %s", typ.KeyType.String())
@@ -126,13 +126,13 @@ func (i *Interpreter) evalSet(pos *tokens.Pos, n *ir.SetNode) (*Value, error) {
 	}
 	switch k.Type.BasicType() {
 	case types.INT:
-		m.Value.(map[int]interface{})[k.Value.(int)] = v.Value
+		m.Value.(map[int]any)[k.Value.(int)] = v.Value
 
 	case types.FLOAT:
-		m.Value.(map[float64]interface{})[k.Value.(float64)] = v.Value
+		m.Value.(map[float64]any)[k.Value.(float64)] = v.Value
 
 	case types.STRING:
-		m.Value.(map[string]interface{})[k.Value.(string)] = v.Value
+		m.Value.(map[string]any)[k.Value.(string)] = v.Value
 
 	default:
 		return nil, pos.Error("cannot set map with key type %s", k.Type.String())
@@ -150,17 +150,17 @@ func (i *Interpreter) evalGet(pos *tokens.Pos, n *ir.GetNode) (*Value, error) {
 	if err != nil {
 		return nil, err
 	}
-	var out interface{}
+	var out any
 	var exists bool
 	switch k.Type.BasicType() {
 	case types.INT:
-		out, exists = m.Value.(map[int]interface{})[k.Value.(int)]
+		out, exists = m.Value.(map[int]any)[k.Value.(int)]
 
 	case types.FLOAT:
-		out, exists = m.Value.(map[float64]interface{})[k.Value.(float64)]
+		out, exists = m.Value.(map[float64]any)[k.Value.(float64)]
 
 	case types.STRING:
-		out, exists = m.Value.(map[string]interface{})[k.Value.(string)]
+		out, exists = m.Value.(map[string]any)[k.Value.(string)]
 
 	default:
 		return nil, pos.Error("cannot get map with key type %s", k.Type.String())
@@ -178,11 +178,11 @@ func (i *Interpreter) evalKeys(pos *tokens.Pos, n *ir.KeysNode) (*Value, error) 
 	if err != nil {
 		return nil, err
 	}
-	var out []interface{}
+	var out []any
 	switch m.Type.(*types.MapType).KeyType.BasicType() {
 	case types.INT:
-		v := m.Value.(map[int]interface{})
-		out = make([]interface{}, len(v))
+		v := m.Value.(map[int]any)
+		out = make([]any, len(v))
 		i := 0
 		for k := range v {
 			out[i] = k
@@ -190,8 +190,8 @@ func (i *Interpreter) evalKeys(pos *tokens.Pos, n *ir.KeysNode) (*Value, error) 
 		}
 
 	case types.FLOAT:
-		v := m.Value.(map[float64]interface{})
-		out = make([]interface{}, len(v))
+		v := m.Value.(map[float64]any)
+		out = make([]any, len(v))
 		i := 0
 		for k := range v {
 			out[i] = k
@@ -199,8 +199,8 @@ func (i *Interpreter) evalKeys(pos *tokens.Pos, n *ir.KeysNode) (*Value, error) 
 		}
 
 	case types.STRING:
-		v := m.Value.(map[string]interface{})
-		out = make([]interface{}, len(v))
+		v := m.Value.(map[string]any)
+		out = make([]any, len(v))
 		i := 0
 		for k := range v {
 			out[i] = k
@@ -223,13 +223,13 @@ func (i *Interpreter) evalExists(pos *tokens.Pos, n *ir.ExistsNode) (*Value, err
 	var exists bool
 	switch k.Type.BasicType() {
 	case types.INT:
-		_, exists = m.Value.(map[int]interface{})[k.Value.(int)]
+		_, exists = m.Value.(map[int]any)[k.Value.(int)]
 
 	case types.FLOAT:
-		_, exists = m.Value.(map[float64]interface{})[k.Value.(float64)]
+		_, exists = m.Value.(map[float64]any)[k.Value.(float64)]
 
 	case types.STRING:
-		_, exists = m.Value.(map[string]interface{})[k.Value.(string)]
+		_, exists = m.Value.(map[string]any)[k.Value.(string)]
 
 	default:
 		return nil, pos.Error("cannot get map with key type %s", k.Type.String())
@@ -239,7 +239,7 @@ func (i *Interpreter) evalExists(pos *tokens.Pos, n *ir.ExistsNode) (*Value, err
 }
 
 func (i *Interpreter) evalArray(n *ir.ArrayNode) (*Value, error) {
-	out := make([]interface{}, len(n.Values))
+	out := make([]any, len(n.Values))
 	for ind, v := range n.Values {
 		val, err := i.evalNode(v)
 		if err != nil {
@@ -255,7 +255,7 @@ func (i *Interpreter) evalAppend(n *ir.AppendNode) (*Value, error) {
 	if err != nil {
 		return nil, err
 	}
-	v := arr.Value.(*[]interface{})
+	v := arr.Value.(*[]any)
 
 	val, err := i.evalNode(n.Value)
 	if err != nil {
@@ -288,7 +288,7 @@ func (i *Interpreter) evalSlice(pos *tokens.Pos, n *ir.SliceNode) (*Value, error
 
 	switch v.Type.BasicType() {
 	case types.ARRAY:
-		a := v.Value.(*[]interface{})
+		a := v.Value.(*[]any)
 		if start.Value.(int) >= len(*a) {
 			return nil, pos.Error("start index out of bounds: %d with length %d", start.Value.(int), len(*a))
 		}
