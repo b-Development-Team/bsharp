@@ -101,7 +101,7 @@ func (b *Builder) functionPass(p *parser.Parser) error {
 				}
 				retTypV, ok := retTypVal.Args[0].(*parser.IdentNode)
 				if !ok {
-					return retTypV.Pos().Error("expected return type")
+					return retTypVal.Args[0].Pos().Error("expected return type")
 				}
 				var err error
 				retType, err = types.ParseType(retTypV.Value)
@@ -203,9 +203,19 @@ func (b *Builder) buildFnDef(n *parser.CallNode) error {
 	}
 
 	// Get name
+	if len(n.Args) == 0 {
+		return n.Pos().Error("invalid function definition")
+	}
+	_, ok := n.Args[len(n.Args)-1].(*parser.IdentNode)
+	if !ok {
+		return n.Pos().Error("invalid function definition")
+	}
 	name := n.Args[len(n.Args)-1].(*parser.IdentNode).Value
 	n.Args = n.Args[:len(n.Args)-1]
-	fn := b.Funcs[name]
+	fn, exists := b.Funcs[name]
+	if !exists {
+		return n.Pos().Error("invalid function definition")
+	}
 
 	// Add params
 	b.Scope.Push(ScopeTypeFunction)

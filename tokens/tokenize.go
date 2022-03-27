@@ -51,10 +51,12 @@ func (t *Tokenizer) Tokenize() error {
 			t.s.Eat()
 
 		case '-':
-			switch t.s.Peek(1) {
-			case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
-				t.addNum()
-				break Tokens
+			if t.s.CanPeek(1) {
+				switch t.s.Peek(1) {
+				case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+					t.addNum()
+					break Tokens
+				}
 			}
 			fallthrough
 
@@ -104,7 +106,7 @@ func (t *Tokenizer) addString() {
 			break
 		}
 
-		if t.s.Char() == '\\' { // escaped characters
+		if t.s.Char() == '\\' && t.s.CanPeek(1) { // escaped characters
 			t.s.Eat()
 			switch t.s.Char() {
 			case 'n':

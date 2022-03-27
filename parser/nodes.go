@@ -26,7 +26,7 @@ func (n *CallNode) String() string {
 			args.WriteString(" ")
 		}
 	}
-	return fmt.Sprintf("(%s)[%s %s]", n.Pos().String(), n.Name, args)
+	return fmt.Sprintf("(%s)][%s %s]", n.Pos().String(), n.Name, args)
 }
 
 func (n *CallNode) Pos() *tokens.Pos {

@@ -17,6 +17,7 @@
 # Data
 bot/test/data/*
 a.c
+testdata/*
 
 # Secret!
 bot/test/token.txt

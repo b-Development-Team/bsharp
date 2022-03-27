@@ -44,6 +44,10 @@ func (s *Stream) Char() rune {
 	return s.code[s.pos]
 }
 
+func (s *Stream) CanPeek(off int) bool {
+	return s.pos+off < len(s.code)
+}
+
 func (s *Stream) Peek(off int) rune {
 	return s.code[s.pos+off]
 }
