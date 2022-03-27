@@ -189,7 +189,7 @@
 
 # Turns
 [DEFINE turn [VAR PLAYER]]
-[PRINT "==Welcome to Tic Tac Toe!=="]
+[PRINT "==Welcome to Tic Tac Toe!==```\n**AI Logs:**\n```"]
 [DEFINE running TRUE]
 [WHILE [VAR running]
   [DEFINE click [SHOWBOARD [VAR state]]]
