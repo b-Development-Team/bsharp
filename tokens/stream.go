@@ -3,13 +3,37 @@ package tokens
 import "fmt"
 
 type Pos struct {
-	File string
-	Line int
-	Char int
+	File    string
+	Line    int
+	Char    int
+	EndLine int
+	EndChar int
+}
+
+type PosError struct {
+	Msg string
+	Pos *Pos
+}
+
+func (p *PosError) Error() string {
+	return fmt.Sprintf("%s: %s", p.Pos.String(), p.Msg)
 }
 
 func (p *Pos) Error(format string, args ...any) error {
-	return fmt.Errorf("%s: %s", p.String(), fmt.Sprintf(format, args...))
+	return &PosError{
+		Msg: fmt.Sprintf(format, args...),
+		Pos: p,
+	}
+}
+
+func (a *Pos) Extend(b *Pos) *Pos {
+	return &Pos{
+		File:    a.File,
+		Line:    a.Line,
+		Char:    a.Char,
+		EndLine: b.EndLine,
+		EndChar: b.EndChar,
+	}
 }
 
 func (p *Pos) String() string {
@@ -57,6 +81,9 @@ func (s *Stream) Pos() *Pos {
 		File: s.file,
 		Line: s.line,
 		Char: s.char,
+
+		EndLine: s.line,
+		EndChar: s.char + 1,
 	}
 }
 

@@ -86,6 +86,7 @@ func (t *Tokenizer) addNum() {
 		}
 
 		val += string(t.s.Char())
+		pos = pos.Extend(t.s.Pos())
 		t.s.Eat()
 	}
 	t.addToken(Token{
@@ -102,6 +103,7 @@ func (t *Tokenizer) addString() {
 	val := ""
 	for t.s.HasNext() {
 		if t.s.Char() == '"' {
+			pos = pos.Extend(t.s.Pos())
 			t.s.Eat()
 			break
 		}
@@ -146,6 +148,7 @@ func (t *Tokenizer) addIdent() {
 		}
 
 		val += string(t.s.Char())
+		pos = pos.Extend(t.s.Pos())
 		t.s.Eat()
 	}
 

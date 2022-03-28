@@ -56,6 +56,7 @@ func (p *Parser) ParseNode() (Node, error) {
 	args := make([]Node, 0)
 	for p.t.HasNext() {
 		if p.t.Tok().Typ == tokens.TokenTypeRBrack { // Eat ]
+			pos = pos.Extend(p.t.Tok().Pos)
 			p.t.Eat()
 			break
 		}
