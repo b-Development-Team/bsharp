@@ -21,3 +21,6 @@ testdata/*
 
 # Secret!
 bot/test/token.txt
+
+# Compiled LSP
+lsp/lsp
