@@ -189,7 +189,8 @@
 
 # Turns
 [DEFINE turn [VAR PLAYER]]
-[PRINT "==Welcome to Tic Tac Toe!==```\n**AI Logs:**\n```"]
+[DEFINE startedlogs FALSE]
+[PRINT "==Welcome to Tic Tac Toe!=="]
 [DEFINE running TRUE]
 [WHILE [VAR running]
   [DEFINE click [SHOWBOARD [VAR state]]]
@@ -205,7 +206,7 @@
 
     [DEFINE winner [WINNER [VAR state] 0]]
     [IF [COMPARE [VAR winner] != -1]
-      [PRINT "```\n**Result:**\n```"]
+      [PRINT "```\n**Result:**\n"]
       [IF [COMPARE [VAR winner] == [VAR AI]]
         [PRINT "AI wins!"]
       ELSE
@@ -248,22 +249,27 @@
       [SETINDEX [INDEX [VAR state] [INDEX [VAR best] 0]] [INDEX [VAR best] 1] [VAR AI]]
 
       # Print time
-      [PRINT [CONCAT "Calculated move in " [STRING [MATH [TIME MILLI] - [VAR start]]] "ms."]]
-    ]
-
-    [DEFINE winner [WINNER [VAR state] 0]]
-    [IF [COMPARE [VAR winner] != -1]
-      [PRINT "```\n**Result:**\n```"]
-      [IF [COMPARE [VAR winner] == [VAR AI]]
-        [PRINT "AI wins!"]
-      ELSE
-        [IF [COMPARE [VAR winner] == [VAR PLAYER]]
-          [PRINT "Player wins!"]
-        ELSE
-          [PRINT "Tie!"]
-        ]
+      [IF [NOT [VAR startedlogs]]
+        [PRINT "```\n**AI Logs:**\n```"]
+        [DEFINE startedlogs TRUE]
       ]
-      [DEFINE running FALSE]
+      [PRINT [CONCAT "Calculated move in " [STRING [MATH [TIME MILLI] - [VAR start]]] "ms."]]
+
+      # Check winner
+      [DEFINE winner [WINNER [VAR state] 0]]
+      [IF [COMPARE [VAR winner] != -1]
+        [PRINT "```\n**Result:**\n```"]
+        [IF [COMPARE [VAR winner] == [VAR AI]]
+          [PRINT "AI wins!"]
+        ELSE
+          [IF [COMPARE [VAR winner] == [VAR PLAYER]]
+            [PRINT "Player wins!"]
+          ELSE
+            [PRINT "Tie!"]
+          ]
+        ]
+        [DEFINE running FALSE]
+      ]
     ]
   ]
 ]
