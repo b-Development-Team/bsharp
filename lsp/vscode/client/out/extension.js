@@ -21,7 +21,7 @@ function activate(context) {
         documentSelector: [{ scheme: "file", pattern: "*.bsp" }, { scheme: "file", "language": "plaintext" }]
     };
     // Create the language client and start the client.
-    client = new node_1.LanguageClient('language ServerExample', 'Language Server Example', serverOptions, clientOptions);
+    client = new node_1.LanguageClient('bsharp', 'B# Language Server', serverOptions, clientOptions);
     client.onReady().then(() => {
         console.log("Example client ready"); // will NOT be logged
     });

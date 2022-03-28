@@ -59,3 +59,27 @@ func (b *Builder) buildExtensionCall(n *parser.CallNode) (Node, error) {
 		pos:  n.Pos(),
 	}, nil
 }
+
+type BuiltinFn struct {
+	Name   string
+	Params []types.Type // nil if block builder
+}
+
+func BuiltinFns() []*BuiltinFn {
+	out := make([]*BuiltinFn, len(nodeBuilders)+len(blockBuilders))
+	i := 0
+	for name, builder := range nodeBuilders {
+		out[i] = &BuiltinFn{
+			Name:   name,
+			Params: builder.ArgTypes,
+		}
+		i++
+	}
+	for name := range blockBuilders {
+		out[i] = &BuiltinFn{
+			Name: name,
+		}
+		i++
+	}
+	return out
+}

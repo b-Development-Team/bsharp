@@ -1,8 +1,6 @@
 package main
 
 import (
-	"log"
-
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"
 	"github.com/tliron/glsp/server"
@@ -12,7 +10,7 @@ import (
 	_ "github.com/tliron/kutil/logging/simple"
 )
 
-const lsName = "my language"
+const lsName = "B#"
 
 var version string = "0.0.1"
 var handler protocol.Handler
@@ -31,7 +29,10 @@ func main() {
 		Shutdown:               shutdown,
 		SetTrace:               setTrace,
 		TextDocumentCompletion: textDocumentCompletion,
-		CompletionItemResolve:  completionItemResolve,
+		TextDocumentDidOpen:    textDocumentDidOpen,
+		TextDocumentDidChange:  textDocumentDidChange,
+		TextDocumentDidClose:   textDocumentDidClose,
+		TextDocumentDidSave:    textDocumentDidSave,
 	}
 
 	server := server.NewServer(&handler, lsName, false)
@@ -39,26 +40,14 @@ func main() {
 	server.RunStdio()
 }
 
-func textDocumentCompletion(context *glsp.Context, params *protocol.CompletionParams) (interface{}, error) {
-	var completionItems []protocol.CompletionItem
-	completionItems = append(completionItems, protocol.CompletionItem{
-		Label: "server",
-		Kind:  Ptr(protocol.CompletionItemKindFile),
-	})
-	log.Println("COMPLETION")
-	return completionItems, nil
-}
-
-func completionItemResolve(context *glsp.Context, params *protocol.CompletionItem) (*protocol.CompletionItem, error) {
-	return params, nil
-}
-
 func initialize(context *glsp.Context, params *protocol.InitializeParams) (interface{}, error) {
 	capabilities := handler.CreateServerCapabilities()
 	capabilities.CompletionProvider = &protocol.CompletionOptions{
-		ResolveProvider:   Ptr(true),
-		TriggerCharacters: []string{"#"},
+		TriggerCharacters: []string{"["},
 	}
+	capabilities.TextDocumentSync = Ptr(protocol.TextDocumentSyncKindIncremental)
+
+	Root = *params.RootPath
 
 	return protocol.InitializeResult{
 		Capabilities: capabilities,

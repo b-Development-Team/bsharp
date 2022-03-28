@@ -32,8 +32,8 @@ export function activate(context: ExtensionContext) {
 
 	// Create the language client and start the client.
 	client = new LanguageClient(
-		'language ServerExample',
-		'Language Server Example',
+		'bsharp',
+		'B# Language Server',
 		serverOptions,
 		clientOptions
 	);
