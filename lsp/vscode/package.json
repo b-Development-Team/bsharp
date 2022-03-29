@@ -23,27 +23,27 @@
 	"contributes": {
 		"configuration": {
 			"type": "object",
-			"title": "Example configuration",
+			"title": "B#",
 			"properties": {
-				"languageServerExample.maxNumberOfProblems": {
+				"bsharp.discordSupport": {
 					"scope": "resource",
-					"type": "number",
-					"default": 100,
+					"type": "boolean",
+					"default": false,
 					"description": "Controls the maximum number of problems produced by the server."
-				},
-				"languageServerExample.trace.server": {
-					"scope": "window",
-					"type": "string",
-					"enum": [
-						"off",
-						"messages",
-						"verbose"
-					],
-					"default": "off",
-					"description": "Traces the communication between VS Code and the language server."
 				}
 			}
-		}
+		},
+		"languages": [{
+			"id": "bsharp",
+			"aliases": ["B#", "bsharp"],
+			"extensions": ["bsp", "bsharp"],
+			"configuration": "./language-configuration.json"
+		}],
+		"grammars": [{
+			"language": "bsharp",
+			"scopeName": "source.bsharp",
+			"path": "./language-highlight.json"
+		}]
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",

@@ -27,7 +27,7 @@ export function activate(context: ExtensionContext) {
 	// Options to control the language client
 	const clientOptions: LanguageClientOptions = {
 		// Register the server for plain text documents
-		documentSelector: [{ scheme: "file", pattern: "*.bsp"}, {scheme: "file", "language": "plaintext"}]
+		documentSelector: [{scheme: "file", "language": "bsharp"}]
 	};
 
 	// Create the language client and start the client.
@@ -37,10 +37,6 @@ export function activate(context: ExtensionContext) {
 		serverOptions,
 		clientOptions
 	);
-
-	client.onReady().then(() => {
-    console.log("Example client ready"); // will NOT be logged
-	});
 
 
 	// Start the client. This will also launch the server

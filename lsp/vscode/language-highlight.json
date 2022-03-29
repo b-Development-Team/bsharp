@@ -1,0 +1,47 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "scopeName": "source.bsharp",
+  "patterns": [{ "include": "#node" }, { "include": "#comment" }],
+  "repository": {
+    "value": {
+      "patterns": [{ "include": "#node" }, { "include": "#comment" }, { "include": "#string" }, { "include": "#number" }, { "include": "#type" }, { "include": "#operator" }, { "include": "#ident" }]
+    },
+    "operator": {
+      "match": "\\+|-|\\*|\\/|%|==|!=|<=|>=|<|>|\\^",
+      "name": "keyword.operator.bsharp"
+    },
+    "type": {
+      "match": "MAP\\{[A-Z{}]+\\}.+|FUNC\\{[A-Z{}]+\\}(?:.+)?|[A-Z{}]+\\{\\}|INT|STRING|FLOAT|BOOL",
+      "name": "entity.name.type"
+    },
+    "ident": {
+      "match": "(?:\\p{L}|\\{|\\})+",
+      "name": "token.ident.bsharp",
+      "patterns": [{ "include": "#operator" }, { "include": "#type" }]
+    },
+    "number": {
+      "match": "(?:-)?(?:[0-9]|\\.)+",
+      "name": "constant.numeric.bsharp"
+    },
+    "string": {
+      "match": "\".+\"",
+      "name": "string.bsharp"
+    },
+    "comment": {
+      "begin": "#",
+      "end": "#|\\n",
+      "name": "comment.bsharp"
+    },
+    "node": {
+      "begin": "\\[([A-Z]+) ",
+      "end": "\\]",
+      "captures": {
+        "1": {
+          "name": "keyword.function.bsharp"
+        }
+      },
+      "name": "expression.tag.bsharp",
+      "patterns": [{ "include": "#value" }]
+    }
+  }
+}

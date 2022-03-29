@@ -45,7 +45,7 @@ func initialize(context *glsp.Context, params *protocol.InitializeParams) (inter
 	capabilities.CompletionProvider = &protocol.CompletionOptions{
 		TriggerCharacters: []string{"["},
 	}
-	capabilities.TextDocumentSync = Ptr(protocol.TextDocumentSyncKindIncremental)
+	capabilities.TextDocumentSync = Ptr(protocol.TextDocumentSyncKindFull)
 
 	Root = *params.RootPath
 

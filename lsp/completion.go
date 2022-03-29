@@ -17,7 +17,13 @@ func textDocumentCompletion(context *glsp.Context, params *protocol.CompletionPa
 
 	// Find the word
 	var word string
-	for i := pos - 1; i >= 0; i-- {
+	if pos <= 0 {
+		return nil, nil
+	}
+	for i := int(pos - 1); i >= 0; i-- {
+		if i < 0 {
+			break
+		}
 		if line[i] == '[' {
 			break
 		}
@@ -32,6 +38,16 @@ func textDocumentCompletion(context *glsp.Context, params *protocol.CompletionPa
 				Label: fn.Name,
 				Kind:  Ptr(protocol.CompletionItemKindFunction),
 			})
+		}
+	}
+	if doc.IRCache != nil {
+		for _, fn := range doc.IRCache.Funcs {
+			if strings.HasPrefix(fn.Name, word) {
+				out = append(out, protocol.CompletionItem{
+					Label: fn.Name,
+					Kind:  Ptr(protocol.CompletionItemKindFunction),
+				})
+			}
 		}
 	}
 

@@ -42,7 +42,15 @@ func textDocumentDidSave(context *glsp.Context, params *protocol.DidSaveTextDocu
 	}
 	ir := ir.NewBuilder()
 	err = ir.Build(p, fs)
-	if err == nil { // No error
+	if err == nil { // No error, save IR cache, clear diagnostics
+		doc := Documents[params.TextDocument.URI]
+		doc.IRCache = ir.IR()
+
+		// Clear diagnostics
+		context.Notify(protocol.ServerTextDocumentPublishDiagnostics, protocol.PublishDiagnosticsParams{
+			URI:         params.TextDocument.URI,
+			Diagnostics: []protocol.Diagnostic{},
+		})
 		return nil
 	}
 	v, ok := err.(*tokens.PosError)

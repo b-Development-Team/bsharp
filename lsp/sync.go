@@ -1,21 +1,37 @@
 package main
 
 import (
+	"path/filepath"
 	"strings"
 
+	"github.com/Nv7-Github/bsharp/ir"
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
 type Document struct {
-	Lines []string
+	Lines   []string
+	IRCache *ir.IR
 }
 
 var Documents = map[string]*Document{}
 
 func textDocumentDidOpen(context *glsp.Context, params *protocol.DidOpenTextDocumentParams) error {
-	Documents[params.TextDocument.URI] = &Document{
+	doc := &Document{
 		Lines: strings.Split(params.TextDocument.Text, "\n"),
+	}
+	Documents[params.TextDocument.URI] = doc
+
+	// Build IR Cache if possible
+	path := strings.TrimPrefix(params.TextDocument.URI, "file://")
+	fs := &FS{}
+	p, err := fs.Parse(filepath.Base(path))
+	if err == nil {
+		bld := ir.NewBuilder()
+		err = bld.Build(p, fs)
+		if err == nil { // No error, save IR cache
+			doc.IRCache = bld.IR()
+		}
 	}
 	return nil
 }
@@ -28,21 +44,8 @@ func textDocumentDidClose(context *glsp.Context, params *protocol.DidCloseTextDo
 func textDocumentDidChange(context *glsp.Context, params *protocol.DidChangeTextDocumentParams) error {
 	doc := Documents[params.TextDocument.URI]
 	for _, change := range params.ContentChanges {
-		c := change.(protocol.TextDocumentContentChangeEvent)
-		for i := c.Range.Start.Line; i <= c.Range.End.Line; i++ {
-			if i < uint32(len(doc.Lines)) {
-				// Update line
-				if c.Range.Start.Character == 0 && c.Range.End.Character == 0 {
-					// Replace whole line
-					doc.Lines[i] = c.Text
-				} else {
-					// Replace part of line
-					doc.Lines[i] = doc.Lines[i][:c.Range.Start.Character] + c.Text + doc.Lines[i][c.Range.End.Character:]
-				}
-			} else {
-				doc.Lines = append(doc.Lines, c.Text)
-			}
-		}
+		c := change.(protocol.TextDocumentContentChangeEventWhole)
+		doc.Lines = strings.Split(c.Text, "\n")
 	}
 	return nil
 }
