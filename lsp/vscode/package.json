@@ -1,14 +1,14 @@
 {
-	"name": "lsp-sample",
-	"description": "A language server example",
+	"name": "bsharp",
+	"description": "The B# programming language!",
 	"author": "Microsoft Corporation",
 	"license": "MIT",
 	"version": "1.0.0",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/Microsoft/vscode-extension-samples"
+		"url": "https://github.com/b-Development-Team/bsharp"
 	},
-	"publisher": "vscode-samples",
+	"publisher": "Nv7",
 	"categories": [],
 	"keywords": [
 		"multi-root ready"
@@ -17,22 +17,10 @@
 		"vscode": "^1.63.0"
 	},
 	"activationEvents": [
-		"onLanguage:plaintext"
+		"onLanguage:bsharp"
 	],
 	"main": "./client/out/extension",
 	"contributes": {
-		"configuration": {
-			"type": "object",
-			"title": "B#",
-			"properties": {
-				"bsharp.discordSupport": {
-					"scope": "resource",
-					"type": "boolean",
-					"default": false,
-					"description": "Controls the maximum number of problems produced by the server."
-				}
-			}
-		},
 		"languages": [{
 			"id": "bsharp",
 			"aliases": ["B#", "bsharp"],

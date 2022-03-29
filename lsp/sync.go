@@ -33,6 +33,7 @@ func textDocumentDidOpen(context *glsp.Context, params *protocol.DidOpenTextDocu
 			doc.IRCache = bld.IR()
 		}
 	}
+
 	return nil
 }
 

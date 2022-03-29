@@ -13,6 +13,7 @@ import (
 )
 
 var Root string
+var RootURI string
 
 type FS struct{}
 
@@ -34,9 +35,9 @@ func (d *FS) Parse(name string) (*parser.Parser, error) {
 
 func textDocumentDidSave(context *glsp.Context, params *protocol.DidSaveTextDocumentParams) error {
 	// Run when doc is saved
-	path := strings.TrimPrefix(params.TextDocument.URI, "file://")
+	path := strings.TrimPrefix(params.TextDocument.URI, RootURI)
 	fs := &FS{}
-	p, err := fs.Parse(filepath.Base(path))
+	p, err := fs.Parse(path)
 	if err != nil {
 		return nil // Invalid code, don't run diagnostics
 	}

@@ -48,6 +48,7 @@ func initialize(context *glsp.Context, params *protocol.InitializeParams) (inter
 	capabilities.TextDocumentSync = Ptr(protocol.TextDocumentSyncKindFull)
 
 	Root = *params.RootPath
+	RootURI = *params.RootURI
 
 	return protocol.InitializeResult{
 		Capabilities: capabilities,
