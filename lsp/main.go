@@ -34,6 +34,7 @@ func main() {
 		TextDocumentDidClose:           textDocumentDidClose,
 		TextDocumentDidSave:            textDocumentDidSave,
 		TextDocumentSemanticTokensFull: semanticTokensFull,
+		TextDocumentHover:              docHover,
 	}
 
 	server := server.NewServer(&handler, lsName, false)
@@ -55,6 +56,7 @@ func initialize(context *glsp.Context, params *protocol.InitializeParams) (inter
 		Range: false,
 		Full:  true,
 	}
+	capabilities.HoverProvider = true
 
 	Root = *params.RootPath
 	RootURI = *params.RootURI
