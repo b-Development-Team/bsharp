@@ -4,20 +4,11 @@
   "patterns": [{ "include": "#node" }, { "include": "#comment" }],
   "repository": {
     "value": {
-      "patterns": [{ "include": "#node" }, { "include": "#comment" }, { "include": "#string" }, { "include": "#number" }, { "include": "#type" }, { "include": "#operator" }, { "include": "#ident" }]
-    },
-    "operator": {
-      "match": "\\+|-|\\*|\\/|%|==|!=|<=|>=|<|>|\\^",
-      "name": "keyword.operator.bsharp"
-    },
-    "type": {
-      "match": "MAP\\{[A-Z{}]+\\}.+|FUNC\\{[A-Z{}]+\\}(?:.+)?|[A-Z{}]+\\{\\}|INT|STRING|FLOAT|BOOL",
-      "name": "entity.name.type"
+      "patterns": [{ "include": "#node" }, { "include": "#comment" }, { "include": "#string" }, { "include": "#number" }, { "include": "#ident" }]
     },
     "ident": {
-      "match": "(?:\\p{L}|\\{|\\})+",
-      "name": "token.ident.bsharp",
-      "patterns": [{ "include": "#operator" }, { "include": "#type" }]
+      "match": "(?:\\p{L}|\\{|\\}|\\+|-|\\*|\\/|%|==|!=|<=|>=|<|>|\\^)+",
+      "name": "token.ident.bsharp"
     },
     "number": {
       "match": "(?:-)?(?:[0-9]|\\.)+",

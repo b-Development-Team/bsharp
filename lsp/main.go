@@ -24,15 +24,16 @@ func main() {
 	logging.Configure(1, nil)
 
 	handler = protocol.Handler{
-		Initialize:             initialize,
-		Initialized:            initialized,
-		Shutdown:               shutdown,
-		SetTrace:               setTrace,
-		TextDocumentCompletion: textDocumentCompletion,
-		TextDocumentDidOpen:    textDocumentDidOpen,
-		TextDocumentDidChange:  textDocumentDidChange,
-		TextDocumentDidClose:   textDocumentDidClose,
-		TextDocumentDidSave:    textDocumentDidSave,
+		Initialize:                     initialize,
+		Initialized:                    initialized,
+		Shutdown:                       shutdown,
+		SetTrace:                       setTrace,
+		TextDocumentCompletion:         textDocumentCompletion,
+		TextDocumentDidOpen:            textDocumentDidOpen,
+		TextDocumentDidChange:          textDocumentDidChange,
+		TextDocumentDidClose:           textDocumentDidClose,
+		TextDocumentDidSave:            textDocumentDidSave,
+		TextDocumentSemanticTokensFull: semanticTokensFull,
 	}
 
 	server := server.NewServer(&handler, lsName, false)
@@ -46,6 +47,14 @@ func initialize(context *glsp.Context, params *protocol.InitializeParams) (inter
 		TriggerCharacters: []string{"["},
 	}
 	capabilities.TextDocumentSync = Ptr(protocol.TextDocumentSyncKindFull)
+	capabilities.SemanticTokensProvider = protocol.SemanticTokensOptions{
+		Legend: protocol.SemanticTokensLegend{
+			TokenTypes:     []string{string(protocol.SemanticTokenTypeType), string(protocol.SemanticTokenTypeVariable), string(protocol.SemanticTokenTypeFunction)},
+			TokenModifiers: []string{},
+		},
+		Range: false,
+		Full:  true,
+	}
 
 	Root = *params.RootPath
 	RootURI = *params.RootURI

@@ -5,13 +5,16 @@ import (
 	"strings"
 
 	"github.com/Nv7-Github/bsharp/ir"
+	"github.com/Nv7-Github/bsharp/tokens"
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
 type Document struct {
-	Lines   []string
-	IRCache *ir.IR
+	Lines          []string
+	IRCache        *ir.IR
+	Tokens         *tokens.Tokenizer
+	SemanticTokens *protocol.SemanticTokens
 }
 
 var Documents = map[string]*Document{}
@@ -34,6 +37,15 @@ func textDocumentDidOpen(context *glsp.Context, params *protocol.DidOpenTextDocu
 		}
 	}
 
+	// Semantic tokens
+	tok := tokens.NewTokenizer(tokens.NewStream(strings.TrimPrefix(params.TextDocument.URI, RootURI), params.TextDocument.Text))
+	err = tok.Tokenize()
+	if err != nil {
+		return nil
+	}
+	doc.Tokens = tok
+	updateDocTokenCache(doc)
+
 	return nil
 }
 
@@ -44,9 +56,16 @@ func textDocumentDidClose(context *glsp.Context, params *protocol.DidCloseTextDo
 
 func textDocumentDidChange(context *glsp.Context, params *protocol.DidChangeTextDocumentParams) error {
 	doc := Documents[params.TextDocument.URI]
-	for _, change := range params.ContentChanges {
-		c := change.(protocol.TextDocumentContentChangeEventWhole)
-		doc.Lines = strings.Split(c.Text, "\n")
+	c := params.ContentChanges[0].(protocol.TextDocumentContentChangeEventWhole)
+	doc.Lines = strings.Split(c.Text, "\n")
+
+	// Tokenize
+	tok := tokens.NewTokenizer(tokens.NewStream(strings.TrimPrefix(params.TextDocument.URI, RootURI), c.Text))
+	err := tok.Tokenize()
+	if err != nil {
+		return nil
 	}
+	doc.Tokens = tok
+	updateDocTokenCache(doc)
 	return nil
 }
