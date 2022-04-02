@@ -34,7 +34,7 @@ func NewExtensionCtx(id string, dat *db.Data, ctx *Ctx) *extensionCtx {
 	return extCtx
 }
 
-var exts = []*ir.Extension{
+var Exts = []*ir.Extension{
 	{
 		Name:    "DB",
 		Params:  []types.Type{types.IDENT, types.STRING, types.VARIADIC},

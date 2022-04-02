@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/Nv7-Github/bsharp/ir"
 	"github.com/Nv7-Github/bsharp/parser"
 	"github.com/Nv7-Github/bsharp/tokens"
 	"github.com/tliron/glsp"
@@ -35,16 +34,16 @@ func (d *FS) Parse(name string) (*parser.Parser, error) {
 
 func textDocumentDidSave(context *glsp.Context, params *protocol.DidSaveTextDocumentParams) error {
 	// Run when doc is saved
+	doc := Documents[params.TextDocument.URI]
 	path := strings.TrimPrefix(params.TextDocument.URI, RootURI)
 	fs := &FS{}
 	p, err := fs.Parse(path)
 	if err != nil {
 		return nil // Invalid code, don't run diagnostics
 	}
-	ir := ir.NewBuilder()
+	ir := getBld(doc)
 	err = ir.Build(p, fs)
 	if err == nil { // No error, save IR cache, clear diagnostics
-		doc := Documents[params.TextDocument.URI]
 		doc.IRCache = ir.IR()
 
 		// Clear diagnostics

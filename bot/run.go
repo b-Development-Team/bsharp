@@ -172,7 +172,7 @@ func (b *Bot) BuildCode(filename string, src string, ctx *Ctx) (*ir.IR, error) {
 		return nil, err
 	}
 	bld := ir.NewBuilder()
-	for _, ext := range exts {
+	for _, ext := range Exts {
 		bld.AddExtension(ext)
 	}
 	err = bld.Build(parser, &fs{b: b, gld: ctx.Guild()})

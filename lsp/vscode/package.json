@@ -21,17 +21,39 @@
 	],
 	"main": "./client/out/extension",
 	"contributes": {
-		"languages": [{
-			"id": "bsharp",
-			"aliases": ["B#", "bsharp"],
-			"extensions": ["bsp", "bsharp"],
-			"configuration": "./language-configuration.json"
-		}],
-		"grammars": [{
-			"language": "bsharp",
-			"scopeName": "source.bsharp",
-			"path": "./language-highlight.json"
-		}]
+		"languages": [
+			{
+				"id": "bsharp",
+				"aliases": [
+					"B#",
+					"bsharp"
+				],
+				"extensions": [
+					"bsp",
+					"bsharp"
+				],
+				"configuration": "./language-configuration.json"
+			}
+		],
+		"grammars": [
+			{
+				"language": "bsharp",
+				"scopeName": "source.bsharp",
+				"path": "./language-highlight.json"
+			}
+		],
+		"configuration": {
+			"type": "object",
+			"title": "B#",
+			"properties": {
+				"discordSupport": {
+					"scope": "resource",
+					"type": "boolean",
+					"default": false,
+					"description": "Whether to include the discord extension."
+				}
+			}
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",

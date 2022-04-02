@@ -3,6 +3,7 @@ package main
 import (
 	"strings"
 
+	"github.com/Nv7-Github/bsharp/bot"
 	"github.com/Nv7-Github/bsharp/ir"
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"
@@ -38,6 +39,16 @@ func textDocumentCompletion(context *glsp.Context, params *protocol.CompletionPa
 				Label: fn.Name,
 				Kind:  Ptr(protocol.CompletionItemKindFunction),
 			})
+		}
+	}
+	if doc.Config.DiscordSupport {
+		for _, fn := range bot.Exts {
+			if strings.HasPrefix(fn.Name, word) {
+				out = append(out, protocol.CompletionItem{
+					Label: fn.Name,
+					Kind:  Ptr(protocol.CompletionItemKindFunction),
+				})
+			}
 		}
 	}
 	if doc.IRCache != nil {

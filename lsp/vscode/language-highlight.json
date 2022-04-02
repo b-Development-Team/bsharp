@@ -15,8 +15,18 @@
       "name": "constant.numeric.bsharp"
     },
     "string": {
-      "match": "\".+\"",
-      "name": "string.bsharp"
+			"begin": "\"",
+			"end": "\"",
+			"name": "string.bsharp",
+			"patterns": [
+				{
+					"include": "#string_escaped_char"
+				}
+			]
+    },
+    "string_escaped_char": {
+			"match": "\\\\[n\"\\\\]",
+			"name": "constant.character.escape"
     },
     "comment": {
       "begin": "#",

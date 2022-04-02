@@ -1,7 +1,6 @@
 package main
 
 import (
-	"path/filepath"
 	"strings"
 
 	"github.com/Nv7-Github/bsharp/ir"
@@ -15,6 +14,7 @@ type Document struct {
 	IRCache        *ir.IR
 	Tokens         *tokens.Tokenizer
 	SemanticTokens *protocol.SemanticTokens
+	Config         *Config
 }
 
 var Documents = map[string]*Document{}
@@ -25,26 +25,16 @@ func textDocumentDidOpen(context *glsp.Context, params *protocol.DidOpenTextDocu
 	}
 	Documents[params.TextDocument.URI] = doc
 
-	// Build IR Cache if possible
-	path := strings.TrimPrefix(params.TextDocument.URI, "file://")
-	fs := &FS{}
-	p, err := fs.Parse(filepath.Base(path))
-	if err == nil {
-		bld := ir.NewBuilder()
-		err = bld.Build(p, fs)
-		if err == nil { // No error, save IR cache
-			doc.IRCache = bld.IR()
-		}
-	}
+	go func() {
+		doc.Config = config(context, params.TextDocument.URI)
 
-	// Semantic tokens
-	tok := tokens.NewTokenizer(tokens.NewStream(strings.TrimPrefix(params.TextDocument.URI, RootURI), params.TextDocument.Text))
-	err = tok.Tokenize()
-	if err != nil {
-		return nil
-	}
-	doc.Tokens = tok
-	updateDocTokenCache(doc)
+		// Build IR Cache if possible
+		buildDoc(doc, params.TextDocument.URI)
+
+		// Semantic tokens
+		tokenizeDoc(doc, params.TextDocument.URI, params.TextDocument.Text)
+
+	}()
 
 	return nil
 }
@@ -58,14 +48,6 @@ func textDocumentDidChange(context *glsp.Context, params *protocol.DidChangeText
 	doc := Documents[params.TextDocument.URI]
 	c := params.ContentChanges[0].(protocol.TextDocumentContentChangeEventWhole)
 	doc.Lines = strings.Split(c.Text, "\n")
-
-	// Tokenize
-	tok := tokens.NewTokenizer(tokens.NewStream(strings.TrimPrefix(params.TextDocument.URI, RootURI), c.Text))
-	err := tok.Tokenize()
-	if err != nil {
-		return nil
-	}
-	doc.Tokens = tok
-	updateDocTokenCache(doc)
+	tokenizeDoc(doc, params.TextDocument.URI, c.Text)
 	return nil
 }
