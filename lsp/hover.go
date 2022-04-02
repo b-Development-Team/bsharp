@@ -10,27 +10,32 @@ import (
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
+func tokID(pos protocol.Position, doc *Document) int {
+	if doc.Tokens == nil || doc.IRCache == nil {
+		return -1
+	}
+	id := -1
+	for i, tok := range doc.Tokens.Tokens {
+		if tok.Pos.Line > int(pos.Line) || (tok.Pos.Line == int(pos.Line) && tok.Pos.Char > int(pos.Character)) {
+			break
+		}
+		id = i
+	}
+	return id
+}
+
 func docHover(context *glsp.Context, params *protocol.HoverParams) (*protocol.Hover, error) {
 	// Find token
 	doc, exists := Documents[params.TextDocument.URI]
 	if !exists {
 		return nil, nil
 	}
-	if doc.Tokens == nil || doc.IRCache == nil {
-		return nil, nil
-	}
-	id := -1
-	for i, tok := range doc.Tokens.Tokens {
-		if tok.Pos.Line > int(params.Position.Line) || (tok.Pos.Line == int(params.Position.Line) && tok.Pos.Char > int(params.Position.Character)) {
-			break
-		}
-		id = i
-	}
-	if id < 1 {
+	id := tokID(params.Position, doc)
+	if id < 0 {
 		return nil, nil
 	}
 
-	// Check if function
+	// Check if function, get name
 	var name *string = nil
 	prev := doc.Tokens.Tokens[id-1]
 	tok := doc.Tokens.Tokens[id]
