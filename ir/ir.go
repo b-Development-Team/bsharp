@@ -23,6 +23,10 @@ type Call interface {
 	Code(CodeConfig) string
 }
 
+type Block interface {
+	Code(CodeConfig) string
+}
+
 type Param struct {
 	ID   int
 	Name string

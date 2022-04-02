@@ -39,9 +39,6 @@ func (cg *CGen) AddNode(node ir.Node) (*Code, error) {
 		case *ir.CastNode:
 			return cg.addCast(c)
 
-		case *ir.IfNode:
-			return cg.addIf(c)
-
 		case *ir.CompareNode:
 			return cg.addCompare(c)
 
@@ -72,14 +69,8 @@ func (cg *CGen) AddNode(node ir.Node) (*Code, error) {
 		case *ir.LengthNode:
 			return cg.addLength(c)
 
-		case *ir.WhileNode:
-			return cg.addWhile(c)
-
 		case *ir.KeysNode:
 			return cg.addKeys(c)
-
-		case *ir.SwitchNode:
-			return cg.addSwitch(c)
 
 		case *ir.ExistsNode:
 			return cg.addExists(c)
@@ -94,6 +85,21 @@ func (cg *CGen) AddNode(node ir.Node) (*Code, error) {
 
 		default:
 			return nil, n.Pos().Error("unknown call node: %T", c)
+		}
+
+	case *ir.BlockNode:
+		switch b := n.Block.(type) {
+		case *ir.IfNode:
+			return cg.addIf(b)
+
+		case *ir.WhileNode:
+			return cg.addWhile(b)
+
+		case *ir.SwitchNode:
+			return cg.addSwitch(b)
+
+		default:
+			return nil, n.Pos().Error("unknown block node: %T", b)
 		}
 
 	case *ir.Const:

@@ -14,7 +14,7 @@ type nodeBuilder struct {
 var nodeBuilders = make(map[string]nodeBuilder)
 
 type blockBuilder struct {
-	Build func(b *Builder, pos *tokens.Pos, args []parser.Node) (Call, error)
+	Build func(b *Builder, pos *tokens.Pos, args []parser.Node) (Block, error)
 }
 
 var blockBuilders = make(map[string]blockBuilder)
@@ -27,6 +27,15 @@ type CallNode struct {
 func (c *CallNode) Pos() *tokens.Pos           { return c.pos }
 func (c *CallNode) Type() types.Type           { return c.Call.Type() }
 func (c *CallNode) Code(cnf CodeConfig) string { return c.Call.Code(cnf) }
+
+type BlockNode struct {
+	pos   *tokens.Pos
+	Block Block
+}
+
+func (b *BlockNode) Pos() *tokens.Pos           { return b.pos }
+func (b *BlockNode) Type() types.Type           { return types.NULL }
+func (b *BlockNode) Code(cnf CodeConfig) string { return b.Block.Code(cnf) }
 
 func NewCallNode(call Call, pos *tokens.Pos) *CallNode {
 	return &CallNode{
@@ -43,11 +52,11 @@ func (b *Builder) buildNode(node parser.Node) (Node, error) {
 			// Block?
 			blkBuilder, exists := blockBuilders[n.Name]
 			if exists {
-				call, err := blkBuilder.Build(b, n.Pos(), n.Args)
+				blk, err := blkBuilder.Build(b, n.Pos(), n.Args)
 				if err != nil {
 					return nil, err
 				}
-				return &CallNode{n.Pos(), call}, nil
+				return &BlockNode{n.Pos(), blk}, nil
 			}
 
 			// Special case?

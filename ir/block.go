@@ -25,10 +25,12 @@ func bodyCode(cnf CodeConfig, body []Node) string {
 }
 
 type IfNode struct {
-	NullCall
 	Condition Node
 	Body      []Node
+	Scope     *ScopeInfo
+
 	Else      []Node // nil if no else
+	ElseScope *ScopeInfo
 }
 
 func (i *IfNode) Code(cnf CodeConfig) string {
@@ -39,9 +41,9 @@ func (i *IfNode) Code(cnf CodeConfig) string {
 }
 
 type WhileNode struct {
-	NullCall
 	Condition Node
 	Body      []Node
+	Scope     *ScopeInfo
 }
 
 func (w *WhileNode) Code(cnf CodeConfig) string {
@@ -49,9 +51,9 @@ func (w *WhileNode) Code(cnf CodeConfig) string {
 }
 
 type Case struct {
-	NullCall
 	Value *Const
 	Body  []Node
+	Scope *ScopeInfo
 }
 
 func (c *Case) Code(cnf CodeConfig) string {
@@ -59,8 +61,8 @@ func (c *Case) Code(cnf CodeConfig) string {
 }
 
 type Default struct {
-	NullCall
-	Body []Node
+	Body  []Node
+	Scope *ScopeInfo
 }
 
 func (d *Default) Code(cnf CodeConfig) string {
@@ -68,19 +70,9 @@ func (d *Default) Code(cnf CodeConfig) string {
 }
 
 type SwitchNode struct {
-	NullCall
 	Value   Node
 	Cases   []*Case
 	Default []Node // if nil, no default
-}
-
-type BlockNode struct {
-	NullCall
-	Body []Node
-}
-
-func (b *BlockNode) Code(cnf CodeConfig) string {
-	return fmt.Sprintf("[BLOCK\n%s]", bodyCode(cnf, b.Body))
 }
 
 func (s *SwitchNode) Code(cnf CodeConfig) string {
@@ -112,7 +104,7 @@ func (s *SwitchNode) Code(cnf CodeConfig) string {
 
 func init() {
 	blockBuilders["IF"] = blockBuilder{
-		Build: func(b *Builder, pos *tokens.Pos, args []parser.Node) (Call, error) {
+		Build: func(b *Builder, pos *tokens.Pos, args []parser.Node) (Block, error) {
 			if len(args) < 2 {
 				return nil, pos.Error("IF requires at least 2 arguments")
 			}
@@ -127,9 +119,9 @@ func init() {
 
 			body := make([]Node, 0, len(args)-1)
 			hasElse := false
-			var els []Node
+			var els []parser.Node
 			b.Scope.Push(ScopeTypeIf)
-			for _, arg := range args[1:] {
+			for i, arg := range args[1:] {
 				// ELSE?
 				_, ok := arg.(*parser.IdentNode)
 				if ok && arg.(*parser.IdentNode).Value == "ELSE" {
@@ -137,7 +129,8 @@ func init() {
 						return nil, arg.Pos().Error("ELSE can only be used once in IF statement")
 					}
 					hasElse = true
-					els = make([]Node, 0, len(args)-1)
+					els = args[i+1:]
+					args = args[:i]
 					continue
 				}
 
@@ -147,22 +140,42 @@ func init() {
 				}
 				if !hasElse {
 					body = append(body, node)
-				} else {
-					els = append(els, node)
 				}
 			}
+			scope := b.Scope.CurrScopeInfo()
 			b.Scope.Pop()
+
+			if els != nil {
+				elsBody := make([]Node, 0, len(els))
+				b.Scope.Push(ScopeTypeIf)
+				for _, v := range els {
+					node, err := b.buildNode(v)
+					if err != nil {
+						return nil, err
+					}
+					elsBody = append(elsBody, node)
+				}
+				elsscope := b.Scope.CurrScopeInfo()
+				b.Scope.Pop()
+				return &IfNode{
+					Condition: cond,
+					Body:      body,
+					Scope:     scope,
+					Else:      elsBody,
+					ElseScope: elsscope,
+				}, nil
+			}
 
 			return &IfNode{
 				Condition: cond,
 				Body:      body,
-				Else:      els,
+				Scope:     scope,
 			}, nil
 		},
 	}
 
 	blockBuilders["WHILE"] = blockBuilder{
-		Build: func(b *Builder, pos *tokens.Pos, args []parser.Node) (Call, error) {
+		Build: func(b *Builder, pos *tokens.Pos, args []parser.Node) (Block, error) {
 			if len(args) < 2 {
 				return nil, pos.Error("WHILE requires at least 2 arguments")
 			}
@@ -189,7 +202,7 @@ func init() {
 	}
 
 	blockBuilders["CASE"] = blockBuilder{
-		Build: func(b *Builder, pos *tokens.Pos, args []parser.Node) (Call, error) {
+		Build: func(b *Builder, pos *tokens.Pos, args []parser.Node) (Block, error) {
 			if b.Scope.CurrType() != ScopeTypeSwitch {
 				return nil, pos.Error("CASE can only be used inside SWITCH")
 			}
@@ -226,7 +239,7 @@ func init() {
 	}
 
 	blockBuilders["DEFAULT"] = blockBuilder{
-		Build: func(b *Builder, pos *tokens.Pos, args []parser.Node) (Call, error) {
+		Build: func(b *Builder, pos *tokens.Pos, args []parser.Node) (Block, error) {
 			if b.Scope.CurrType() != ScopeTypeSwitch {
 				return nil, pos.Error("DEFAULT can only be used inside SWITCH")
 			}
@@ -251,7 +264,7 @@ func init() {
 	}
 
 	blockBuilders["SWITCH"] = blockBuilder{
-		Build: func(b *Builder, pos *tokens.Pos, args []parser.Node) (Call, error) {
+		Build: func(b *Builder, pos *tokens.Pos, args []parser.Node) (Block, error) {
 			if len(args) < 2 {
 				return nil, pos.Error("SWITCH requires at least 2 arguments")
 			}
@@ -273,14 +286,14 @@ func init() {
 				if err != nil {
 					return nil, err
 				}
-				call, ok := node.(*CallNode)
+				blk, ok := node.(*BlockNode)
 				if !ok {
 					return nil, v.Pos().Error("expected case")
 				}
-				cs, ok := call.Call.(*Case)
+				cs, ok := blk.Block.(*Case)
 				if !ok {
 					// Default
-					defaul, ok := call.Call.(*Default)
+					defaul, ok := blk.Block.(*Default)
 					if ok {
 						if def != nil {
 							return nil, node.Pos().Error("only one default case allowed")
@@ -300,28 +313,6 @@ func init() {
 				Value:   val,
 				Cases:   cases,
 				Default: def,
-			}, nil
-		},
-	}
-
-	blockBuilders["BLOCK"] = blockBuilder{
-		Build: func(b *Builder, pos *tokens.Pos, args []parser.Node) (Call, error) {
-			if len(args) < 1 {
-				return nil, pos.Error("BLOCK requires at least 1 argument")
-			}
-			body := make([]Node, len(args)-1)
-			var err error
-			b.Scope.Push(ScopeTypeBlock)
-			for i, v := range args[1:] {
-				body[i], err = b.buildNode(v)
-				if err != nil {
-					return nil, err
-				}
-			}
-			b.Scope.Pop()
-
-			return &BlockNode{
-				Body: body,
 			}, nil
 		},
 	}

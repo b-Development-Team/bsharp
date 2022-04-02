@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Nv7-Github/bsharp/parser"
 	"github.com/Nv7-Github/bsharp/tokens"
 	"github.com/Nv7-Github/bsharp/types"
 )
@@ -74,20 +73,21 @@ func init() {
 		},
 	}
 
-	blockBuilders["TIME"] = blockBuilder{
-		Build: func(b *Builder, pos *tokens.Pos, args []parser.Node) (Call, error) {
+	nodeBuilders["TIME"] = nodeBuilder{
+		ArgTypes: []types.Type{types.IDENT, types.VARIADIC},
+		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
 			if len(args) > 1 {
 				return nil, pos.Error("TIME takes 0 or 1 arguments")
 			}
 
 			mode := TimeModeSeconds
 			if len(args) == 1 {
-				i, ok := args[0].(*parser.IdentNode)
+				i, ok := args[0].(*Const)
 				if !ok {
 					return nil, pos.Error("TIME mode must be an identifier")
 				}
 
-				m, ok := timeModeNames[i.Value]
+				m, ok := timeModeNames[i.Value.(string)]
 				if !ok {
 					return nil, pos.Error("TIME mode must be SECONDS, MICRO, MILLI, or NANO")
 				}

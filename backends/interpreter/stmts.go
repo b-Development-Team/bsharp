@@ -39,9 +39,6 @@ func (i *Interpreter) evalNode(node ir.Node) (*Value, error) {
 		case *ir.ConcatNode:
 			return i.evalConcat(c)
 
-		case *ir.IfNode:
-			return NewValue(types.NULL, nil), i.evalIfNode(c)
-
 		case *ir.CompareNode:
 			return i.evalCompareNode(n.Pos(), c)
 
@@ -51,9 +48,6 @@ func (i *Interpreter) evalNode(node ir.Node) (*Value, error) {
 		case *ir.LengthNode:
 			return i.evalLength(n.Pos(), c)
 
-		case *ir.WhileNode:
-			return NewValue(types.NULL, nil), i.evalWhileNode(c)
-
 		case *ir.MakeNode:
 			return i.evalMake(n.Pos(), c)
 
@@ -62,9 +56,6 @@ func (i *Interpreter) evalNode(node ir.Node) (*Value, error) {
 
 		case *ir.GetNode:
 			return i.evalGet(n.Pos(), c)
-
-		case *ir.SwitchNode:
-			return NewValue(types.NULL, nil), i.evalSwitchNode(c)
 
 		case *ir.ArrayNode:
 			return i.evalArray(c)
@@ -98,6 +89,21 @@ func (i *Interpreter) evalNode(node ir.Node) (*Value, error) {
 
 		default:
 			return nil, n.Pos().Error("unknown call node: %T", c)
+		}
+
+	case *ir.BlockNode:
+		switch b := n.Block.(type) {
+		case *ir.IfNode:
+			return NewValue(types.NULL, nil), i.evalIfNode(b)
+
+		case *ir.WhileNode:
+			return NewValue(types.NULL, nil), i.evalWhileNode(b)
+
+		case *ir.SwitchNode:
+			return NewValue(types.NULL, nil), i.evalSwitchNode(b)
+
+		default:
+			return nil, n.Pos().Error("unknown block node: %T", b)
 		}
 
 	case *ir.FnCallNode:

@@ -11,18 +11,20 @@ func (n NullCall) Type() types.Type { return types.NULL }
 
 func MatchTypes(pos *tokens.Pos, args []Node, typs []types.Type) error {
 	if len(typs) > 0 && typs[len(typs)-1] == types.VARIADIC { // last type is variadic, check up to that
-		if len(args) < len(typs)-1 {
-			return pos.Error("wrong number of arguments: expected at least %d, got %d", len(typs)-1, len(args))
+		if len(args) < len(typs)-2 { // Ignore last 2 since variadic means 0 or more
+			return pos.Error("wrong number of arguments: expected at least %d, got %d", len(typs)-2, len(args))
 		}
-		for i, t := range typs {
-			if t.Equal(types.VARIADIC) {
-				return nil
-			}
-
-			if !t.Equal(args[i].Type()) {
+		for i, v := range args {
+			if i < len(typs)-3 && !v.Type().Equal(typs[i]) {
 				return args[i].Pos().Error("wrong argument type: expected %s, got %s", typs[i], args[i].Type())
 			}
+
+			if i >= len(typs)-3 && !v.Type().Equal(typs[len(typs)-2]) {
+				return args[i].Pos().Error("wrong variadic argument type: expected %s, got %s", typs[len(typs)-2], args[i].Type())
+			}
 		}
+
+		return nil
 	}
 	if len(args) != len(typs) {
 		return pos.Error("wrong number of arguments: expected %d, got %d", len(typs), len(args))

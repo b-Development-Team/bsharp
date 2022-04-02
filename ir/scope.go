@@ -14,7 +14,6 @@ const (
 	ScopeTypeWhile
 	ScopeTypeSwitch
 	ScopeTypeCase
-	ScopeTypeBlock
 )
 
 type Variable struct {
@@ -35,6 +34,11 @@ type Scope struct {
 	Variables []*Variable
 }
 
+type ScopeInfo struct {
+	Type      ScopeType
+	Variables []int
+}
+
 func (s *Scope) Push(typ ScopeType) {
 	s.scopes = append(s.scopes, scope{
 		Variables: make(map[string]int),
@@ -53,6 +57,20 @@ func (s *Scope) HasType(typ ScopeType) bool {
 		}
 	}
 	return false
+}
+
+func (s *Scope) CurrScopeInfo() *ScopeInfo {
+	sc := s.scopes[len(s.scopes)-1]
+	vars := make([]int, len(sc.Variables))
+	i := 0
+	for _, v := range sc.Variables {
+		vars[i] = v
+		i++
+	}
+	return &ScopeInfo{
+		Type:      sc.Type,
+		Variables: vars,
+	}
 }
 
 func (s *Scope) CurrType() ScopeType {
