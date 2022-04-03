@@ -51,13 +51,38 @@ func docHover(context *glsp.Context, params *protocol.HoverParams) (*protocol.Ho
 
 	// Check if function, get name
 	var name *string = nil
-	tok := doc.Tokens.Tokens[id-1]
+	tok := doc.Tokens.Tokens[id]
 	if matchPrev(id, doc, []TokenMatcher{TokMatchT(tokens.TokenTypeLBrack)}) {
 		name = &tok.Value
 	} else if matchPrev(id, doc, []TokenMatcher{TokMatchTV(tokens.TokenTypeIdent, "FN"), TokMatchT(tokens.TokenTypeLBrack)}) {
 		name = &tok.Value
 	}
 	if name == nil {
+		// Variable?
+		if matchPrev(id, doc, []TokenMatcher{TokMatchTV(tokens.TokenTypeIdent, "VAR"), TokMatchT(tokens.TokenTypeLBrack)}) {
+			// Variable
+			scope := GetScope(doc.IRCache, tok.Pos)
+			if scope == nil {
+				return nil, nil
+			}
+			for i := len(scope.Frames) - 1; i >= 0; i-- {
+				for _, v := range scope.Frames[i].Variables {
+					if doc.IRCache.Variables[v].Name == tok.Value {
+						va := doc.IRCache.Variables[v]
+						return &protocol.Hover{
+							Contents: protocol.MarkupContent{
+								Kind:  protocol.MarkupKindMarkdown,
+								Value: fmt.Sprintf("```bsharp\n[VAR %s %s]\n```", va.Name, va.Type.String()),
+							},
+							Range: &protocol.Range{
+								Start: protocol.Position{Line: uint32(tok.Pos.Line), Character: uint32(tok.Pos.Char)},
+								End:   protocol.Position{Line: uint32(tok.Pos.EndLine), Character: uint32(tok.Pos.EndChar)},
+							},
+						}, nil
+					}
+				}
+			}
+		}
 		return nil, nil
 	}
 
