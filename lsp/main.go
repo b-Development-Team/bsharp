@@ -46,7 +46,7 @@ func main() {
 func initialize(context *glsp.Context, params *protocol.InitializeParams) (interface{}, error) {
 	capabilities := handler.CreateServerCapabilities()
 	capabilities.CompletionProvider = &protocol.CompletionOptions{
-		TriggerCharacters: []string{"["},
+		TriggerCharacters: []string{"[", " "},
 	}
 	capabilities.TextDocumentSync = Ptr(protocol.TextDocumentSyncKindFull)
 	capabilities.SemanticTokensProvider = protocol.SemanticTokensOptions{

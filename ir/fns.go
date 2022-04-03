@@ -251,6 +251,8 @@ func (b *Builder) buildFnDef(n *parser.CallNode) error {
 	}
 
 	// Cleanup
+	s := b.Scope.CurrScopeInfo()
+	fn.Scope = s
 	b.Scope.Pop()
 	return nil
 }

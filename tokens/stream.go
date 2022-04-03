@@ -37,7 +37,7 @@ func (a *Pos) Extend(b *Pos) *Pos {
 }
 
 func (p *Pos) Contains(b *Pos) bool {
-	return p.File == b.File && b.Line == p.Line && b.Char > p.Char && b.Char < p.EndChar
+	return p.File == b.File && ((b.Line == p.Line && b.Char > p.Char && b.Char < p.EndChar) || (p.Line < b.Line && b.Line < p.EndLine))
 }
 
 func (p *Pos) String() string {

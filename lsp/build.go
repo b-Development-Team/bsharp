@@ -11,7 +11,7 @@ import (
 
 func tokenizeDoc(doc *Document, uri, text string) {
 	// Tokenize
-	tok := tokens.NewTokenizer(tokens.NewStream(strings.TrimPrefix(uri, RootURI), text))
+	tok := tokens.NewTokenizer(tokens.NewStream(strings.TrimPrefix(uri, RootURI+"/"), text))
 	err := tok.Tokenize()
 	if err != nil {
 		return

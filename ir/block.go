@@ -9,6 +9,13 @@ import (
 	"github.com/Nv7-Github/bsharp/types"
 )
 
+type BodyBlock interface {
+	Block
+
+	Block() []Node
+	ScopeInfo() *ScopeInfo
+}
+
 func bodyCode(cnf CodeConfig, body []Node) string {
 	tab := strings.Repeat(" ", cnf.Indent)
 	out := &strings.Builder{}
@@ -50,6 +57,14 @@ func (w *WhileNode) Code(cnf CodeConfig) string {
 	return fmt.Sprintf("[WHILE %s\n%s]", w.Condition.Code(cnf), bodyCode(cnf, w.Body))
 }
 
+func (w *WhileNode) Block() []Node {
+	return w.Body
+}
+
+func (w *WhileNode) ScopeInfo() *ScopeInfo {
+	return w.Scope
+}
+
 type Case struct {
 	Value *Const
 	Body  []Node
@@ -58,6 +73,14 @@ type Case struct {
 
 func (c *Case) Code(cnf CodeConfig) string {
 	return fmt.Sprintf("[CASE %s\n%s]", c.Value.Code(cnf), bodyCode(cnf, c.Body))
+}
+
+func (c *Case) Block() []Node {
+	return c.Body
+}
+
+func (c *Case) ScopeInfo() *ScopeInfo {
+	return c.Scope
 }
 
 type Default struct {
@@ -69,10 +92,18 @@ func (d *Default) Code(cnf CodeConfig) string {
 	return fmt.Sprintf("[DEFAULT\n%s]", bodyCode(cnf, d.Body))
 }
 
+func (d *Default) Block() []Node {
+	return d.Body
+}
+
+func (d *Default) ScopeInfo() *ScopeInfo {
+	return d.Scope
+}
+
 type SwitchNode struct {
 	Value   Node
-	Cases   []*Case
-	Default []Node // if nil, no default
+	Cases   []*BlockNode // *Case is Block
+	Default *BlockNode   // if nil, no default
 }
 
 func (s *SwitchNode) Code(cnf CodeConfig) string {
@@ -91,7 +122,7 @@ func (s *SwitchNode) Code(cnf CodeConfig) string {
 	}
 	if s.Default != nil {
 		args.WriteString("\n" + tab + "[DEFAULT\n")
-		lines := strings.Split(bodyCode(cnf, s.Default), "\n")
+		lines := strings.Split(bodyCode(cnf, s.Default.Block.(*Default).Body), "\n")
 		for _, line := range lines {
 			args.WriteString(tab)
 			args.WriteString(line)
@@ -278,8 +309,8 @@ func init() {
 			}
 
 			// Get cases
-			cases := make([]*Case, 0, len(args)-1)
-			var def []Node
+			cases := make([]*BlockNode, 0, len(args)-1)
+			var def *BlockNode
 			b.Scope.Push(ScopeTypeSwitch)
 			for _, v := range args[1:] {
 				node, err := b.buildNode(v)
@@ -293,12 +324,12 @@ func init() {
 				cs, ok := blk.Block.(*Case)
 				if !ok {
 					// Default
-					defaul, ok := blk.Block.(*Default)
+					_, ok := blk.Block.(*Default)
 					if ok {
 						if def != nil {
 							return nil, node.Pos().Error("only one default case allowed")
 						}
-						def = defaul.Body
+						def = blk
 						continue
 					}
 					return nil, v.Pos().Error("expected case")
@@ -306,7 +337,7 @@ func init() {
 				if !cs.Value.Type().Equal(val.Type()) {
 					return nil, v.Pos().Error("expected case with type %s", val.Type())
 				}
-				cases = append(cases, cs)
+				cases = append(cases, blk)
 			}
 			b.Scope.Pop()
 			return &SwitchNode{

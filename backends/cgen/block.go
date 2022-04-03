@@ -102,9 +102,9 @@ func (c *CGen) addSwitch(i *ir.SwitchNode) (*Code, error) {
 	bld := &strings.Builder{}
 	fmt.Fprintf(bld, "switch (%s) {\n", cond.Value)
 	for _, cs := range i.Cases {
-		fmt.Fprintf(bld, "case %s:;\n", c.hashCase(cs.Value, i.Value.Type()))
+		fmt.Fprintf(bld, "case %s:;\n", c.hashCase(cs.Block.(*ir.Case).Value, i.Value.Type()))
 		c.stack.Push()
-		for _, node := range cs.Body {
+		for _, node := range cs.Block.(*ir.Case).Body {
 			code, err := c.AddNode(node)
 			if err != nil {
 				return nil, err
@@ -119,7 +119,7 @@ func (c *CGen) addSwitch(i *ir.SwitchNode) (*Code, error) {
 	if i.Default != nil {
 		bld.WriteString("default:;\n")
 		c.stack.Push()
-		for _, node := range i.Default {
+		for _, node := range i.Default.Block.(*ir.Default).Body {
 			code, err := c.AddNode(node)
 			if err != nil {
 				return nil, err

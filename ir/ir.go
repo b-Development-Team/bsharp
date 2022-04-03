@@ -40,6 +40,7 @@ type Function struct {
 	RetType types.Type
 	Body    []Node
 	pos     *tokens.Pos
+	Scope   *ScopeInfo
 }
 
 func (f *Function) Pos() *tokens.Pos { return f.pos }

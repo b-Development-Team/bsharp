@@ -61,9 +61,9 @@ func (i *Interpreter) evalSwitchNode(n *ir.SwitchNode) error {
 
 	// Check cases (O(n), not O(1) like expected from switch)
 	for _, cs := range n.Cases {
-		if cs.Value.Value == v.Value { // This works for int, float, string, all the hashable types
+		if cs.Block.(*ir.Case).Value == v.Value { // This works for int, float, string, all the hashable types
 			i.stack.Push()
-			for _, node := range cs.Body {
+			for _, node := range cs.Block.(*ir.Case).Body {
 				if _, err := i.evalNode(node); err != nil {
 					return err
 				}
@@ -76,7 +76,7 @@ func (i *Interpreter) evalSwitchNode(n *ir.SwitchNode) error {
 	// Default case
 	if n.Default != nil {
 		i.stack.Push()
-		for _, node := range n.Default {
+		for _, node := range n.Default.Block.(*ir.Default).Body {
 			if _, err := i.evalNode(node); err != nil {
 				return err
 			}

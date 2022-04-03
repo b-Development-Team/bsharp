@@ -43,7 +43,7 @@ func (d *FS) Parse(name string) (*parser.Parser, error) {
 func textDocumentDidSave(context *glsp.Context, params *protocol.DidSaveTextDocumentParams) error {
 	// Run when doc is saved
 	doc := Documents[params.TextDocument.URI]
-	path := strings.TrimPrefix(params.TextDocument.URI, RootURI)
+	path := strings.TrimPrefix(params.TextDocument.URI, RootURI+"/")
 	fs := &FS{}
 	p, err := fs.Parse(path)
 	if err != nil {

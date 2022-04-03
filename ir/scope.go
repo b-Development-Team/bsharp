@@ -35,6 +35,10 @@ type Scope struct {
 }
 
 type ScopeInfo struct {
+	Frames []ScopeFrame // Top frame is last
+}
+
+type ScopeFrame struct {
 	Type      ScopeType
 	Variables []int
 }
@@ -60,16 +64,21 @@ func (s *Scope) HasType(typ ScopeType) bool {
 }
 
 func (s *Scope) CurrScopeInfo() *ScopeInfo {
-	sc := s.scopes[len(s.scopes)-1]
-	vars := make([]int, len(sc.Variables))
-	i := 0
-	for _, v := range sc.Variables {
-		vars[i] = v
-		i++
+	frames := make([]ScopeFrame, len(s.scopes))
+	for i, sc := range s.scopes {
+		vars := make([]int, len(sc.Variables))
+		j := 0
+		for _, v := range sc.Variables {
+			vars[j] = v
+			j++
+		}
+		frames[i] = ScopeFrame{
+			Type:      sc.Type,
+			Variables: vars,
+		}
 	}
 	return &ScopeInfo{
-		Type:      sc.Type,
-		Variables: vars,
+		Frames: frames,
 	}
 }
 
