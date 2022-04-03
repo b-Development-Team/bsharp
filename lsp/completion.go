@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"strings"
 
 	"github.com/Nv7-Github/bsharp/bot"
@@ -56,7 +55,6 @@ func textDocumentCompletion(context *glsp.Context, params *protocol.CompletionPa
 		if tok.Typ != tokens.TokenTypeRBrack {
 			word = tok.Value // Already typed something
 		}
-		log.Println(scope, word)
 		for _, scope := range scope.Frames {
 			for _, v := range scope.Variables {
 				_, exists := done[v]

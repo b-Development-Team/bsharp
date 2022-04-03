@@ -1,15 +1,12 @@
 package main
 
 import (
-	"log"
-
 	"github.com/Nv7-Github/bsharp/ir"
 	"github.com/Nv7-Github/bsharp/tokens"
 )
 
 func GetScope(i *ir.IR, pos *tokens.Pos) *ir.ScopeInfo {
 	for _, fn := range i.Funcs {
-		log.Println(fn.Name, fn.Pos(), pos, fn.Pos().EndLine, fn.Pos().EndChar, fn.Pos().Contains(pos))
 		if fn.Pos().Contains(pos) {
 			for _, node := range fn.Body {
 				_, ok := node.(*ir.BlockNode)

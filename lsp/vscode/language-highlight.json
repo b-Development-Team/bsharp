@@ -4,11 +4,16 @@
   "patterns": [{ "include": "#node" }, { "include": "#comment" }],
   "repository": {
     "value": {
-      "patterns": [{ "include": "#node" }, { "include": "#comment" }, { "include": "#string" }, { "include": "#number" }, { "include": "#ident" }]
+      "patterns": [{ "include": "#node" }, { "include": "#comment" }, { "include": "#string" }, { "include": "#number" }, { "include": "#keyword" }, { "include": "#ident" }]
     },
     "ident": {
       "match": "(?:\\p{L}|\\{|\\}|\\+|-|\\*|\\/|%|==|!=|<=|>=|<|>|\\^)+",
-      "name": "token.ident.bsharp"
+      "name": "token.ident.bsharp",
+      "patterns": [{ "include": "#keyword"}]
+    },
+    "keyword": {
+      "match": "ELSE",
+      "name": "keyword.function.bsharp"
     },
     "number": {
       "match": "(?:-)?(?:[0-9]|\\.)+",
@@ -34,7 +39,7 @@
       "name": "comment.bsharp"
     },
     "node": {
-      "begin": "\\[([A-Z]+) ",
+      "begin": "\\[([A-Z]+)",
       "end": "\\]",
       "captures": {
         "1": {
