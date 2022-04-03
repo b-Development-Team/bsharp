@@ -17,12 +17,20 @@ var RootURI string
 type FS struct{}
 
 func (d *FS) Parse(name string) (*parser.Parser, error) {
-	src, err := os.ReadFile(filepath.Join(Root, name))
-	if err != nil {
-		return nil, err
+	var src string
+	doc, exists := Documents[filepath.Join(RootURI, name)]
+	if exists {
+		src = doc.Source
+	} else {
+		var err error
+		dat, err := os.ReadFile(filepath.Join(Root, name))
+		if err != nil {
+			return nil, err
+		}
+		src = string(dat)
 	}
-	stream := tokens.NewTokenizer(tokens.NewStream(name, string(src)))
-	err = stream.Tokenize()
+	stream := tokens.NewTokenizer(tokens.NewStream(name, src))
+	err := stream.Tokenize()
 	if err != nil {
 		return nil, err
 	}

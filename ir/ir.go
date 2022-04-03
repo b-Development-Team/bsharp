@@ -74,9 +74,10 @@ func (b *Builder) AddExtension(e *Extension) {
 }
 
 type IR struct {
-	Funcs     map[string]*Function
-	Variables []*Variable
-	Body      []Node
+	Funcs       map[string]*Function
+	Variables   []*Variable
+	Body        []Node
+	GlobalScope *ScopeInfo
 }
 
 func NewBuilder() *Builder {
@@ -90,9 +91,10 @@ func NewBuilder() *Builder {
 
 func (b *Builder) IR() *IR {
 	return &IR{
-		Funcs:     b.Funcs,
-		Variables: b.Scope.Variables,
-		Body:      b.Body,
+		Funcs:       b.Funcs,
+		Variables:   b.Scope.Variables,
+		Body:        b.Body,
+		GlobalScope: b.Scope.CurrScopeInfo(),
 	}
 }
 

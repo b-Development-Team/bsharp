@@ -1,8 +1,6 @@
 package main
 
 import (
-	"strings"
-
 	"github.com/Nv7-Github/bsharp/ir"
 	"github.com/Nv7-Github/bsharp/tokens"
 	"github.com/tliron/glsp"
@@ -10,7 +8,7 @@ import (
 )
 
 type Document struct {
-	Lines          []string
+	Source         string
 	IRCache        *ir.IR
 	Tokens         *tokens.Tokenizer
 	SemanticTokens *protocol.SemanticTokens
@@ -21,7 +19,7 @@ var Documents = map[string]*Document{}
 
 func textDocumentDidOpen(context *glsp.Context, params *protocol.DidOpenTextDocumentParams) error {
 	doc := &Document{
-		Lines: strings.Split(params.TextDocument.Text, "\n"),
+		Source: params.TextDocument.Text,
 	}
 	Documents[params.TextDocument.URI] = doc
 
@@ -47,7 +45,8 @@ func textDocumentDidClose(context *glsp.Context, params *protocol.DidCloseTextDo
 func textDocumentDidChange(context *glsp.Context, params *protocol.DidChangeTextDocumentParams) error {
 	doc := Documents[params.TextDocument.URI]
 	c := params.ContentChanges[0].(protocol.TextDocumentContentChangeEventWhole)
-	doc.Lines = strings.Split(c.Text, "\n")
+	doc.Source = c.Text
 	tokenizeDoc(doc, params.TextDocument.URI, c.Text)
+	buildDoc(doc, params.TextDocument.URI)
 	return nil
 }

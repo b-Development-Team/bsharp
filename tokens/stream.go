@@ -36,6 +36,10 @@ func (a *Pos) Extend(b *Pos) *Pos {
 	}
 }
 
+func (p *Pos) Contains(b *Pos) bool {
+	return p.File == b.File && b.Line == p.Line && b.Char > p.Char && b.Char < p.EndChar
+}
+
 func (p *Pos) String() string {
 	return fmt.Sprintf("%s:%d:%d", p.File, p.Line+1, p.Char+1)
 }

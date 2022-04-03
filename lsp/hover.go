@@ -24,6 +24,20 @@ func tokID(pos protocol.Position, doc *Document) int {
 	return id
 }
 
+func matchPrev(tokID int, doc *Document, matchers []TokenMatcher) bool {
+	if tokID < len(matchers) {
+		return false
+	}
+
+	for i := 0; i < len(matchers); i++ {
+		if !matchers[i].Match(doc.Tokens.Tokens[tokID-(i+1)]) {
+			return false
+		}
+	}
+
+	return true
+}
+
 func docHover(context *glsp.Context, params *protocol.HoverParams) (*protocol.Hover, error) {
 	// Find token
 	doc, exists := Documents[params.TextDocument.URI]
@@ -37,15 +51,11 @@ func docHover(context *glsp.Context, params *protocol.HoverParams) (*protocol.Ho
 
 	// Check if function, get name
 	var name *string = nil
-	prev := doc.Tokens.Tokens[id-1]
-	tok := doc.Tokens.Tokens[id]
-	if prev.Typ == tokens.TokenTypeLBrack {
+	tok := doc.Tokens.Tokens[id-1]
+	if matchPrev(id, doc, []TokenMatcher{TokMatchT(tokens.TokenTypeLBrack)}) {
 		name = &tok.Value
-	} else if prev.Typ == tokens.TokenTypeIdent && id > 1 {
-		prev2 := doc.Tokens.Tokens[id-2]
-		if prev2.Typ == tokens.TokenTypeLBrack {
-			name = &tok.Value
-		}
+	} else if matchPrev(id, doc, []TokenMatcher{TokMatchTV(tokens.TokenTypeIdent, "FN"), TokMatchT(tokens.TokenTypeLBrack)}) {
+		name = &tok.Value
 	}
 	if name == nil {
 		return nil, nil
