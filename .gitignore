@@ -24,3 +24,5 @@ bot/test/token.txt
 
 # Compiled LSP
 lsp/lsp
+lsp/vscode/node_modules
+lsp/vscode/client/node_modules
