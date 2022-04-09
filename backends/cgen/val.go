@@ -65,6 +65,7 @@ func (c *CGen) GrabCode(varName string, typ types.Type) string {
 	panic("invalid type")
 }
 
+// TODO: ANY casts
 func (c *CGen) addCast(n *ir.CastNode) (*Code, error) {
 	v, err := c.AddNode(n.Value)
 	if err != nil {

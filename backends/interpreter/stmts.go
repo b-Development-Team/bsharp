@@ -118,6 +118,8 @@ func (i *Interpreter) evalNode(node ir.Node) (*Value, error) {
 	case *ir.CastNode:
 		return i.evalCast(n)
 
+		// TODO: *ir.CanCastNode
+
 	default:
 		return nil, n.Pos().Error("unknown node type: %T", node)
 	}

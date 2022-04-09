@@ -1,9 +1,6 @@
 package ir
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/Nv7-Github/bsharp/parser"
 	"github.com/Nv7-Github/bsharp/tokens"
 	"github.com/Nv7-Github/bsharp/types"
@@ -16,21 +13,6 @@ type BodyBlock interface {
 	ScopeInfo() *ScopeInfo
 }
 
-func bodyCode(cnf CodeConfig, body []Node) string {
-	tab := strings.Repeat(" ", cnf.Indent)
-	out := &strings.Builder{}
-	for _, node := range body {
-		code := node.Code(cnf)
-		lines := strings.Split(code, "\n")
-		for _, line := range lines {
-			out.WriteString(tab)
-			out.WriteString(line)
-			out.WriteString("\n")
-		}
-	}
-	return out.String()
-}
-
 type IfNode struct {
 	Condition Node
 	Body      []Node
@@ -40,21 +22,10 @@ type IfNode struct {
 	ElseScope *ScopeInfo
 }
 
-func (i *IfNode) Code(cnf CodeConfig) string {
-	if i.Else != nil {
-		return fmt.Sprintf("[IF %s\n%sELSE\n%s]", i.Condition.Code(cnf), bodyCode(cnf, i.Body), bodyCode(cnf, i.Else))
-	}
-	return fmt.Sprintf("[IF %s\n%s]", i.Condition.Code(cnf), bodyCode(cnf, i.Body))
-}
-
 type WhileNode struct {
 	Condition Node
 	Body      []Node
 	Scope     *ScopeInfo
-}
-
-func (w *WhileNode) Code(cnf CodeConfig) string {
-	return fmt.Sprintf("[WHILE %s\n%s]", w.Condition.Code(cnf), bodyCode(cnf, w.Body))
 }
 
 func (w *WhileNode) Block() []Node {
@@ -71,10 +42,6 @@ type Case struct {
 	Scope *ScopeInfo
 }
 
-func (c *Case) Code(cnf CodeConfig) string {
-	return fmt.Sprintf("[CASE %s\n%s]", c.Value.Code(cnf), bodyCode(cnf, c.Body))
-}
-
 func (c *Case) Block() []Node {
 	return c.Body
 }
@@ -86,10 +53,6 @@ func (c *Case) ScopeInfo() *ScopeInfo {
 type Default struct {
 	Body  []Node
 	Scope *ScopeInfo
-}
-
-func (d *Default) Code(cnf CodeConfig) string {
-	return fmt.Sprintf("[DEFAULT\n%s]", bodyCode(cnf, d.Body))
 }
 
 func (d *Default) Block() []Node {
@@ -104,33 +67,6 @@ type SwitchNode struct {
 	Value   Node
 	Cases   []*BlockNode // *Case is Block
 	Default *BlockNode   // if nil, no default
-}
-
-func (s *SwitchNode) Code(cnf CodeConfig) string {
-	args := &strings.Builder{}
-	tab := strings.Repeat(" ", cnf.Indent)
-	for i, c := range s.Cases {
-		lines := strings.Split(c.Code(cnf), "\n")
-		for _, line := range lines {
-			args.WriteString(tab)
-			args.WriteString(line)
-			args.WriteString("\n")
-		}
-		if i != len(s.Cases)-1 {
-			args.WriteString("\n")
-		}
-	}
-	if s.Default != nil {
-		args.WriteString("\n" + tab + "[DEFAULT\n")
-		lines := strings.Split(bodyCode(cnf, s.Default.Block.(*Default).Body), "\n")
-		for _, line := range lines {
-			args.WriteString(tab)
-			args.WriteString(line)
-			args.WriteString("\n")
-		}
-		args.WriteString(tab + "]\n")
-	}
-	return fmt.Sprintf("[SWITCH\n%s]", args.String())
 }
 
 func init() {

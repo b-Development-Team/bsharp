@@ -1,31 +1,20 @@
 package ir
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/Nv7-Github/bsharp/tokens"
 	"github.com/Nv7-Github/bsharp/types"
 )
 
-type CodeConfig struct {
-	Indent int
-}
-
 type Node interface {
 	Type() types.Type
 	Pos() *tokens.Pos
-	Code(CodeConfig) string
 }
 
 type Call interface {
 	Type() types.Type
-	Code(CodeConfig) string
 }
 
-type Block interface {
-	Code(CodeConfig) string
-}
+type Block interface{} // TODO: Have something in this to make sure its a block
 
 type Param struct {
 	ID   int
@@ -44,20 +33,6 @@ type Function struct {
 }
 
 func (f *Function) Pos() *tokens.Pos { return f.pos }
-func (f *Function) Code(cnf CodeConfig) string {
-	out := &strings.Builder{}
-	fmt.Fprintf(out, "[FUNC %s ", f.Name)
-	for _, par := range f.Params {
-		fmt.Fprintf(out, "[PARAM %s %s] ", par.Name, par.Type.String())
-	}
-	if !types.NULL.Equal(f.RetType) {
-		fmt.Fprintf(out, "[RETURNS %s]", f.RetType.String())
-	}
-	out.WriteString("\n")
-	out.WriteString(bodyCode(cnf, f.Body))
-	out.WriteString("\n]")
-	return out.String()
-}
 
 type empty struct{}
 
@@ -97,17 +72,4 @@ func (b *Builder) IR() *IR {
 		Body:        b.Body,
 		GlobalScope: b.Scope.CurrScopeInfo(),
 	}
-}
-
-func (i *IR) Code(cnf CodeConfig) string {
-	out := &strings.Builder{}
-	for _, fn := range i.Funcs {
-		out.WriteString(fn.Code(cnf))
-		out.WriteString("\n")
-	}
-	for _, node := range i.Body {
-		out.WriteString(node.Code(cnf))
-		out.WriteString("\n")
-	}
-	return out.String()
 }

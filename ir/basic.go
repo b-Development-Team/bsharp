@@ -1,9 +1,6 @@
 package ir
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/Nv7-Github/bsharp/tokens"
 	"github.com/Nv7-Github/bsharp/types"
 )
@@ -13,23 +10,11 @@ type PrintNode struct {
 	Arg Node
 }
 
-func (p *PrintNode) Code(cnf CodeConfig) string { return fmt.Sprintf("[PRINT %s]", p.Arg.Code(cnf)) }
-
 type ConcatNode struct {
 	Values []Node
 }
 
 func (c *ConcatNode) Type() types.Type { return types.STRING }
-func (c *ConcatNode) Code(cnf CodeConfig) string {
-	args := &strings.Builder{}
-	for i, v := range c.Values {
-		args.WriteString(v.Code(cnf))
-		if i != len(c.Values)-1 {
-			args.WriteString(" ")
-		}
-	}
-	return fmt.Sprintf("[CONCAT %s]", args.String())
-}
 
 type TimeMode int
 
@@ -51,8 +36,7 @@ type TimeNode struct {
 	Mode TimeMode
 }
 
-func (t *TimeNode) Code(cnf CodeConfig) string { return "[TIME]" }
-func (t *TimeNode) Type() types.Type           { return types.INT }
+func (t *TimeNode) Type() types.Type { return types.INT }
 
 func init() {
 	nodeBuilders["PRINT"] = nodeBuilder{

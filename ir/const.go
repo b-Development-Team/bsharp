@@ -1,7 +1,6 @@
 package ir
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -19,30 +18,6 @@ type Const struct {
 
 func (c *Const) Type() types.Type { return c.typ }
 func (c *Const) Pos() *tokens.Pos { return c.pos }
-func (c *Const) Code(cnf CodeConfig) string {
-	switch c.typ.BasicType() {
-	case types.INT:
-		return fmt.Sprintf("%d", c.Value.(int))
-
-	case types.FLOAT:
-		return strconv.FormatFloat(c.Value.(float64), 'f', -1, 64)
-
-	case types.STRING:
-		return fmt.Sprintf("%q", c.Value.(string))
-
-	case types.IDENT:
-		return c.Value.(string)
-
-	case types.BOOL:
-		if c.Value.(bool) {
-			return "TRUE"
-		}
-		return "FALSE"
-
-	default:
-		return "[UNKNOWN CONST]"
-	}
-}
 
 func (b *Builder) buildString(n *parser.StringNode) Node {
 	return &Const{

@@ -1,8 +1,6 @@
 package ir
 
 import (
-	"fmt"
-
 	"github.com/Nv7-Github/bsharp/tokens"
 	"github.com/Nv7-Github/bsharp/types"
 )
@@ -15,9 +13,6 @@ type VarNode struct {
 }
 
 func (v *VarNode) Type() types.Type { return v.typ }
-func (v *VarNode) Code(cnf CodeConfig) string {
-	return fmt.Sprintf("[VAR %s]", v.name)
-}
 
 type DefineNode struct {
 	NullCall
@@ -26,10 +21,6 @@ type DefineNode struct {
 	InScope bool // Check if accessing var outside of function (helps with recursion)
 
 	name string // Variable name for use in Code()
-}
-
-func (d *DefineNode) Code(cnf CodeConfig) string {
-	return fmt.Sprintf("[DEFINE %s %s]", d.name, d.Value.Code(cnf))
 }
 
 func NewDefineNode(id int, val Node, i *IR) *DefineNode {
@@ -60,7 +51,7 @@ func init() {
 	}
 
 	nodeBuilders["DEFINE"] = nodeBuilder{
-		ArgTypes: []types.Type{types.IDENT, types.ANY},
+		ArgTypes: []types.Type{types.IDENT, types.ALL},
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
 			// Get var
 			name := args[0].(*Const).Value.(string)

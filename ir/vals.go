@@ -1,8 +1,6 @@
 package ir
 
 import (
-	"fmt"
-
 	"github.com/Nv7-Github/bsharp/tokens"
 	"github.com/Nv7-Github/bsharp/types"
 )
@@ -15,20 +13,6 @@ type CastNode struct {
 
 func (c *CastNode) Type() types.Type { return c.typ }
 func (c *CastNode) Pos() *tokens.Pos { return c.Value.Pos() }
-func (c *CastNode) Code(cnf CodeConfig) string {
-	var fn string
-	switch c.Type().BasicType() {
-	case types.INT:
-		fn = "INT"
-
-	case types.FLOAT:
-		fn = "FLOAT"
-
-	case types.STRING:
-		fn = "STRING"
-	}
-	return fmt.Sprintf("[%s %s]", fn, c.Value.Code(cnf))
-}
 
 func NewCastNode(val Node, typ types.Type) *CastNode {
 	return &CastNode{
@@ -73,9 +57,6 @@ type MathNode struct {
 }
 
 func (m *MathNode) Type() types.Type { return m.typ }
-func (m *MathNode) Code(cnf CodeConfig) string {
-	return fmt.Sprintf("[MATH %s %s %s]", m.Lhs.Code(cnf), mathOpsNames[m.Op], m.Rhs.Code(cnf))
-}
 
 type CompareOperation int
 
@@ -112,9 +93,6 @@ type CompareNode struct {
 }
 
 func (c *CompareNode) Type() types.Type { return types.BOOL }
-func (c *CompareNode) Code(cnf CodeConfig) string {
-	return fmt.Sprintf("[COMPARE %s %s %s]", c.Lhs.Code(cnf), compareOpsNames[c.Op], c.Rhs.Code(cnf))
-}
 
 type LogicalOp int
 
@@ -124,12 +102,6 @@ const (
 	LogicalOpNot
 )
 
-var logicalOpNames = map[LogicalOp]string{
-	LogicalOpAnd: "AND",
-	LogicalOpOr:  "OR",
-	LogicalOpNot: "NOT",
-}
-
 type LogicalOpNode struct {
 	Op  LogicalOp
 	Val Node
@@ -137,12 +109,6 @@ type LogicalOpNode struct {
 }
 
 func (l *LogicalOpNode) Type() types.Type { return types.BOOL }
-func (l *LogicalOpNode) Code(cnf CodeConfig) string {
-	if l.Rhs != nil {
-		return fmt.Sprintf("[%s %s %s]", logicalOpNames[l.Op], l.Val.Code(cnf), l.Rhs.Code(cnf))
-	}
-	return fmt.Sprintf("[%s %s]", logicalOpNames[l.Op], l.Val.Code(cnf))
-}
 
 func NewMathNode(op MathOperation, lhs, rhs Node, typ types.Type) *MathNode {
 	return &MathNode{
@@ -151,6 +117,15 @@ func NewMathNode(op MathOperation, lhs, rhs Node, typ types.Type) *MathNode {
 		Rhs: rhs,
 		typ: typ,
 	}
+}
+
+type CanCastNode struct {
+	Value Node
+	Typ   types.Type
+}
+
+func (c *CanCastNode) Type() types.Type {
+	return types.BOOL
 }
 
 func init() {
@@ -257,6 +232,44 @@ func init() {
 			return &LogicalOpNode{
 				Op:  LogicalOpNot,
 				Val: args[0],
+			}, nil
+		},
+	}
+
+	nodeBuilders["ANY"] = nodeBuilder{
+		ArgTypes: []types.Type{types.ALL},
+		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
+			return &CastNode{
+				Value: args[0],
+				typ:   types.ANY,
+			}, nil
+		},
+	}
+
+	nodeBuilders["CANCAST"] = nodeBuilder{
+		ArgTypes: []types.Type{types.ALL, types.IDENT},
+		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
+			typ, err := types.ParseType(args[1].(*Const).Value.(string))
+			if err != nil {
+				return nil, err
+			}
+			return &CanCastNode{
+				Value: args[0],
+				Typ:   typ,
+			}, nil
+		},
+	}
+
+	nodeBuilders["CAST"] = nodeBuilder{
+		ArgTypes: []types.Type{types.ALL, types.IDENT},
+		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
+			typ, err := types.ParseType(args[1].(*Const).Value.(string))
+			if err != nil {
+				return nil, err
+			}
+			return &CastNode{
+				Value: args[0],
+				typ:   typ,
 			}, nil
 		},
 	}

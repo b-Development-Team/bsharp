@@ -1,9 +1,6 @@
 package ir
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/Nv7-Github/bsharp/tokens"
 	"github.com/Nv7-Github/bsharp/types"
 )
@@ -23,26 +20,12 @@ func NewArrayNode(vals []Node, typ types.Type) *ArrayNode {
 }
 
 func (a *ArrayNode) Type() types.Type { return a.typ }
-func (a *ArrayNode) Code(cnf CodeConfig) string {
-	args := &strings.Builder{}
-	for i, v := range a.Values {
-		args.WriteString(v.Code(cnf))
-		if i != len(a.Values)-1 {
-			args.WriteString(" ")
-		}
-	}
-	return fmt.Sprintf("[ARRAY %s]", args.String())
-}
 
 type AppendNode struct {
 	NullCall
 
 	Array Node
 	Value Node
-}
-
-func (a *AppendNode) Code(cnf CodeConfig) string {
-	return fmt.Sprintf("[APPEND %s %s]", a.Array.Code(cnf), a.Value.Code(cnf))
 }
 
 type IndexNode struct {
@@ -53,20 +36,12 @@ type IndexNode struct {
 
 func (i *IndexNode) Type() types.Type { return i.typ }
 
-func (i *IndexNode) Code(cnf CodeConfig) string {
-	return fmt.Sprintf("[INDEX %s %s]", i.Value.Code(cnf), i.Index.Code(cnf))
-}
-
 type SetIndexNode struct {
 	NullCall
 
 	Array Node
 	Index Node
 	Value Node
-}
-
-func (s *SetIndexNode) Code(cnf CodeConfig) string {
-	return fmt.Sprintf("[SETINDEX %s %s %s]", s.Array.Code(cnf), s.Index.Code(cnf), s.Value.Code(cnf))
 }
 
 func NewIndexNode(val, index Node) *IndexNode {
@@ -86,18 +61,12 @@ type LengthNode struct {
 }
 
 func (l *LengthNode) Type() types.Type { return types.INT }
-func (l *LengthNode) Code(cnf CodeConfig) string {
-	return fmt.Sprintf("[LENGTH %s]", l.Value.Code(cnf))
-}
 
 type MakeNode struct {
 	typ types.Type
 }
 
 func (m *MakeNode) Type() types.Type { return m.typ }
-func (m *MakeNode) Code(cnf CodeConfig) string {
-	return fmt.Sprintf("[MAKE %s]", m.Type().String())
-}
 
 type SetNode struct {
 	NullCall
@@ -106,11 +75,6 @@ type SetNode struct {
 	Key   Node
 	Value Node
 }
-
-func (s *SetNode) Code(cnf CodeConfig) string {
-	return fmt.Sprintf("[SET %s %s %s]", s.Map.Code(cnf), s.Key.Code(cnf), s.Value.Code(cnf))
-}
-
 type GetNode struct {
 	Map Node
 	Key Node
@@ -119,10 +83,6 @@ type GetNode struct {
 }
 
 func (g *GetNode) Type() types.Type { return g.typ }
-
-func (g *GetNode) Code(cnf CodeConfig) string {
-	return fmt.Sprintf("[GET %s %s]", g.Map.Code(cnf), g.Key.Code(cnf))
-}
 
 func NewGetNode(m, k Node) *GetNode {
 	return &GetNode{
@@ -139,19 +99,12 @@ type ExistsNode struct {
 
 func (g *ExistsNode) Type() types.Type { return types.BOOL }
 
-func (e *ExistsNode) Code(cnf CodeConfig) string {
-	return fmt.Sprintf("[EXISTS %s %s]", e.Map.Code(cnf), e.Key.Code(cnf))
-}
-
 type KeysNode struct {
 	Map Node
 	typ types.Type
 }
 
 func (k *KeysNode) Type() types.Type { return k.typ }
-func (k *KeysNode) Code(cnf CodeConfig) string {
-	return fmt.Sprintf("[KEYS %s]", k.Map.Code(cnf))
-}
 
 type SliceNode struct {
 	Value Node
@@ -165,13 +118,10 @@ func (s *SliceNode) Type() types.Type {
 	}
 	return types.NULL
 }
-func (s *SliceNode) Code(cnf CodeConfig) string {
-	return fmt.Sprintf("[SLICE %s %s %s]", s.Value.Code(cnf), s.Start.Code(cnf), s.End.Code(cnf))
-}
 
 func init() {
 	nodeBuilders["ARRAY"] = nodeBuilder{
-		ArgTypes: []types.Type{types.ANY, types.VARIADIC},
+		ArgTypes: []types.Type{types.ALL, types.VARIADIC},
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
 			// Check types
 			typ := args[0].Type()
@@ -191,7 +141,7 @@ func init() {
 	}
 
 	nodeBuilders["APPEND"] = nodeBuilder{
-		ArgTypes: []types.Type{types.ARRAY, types.ANY},
+		ArgTypes: []types.Type{types.ARRAY, types.ALL},
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
 			arrTyp := args[0].Type().(*types.ArrayType)
 			if !arrTyp.ElemType.Equal(args[1].Type()) {
@@ -255,7 +205,7 @@ func init() {
 	}
 
 	nodeBuilders["SETINDEX"] = nodeBuilder{
-		ArgTypes: []types.Type{types.ARRAY, types.INT, types.ANY},
+		ArgTypes: []types.Type{types.ARRAY, types.INT, types.ALL},
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
 			// Check types
 			arrTyp := args[0].Type().(*types.ArrayType)
@@ -272,7 +222,7 @@ func init() {
 	}
 
 	nodeBuilders["SET"] = nodeBuilder{
-		ArgTypes: []types.Type{types.MAP, hashable, types.ANY},
+		ArgTypes: []types.Type{types.MAP, hashable, types.ALL},
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
 			// Check types
 			mapTyp := args[0].Type().(*types.MapType)

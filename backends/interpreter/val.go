@@ -11,6 +11,7 @@ func (i *Interpreter) evalConst(c *ir.Const) (*Value, error) {
 	return NewValue(c.Type(), c.Value), nil
 }
 
+// TODO: ANY casts
 func (i *Interpreter) evalCast(c *ir.CastNode) (*Value, error) {
 	v, err := i.evalNode(c.Value)
 	if err != nil {

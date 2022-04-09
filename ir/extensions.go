@@ -1,9 +1,6 @@
 package ir
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/Nv7-Github/bsharp/parser"
 	"github.com/Nv7-Github/bsharp/tokens"
 	"github.com/Nv7-Github/bsharp/types"
@@ -24,16 +21,6 @@ type ExtensionCall struct {
 
 func (e *ExtensionCall) Type() types.Type { return e.typ }
 func (e *ExtensionCall) Pos() *tokens.Pos { return e.pos }
-func (e *ExtensionCall) Code(cnf CodeConfig) string {
-	args := &strings.Builder{}
-	for i, arg := range e.Args {
-		args.WriteString(arg.Code(cnf))
-		if i != len(e.Args)-1 {
-			args.WriteString(" ")
-		}
-	}
-	return fmt.Sprintf("[%s %s]", e.Name, args.String())
-}
 
 func (b *Builder) buildExtensionCall(n *parser.CallNode) (Node, error) {
 	ext := b.extensions[n.Name]

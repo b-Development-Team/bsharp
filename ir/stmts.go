@@ -24,18 +24,16 @@ type CallNode struct {
 	Call Call
 }
 
-func (c *CallNode) Pos() *tokens.Pos           { return c.pos }
-func (c *CallNode) Type() types.Type           { return c.Call.Type() }
-func (c *CallNode) Code(cnf CodeConfig) string { return c.Call.Code(cnf) }
+func (c *CallNode) Pos() *tokens.Pos { return c.pos }
+func (c *CallNode) Type() types.Type { return c.Call.Type() }
 
 type BlockNode struct {
 	pos   *tokens.Pos
 	Block Block
 }
 
-func (b *BlockNode) Pos() *tokens.Pos           { return b.pos }
-func (b *BlockNode) Type() types.Type           { return types.NULL }
-func (b *BlockNode) Code(cnf CodeConfig) string { return b.Block.Code(cnf) }
+func (b *BlockNode) Pos() *tokens.Pos { return b.pos }
+func (b *BlockNode) Type() types.Type { return types.NULL }
 
 func NewCallNode(call Call, pos *tokens.Pos) *CallNode {
 	return &CallNode{

@@ -36,9 +36,10 @@ const (
 	FUNCTION
 	STRUCT
 	NULL
+	ANY
 
 	// Special types
-	ANY
+	ALL
 	VARIADIC
 	IDENT
 )
@@ -52,6 +53,7 @@ var basicTypeNames = map[BasicType]string{
 	MAP:      "MAP",
 	FUNCTION: "FUNCTION",
 	NULL:     "NULL",
+	ALL:      "ALL",
 	ANY:      "ANY",
 	VARIADIC: "VARIADIC",
 	IDENT:    "IDENT",
@@ -67,7 +69,7 @@ func (b BasicType) String() string {
 }
 
 func (b BasicType) Equal(t Type) bool {
-	if b == ANY || t == ANY {
+	if b == ALL || t == ALL {
 		return true
 	}
 	return b == t.BasicType()
@@ -88,7 +90,7 @@ func (a *ArrayType) BasicType() BasicType {
 }
 
 func (a *ArrayType) Equal(b Type) bool {
-	if b.BasicType() == ANY {
+	if b.BasicType() == ALL {
 		return true
 	}
 	if b.BasicType() != ARRAY {
@@ -119,7 +121,7 @@ func (m *MapType) BasicType() BasicType {
 }
 
 func (m *MapType) Equal(b Type) bool {
-	if b.BasicType() == ANY {
+	if b.BasicType() == ALL {
 		return true
 	}
 	if b.BasicType() != MAP {
@@ -155,7 +157,7 @@ func (a *MulType) String() string {
 }
 
 func (a *MulType) BasicType() BasicType {
-	return ANY
+	return ALL
 }
 
 func NewMulType(typs ...Type) *MulType {
@@ -174,6 +176,9 @@ func (f *FuncType) BasicType() BasicType {
 }
 
 func (f *FuncType) Equal(t Type) bool {
+	if t.BasicType() == ALL {
+		return true
+	}
 	if t.BasicType() != FUNCTION {
 		return false
 	}

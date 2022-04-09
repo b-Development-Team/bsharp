@@ -1,9 +1,6 @@
 package ir
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/Nv7-Github/bsharp/parser"
 	"github.com/Nv7-Github/bsharp/tokens"
 	"github.com/Nv7-Github/bsharp/types"
@@ -143,16 +140,7 @@ type FnCallNode struct {
 
 func (c *FnCallNode) Type() types.Type { return c.typ }
 func (c *FnCallNode) Pos() *tokens.Pos { return c.pos }
-func (c *FnCallNode) Code(cnf CodeConfig) string {
-	args := &strings.Builder{}
-	for i, arg := range c.Args {
-		args.WriteString(arg.Code(cnf))
-		if i != len(c.Args)-1 {
-			args.WriteString(" ")
-		}
-	}
-	return fmt.Sprintf("[CALL %s %s]", c.Fn.Code(cnf), args.String())
-}
+
 func NewFnCallNode(fn Node, args []Node, typ types.Type, pos *tokens.Pos) *FnCallNode {
 	return &FnCallNode{
 		Fn:   fn,
@@ -262,21 +250,16 @@ type ReturnNode struct {
 	Value Node
 }
 
-func (r *ReturnNode) Code(cnf CodeConfig) string {
-	return fmt.Sprintf("[RETURN %s]", r.Value.Code(cnf))
-}
-
 type FnNode struct {
 	Name string
 	typ  types.Type
 }
 
-func (f *FnNode) Type() types.Type           { return f.typ }
-func (f *FnNode) Code(cnf CodeConfig) string { return fmt.Sprintf("[FN %s]", f.Name) }
+func (f *FnNode) Type() types.Type { return f.typ }
 
 func init() {
 	nodeBuilders["RETURN"] = nodeBuilder{
-		ArgTypes: []types.Type{types.ANY},
+		ArgTypes: []types.Type{types.ALL},
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
 			if !b.Scope.HasType(ScopeTypeFunction) {
 				return nil, pos.Error("return statement outside of function")
@@ -312,7 +295,7 @@ func init() {
 	}
 
 	nodeBuilders["CALL"] = nodeBuilder{
-		ArgTypes: []types.Type{types.FUNCTION, types.ANY, types.VARIADIC},
+		ArgTypes: []types.Type{types.FUNCTION, types.ALL, types.VARIADIC},
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
 			// Match types
 			typ := args[0].Type().(*types.FuncType)
