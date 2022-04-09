@@ -99,6 +99,11 @@ func parse(tokens []token) (Type, []token, error) {
 			// Get argument types
 			argTypes := make([]Type, 0)
 			for {
+				// Check if done
+				if tokens[0].typ == tokenTypeRBrack {
+					break
+				}
+
 				var argType Type
 				var err error
 				argType, tokens, err = parse(tokens)
@@ -108,6 +113,7 @@ func parse(tokens []token) (Type, []token, error) {
 
 				argTypes = append(argTypes, argType)
 
+				// Check if done
 				if tokens[0].typ == tokenTypeRBrack {
 					break
 				}
@@ -145,6 +151,11 @@ func parse(tokens []token) (Type, []token, error) {
 			// Get fields
 			fields := make([]StructField, 0)
 			for {
+				// Check if done
+				if tokens[0].typ == tokenTypeRBrack {
+					break
+				}
+
 				// Get name
 				if tokens[0].typ != tokenTypeIdent {
 					return nil, nil, fmt.Errorf("expected field name")

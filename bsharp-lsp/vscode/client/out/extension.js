@@ -5,13 +5,17 @@
  * ------------------------------------------------------------------------------------------ */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deactivate = exports.activate = void 0;
+const cp = require("child_process");
 const node_1 = require("vscode-languageclient/node");
 let client;
-function activate(context) {
+async function activate(context) {
     // If the extension is launched in debug mode then the debug server options are used
     // Otherwise the run options are used
+    // Get GOPATH
+    let gopath = cp.execSync('go env GOPATH').toString();
+    console.log(gopath);
     const serverOptions = {
-        command: context.asAbsolutePath("../lsp"),
+        command: gopath.trim() + "/bin/bsharp-lsp",
         args: [],
         transport: node_1.TransportKind.stdio, // also tried every other option
     };

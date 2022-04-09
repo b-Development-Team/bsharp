@@ -87,15 +87,19 @@ func docHover(context *glsp.Context, params *protocol.HoverParams) (*protocol.Ho
 	}
 
 	// Function, check if exists and find pos
-	for _, fn := range doc.IRCache.Funcs {
+	for _, fn := range getFns(doc) {
 		if fn.Name == *name {
 			// Gen text
 			text := &strings.Builder{}
 			fmt.Fprintf(text, "[FUNC %s", fn.Name)
-			for _, par := range fn.Params {
-				fmt.Fprintf(text, " [PARAM %s %s]", par.Name, par.Type.String())
+			for i, par := range fn.Params {
+				if fn.ParNames != nil {
+					fmt.Fprintf(text, " [PARAM %s %s]", fn.ParNames[i], par.String())
+				} else {
+					fmt.Fprintf(text, " [PARAM %s]", par.String())
+				}
 			}
-			if !types.NULL.Equal(fn.RetType) {
+			if fn.RetType != nil && !types.NULL.Equal(fn.RetType) {
 				fmt.Fprintf(text, " [RETURNS %s]", fn.RetType.String())
 			}
 			text.WriteString("]")

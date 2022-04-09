@@ -5,6 +5,7 @@
 
 import * as path from 'path';
 import { workspace, ExtensionContext } from 'vscode';
+import cp = require('child_process');
 
 import {
 	LanguageClient,
@@ -15,11 +16,15 @@ import {
 
 let client: LanguageClient;
 
-export function activate(context: ExtensionContext) {
+export async function activate(context: ExtensionContext) {
 	// If the extension is launched in debug mode then the debug server options are used
 	// Otherwise the run options are used
+
+	// Get GOPATH
+	let gopath = cp.execSync('go env GOPATH').toString();
+	console.log(gopath);
 	const serverOptions: ServerOptions = {
-		command: context.asAbsolutePath(`$(go env GOPATH)/bin/bsharp-lsp`),
+		command:  gopath.trim() + "/bin/bsharp-lsp",
     args: [],
     transport: TransportKind.stdio, // also tried every other option
 	};
