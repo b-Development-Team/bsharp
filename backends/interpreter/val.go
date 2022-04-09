@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	"github.com/Nv7-Github/bsharp/ir"
+	"github.com/Nv7-Github/bsharp/tokens"
 	"github.com/Nv7-Github/bsharp/types"
 )
 
@@ -11,11 +12,67 @@ func (i *Interpreter) evalConst(c *ir.Const) (*Value, error) {
 	return NewValue(c.Type(), c.Value), nil
 }
 
-// TODO: ANY casts
+func (i *Interpreter) canCastAny(v interface{}, t types.Type) bool {
+	ok := false
+	switch t.BasicType() {
+	case types.INT:
+		_, ok = v.(int)
+
+	case types.FLOAT:
+		_, ok = v.(float64)
+
+	case types.STRING:
+		_, ok = v.(string)
+
+	case types.BOOL:
+		_, ok = v.(bool)
+
+	case types.ANY:
+		ok = true
+
+	case types.ARRAY:
+		_, ok = v.(*[]any)
+
+	case types.STRUCT:
+		_, ok = v.(*[]any)
+
+	case types.MAP:
+		typ := t.(*types.MapType)
+		switch typ.KeyType.BasicType() {
+		case types.INT:
+			_, ok = v.(map[int]any)
+
+		case types.FLOAT:
+			_, ok = v.(map[float64]any)
+
+		case types.STRING:
+			_, ok = v.(map[string]any)
+		}
+	}
+
+	return ok
+}
+
+func (i *Interpreter) evalCanCast(pos *tokens.Pos, c *ir.CanCastNode) (*Value, error) {
+	v, err := i.evalNode(c.Value)
+	if err != nil {
+		return nil, err
+	}
+	return NewValue(types.BOOL, i.canCastAny(v.Value, c.Typ)), nil
+}
+
 func (i *Interpreter) evalCast(c *ir.CastNode) (*Value, error) {
 	v, err := i.evalNode(c.Value)
 	if err != nil {
 		return nil, err
+	}
+
+	if types.ANY.Equal(c.Value.Type()) {
+		if !i.canCastAny(v.Value, c.Type()) {
+			return nil, c.Pos().Error("cannot cast %s to %s", v.Type.String(), c.Type().String())
+		}
+
+		return NewValue(c.Type(), v.Value), nil
 	}
 
 	switch c.Value.Type().BasicType() {
@@ -67,6 +124,9 @@ func (i *Interpreter) evalCast(c *ir.CastNode) (*Value, error) {
 			return NewValue(c.Type(), val), nil
 		}
 		fallthrough
+
+	case types.ANY:
+		return NewValue(c.Type(), v.Value), nil
 
 	default:
 		return nil, c.Pos().Error("cannot cast type \"%s\" to \"%s\"", v.Type.BasicType(), c.Type().BasicType())
