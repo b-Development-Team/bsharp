@@ -44,6 +44,14 @@ type SetIndexNode struct {
 	Value Node
 }
 
+type SetStructNode struct {
+	NullCall
+
+	Struct Node
+	Field  int
+	Value  Node
+}
+
 func NewIndexNode(val, index Node) *IndexNode {
 	outTyp := types.Type(types.STRING)
 	if types.ARRAY.Equal(val.Type()) {
@@ -75,6 +83,7 @@ type SetNode struct {
 	Key   Node
 	Value Node
 }
+
 type GetNode struct {
 	Map Node
 	Key Node
@@ -91,6 +100,15 @@ func NewGetNode(m, k Node) *GetNode {
 		typ: m.Type().(*types.MapType).ValType,
 	}
 }
+
+type GetStructNode struct {
+	Struct Node
+	Field  int
+
+	typ types.Type
+}
+
+func (g *GetStructNode) Type() types.Type { return g.typ }
 
 type ExistsNode struct {
 	Map Node
@@ -183,15 +201,15 @@ func init() {
 	}
 
 	nodeBuilders["MAKE"] = nodeBuilder{
-		ArgTypes: []types.Type{types.NewMulType(types.IDENT)},
+		ArgTypes: []types.Type{types.IDENT},
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
 			typV := args[0].(*Const).Value.(string)
 			typ, err := types.ParseType(typV)
 			if err != nil {
 				return nil, args[0].Pos().Error("%s", err.Error())
 			}
-			if !types.ARRAY.Equal(typ) && !types.MAP.Equal(typ) {
-				return nil, args[0].Pos().Error("expected map or array type, got %s", typ.String())
+			if !types.ARRAY.Equal(typ) && !types.MAP.Equal(typ) && !types.STRUCT.Equal(typ) {
+				return nil, args[0].Pos().Error("expected map, array, or struct type, got %s", typ.String())
 			}
 			if types.MAP.Equal(typ) { // Check key type
 				if !hashable.Equal(typ.(*types.MapType).KeyType) {
@@ -204,15 +222,66 @@ func init() {
 		},
 	}
 
-	nodeBuilders["SETINDEX"] = nodeBuilder{
-		ArgTypes: []types.Type{types.ARRAY, types.INT, types.ALL},
+	nodeBuilders["SET"] = nodeBuilder{
+		ArgTypes: []types.Type{types.NewMulType(types.MAP, types.INT, types.STRUCT), types.NewMulType(hashable, types.IDENT), types.ALL},
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
-			// Check types
+			// If map type
+			if types.MAP.Equal(args[0].Type()) {
+				// Check types
+				mapTyp := args[0].Type().(*types.MapType)
+				if !mapTyp.KeyType.Equal(args[1].Type()) {
+					return nil, args[1].Pos().Error("expected type %s for map key, got %s", mapTyp.KeyType.String(), args[1].Type().String())
+				}
+				if !mapTyp.ValType.Equal(args[2].Type()) {
+					return nil, args[2].Pos().Error("expected type %s for map value, got %s", mapTyp.ValType.String(), args[2].Type().String())
+				}
+
+				return &SetNode{
+					Map:   args[0],
+					Key:   args[1],
+					Value: args[2],
+				}, nil
+			}
+
+			// If struct type
+			if types.STRUCT.Equal(args[0].Type()) {
+				// Check types
+				structTyp := args[0].Type().(*types.StructType)
+				if !types.IDENT.Equal(args[1].Type()) {
+					return nil, args[1].Pos().Error("expected type %s for struct field name, got %s", types.IDENT.String(), args[1].Type().String())
+				}
+				name := args[1].(*Const).Value.(string)
+				var field *types.StructField
+				id := -1
+				for i, f := range structTyp.Fields {
+					if f.Name == name {
+						field = &f
+						id = i
+						break
+					}
+				}
+				if field == nil {
+					return nil, args[1].Pos().Error("unknown struct field: %s", name)
+				}
+				if !field.Type.Equal(args[2].Type()) {
+					return nil, args[2].Pos().Error("expected type %s for struct field value, got %s", field.Type.String(), args[2].Type().String())
+				}
+
+				return &SetStructNode{
+					Struct: args[0],
+					Field:  id,
+					Value:  args[2],
+				}, nil
+			}
+
+			// Array type
 			arrTyp := args[0].Type().(*types.ArrayType)
+			if !types.INT.Equal(args[1].Type()) {
+				return nil, args[1].Pos().Error("expected type %s for array index, got %s", types.INT.String(), args[1].Type().String())
+			}
 			if !arrTyp.ElemType.Equal(args[2].Type()) {
 				return nil, args[2].Pos().Error("expected type %s for array value, got %s", arrTyp.ElemType.String(), args[2].Type().String())
 			}
-
 			return &SetIndexNode{
 				Array: args[0],
 				Index: args[1],
@@ -221,39 +290,46 @@ func init() {
 		},
 	}
 
-	nodeBuilders["SET"] = nodeBuilder{
-		ArgTypes: []types.Type{types.MAP, hashable, types.ALL},
-		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
-			// Check types
-			mapTyp := args[0].Type().(*types.MapType)
-			if !mapTyp.KeyType.Equal(args[1].Type()) {
-				return nil, args[1].Pos().Error("expected type %s for map key, got %s", mapTyp.KeyType.String(), args[1].Type().String())
-			}
-			if !mapTyp.ValType.Equal(args[2].Type()) {
-				return nil, args[2].Pos().Error("expected type %s for map value, got %s", mapTyp.ValType.String(), args[2].Type().String())
-			}
-
-			return &SetNode{
-				Map:   args[0],
-				Key:   args[1],
-				Value: args[2],
-			}, nil
-		},
-	}
-
 	nodeBuilders["GET"] = nodeBuilder{
-		ArgTypes: []types.Type{types.MAP, hashable},
+		ArgTypes: []types.Type{types.NewMulType(types.MAP, types.STRUCT), types.NewMulType(hashable, types.IDENT)},
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
-			// Check types
-			mapTyp := args[0].Type().(*types.MapType)
-			if !mapTyp.KeyType.Equal(args[1].Type()) {
-				return nil, args[1].Pos().Error("expected type %s for map key, got %s", mapTyp.KeyType.String(), args[1].Type().String())
+			// If map type
+			if types.MAP.Equal(args[0].Type()) {
+				// Check types
+				mapTyp := args[0].Type().(*types.MapType)
+				if !mapTyp.KeyType.Equal(args[1].Type()) {
+					return nil, args[1].Pos().Error("expected type %s for map key, got %s", mapTyp.KeyType.String(), args[1].Type().String())
+				}
+
+				return &GetNode{
+					Map: args[0],
+					Key: args[1],
+					typ: mapTyp.ValType,
+				}, nil
 			}
 
-			return &GetNode{
-				Map: args[0],
-				Key: args[1],
-				typ: mapTyp.ValType,
+			// Struct type
+			structTyp := args[0].Type().(*types.StructType)
+			if !types.IDENT.Equal(args[1].Type()) {
+				return nil, args[1].Pos().Error("expected type %s for struct field name, got %s", types.IDENT.String(), args[1].Type().String())
+			}
+			name := args[1].(*Const).Value.(string)
+			var field *types.StructField
+			id := -1
+			for i, f := range structTyp.Fields {
+				if f.Name == name {
+					field = &f
+					id = i
+					break
+				}
+			}
+			if field == nil {
+				return nil, args[1].Pos().Error("unknown struct field: %s", name)
+			}
+			return &GetStructNode{
+				Struct: args[0],
+				Field:  id,
+				typ:    field.Type,
 			}, nil
 		},
 	}

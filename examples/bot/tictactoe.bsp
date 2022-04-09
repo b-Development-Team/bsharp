@@ -147,7 +147,7 @@
           [DEFINE player [VAR AI]]
         ]
         [DEFINE newboard [COPYBOARD [VAR board]]]
-        [SETINDEX [INDEX [VAR newboard] [VAR i]] [VAR j] [VAR player]]
+        [SET [INDEX [VAR newboard] [VAR i]] [VAR j] [VAR player]]
         [DEFINE score [MINIMAX [VAR newboard] [MATH [VAR depth] + 1] [NOT [VAR maximize]]]]
 
         # Check if move is better
@@ -202,7 +202,7 @@
   [IF [COMPARE [VAR val] != [VAR EMPTY]]
     [PRINT "Invalid move!"]
   ELSE
-    [SETINDEX [INDEX [VAR state] [INDEX [VAR pos] 0]] [INDEX [VAR pos] 1] [VAR turn]]
+    [SET [INDEX [VAR state] [INDEX [VAR pos] 0]] [INDEX [VAR pos] 1] [VAR turn]]
 
     [DEFINE winner [WINNER [VAR state] 0]]
     [IF [COMPARE [VAR winner] != -1]
@@ -230,14 +230,14 @@
           [DEFINE val [INDEX [INDEX [VAR state] [VAR y]] [VAR x]]]
           [IF [COMPARE [VAR val] == [VAR EMPTY]]
             # Attempt move
-            [SETINDEX [INDEX [VAR state] [VAR y]] [VAR x] [VAR AI]]
+            [SET [INDEX [VAR state] [VAR y]] [VAR x] [VAR AI]]
             [DEFINE score [MINIMAX [VAR state] 0 FALSE]]
 
             [IF [COMPARE [VAR score] > [VAR bestscore]]
               [DEFINE bestscore [VAR score]]
               [DEFINE best [ARRAY [VAR y] [VAR x]]]
             ]
-            [SETINDEX [INDEX [VAR state] [VAR y]] [VAR x] [VAR EMPTY]]
+            [SET [INDEX [VAR state] [VAR y]] [VAR x] [VAR EMPTY]]
           ]
 
           [DEFINE x [MATH [VAR x] + 1]]
@@ -246,7 +246,7 @@
       ]
 
       # Perform best move
-      [SETINDEX [INDEX [VAR state] [INDEX [VAR best] 0]] [INDEX [VAR best] 1] [VAR AI]]
+      [SET [INDEX [VAR state] [INDEX [VAR best] 0]] [INDEX [VAR best] 1] [VAR AI]]
 
       # Print time
       [IF [NOT [VAR startedlogs]]

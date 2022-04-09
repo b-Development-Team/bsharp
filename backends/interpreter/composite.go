@@ -87,6 +87,7 @@ func (i *Interpreter) evalLength(pos *tokens.Pos, n *ir.LengthNode) (*Value, err
 	return nil, pos.Error("cannot get length of type %s", v.Type.String())
 }
 
+// TODO: Struct types
 func (i *Interpreter) evalMake(pos *tokens.Pos, n *ir.MakeNode) (*Value, error) {
 	typ, ok := n.Type().(*types.MapType)
 	if !ok { // Its an array if not map

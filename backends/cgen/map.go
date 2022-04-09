@@ -85,6 +85,7 @@ func (c *CGen) addMapFns(typ *types.MapType) mapFns {
 	}
 }
 
+// TODO: Struct types
 func (c *CGen) addMake(n *ir.MakeNode) (*Code, error) {
 	if types.ARRAY.Equal(n.Type()) {
 		name := c.GetTmp("arr")
