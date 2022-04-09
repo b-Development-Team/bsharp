@@ -109,7 +109,7 @@ string* string_ftoa(float val) {
 }
 
 static inline string* string_btoa(bool val) {
-  return val ? string_new("true", 4) : string_new("false", 5);
+  return val ? string_from_const("true") : string_from_const("false");
 }
 
 // Parse int code

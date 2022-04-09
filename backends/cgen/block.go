@@ -53,8 +53,11 @@ func (c *CGen) addWhile(i *ir.WhileNode) (*Code, error) {
 	if err != nil {
 		return nil, err
 	}
+	condV := c.GetTmp("cond")
+	cond.Pre = JoinCode(cond.Pre, fmt.Sprintf("bool %s = %s;\n", condV, cond.Value))
+
 	bld := &strings.Builder{}
-	fmt.Fprintf(bld, "while (%s) {\n", cond.Value)
+	fmt.Fprintf(bld, "while (%s) {\n", condV)
 	c.stack.Push()
 	for _, node := range i.Body {
 		code, err := c.AddNode(node)
@@ -63,6 +66,15 @@ func (c *CGen) addWhile(i *ir.WhileNode) (*Code, error) {
 		}
 		c.addCode(bld, code)
 	}
+	// Recalc cond
+	condR, err := c.AddNode(i.Condition)
+	if err != nil {
+		return nil, err
+	}
+	condR.Pre = JoinCode(condR.Pre, fmt.Sprintf("%s = %s;\n", condV, condR.Value))
+	condR.Value = ""
+	c.addCode(bld, condR)
+
 	c.addFree(bld)
 	c.stack.Pop()
 	bld.WriteString("}")
