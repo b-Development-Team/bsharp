@@ -4,11 +4,18 @@ import (
 	"fmt"
 )
 
-func parse(tokens []token) (Type, []token, error) {
+func parse(tokens []token, names map[string]Type) (Type, []token, error) {
 	if len(tokens) < 1 {
 		return nil, nil, fmt.Errorf("expected type")
 	}
 	switch tokens[0].typ {
+	case tokenTypeIdent:
+		_, exists := names[*tokens[0].value]
+		if !exists {
+			return nil, nil, fmt.Errorf("unknown type name %s", *tokens[0].value)
+		}
+		return names[*tokens[0].value], tokens[1:], nil
+
 	case tokenTypeConst:
 		switch *tokens[0].value {
 		case "INT":
@@ -37,7 +44,7 @@ func parse(tokens []token) (Type, []token, error) {
 			tokens = tokens[1:]
 
 			// Get element type
-			elemType, tokens, err := parse(tokens)
+			elemType, tokens, err := parse(tokens, names)
 			if err != nil {
 				return nil, nil, err
 			}
@@ -61,7 +68,7 @@ func parse(tokens []token) (Type, []token, error) {
 			tokens = tokens[1:]
 
 			// Get key type
-			keyType, tokens, err := parse(tokens)
+			keyType, tokens, err := parse(tokens, names)
 			if err != nil {
 				return nil, nil, err
 			}
@@ -73,7 +80,7 @@ func parse(tokens []token) (Type, []token, error) {
 			tokens = tokens[1:]
 
 			// Get value type
-			valueType, tokens, err := parse(tokens)
+			valueType, tokens, err := parse(tokens, names)
 			if err != nil {
 				return nil, nil, err
 			}
@@ -106,7 +113,7 @@ func parse(tokens []token) (Type, []token, error) {
 
 				var argType Type
 				var err error
-				argType, tokens, err = parse(tokens)
+				argType, tokens, err = parse(tokens, names)
 				if err != nil {
 					return nil, nil, err
 				}
@@ -131,7 +138,7 @@ func parse(tokens []token) (Type, []token, error) {
 			tokens = tokens[1:]
 
 			// Get return type
-			returnType, tokens, err := parse(tokens)
+			returnType, tokens, err := parse(tokens, names)
 			if err != nil {
 				return nil, nil, err
 			}
@@ -172,7 +179,7 @@ func parse(tokens []token) (Type, []token, error) {
 				// Get type
 				var fieldType Type
 				var err error
-				fieldType, tokens, err = parse(tokens)
+				fieldType, tokens, err = parse(tokens, names)
 				if err != nil {
 					return nil, nil, err
 				}

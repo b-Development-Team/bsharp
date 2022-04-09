@@ -5,22 +5,6 @@ import (
 	"github.com/Nv7-Github/bsharp/types"
 )
 
-type CastNode struct {
-	Value Node
-
-	typ types.Type
-}
-
-func (c *CastNode) Type() types.Type { return c.typ }
-func (c *CastNode) Pos() *tokens.Pos { return c.Value.Pos() }
-
-func NewCastNode(val Node, typ types.Type) *CastNode {
-	return &CastNode{
-		Value: val,
-		typ:   typ,
-	}
-}
-
 type MathOperation int
 
 const (
@@ -183,27 +167,6 @@ func init() {
 		},
 	}
 
-	nodeBuilders["FLOAT"] = nodeBuilder{
-		ArgTypes: []types.Type{types.NewMulType(types.INT, types.STRING)},
-		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
-			return NewCastNode(args[0], types.FLOAT), nil
-		},
-	}
-
-	nodeBuilders["STRING"] = nodeBuilder{
-		ArgTypes: []types.Type{types.NewMulType(types.INT, types.FLOAT, types.BOOL)},
-		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
-			return NewCastNode(args[0], types.STRING), nil
-		},
-	}
-
-	nodeBuilders["INT"] = nodeBuilder{
-		ArgTypes: []types.Type{types.NewMulType(types.FLOAT, types.STRING)},
-		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
-			return NewCastNode(args[0], types.INT), nil
-		},
-	}
-
 	nodeBuilders["AND"] = nodeBuilder{
 		ArgTypes: []types.Type{types.BOOL, types.BOOL},
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
@@ -236,41 +199,4 @@ func init() {
 		},
 	}
 
-	nodeBuilders["ANY"] = nodeBuilder{
-		ArgTypes: []types.Type{types.ALL},
-		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
-			return &CastNode{
-				Value: args[0],
-				typ:   types.ANY,
-			}, nil
-		},
-	}
-
-	nodeBuilders["CANCAST"] = nodeBuilder{
-		ArgTypes: []types.Type{types.ALL, types.IDENT},
-		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
-			typ, err := types.ParseType(args[1].(*Const).Value.(string))
-			if err != nil {
-				return nil, err
-			}
-			return &CanCastNode{
-				Value: args[0],
-				Typ:   typ,
-			}, nil
-		},
-	}
-
-	nodeBuilders["CAST"] = nodeBuilder{
-		ArgTypes: []types.Type{types.ALL, types.IDENT},
-		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
-			typ, err := types.ParseType(args[1].(*Const).Value.(string))
-			if err != nil {
-				return nil, err
-			}
-			return &CastNode{
-				Value: args[0],
-				typ:   typ,
-			}, nil
-		},
-	}
 }

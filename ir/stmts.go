@@ -62,6 +62,9 @@ func (b *Builder) buildNode(node parser.Node) (Node, error) {
 			case "FUNC":
 				return nil, b.buildFnDef(n)
 
+			case "TYPEDEF":
+				return nil, b.checkTypeDef(n)
+
 			case "IMPORT":
 				if b.Scope.CurrType() != ScopeTypeGlobal {
 					return nil, n.Pos().Error("import must be at the top level")

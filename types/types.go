@@ -12,12 +12,12 @@ type Type interface {
 	Equal(Type) bool
 }
 
-func ParseType(typ string) (Type, error) {
+func ParseType(typ string, names map[string]Type) (Type, error) {
 	tokens, err := tokenize([]rune(typ))
 	if err != nil {
 		return nil, err
 	}
-	out, _, err := parse(tokens)
+	out, _, err := parse(tokens, names)
 	if err != nil {
 		return nil, err
 	}

@@ -204,7 +204,7 @@ func init() {
 		ArgTypes: []types.Type{types.IDENT},
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
 			typV := args[0].(*Const).Value.(string)
-			typ, err := types.ParseType(typV)
+			typ, err := types.ParseType(typV, b.typeNames)
 			if err != nil {
 				return nil, args[0].Pos().Error("%s", err.Error())
 			}

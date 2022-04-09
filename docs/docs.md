@@ -8,7 +8,10 @@
   - [Strings](#strings)
   - [Arrays](#arrays)
   - [Maps](#maps)
+  - [Structs](#structs)
+  - [Type Definitions](#type-definitions)
   - [Type Conversions](#type-conversions)
+  - [Any](#any)
 - [Statements](#statements)
   - [If](#if)
   - [While](#while)
@@ -161,6 +164,15 @@ The above example could be remade to use structs as follows:
 [SET [VAR a] favoriteLanguage "B#"]
 [SET [VAR a] age -1]
 [PRINT [GET [VAR a] favoriteLanguage]]
+```
+
+### Type Definitions
+Types can be given name using the `TYPEDEF` declaration. For example:
+```scala
+[TYPEDEF a INT]
+[TYPEDEF arr ARRAY{a}]
+
+[DEFINE val [MAKE arr]]
 ```
 
 ### Type Conversions

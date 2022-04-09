@@ -72,7 +72,7 @@ func (b *Builder) functionPass(p *parser.Parser) error {
 			if !ok {
 				return typVal.Pos().Error("expected param type")
 			}
-			typ, err := types.ParseType(typV.Value)
+			typ, err := types.ParseType(typV.Value, b.typeNames)
 			if err != nil {
 				return typV.Pos().Error("%s", err.Error())
 			}
@@ -101,7 +101,7 @@ func (b *Builder) functionPass(p *parser.Parser) error {
 					return retTypVal.Args[0].Pos().Error("expected return type")
 				}
 				var err error
-				retType, err = types.ParseType(retTypV.Value)
+				retType, err = types.ParseType(retTypV.Value, b.typeNames)
 				if err != nil {
 					return retTypV.Pos().Error("%s", err.Error())
 				}

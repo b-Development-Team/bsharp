@@ -9,6 +9,10 @@ func (b *Builder) Build(p *parser.Parser, fs FS) error {
 	if err != nil {
 		return err
 	}
+	err = b.typePass(p)
+	if err != nil {
+		return err
+	}
 	err = b.functionPass(p)
 	if err != nil {
 		return err
