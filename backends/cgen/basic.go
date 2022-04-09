@@ -81,7 +81,7 @@ func (c *CGen) addLogicalOp(n *ir.LogicalOpNode) (*Code, error) {
 
 	case ir.LogicalOpNot:
 		return &Code{
-			Pre:   JoinCode(l.Pre, r.Pre),
+			Pre:   JoinCode(l.Pre),
 			Value: fmt.Sprintf("(!%s)", l.Value),
 		}, nil
 	}

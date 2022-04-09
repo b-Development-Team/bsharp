@@ -96,16 +96,17 @@
       [DEFINE i [MATH [VAR i] + 1]]
       [DEFINE arg "["]
       [DEFINE bracks 1]
-    ELSE
-      [IF [COMPARE [INDEX [VAR src] [VAR i]] == "\""] Eat quote
+    ELSE 
+      [IF [COMPARE [INDEX [VAR src] [VAR i]] == "\""] # Eat quote
         [DEFINE openQuote TRUE]
         [DEFINE i [MATH [VAR i] + 1]]
         [DEFINE arg "\""]
       ]
     ]
-    [DEFINE done [COMPARE 1 == 0]]
+
+    [DEFINE done FALSE]
     [WHILE [NOT [VAR done]] # Wait for closing bracket and closing quote
-      [SWITCH  [INDEX [VAR src] [VAR i]]
+      [SWITCH [INDEX [VAR src] [VAR i]]
         [CASE "["
           [DEFINE bracks [MATH [VAR bracks] + 1]]
           [DEFINE arg [CONCAT [VAR arg] [INDEX [VAR src] [VAR i]]]]
@@ -138,7 +139,7 @@
           [DEFINE i [MATH [VAR i] + 1]]
         ]
 
-        [DEFAULT
+        [DEFAULT 
           [DEFINE arg [CONCAT [VAR arg] [INDEX [VAR src] [VAR i]]]]
           [DEFINE i [MATH [VAR i] + 1]]
         ]

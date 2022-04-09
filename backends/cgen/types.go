@@ -16,6 +16,9 @@ func (c *CGen) CType(typ types.Type) string {
 	case types.FLOAT:
 		return "double"
 
+	case types.BOOL:
+		return "bool"
+
 	case types.STRING:
 		return "string*"
 

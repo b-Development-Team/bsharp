@@ -85,29 +85,21 @@ func init() {
 			}
 
 			body := make([]Node, 0, len(args)-1)
-			hasElse := false
 			var els []parser.Node
 			b.Scope.Push(ScopeTypeIf)
 			for i, arg := range args[1:] {
 				// ELSE?
 				_, ok := arg.(*parser.IdentNode)
 				if ok && arg.(*parser.IdentNode).Value == "ELSE" {
-					if hasElse {
-						return nil, arg.Pos().Error("ELSE can only be used once in IF statement")
-					}
-					hasElse = true
-					els = args[i+1:]
-					args = args[:i]
-					continue
+					els = args[i+2:]
+					break
 				}
 
 				node, err := b.buildNode(arg)
 				if err != nil {
 					return nil, err
 				}
-				if !hasElse {
-					body = append(body, node)
-				}
+				body = append(body, node)
 			}
 			scope := b.Scope.CurrScopeInfo()
 			b.Scope.Pop()

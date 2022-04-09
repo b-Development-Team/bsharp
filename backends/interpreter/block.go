@@ -61,7 +61,7 @@ func (i *Interpreter) evalSwitchNode(n *ir.SwitchNode) error {
 
 	// Check cases (O(n), not O(1) like expected from switch)
 	for _, cs := range n.Cases {
-		if cs.Block.(*ir.Case).Value == v.Value { // This works for int, float, string, all the hashable types
+		if cs.Block.(*ir.Case).Value.Value == v.Value { // This works for int, float, string, all the hashable types
 			i.stack.Push()
 			for _, node := range cs.Block.(*ir.Case).Body {
 				if _, err := i.evalNode(node); err != nil {

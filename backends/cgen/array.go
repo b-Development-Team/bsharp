@@ -114,7 +114,7 @@ func (c *CGen) addIndex(n *ir.IndexNode) (*Code, error) {
 	typ := c.CType(n.Type())
 	return &Code{
 		Pre:   JoinCode(arr.Pre, ind.Pre),
-		Value: fmt.Sprintf("*((%s*)(array_get(%s, %s)))", typ, arr.Value, ind.Value),
+		Value: fmt.Sprintf("(*((%s*)(array_get(%s, %s))))", typ, arr.Value, ind.Value),
 	}, nil
 }
 

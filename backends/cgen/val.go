@@ -38,6 +38,8 @@ func (c *CGen) addConst(n *ir.Const) *Code {
 		}
 	}
 
+	fmt.Println(n.Pos())
+
 	panic("invalid const")
 }
 

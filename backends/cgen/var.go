@@ -25,10 +25,13 @@ func (c *CGen) addDefine(n *ir.DefineNode) (*Code, error) {
 	}
 
 	pre := val.Pre
+	free := ""
 	if isDynamic(v.Type) { // Free old val, grab new one
 		pre = JoinCode(pre, c.GrabCode(val.Value, n.Value.Type()))
 		if c.declaredVars[v.ID] {
-			pre = JoinCode(c.FreeCode(name, v.Type), pre)
+			oldName := c.GetTmp("old")
+			pre = JoinCode(fmt.Sprintf("%s %s = %s;", c.CType(v.Type), oldName, name), pre)
+			free = c.FreeCode(oldName, v.Type)
 		}
 	}
 
@@ -50,6 +53,6 @@ func (c *CGen) addDefine(n *ir.DefineNode) (*Code, error) {
 	}
 
 	return &Code{
-		Pre: JoinCode(pre, code),
+		Pre: JoinCode(pre, code, free),
 	}, nil
 }

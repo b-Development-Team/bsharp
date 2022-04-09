@@ -40,7 +40,7 @@ string* string_concat(int n, ...) {
   // Calc len
   va_list ptr;
   va_start(ptr, n);
-  int len;
+  int len = 0;
   for (int i = 0; i < n; i++) {
     string* val = va_arg(ptr, string*);
     len += val->len;
