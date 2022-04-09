@@ -59,6 +59,18 @@ func (b *BoolNode) String() string {
 	return fmt.Sprintf("Bool(%t, %s)", b.Value, b.Pos().String())
 }
 
+type NullNode struct {
+	pos *tokens.Pos
+}
+
+func (n *NullNode) Pos() *tokens.Pos {
+	return n.pos
+}
+
+func (n *NullNode) String() string {
+	return fmt.Sprintf("Null(%s)", n.Pos().String())
+}
+
 type StringNode struct {
 	pos   *tokens.Pos
 	Value string

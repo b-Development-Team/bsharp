@@ -24,6 +24,11 @@ func (p *Parser) ParseNode() (Node, error) {
 				Value: t.Value == "TRUE",
 			}, nil
 		}
+		if t.Value == "NULL" {
+			return &NullNode{
+				pos: t.Pos,
+			}, nil
+		}
 		return &IdentNode{
 			pos:   t.Pos,
 			Value: t.Value,

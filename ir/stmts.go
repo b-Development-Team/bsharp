@@ -118,6 +118,9 @@ func (b *Builder) buildNode(node parser.Node) (Node, error) {
 	case *parser.BoolNode:
 		return b.buildBool(n), nil
 
+	case *parser.NullNode:
+		return NewConst(types.NULL, n.Pos(), nil), nil
+
 	default:
 		return nil, n.Pos().Error("unknown node type: %T", n)
 	}
