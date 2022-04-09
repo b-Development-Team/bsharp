@@ -82,15 +82,16 @@ func tokenize(val []rune) ([]token, error) {
 		case 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '_':
 			// ident
 			var ident string
-			for i < len(val) && (char == 'a' || char == 'b' || char == 'c' || char == 'd' || char == 'e' || char == 'f' || char == 'g' || char == 'h' || char == 'i' || char == 'j' || char == 'k' || char == 'l' || char == 'm' || char == 'n' || char == 'o' || char == 'p' || char == 'q' || char == 'r' || char == 's' || char == 't' || char == 'u' || char == 'v' || char == 'w' || char == 'x' || char == 'y' || char == 'z' || char == '0' || char == '1' || char == '2' || char == '3' || char == '4' || char == '5' || char == '6' || char == '7' || char == '8' || char == '9' || char == '_') {
+			for i < len(val) && (char == 'a' || char == 'b' || char == 'c' || char == 'd' || char == 'e' || char == 'f' || char == 'g' || char == 'h' || char == 'i' || char == 'j' || char == 'k' || char == 'l' || char == 'm' || char == 'n' || char == 'o' || char == 'p' || char == 'q' || char == 'r' || char == 's' || char == 't' || char == 'u' || char == 'v' || char == 'w' || char == 'x' || char == 'y' || char == 'z' || char == '0' || char == '1' || char == '2' || char == '3' || char == '4' || char == '5' || char == '6' || char == '7' || char == '8' || char == '9' || char == '_' || char == 'A' || char == 'B' || char == 'C' || char == 'D' || char == 'E' || char == 'F' || char == 'G' || char == 'H' || char == 'I' || char == 'J' || char == 'K' || char == 'L' || char == 'M' || char == 'N' || char == 'O' || char == 'P' || char == 'Q' || char == 'R' || char == 'S' || char == 'T' || char == 'U' || char == 'V' || char == 'W' || char == 'X' || char == 'Y' || char == 'Z') {
 				ident += string(char)
-				i++
 				if i >= len(val) {
 					break
 				}
+				i++
 				char = val[i]
 			}
 			tokens = append(tokens, token{tokenTypeIdent, &ident})
+			i--
 
 		default:
 			if _, ok := tokenStarters[char]; ok {

@@ -145,11 +145,6 @@ func parse(tokens []token) (Type, []token, error) {
 			// Get fields
 			fields := make([]StructField, 0)
 			for {
-				// Check if done
-				if tokens[0].typ == tokenTypeRBrack {
-					break
-				}
-
 				// Get name
 				if tokens[0].typ != tokenTypeIdent {
 					return nil, nil, fmt.Errorf("expected field name")
@@ -172,13 +167,24 @@ func parse(tokens []token) (Type, []token, error) {
 				}
 
 				fields = append(fields, NewStructField(name, fieldType))
+
+				// Check if done
+				if tokens[0].typ == tokenTypeRBrack {
+					break
+				} else {
+					// Not done, eat comma
+					if tokens[0].typ != tokenTypeComma {
+						return nil, nil, fmt.Errorf("expected ',' or '}' after field type")
+					}
+					tokens = tokens[1:]
+				}
 			}
 
 			// Eat RBrack
-			tokens = tokens[1:]
 			if tokens[0].typ != tokenTypeRBrack {
 				return nil, nil, fmt.Errorf("expected '}' after STRUCT fields")
 			}
+			tokens = tokens[1:]
 
 			return NewStruct(fields...), tokens, nil
 

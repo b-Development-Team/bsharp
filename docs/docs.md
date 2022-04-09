@@ -64,6 +64,8 @@ There are 7 data types in B#:
 | `ARRAY` | Represents multiple values in a list. |
 | `MAP` | Represents key-value data. |
 | `FUNCTION` | Represents a pointer to a function. |
+| `STRUCT` | Represents key-value data but with a fixed set of keys. |
+| `ANY` | Represents a value of any type. |
 
 ### Numbers
 There are two types of numbers: integers, and floats. Integers represent whole numbers, whereas floats represent decimals. They can both be negative.
@@ -145,8 +147,50 @@ To initialize a map use the `MAKE` function. The `[SET]` and `[GET]` functions c
 [PRINT [GET [VAR a] "Favorite Language"]]
 ```
 
+### Structs
+Structs are like maps, but they only have a fixed number of keys. One advantage however, is that they can store values of multiple types. 
+
+In addition, structs are generally safer because a field is guarenteed to exist, and errors related to accessing nonexistent fields can be caught at compile time. 
+
+The above example could be remade to use structs as follows:
+
+```scala
+[DEFINE a [MAKE STRUCT{name:STRING,favoriteColor:STRING,favoriteLanguage:STRING,age:INT}]]
+[SET [VAR a] name "Joe"]
+[SET [VAR a] favoriteColor "Blue"]
+[SET [VAR a] favoriteLanguage "B#"]
+[SET [VAR a] age -1]
+[PRINT [GET [VAR a] favoriteLanguage]]
+```
+
 ### Type Conversions
 `INT`s, `FLOAT`s, and `STRING`s can all be converted to each other using type conversions. Use the `INT` tag to convert a float or string to an integer, the `FLOAT` tag to convert the other two to a float, and the `STRING` tag to convert an integer or float to a string.
+
+### Any
+The `ANY` type allows for passing values of multiple types around. It can be checked to be of a certain type using the `CANCAST` tag, and cast using the `CAST` tag. The `ANY` tag can be used to cast a value to type `ANY`. For example, to add 2 integers or floats you could do:
+```scala
+[FUNC ADD [PARAM a ANY] [PARAM b ANY] [RETURNS ANY]
+  [IF [CANCAST [VAR a] INT]
+    [DEFINE aval [CAST [VAR a] INT]]
+    [DEFINE bval [CAST [VAR b] INT]]
+    [RETURN [ANY [MATH [VAR aval] + [VAR bval]]]]
+  ]
+
+  [IF [CANCAST [VAR a] FLOAT]
+    [DEFINE aval [CAST [VAR a] FLOAT]]
+    [DEFINE bval [CAST [VAR b] FLOAT]]
+    [RETURN [ANY [MATH [VAR aval] + [VAR bval]]]]
+  ]
+
+  [RETURN 0]
+]
+
+[DEFINE vala [ANY 1]]
+[DEFINE valb [ANY 2]]
+[DEFINE res [ADD [VAR vala] [VAR valb]]]
+[PRINT [STRING [CAST [VAR res] INT]]]
+```
+**NOTE**: This will cause a crash in the program if the values are anything other than two `FLOAT`s or two `INT`s!
 
 ## Statements
 ### If
