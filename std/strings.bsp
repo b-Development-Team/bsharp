@@ -1,4 +1,4 @@
-[FUNC JOIN [PARAM vals STRING{}] [PARAM joiner STRING] [RETURNS STRING]
+[FUNC JOIN [PARAM vals ARRAY{STRING}] [PARAM joiner STRING] [RETURNS STRING]
   [DEFINE out ""]
   [DEFINE i 0]
   [WHILE [COMPARE [VAR i] < [LENGTH [VAR vals]]]
@@ -11,10 +11,10 @@
   [RETURN [VAR out]]
 ]
 
-[FUNC SPLIT [PARAM str STRING] [PARAM sep STRING] [RETURNS STRING{}]
+[FUNC SPLIT [PARAM str STRING] [PARAM sep STRING] [RETURNS ARRAY{STRING}]
   [DEFINE i 0]
   [DEFINE curr ""]
-  [DEFINE out [MAKE STRING{}]]
+  [DEFINE out [MAKE ARRAY{STRING}]]
   [WHILE [COMPARE [LENGTH [VAR sep]] <= [MATH [LENGTH [VAR str]] - [VAR i]]] # Loop until sep is not possible
     # Check if the next characters are the seperator
     [DEFINE j 0]

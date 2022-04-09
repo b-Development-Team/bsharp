@@ -136,7 +136,7 @@ func (t *Tokenizer) addString() {
 }
 
 func isLetter(char rune) bool {
-	return char == '+' || char == '-' || char == '*' || char == '/' || char == '^' || char == '%' || char == '=' || char == '!' || char == '<' || char == '>' || char == '{' || char == '}' || unicode.IsLetter(char)
+	return char == '+' || char == '-' || char == '*' || char == '/' || char == '^' || char == '%' || char == '=' || char == '!' || char == '<' || char == '>' || char == '{' || char == '}' || char == ',' || char == ':' || unicode.IsLetter(char)
 }
 
 func (t *Tokenizer) addIdent() {

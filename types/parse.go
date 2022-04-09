@@ -2,94 +2,190 @@ package types
 
 import (
 	"fmt"
-	"strings"
 )
 
-// int, string, float, int{}, map{string}int, etc.
-func ParseType(typ string) (Type, error) {
-	for k, v := range basicTypeNames {
-		// Either array or basic type
-		if strings.HasPrefix(typ, v) {
-			if typ == v { // Basic type
-				return k, nil
+func parse(tokens []token) (Type, []token, error) {
+	if len(tokens) < 1 {
+		return nil, nil, fmt.Errorf("expected type")
+	}
+	switch tokens[0].typ {
+	case tokenTypeConst:
+		switch *tokens[0].value {
+		case "INT":
+			return INT, tokens[1:], nil
+
+		case "FLOAT":
+			return FLOAT, tokens[1:], nil
+
+		case "BOOL":
+			return BOOL, tokens[1:], nil
+
+		case "NULL":
+			return NULL, tokens[1:], nil
+
+		case "STRING":
+			return STRING, tokens[1:], nil
+
+		case "ARRAY":
+			// Eat "ARRAY"
+			tokens = tokens[1:]
+			if tokens[0].typ != tokenTypeLBrack {
+				return nil, nil, fmt.Errorf("expected '{' after 'ARRAY'")
 			}
-		}
-	}
 
-	// Array
-	if strings.HasSuffix(typ, "{}") {
-		typ, err := ParseType(typ[:len(typ)-2])
-		if err != nil {
-			return nil, err
-		}
-		return NewArrayType(typ), nil
-	}
+			// Eat "{"
+			tokens = tokens[1:]
 
-	// Function
-	if strings.HasPrefix(typ, "FUNC{") {
-		typ = strings.TrimPrefix(typ, "FUNC{")
-		var v string
-		argTyps := make([]Type, 0)
-		for len(typ) > 0 && typ[0] != '}' { // Match until closing brace
-			v, typ = matchBrackets(typ)
-			argTyp, err := ParseType(v)
+			// Get element type
+			elemType, tokens, err := parse(tokens)
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
-			argTyps = append(argTyps, argTyp)
-		}
-		typ = typ[1:] // Get rid of closing bracket
-		retTyp := Type(NULL)
-		// Check if return type
-		if len(typ) > 0 {
-			var err error
-			retTyp, err = ParseType(typ)
+
+			// Eat "}"
+			if tokens[0].typ != tokenTypeRBrack {
+				return nil, nil, fmt.Errorf("expected '}' after ARRAY element type")
+			}
+			tokens = tokens[1:]
+
+			return NewArrayType(elemType), tokens, nil
+
+		case "MAP":
+			// Eat "MAP"
+			tokens = tokens[1:]
+			if tokens[0].typ != tokenTypeLBrack {
+				return nil, nil, fmt.Errorf("expected '{' after 'MAP'")
+			}
+
+			// Eat "{"
+			tokens = tokens[1:]
+
+			// Get key type
+			keyType, tokens, err := parse(tokens)
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
+
+			// Eat ","
+			if tokens[0].typ != tokenTypeComma {
+				return nil, nil, fmt.Errorf("expected ',' after MAP key type")
+			}
+			tokens = tokens[1:]
+
+			// Get value type
+			valueType, tokens, err := parse(tokens)
+			if err != nil {
+				return nil, nil, err
+			}
+
+			// Eat "}"
+			if tokens[0].typ != tokenTypeRBrack {
+				return nil, nil, fmt.Errorf("expected '}' after MAP value type")
+			}
+			tokens = tokens[1:]
+
+			return NewMapType(keyType, valueType), tokens, nil
+
+		case "FUNC":
+			// Eat "FUNC"
+			tokens = tokens[1:]
+			if tokens[0].typ != tokenTypeLBrack {
+				return nil, nil, fmt.Errorf("expected '{' after 'FUNC'")
+			}
+
+			// Eat "{"
+			tokens = tokens[1:]
+
+			// Get argument types
+			argTypes := make([]Type, 0)
+			for {
+				var argType Type
+				var err error
+				argType, tokens, err = parse(tokens)
+				if err != nil {
+					return nil, nil, err
+				}
+
+				argTypes = append(argTypes, argType)
+
+				if tokens[0].typ == tokenTypeRBrack {
+					break
+				}
+
+				if tokens[0].typ != tokenTypeComma {
+					return nil, nil, fmt.Errorf("expected ',' or '}' after FUNC argument type")
+				}
+				tokens = tokens[1:]
+			}
+
+			// Eat "}"
+			if tokens[0].typ != tokenTypeRBrack {
+				return nil, nil, fmt.Errorf("expected '}' after FUNC argument types")
+			}
+			tokens = tokens[1:]
+
+			// Get return type
+			returnType, tokens, err := parse(tokens)
+			if err != nil {
+				return nil, nil, err
+			}
+
+			return NewFuncType(argTypes, returnType), tokens, nil
+
+		case "STRUCT":
+			// Eat "STRUCT"
+			tokens = tokens[1:]
+			if tokens[0].typ != tokenTypeLBrack {
+				return nil, nil, fmt.Errorf("expected '{' after 'STRUCT'")
+			}
+
+			// Eat "{"
+			tokens = tokens[1:]
+
+			// Get fields
+			fields := make([]StructField, 0)
+			for {
+				// Check if done
+				if tokens[0].typ == tokenTypeRBrack {
+					break
+				}
+
+				// Get name
+				if tokens[0].typ != tokenTypeIdent {
+					return nil, nil, fmt.Errorf("expected field name")
+				}
+				name := *tokens[0].value
+				tokens = tokens[1:]
+
+				// Eat ":"
+				if tokens[0].typ != tokenTypeColon {
+					return nil, nil, fmt.Errorf("expected ':' after field name")
+				}
+				tokens = tokens[1:]
+
+				// Get type
+				var fieldType Type
+				var err error
+				fieldType, tokens, err = parse(tokens)
+				if err != nil {
+					return nil, nil, err
+				}
+
+				fields = append(fields, NewStructField(name, fieldType))
+			}
+
+			// Eat RBrack
+			tokens = tokens[1:]
+			if tokens[0].typ != tokenTypeRBrack {
+				return nil, nil, fmt.Errorf("expected '}' after STRUCT fields")
+			}
+
+			return NewStruct(fields...), tokens, nil
+
+		default:
+			return nil, nil, fmt.Errorf("unexpected const: %s", *tokens[0].value)
 		}
-		return NewFuncType(argTyps, retTyp), nil
 	}
 
-	// Map or nothing
-	if strings.HasPrefix(typ, "MAP{") {
-		// Get key and value types
-		typ = typ[4:]
-
-		// Get key by matching brackets
-		key, typ := matchBrackets(typ)
-
-		// Parse types
-		keyType, err := ParseType(key)
-		if err != nil {
-			return nil, err
-		}
-		valTyp, err := ParseType(typ[1:])
-		if err != nil {
-			return nil, err
-		}
-		return NewMapType(keyType, valTyp), nil
-	}
-	return nil, fmt.Errorf("unknown type: %s", typ)
-}
-
-func matchBrackets(val string) (string, string) {
-	openBrackets := 1
-	key := ""
-	for len(val) > 0 {
-		c := val[0]
-		if c == '{' {
-			openBrackets++
-		} else if c == '}' {
-			openBrackets--
-		}
-
-		if openBrackets == 0 {
-			break
-		} else {
-			key += string(c)
-			val = val[1:]
-		}
-	}
-	return key, val
+	return nil, nil, fmt.Errorf("unexpected token: %s", tokens[0].String())
 }

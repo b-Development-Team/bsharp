@@ -106,7 +106,7 @@ Strings represent textual data. They are surrounded by quotation marks.
 ```
 
 ### Arrays
-Arrays represent a list of items. Their types are made by putting a `{}` after the type of the elements in the array. For example, an array of integers would be written as `INT{}`.
+Arrays represent a list of items. Their types are made by putting a `ARRAY{}` after the type of the elements in the curly braces. For example, an array of integers would be written as `ARRAY{INT}`.
 
 There are two ways of defining arrays. An array literal can be defined using the `ARRAY` function.
 ```scala
@@ -114,7 +114,7 @@ There are two ways of defining arrays. An array literal can be defined using the
 ```
 An empty array can be initialized using the `MAKE` function.
 ```scala
-[MAKE INT{}]
+[MAKE ARRAY{INT}]
 ```
 Arrays are pointers. This means that a change to an array, like appending to it, appends to all of its uses. For example:
 ```scala
@@ -134,11 +134,11 @@ Maps represent key-value data. For example, take the following table.
 | Favorite Color | Blue |
 | Favorite Language | B# |
 
-Map types are defined by putting `MAP{`, the key type, a `}`, and the value type. For example, `MAP{STRING}INT` would be the type for a map with a key type of string and a value type of `INT`. Maps can also be nested, for example `MAP{STRING}MAP{STRING}INT` would be a map of a map.
+Map types are defined by putting `MAP{`, the key type, a `,`, the value type, and then a `}`. For example, `MAP{STRING,INT}` would be the type for a map with a key type of string and a value type of `INT`. Maps can also be nested, for example `MAP{STRING,MAP{STRING,INT}}` would be a map of a map.
 
 To initialize a map use the `MAKE` function. The `[SET]` and `[GET]` functions can be used to read and write to the map. The `[EXISTS]` function returns a boolean of whether a key exists.
 ```scala
-[DEFINE a [MAKE MAP{STRING}STRING]]
+[DEFINE a [MAKE MAP{STRING,STRING}]]
 [SET [VAR a] "Name" "Joe"]
 [SET [VAR a] "Favorite Color" "Blue"]
 [SET [VAR a] "Favorite Language" "B#"]

@@ -10,12 +10,12 @@
 [DEFINE HEIGHT 3]
 
 # Copies the board
-[FUNC COPYBOARD [PARAM board INT{}{}] [RETURNS INT{}{}]
-  [DEFINE out [MAKE INT{}{}]]
+[FUNC COPYBOARD [PARAM board ARRAY{ARRAY{INT}}] [RETURNS ARRAY{ARRAY{INT}}]
+  [DEFINE out [MAKE ARRAY{ARRAY{INT}}]]
   [DEFINE i 0]
   [WHILE [COMPARE [VAR i] < [LENGTH [VAR board]]]
     [DEFINE j 0]
-    [DEFINE row [MAKE INT{}]]
+    [DEFINE row [MAKE ARRAY{INT}]]
     [WHILE [COMPARE [VAR j] < [LENGTH [INDEX [VAR board] [VAR i]]]]
       [APPEND [VAR row] [INDEX [INDEX [VAR board] [VAR i]] [VAR j]]]
       [DEFINE j [MATH [VAR j] + 1]]
@@ -30,7 +30,7 @@
   [RETURN [AND [AND [COMPARE [VAR a] == [VAR b]] [COMPARE [VAR b] == [VAR c]]] [COMPARE [VAR a] != [VAR EMPTY]]]]
 ]
 
-[FUNC WINNER [PARAM board INT{}{}] [PARAM depth INT] [RETURNS INT]
+[FUNC WINNER [PARAM board ARRAY{ARRAY{INT}}] [PARAM depth INT] [RETURNS INT]
   # Check rows
   [DEFINE i 0]
   [WHILE [COMPARE [VAR i] < [VAR HEIGHT]]
@@ -80,11 +80,11 @@
   [RETURN [VAR EMPTY]]
 ]
 
-[FUNC SHOWBOARD [PARAM board INT{}{}] [RETURNS STRING]
-  [DEFINE btns [MAKE MAP{STRING}STRING{}{}]]
+[FUNC SHOWBOARD [PARAM board ARRAY{ARRAY{INT}}] [RETURNS STRING]
+  [DEFINE btns [MAKE ARRAY{ARRAY{MAP{STRING,STRING}}}]]
   [DEFINE i 0]
   [WHILE [COMPARE [VAR i] < [VAR HEIGHT]]
-    [DEFINE row [MAKE MAP{STRING}STRING{}]]
+    [DEFINE row [MAKE ARRAY{MAP{STRING,STRING}}]]
 
     [DEFINE j 0]
     [WHILE [COMPARE [VAR j] < [VAR WIDTH]]
@@ -117,7 +117,7 @@
 #[DEFINE inf 10] # Max possible depth
 
 # Minimax
-[FUNC MINIMAX [PARAM board INT{}{}] [PARAM depth INT] [PARAM maximize BOOL] [RETURNS INT]
+[FUNC MINIMAX [PARAM board ARRAY{ARRAY{INT}}] [PARAM depth INT] [PARAM maximize BOOL] [RETURNS INT]
   [DEFINE winner [WINNER [VAR board] [VAR depth]]]
   [IF [COMPARE [VAR winner] == [VAR EMPTY]]
     [RETURN 0]
@@ -174,11 +174,11 @@
 ]
 
 # Make board
-[DEFINE state [MAKE INT{}{}]]
+[DEFINE state [MAKE ARRAY{ARRAY{INT}}]]
 [DEFINE i 0]
 [WHILE [COMPARE [VAR i] < [VAR WIDTH]]
   [DEFINE j 0]
-  [DEFINE row [MAKE INT{}]]
+  [DEFINE row [MAKE ARRAY{INT}]]
   [WHILE [COMPARE [VAR j] < [VAR HEIGHT]]
     [APPEND [VAR row] [VAR EMPTY]]
     [DEFINE j [MATH [VAR j] + 1]]
@@ -222,7 +222,7 @@
 
       # Do AI turn, check best move
       [DEFINE y 0]
-      [DEFINE best [MAKE INT{}]]
+      [DEFINE best [MAKE ARRAY{INT}]]
       [DEFINE bestscore -2] # Lowest possible score is -1, so will guarenteed get one
       [WHILE [COMPARE [VAR y] < [LENGTH [VAR state]]]
         [DEFINE x 0]

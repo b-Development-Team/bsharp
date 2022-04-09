@@ -1,4 +1,4 @@
-# DB Schema: MAP{USERID}USES (Note: Uses stored as string)
+# DB Schema: MAP{USERID,USES} (Note: Uses stored as string)
 
 [DEFINE uses 0]
 [IF [COMPARE [DB EXISTS [USERID]] == "true"] # Note: [DB EXISTS] returns "true" if true, "false" if false

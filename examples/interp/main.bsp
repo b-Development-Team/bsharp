@@ -1,8 +1,8 @@
 [DEFINE src "[PRINT [FTOA [MATH 1.0 + 1.0]]]"]
 
-[DEFINE intvals [MAKE INT{}]]
-[DEFINE floatvals [MAKE FLOAT{}]]
-[DEFINE stringvals [MAKE STRING{}]]
+[DEFINE intvals [MAKE ARRAY{INT}]]
+[DEFINE floatvals [MAKE ARRAY{FLOAT}]]
+[DEFINE stringvals [MAKE ARRAY{STRING}]]
 
 [FUNC ISINT [PARAM src STRING] [RETURNS BOOL]
   [DEFINE i 0]
@@ -85,7 +85,7 @@
   # Eat space
   [DEFINE i [MATH [VAR i] + 1]]
   # Get body
-  [DEFINE argsraw [MAKE STRING{}]]
+  [DEFINE argsraw [MAKE ARRAY{STRING}]]
   [WHILE [COMPARE [INDEX [VAR src] [VAR i]] != "]"] # Go to the closing bracket
     [DEFINE arg ""]
     # Count brackets
@@ -150,7 +150,7 @@
   ]
 
   # Build args
-  [DEFINE args [MAKE INT{}]]
+  [DEFINE args [MAKE ARRAY{INT}]]
   [DEFINE i 0]
   [WHILE [COMPARE [VAR i] < [LENGTH [VAR argsraw]]]
     # Build args

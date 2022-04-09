@@ -36,7 +36,7 @@ ELSE
 [PRINT [STRING [ROUND 1.5]]]
 
 # Maps
-[DEFINE b [MAKE MAP{STRING}STRING]]
+[DEFINE b [MAKE MAP{STRING,STRING}]]
 [SET [VAR b] "Hello" "World"]
 [PRINT [GET [VAR b] "Hello"]]
 
@@ -63,6 +63,6 @@ ELSE
 # First-class Functions
 [HELLO] # Call function with alias
 [CALL [FN HELLO] ""] # Call function without alias
-[DEFINE fns [MAKE MAP{STRING}FUNC{}NULL]] # Make a dictionary of functions
+[DEFINE fns [MAKE MAP{STRING,FUNC{}NULL}]] # Make a dictionary of functions
 [SET [VAR fns] "hello" [FN HELLO]]
 [CALL [GET [VAR fns] "hello"] ""] # Call function from dictionary

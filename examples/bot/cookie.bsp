@@ -14,9 +14,9 @@
 ]
 
 # Upgrades
-[DEFINE upgrades [MAKE MAP{STRING}INT]] # MAP{Name}Price (price ^ (quantity + 1) is cost), (quantity ^ benefit is CPS benefit) 
-[DEFINE benefit [MAKE MAP{STRING}INT]]
-[DEFINE icons [MAKE MAP{STRING}STRING]] # MAP{Name}Icon
+[DEFINE upgrades [MAKE MAP{STRING,INT}]] # MAP{Name}Price (price ^ (quantity + 1) is cost), (quantity ^ benefit is CPS benefit) 
+[DEFINE benefit [MAKE MAP{STRING,INT}]]
+[DEFINE icons [MAKE MAP{STRING,STRING}]] # MAP{Name}Icon
 [DEFINE names [ARRAY "Clicker" "Granny" "Miner" "Factory" "Wizard"]]
 [SET [VAR upgrades] "Clicker" 2]
 [SET [VAR benefit] "Clicker" 1]
@@ -45,7 +45,7 @@
   [DB SET [USERID] [JOIN [VAR inv] "|"]]
 ]
 
-[DEFINE counts [MAKE MAP{STRING}INT]]
+[DEFINE counts [MAKE MAP{STRING,INT}]]
 [DEFINE i 0]
 [WHILE [COMPARE [VAR i] < [LENGTH [VAR inv]]]
   # Increment by one for every item

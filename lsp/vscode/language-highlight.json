@@ -7,7 +7,7 @@
       "patterns": [{ "include": "#node" }, { "include": "#comment" }, { "include": "#string" }, { "include": "#number" }, { "include": "#keyword" }, { "include": "#ident" }]
     },
     "ident": {
-      "match": "(?:\\p{L}|\\{|\\}|\\+|-|\\*|\\/|%|==|!=|<=|>=|<|>|\\^)+",
+      "match": "(?:\\p{L}|\\{|\\}|\\+|-|\\*|\\/|%|==|!=|<=|>=|<|>|\\^|,|:)+",
       "name": "token.ident.bsharp",
       "patterns": [{ "include": "#keyword"}]
     },

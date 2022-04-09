@@ -4,7 +4,7 @@
 # Get allowed words
 [DEFINE start [TIME MILLI]]
 [DEFINE vals [DB GET "allowed"]]
-[DEFINE allowed [MAKE MAP{STRING}BOOL]]
+[DEFINE allowed [MAKE MAP{STRING,BOOL}]]
 [DEFINE i 0]
 [WHILE [COMPARE [VAR i] < [MATH [LENGTH [VAR vals]] / 6]]
   [SET [VAR allowed] [SLICE [VAR vals] [MATH [VAR i] * 6] [MATH [MATH [VAR i] * 6] + 5]] TRUE]
@@ -26,7 +26,7 @@
 [DEFINE possible [DB GET "possible"]]
 [DEFINE ind [RANDINT 0 [MATH [MATH [LENGTH [VAR possible]] / 6] - 1]]]
 [DEFINE currword [SLICE [VAR possible] [MATH [VAR ind] * 6] [MATH [MATH [VAR ind] * 6] + 5]]]
-[DEFINE guesses [MAKE STRING{}]]
+[DEFINE guesses [MAKE ARRAY{STRING}]]
 
 [PRINT [CONCAT "Loaded in " [STRING [MATH [TIME MILLI] - [VAR start]]] "ms."]]
 

@@ -12,6 +12,18 @@ type Type interface {
 	Equal(Type) bool
 }
 
+func ParseType(typ string) (Type, error) {
+	tokens, err := tokenize([]rune(typ))
+	if err != nil {
+		return nil, err
+	}
+	out, _, err := parse(tokens)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 type BasicType int
 
 const (
@@ -22,6 +34,7 @@ const (
 	ARRAY
 	MAP
 	FUNCTION
+	STRUCT
 	NULL
 
 	// Special types
@@ -42,6 +55,7 @@ var basicTypeNames = map[BasicType]string{
 	ANY:      "ANY",
 	VARIADIC: "VARIADIC",
 	IDENT:    "IDENT",
+	STRUCT:   "STRUCT",
 }
 
 func (b BasicType) BasicType() BasicType {
@@ -85,7 +99,7 @@ func (a *ArrayType) Equal(b Type) bool {
 }
 
 func (a *ArrayType) String() string {
-	return fmt.Sprintf("%s{}", a.ElemType.String())
+	return fmt.Sprintf("ARRAY{%s}", a.ElemType.String())
 }
 
 type MapType struct {
@@ -116,7 +130,7 @@ func (m *MapType) Equal(b Type) bool {
 }
 
 func (m *MapType) String() string {
-	return fmt.Sprintf("MAP{%s}%s", m.KeyType.String(), m.ValType.String())
+	return fmt.Sprintf("MAP{%s,%s}", m.KeyType.String(), m.ValType.String())
 }
 
 type MulType struct {
@@ -194,5 +208,61 @@ func NewFuncType(parTyps []Type, retType Type) Type {
 	return &FuncType{
 		ParTypes: parTyps,
 		RetType:  retType,
+	}
+}
+
+type StructField struct {
+	Name string
+	Type Type
+}
+
+type StructType struct {
+	Fields []StructField
+}
+
+func (s *StructType) BasicType() BasicType {
+	return STRUCT
+}
+
+func (s *StructType) Equal(t Type) bool {
+	if t.BasicType() != STRUCT {
+		return false
+	}
+
+	v := t.(*StructType)
+	if len(v.Fields) != len(s.Fields) {
+		return false
+	}
+	for i, field := range s.Fields {
+		if !v.Fields[i].Type.Equal(field.Type) || field.Name != v.Fields[i].Name {
+			return false
+		}
+	}
+	return true
+}
+
+func (s *StructType) String() string {
+	out := &strings.Builder{}
+	out.WriteString("STRUCT{")
+	for i, field := range s.Fields {
+		fmt.Fprintf(out, "%s %s", field.Name, field.Type.String())
+		if i != len(s.Fields)-1 {
+			out.WriteString(", ")
+		}
+	}
+	out.WriteString("}")
+	return out.String()
+}
+
+func NewStructField(name string, typ Type) StructField {
+	return StructField{
+		Name: name,
+		Type: typ,
+	}
+}
+
+func NewStruct(fields ...StructField) *StructType {
+	return &StructType{
+		Fields: fields,
 	}
 }
