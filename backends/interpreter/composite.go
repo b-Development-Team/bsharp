@@ -87,10 +87,16 @@ func (i *Interpreter) evalLength(pos *tokens.Pos, n *ir.LengthNode) (*Value, err
 	return nil, pos.Error("cannot get length of type %s", v.Type.String())
 }
 
-// TODO: Struct types
 func (i *Interpreter) evalMake(pos *tokens.Pos, n *ir.MakeNode) (*Value, error) {
 	typ, ok := n.Type().(*types.MapType)
 	if !ok { // Its an array if not map
+		// Is struct
+		if types.STRUCT.Equal(n.Type()) {
+			t := n.Type().(*types.StructType)
+			val := make([]any, len(t.Fields))
+			return NewValue(n.Type(), &val), nil
+		}
+
 		v := make([]any, 0)
 		return NewValue(n.Type(), &v), nil
 	}
@@ -311,4 +317,25 @@ func (i *Interpreter) evalSlice(pos *tokens.Pos, n *ir.SliceNode) (*Value, error
 	}
 
 	return nil, pos.Error("cannot get length of type %s", v.Type.String())
+}
+
+func (i *Interpreter) evalGetStruct(n *ir.GetStructNode) (*Value, error) {
+	v, err := i.evalNode(n.Struct)
+	if err != nil {
+		return nil, err
+	}
+	return NewValue(n.Type(), (*v.Value.(*[]any))[n.Field]), nil
+}
+
+func (i *Interpreter) evalSetStruct(n *ir.SetStructNode) (*Value, error) {
+	v, err := i.evalNode(n.Struct)
+	if err != nil {
+		return nil, err
+	}
+	val, err := i.evalNode(n.Value)
+	if err != nil {
+		return nil, err
+	}
+	(*v.Value.(*[]any))[n.Field] = val.Value
+	return NewValue(types.NULL, nil), nil
 }

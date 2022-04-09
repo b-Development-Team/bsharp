@@ -87,6 +87,12 @@ func (i *Interpreter) evalNode(node ir.Node) (*Value, error) {
 		case *ir.SetIndexNode:
 			return i.evalSetIndex(n.Pos(), c)
 
+		case *ir.GetStructNode:
+			return i.evalGetStruct(c)
+
+		case *ir.SetStructNode:
+			return i.evalSetStruct(c)
+
 		default:
 			return nil, n.Pos().Error("unknown call node: %T", c)
 		}
@@ -118,7 +124,7 @@ func (i *Interpreter) evalNode(node ir.Node) (*Value, error) {
 	case *ir.CastNode:
 		return i.evalCast(n)
 
-		// TODO: *ir.CanCastNode, *ir.SetStructNode, *ir.GetStructNode
+		// TODO: *ir.CanCastNode
 
 	default:
 		return nil, n.Pos().Error("unknown node type: %T", node)
