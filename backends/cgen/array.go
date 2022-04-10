@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/Nv7-Github/bsharp/ir"
+	"github.com/Nv7-Github/bsharp/tokens"
 	"github.com/Nv7-Github/bsharp/types"
 )
 
@@ -102,7 +103,7 @@ func (c *CGen) addArray(n *ir.ArrayNode) (*Code, error) {
 	return &Code{Pre: pre, Value: arr}, nil
 }
 
-func (c *CGen) addIndex(n *ir.IndexNode) (*Code, error) {
+func (c *CGen) addIndex(pos *tokens.Pos, n *ir.IndexNode) (*Code, error) {
 	arr, err := c.AddNode(n.Value)
 	if err != nil {
 		return nil, err
@@ -115,14 +116,23 @@ func (c *CGen) addIndex(n *ir.IndexNode) (*Code, error) {
 		name := c.GetTmp("ind")
 		pre := fmt.Sprintf("string* %s = string_ind(%s, %s);", name, arr.Value, ind.Value)
 		c.stack.Add(c.FreeCode(name, types.STRING))
+		// Bounds check
+		if c.Config.BoundsCheck {
+			pre = JoinCode(fmt.Sprintf("string_bounds(%s, %s, %q);", arr.Value, ind.Value, pos.String()), pre)
+		}
 		return &Code{
 			Pre:   JoinCode(arr.Pre, ind.Pre, pre),
 			Value: name,
 		}, nil
 	}
 	typ := c.CType(n.Type())
+	pre := JoinCode(arr.Pre, ind.Pre)
+	// Bounds check
+	if c.Config.BoundsCheck {
+		pre = JoinCode(pre, fmt.Sprintf("array_bounds(%s, %s, %q);", arr.Value, ind.Value, pos.String()))
+	}
 	return &Code{
-		Pre:   JoinCode(arr.Pre, ind.Pre),
+		Pre:   pre,
 		Value: fmt.Sprintf("(*((%s*)(array_get(%s, %s))))", typ, arr.Value, ind.Value),
 	}, nil
 }
@@ -196,7 +206,7 @@ func (c *CGen) addSlice(n *ir.SliceNode) (*Code, error) {
 	}, nil
 }
 
-func (c *CGen) addSetIndex(n *ir.SetIndexNode) (*Code, error) {
+func (c *CGen) addSetIndex(pos *tokens.Pos, n *ir.SetIndexNode) (*Code, error) {
 	arr, err := c.AddNode(n.Array)
 	if err != nil {
 		return nil, err
@@ -211,14 +221,18 @@ func (c *CGen) addSetIndex(n *ir.SetIndexNode) (*Code, error) {
 	}
 
 	pre := val.Pre
+	check := ""
+	if c.Config.BoundsCheck {
+		check = fmt.Sprintf("array_bounds(%s, %s, %q);", arr.Value, ind.Value, pos.String())
+	}
 	free := ""
 	if isDynamic(n.Value.Type()) {
 		pre = JoinCode(pre, c.GrabCode(val.Value, n.Value.Type()))
 		old := c.GetTmp("old")
-		pre = JoinCode(arr.Pre, ind.Pre, fmt.Sprintf("%s %s = (*((%s*)(array_get(%s, %s))));", c.CType(n.Value.Type()), old, c.CType(n.Value.Type()), arr.Value, ind.Value), pre)
+		pre = JoinCode(arr.Pre, ind.Pre, check, fmt.Sprintf("%s %s = (*((%s*)(array_get(%s, %s))));", c.CType(n.Value.Type()), old, c.CType(n.Value.Type()), arr.Value, ind.Value), pre)
 		free = c.FreeCode(old, n.Value.Type())
 	} else {
-		pre = JoinCode(arr.Pre, ind.Pre, pre)
+		pre = JoinCode(arr.Pre, ind.Pre, check, pre)
 	}
 
 	code := fmt.Sprintf("array_set(%s, %s, &(%s));", arr.Value, ind.Value, val.Value)

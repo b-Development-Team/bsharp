@@ -62,8 +62,15 @@ string* string_concat(int n, ...) {
   return string_new(out, len);
 }
 
-inline static void string_print(string* val) {
+static inline void string_print(string* val) {
   printf("%.*s\n", val->len, val->data);
+}
+
+static inline void string_bounds(string* s, int i, const char* pos) {
+  if (i < 0 || i >= s->len) {
+    fprintf(stderr, "%s: index out of bounds: %d with length %d\n", pos, i, s->len);
+    exit(EXIT_FAILURE);
+  }
 }
 
 string* string_slice(string* val, int start, int end) {
@@ -206,6 +213,13 @@ void array_free(array* a, array_free_fn free_fn) {
     }
     free(a->data);
     free(a);
+  }
+}
+
+static inline void array_bounds(array* a, int i, const char* pos) {
+  if (i < 0 || i >= a->len) {
+    fprintf(stderr, "%s: index out of bounds: %d with length %d\n", pos, i, a->len);
+    exit(EXIT_FAILURE);
   }
 }
 

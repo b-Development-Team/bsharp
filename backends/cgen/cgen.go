@@ -15,11 +15,12 @@ type Code struct {
 }
 
 type CodeConfig struct {
-	Tab string
+	Tab         string
+	BoundsCheck bool
 }
 
 func DefaultCodeConfig() CodeConfig {
-	return CodeConfig{Tab: "\t"}
+	return CodeConfig{Tab: "\t", BoundsCheck: true}
 }
 
 func JoinCode(vals ...string) string {

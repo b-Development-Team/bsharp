@@ -52,7 +52,7 @@ func (cg *CGen) AddNode(node ir.Node) (*Code, error) {
 			return cg.addArray(c)
 
 		case *ir.IndexNode:
-			return cg.addIndex(c)
+			return cg.addIndex(n.Pos(), c)
 
 		case *ir.AppendNode:
 			return cg.addAppend(c)
@@ -82,7 +82,7 @@ func (cg *CGen) AddNode(node ir.Node) (*Code, error) {
 			return cg.addSlice(c)
 
 		case *ir.SetIndexNode:
-			return cg.addSetIndex(c)
+			return cg.addSetIndex(n.Pos(), c)
 
 		// TODO: *ir.CanCastNode, *ir.SetStructNode, *ir.GetStructNode
 
