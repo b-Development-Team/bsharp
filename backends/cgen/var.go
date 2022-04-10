@@ -10,7 +10,7 @@ import (
 
 func isDynamic(typ types.Type) bool {
 	switch typ.BasicType() {
-	case types.STRING, types.MAP, types.ARRAY:
+	case types.STRING, types.MAP, types.ARRAY, types.STRUCT:
 		return true
 	}
 	return false

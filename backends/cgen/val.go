@@ -53,6 +53,9 @@ func (c *CGen) FreeCode(varName string, typ types.Type) string {
 
 	case types.MAP:
 		return fmt.Sprintf("map_free(%s);", varName)
+
+	case types.STRUCT:
+		return fmt.Sprintf("%s_free(%s);", typName(typ), varName)
 	}
 
 	panic("invalid type")
@@ -60,7 +63,7 @@ func (c *CGen) FreeCode(varName string, typ types.Type) string {
 
 func (c *CGen) GrabCode(varName string, typ types.Type) string {
 	switch typ.BasicType() {
-	case types.STRING, types.ARRAY, types.MAP:
+	case types.STRING, types.ARRAY, types.MAP, types.STRUCT:
 		return fmt.Sprintf("%s->refs++;", varName)
 	}
 

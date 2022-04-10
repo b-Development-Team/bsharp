@@ -41,6 +41,15 @@ func typName(typ types.Type) string {
 	case types.NULL:
 		return "n"
 
+	case types.STRUCT:
+		out := &strings.Builder{}
+		t := typ.(*types.StructType)
+		out.WriteString("s")
+		for _, f := range t.Fields {
+			out.WriteString(typName(f.Type))
+		}
+		return out.String()
+
 	default:
 		panic("unknown")
 	}

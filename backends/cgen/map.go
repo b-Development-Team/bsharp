@@ -85,11 +85,22 @@ func (c *CGen) addMapFns(typ *types.MapType) mapFns {
 	}
 }
 
-// TODO: Struct types
 func (c *CGen) addMake(n *ir.MakeNode) (*Code, error) {
 	if types.ARRAY.Equal(n.Type()) {
 		name := c.GetTmp("arr")
 		pre := fmt.Sprintf("array* %s = array_new(sizeof(%s), 1);", name, c.CType(n.Type().(*types.ArrayType).ElemType))
+		c.stack.Add(c.FreeCode(name, n.Type()))
+		return &Code{
+			Pre:   pre,
+			Value: name,
+		}, nil
+	}
+
+	if types.STRUCT.Equal(n.Type()) {
+		name := c.GetTmp("struct")
+		t := typName(n.Type())
+		pre := fmt.Sprintf("struct %s* %s = malloc(sizeof(struct %s*));", t, name, t)
+		pre = JoinCode(pre, fmt.Sprintf("%s->refs = 1;", name))
 		c.stack.Add(c.FreeCode(name, n.Type()))
 		return &Code{
 			Pre:   pre,

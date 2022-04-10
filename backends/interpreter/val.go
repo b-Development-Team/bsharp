@@ -48,6 +48,9 @@ func (i *Interpreter) canCastAny(v interface{}, t types.Type) bool {
 		case types.STRING:
 			_, ok = v.(map[string]any)
 		}
+
+	case types.NULL:
+		ok = v == nil
 	}
 
 	return ok

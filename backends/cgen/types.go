@@ -1,6 +1,7 @@
 package cgen
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/Nv7-Github/bsharp/types"
@@ -56,6 +57,37 @@ func (c *CGen) CType(typ types.Type) string {
 
 	case types.NULL:
 		return "void"
+
+	case types.STRUCT:
+		name := typName(typ)
+		_, exists := c.addedFns[name]
+		if exists {
+			return name
+		}
+		fmt.Fprintf(c.globalfns, "struct %s {\n", name)
+		for i, field := range typ.(*types.StructType).Fields {
+			fmt.Fprintf(c.globalfns, "%s%s f%d;\n", c.Config.Tab, c.CType(field.Type), i)
+		}
+		fmt.Fprintf(c.globalfns, "%sint refs;\n", c.Config.Tab)
+		c.globalfns.WriteString("};\n\n")
+
+		// Free function
+		fmt.Fprintf(c.globalfns, "void %s_free(struct %s* val) {;\n", name, name)
+		fmt.Fprintf(c.globalfns, "%sif (val == NULL) {\n%s%sreturn;\n%s}\n", c.Config.Tab, c.Config.Tab, c.Config.Tab, c.Config.Tab)
+		fmt.Fprintf(c.globalfns, "%sval->refs--;\n", c.Config.Tab)
+		fmt.Fprintf(c.globalfns, "%sif(val->refs == 0) {\n", c.Config.Tab)
+		for i, field := range typ.(*types.StructType).Fields {
+			if isDynamic(field.Type) {
+				fmt.Fprintf(c.globalfns, "%s%s%s;\n", c.Config.Tab, c.Config.Tab, c.FreeCode(fmt.Sprintf("val->f%d", i), field.Type))
+			}
+		}
+		fmt.Fprintf(c.globalfns, "%s%sfree(val);\n", c.Config.Tab, c.Config.Tab)
+		fmt.Fprintf(c.globalfns, "%s}\n", c.Config.Tab)
+		c.globalfns.WriteString("}\n\n")
+
+		// Return
+		c.addedFns[name] = struct{}{}
+		return "struct " + name + "*"
 
 	default:
 		return "unknown"
