@@ -223,7 +223,7 @@ func init() {
 	}
 
 	nodeBuilders["SET"] = nodeBuilder{
-		ArgTypes: []types.Type{types.NewMulType(types.MAP, types.INT, types.STRUCT), types.NewMulType(hashable, types.IDENT), types.ALL},
+		ArgTypes: []types.Type{types.NewMulType(types.MAP, types.ARRAY, types.STRUCT), types.NewMulType(hashable, types.IDENT), types.ALL},
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
 			// If map type
 			if types.MAP.Equal(args[0].Type()) {
