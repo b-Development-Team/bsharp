@@ -90,7 +90,8 @@ func (cg *CGen) AddNode(node ir.Node) (*Code, error) {
 		case *ir.SetStructNode:
 			return cg.addSetStruct(c)
 
-		// TODO: *ir.CanCastNode
+		case *ir.CanCastNode:
+			return cg.addCanCast(c)
 
 		default:
 			return nil, n.Pos().Error("unknown call node: %T", c)

@@ -5,16 +5,7 @@ import (
 	"strconv"
 
 	"github.com/Nv7-Github/bsharp/ir"
-	"github.com/Nv7-Github/bsharp/types"
 )
-
-func isDynamic(typ types.Type) bool {
-	switch typ.BasicType() {
-	case types.STRING, types.MAP, types.ARRAY, types.STRUCT:
-		return true
-	}
-	return false
-}
 
 func (c *CGen) addDefine(n *ir.DefineNode) (*Code, error) {
 	v := c.ir.Variables[n.Var]

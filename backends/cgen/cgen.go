@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/Nv7-Github/bsharp/ir"
+	"github.com/Nv7-Github/bsharp/types"
 )
 
 type Code struct {
@@ -56,6 +57,9 @@ type CGen struct {
 	isReturn     bool
 	addedFns     map[string]struct{}
 
+	typIDs map[string]int
+	idTyps []types.Type
+
 	globals    *strings.Builder
 	globalfns  *strings.Builder
 	globaltyps *strings.Builder
@@ -73,6 +77,8 @@ func NewCGen(i *ir.IR) *CGen {
 		globals:      &strings.Builder{},
 		addedFns:     make(map[string]struct{}),
 		globalfns:    &strings.Builder{},
+		typIDs:       make(map[string]int),
+		idTyps:       make([]types.Type, 0),
 	}
 }
 
@@ -101,7 +107,7 @@ func (c *CGen) addFree(bld *strings.Builder) {
 
 func (c *CGen) Build() (string, error) {
 	top := &strings.Builder{}
-	top.WriteString(std)
+
 	out := &strings.Builder{}
 	// Add fn types
 	for _, fn := range c.ir.Funcs {
@@ -160,7 +166,10 @@ func (c *CGen) Build() (string, error) {
 	top.WriteString("\n")
 	top.WriteString(c.globalfns.String())
 
-	return top.String() + out.String(), nil
+	// Runtime
+	topCode := strings.Replace(std, "const char* const anytyps[];", c.typCode(), 1)
+
+	return topCode + top.String() + out.String(), nil
 }
 
 func (c *CGen) GetTmp(name string) string {

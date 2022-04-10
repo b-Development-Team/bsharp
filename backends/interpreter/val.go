@@ -70,6 +70,10 @@ func (i *Interpreter) evalCast(c *ir.CastNode) (*Value, error) {
 		return nil, err
 	}
 
+	if types.ANY.Equal(c.Type()) {
+		return NewValue(types.ANY, v.Value), nil
+	}
+
 	if types.ANY.Equal(c.Value.Type()) {
 		if !i.canCastAny(v.Value, c.Type()) {
 			return nil, c.Pos().Error("cannot cast %s to %s", v.Type.String(), c.Type().String())
@@ -127,9 +131,6 @@ func (i *Interpreter) evalCast(c *ir.CastNode) (*Value, error) {
 			return NewValue(c.Type(), val), nil
 		}
 		fallthrough
-
-	case types.ANY:
-		return NewValue(c.Type(), v.Value), nil
 
 	default:
 		return nil, c.Pos().Error("cannot cast type \"%s\" to \"%s\"", v.Type.BasicType(), c.Type().BasicType())

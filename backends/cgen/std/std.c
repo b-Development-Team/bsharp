@@ -860,3 +860,43 @@ uint32_t str_hash(string* str) {
   return hval;
 }
 
+// Any
+typedef void (*anyfreefn)(void*);
+
+typedef struct any {
+  void* value;
+  int typ;
+  int refs;
+  anyfreefn freefn;
+} any;
+
+any* any_new(void* val, int typ, anyfreefn freefn) {
+  any* a = malloc(sizeof(any));
+  a->refs = 1;
+  a->value = val;
+  a->typ = typ;
+  a->freefn = freefn;
+  return a;
+}
+
+void any_free(any* a) {
+  if (a == NULL) {
+    return;
+  }
+  a->refs--;
+  if (a->refs == 0) {
+    if (a->freefn != NULL) {
+      a->freefn(a->value);
+    }
+    free(a);
+  }
+}
+
+const char* const anytyps[];
+
+void any_try_cast(const char* pos, any* a, int typ) {
+  if (a->typ != typ) {
+    fprintf(stderr, "%s: cannot cast value of type %s to %s\n", pos, anytyps[a->typ], anytyps[typ]);
+    exit(1);
+  }
+}

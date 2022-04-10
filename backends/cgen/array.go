@@ -232,6 +232,11 @@ func (c *CGen) addSetIndex(pos *tokens.Pos, n *ir.SetIndexNode) (*Code, error) {
 		pre = JoinCode(arr.Pre, ind.Pre, check, fmt.Sprintf("%s %s = (*((%s*)(array_get(%s, %s))));", c.CType(n.Value.Type()), old, c.CType(n.Value.Type()), arr.Value, ind.Value), pre)
 		free = c.FreeCode(old, n.Value.Type())
 	} else {
+		// Need to be able to get pointer
+		name := c.GetTmp("cnst")
+		pre = JoinCode(pre, fmt.Sprintf("%s %s = %s;", c.CType(n.Value.Type()), name, val.Value))
+		val.Value = name
+
 		pre = JoinCode(arr.Pre, ind.Pre, check, pre)
 	}
 

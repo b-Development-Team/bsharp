@@ -89,7 +89,9 @@ func (c *CGen) CType(typ types.Type) string {
 		c.addedFns[name] = struct{}{}
 		return "struct " + name + "*"
 
-	default:
-		return "unknown"
+	case types.ANY:
+		return "any*"
 	}
+
+	panic("invalid type")
 }

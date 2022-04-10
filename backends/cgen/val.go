@@ -36,9 +36,12 @@ func (c *CGen) addConst(n *ir.Const) *Code {
 		return &Code{
 			Value: "false",
 		}
-	}
 
-	fmt.Println(n.Pos())
+	case types.NULL:
+		return &Code{
+			Value: "NULL",
+		}
+	}
 
 	panic("invalid const")
 }
@@ -56,6 +59,9 @@ func (c *CGen) FreeCode(varName string, typ types.Type) string {
 
 	case types.STRUCT:
 		return fmt.Sprintf("%s_free(%s);", typName(typ), varName)
+
+	case types.ANY:
+		return fmt.Sprintf("any_free(%s);", varName)
 	}
 
 	panic("invalid type")
@@ -63,15 +69,22 @@ func (c *CGen) FreeCode(varName string, typ types.Type) string {
 
 func (c *CGen) GrabCode(varName string, typ types.Type) string {
 	switch typ.BasicType() {
-	case types.STRING, types.ARRAY, types.MAP, types.STRUCT:
+	case types.STRING, types.ARRAY, types.MAP, types.STRUCT, types.ANY:
 		return fmt.Sprintf("%s->refs++;", varName)
 	}
 
 	panic("invalid type")
 }
 
-// TODO: ANY casts
 func (c *CGen) addCast(n *ir.CastNode) (*Code, error) {
+	if types.ANY.Equal(n.Type()) {
+		return c.addAnyCast(n)
+	}
+
+	if types.ANY.Equal(n.Value.Type()) {
+		return c.addAnyFromCast(n)
+	}
+
 	v, err := c.AddNode(n.Value)
 	if err != nil {
 		return nil, err
@@ -143,4 +156,12 @@ func (c *CGen) addCast(n *ir.CastNode) (*Code, error) {
 	}
 
 	panic("cannot cast")
+}
+
+func isDynamic(typ types.Type) bool {
+	switch typ.BasicType() {
+	case types.STRING, types.MAP, types.ARRAY, types.STRUCT, types.ANY:
+		return true
+	}
+	return false
 }
