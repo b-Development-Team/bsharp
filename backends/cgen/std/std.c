@@ -189,6 +189,7 @@ static inline void* array_get(array* a, int i) {
   return a->data + ((a->off + i) * a->elemsize);
 }
 
+
 typedef void (*array_free_fn)(array*);
 
 void array_free(array* a, array_free_fn free_fn) {
@@ -219,6 +220,10 @@ void array_append(array* a, void* val) {
   array_grow(a, a->len + 1);
   memcpy(array_get(a, a->len), val, a->elemsize);
   a->len++;
+}
+
+void array_set(array* a, int i, void* val) {
+  memcpy(array_get(a, i), val, a->elemsize);
 }
 
 void array_slice(array* a, int start, int end) {

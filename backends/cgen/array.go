@@ -195,3 +195,34 @@ func (c *CGen) addSlice(n *ir.SliceNode) (*Code, error) {
 		Value: code,
 	}, nil
 }
+
+func (c *CGen) addSetIndex(n *ir.SetIndexNode) (*Code, error) {
+	arr, err := c.AddNode(n.Array)
+	if err != nil {
+		return nil, err
+	}
+	ind, err := c.AddNode(n.Index)
+	if err != nil {
+		return nil, err
+	}
+	val, err := c.AddNode(n.Value)
+	if err != nil {
+		return nil, err
+	}
+
+	pre := val.Pre
+	free := ""
+	if isDynamic(n.Value.Type()) {
+		pre = JoinCode(pre, c.GrabCode(val.Value, n.Value.Type()))
+		old := c.GetTmp("old")
+		pre = JoinCode(arr.Pre, ind.Pre, fmt.Sprintf("%s %s = (*((%s*)(array_get(%s, %s))));", c.CType(n.Value.Type()), old, c.CType(n.Value.Type()), arr.Value, ind.Value), pre)
+		free = c.FreeCode(old, n.Value.Type())
+	} else {
+		pre = JoinCode(arr.Pre, ind.Pre, pre)
+	}
+
+	code := fmt.Sprintf("array_set(%s, %s, &(%s));", arr.Value, ind.Value, val.Value)
+	return &Code{
+		Pre: JoinCode(pre, code, free),
+	}, nil
+}
