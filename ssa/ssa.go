@@ -102,8 +102,9 @@ func (s *SSA) String() string {
 		todo = todo[1:]
 
 		out.WriteString(blk.Label + ":\n")
-		for _, instr := range blk.Instructions {
-			out.WriteString("\t" + instr.String() + "\n")
+		for _, instr := range blk.Order {
+			i := blk.Instructions[instr]
+			fmt.Fprintf(out, "\t%s = %s\n", instr.String(), i.String())
 		}
 		out.WriteString("\t" + blk.End.String() + "\n")
 		out.WriteString("\n")
