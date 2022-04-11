@@ -3,6 +3,7 @@ package ssagen
 import (
 	"github.com/Nv7-Github/bsharp/ir"
 	"github.com/Nv7-Github/bsharp/ssa"
+	"github.com/Nv7-Github/bsharp/types"
 )
 
 type SSAGen struct {
@@ -22,9 +23,15 @@ func NewSSAGen(i *ir.IR) *SSAGen {
 }
 
 func (s *SSAGen) Build() {
+	s.ssa.VariableTypes = make([]types.Type, len(s.ir.Variables))
+	for _, v := range s.ir.Variables {
+		s.ssa.VariableTypes[v.ID] = v.Type
+	}
 	for _, node := range s.ir.Body {
 		s.Add(node)
 	}
+	s.blk.EndInstructionExit()
+	s.blk = nil
 }
 
 func (s *SSAGen) SSA() *ssa.SSA {

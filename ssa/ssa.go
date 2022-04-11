@@ -15,6 +15,10 @@ type Instruction interface {
 
 type ID string
 
+func NullID() ID {
+	return ""
+}
+
 func (i ID) String() string {
 	return string(i)
 }
@@ -34,6 +38,9 @@ type SSA struct {
 	Blocks       map[string]*Block
 	Instructions map[ID]string // map[id]block
 
+	// Before the memrm pass, variable data needs to be stored
+	VariableTypes []types.Type
+
 	// For IDs
 	cnt int
 }
@@ -47,16 +54,30 @@ func NewSSA() *SSA {
 	}
 }
 
+func (s *SSA) BlockName(name string) string {
+	i := int64(0)
+	for {
+		n := name + strconv.FormatInt(i, 16)
+		_, exists := s.Blocks[n]
+		if !exists {
+			return n
+		}
+		i++
+	}
+}
+
 func (s *SSA) NewBlock(label string) *Block {
 	if s.EntryBlock == "" {
 		s.EntryBlock = label
 	}
-	return &Block{
+	b := &Block{
 		Parent:       s,
 		Label:        label,
 		Instructions: make(map[ID]Instruction),
 		Order:        make([]ID, 0),
 	}
+	s.Blocks[b.Label] = b
+	return b
 }
 
 func (s *SSA) genID() ID {
@@ -68,9 +89,18 @@ func (s *SSA) genID() ID {
 func (s *SSA) String() string {
 	out := &strings.Builder{}
 	todo := []string{s.EntryBlock}
+	done := make(map[string]struct{})
 	for len(todo) > 0 {
+		_, exists := done[todo[0]]
+		if exists {
+			todo = todo[1:]
+			continue
+		}
+
 		blk := s.Blocks[todo[0]]
+		done[todo[0]] = struct{}{}
 		todo = todo[1:]
+
 		out.WriteString(blk.Label + ":\n")
 		for _, instr := range blk.Instructions {
 			out.WriteString("\t" + instr.String() + "\n")
@@ -102,9 +132,15 @@ func (b *Block) AddInstruction(i Instruction) ID {
 type EndInstructionType int
 
 const (
-	EndInstructionTypeJmp = iota
+	EndInstructionTypeJmp EndInstructionType = iota
 	EndInstructionTypeCondJmp
+	EndInstructionTypeExit
 )
+
+func (e EndInstructionType) Type() EndInstructionType { return e }
+func (e EndInstructionType) String() string {
+	return "Exit" // only time used as end instruction
+}
 
 type EndInstruction interface {
 	fmt.Stringer
@@ -155,4 +191,8 @@ func (b *Block) EndInstrutionCondJmp(cond ID, iftrue *Block, iffalse *Block) {
 	iftrue.Before = append(iftrue.Before, b.Label)
 	iffalse.Before = append(iffalse.Before, b.Label)
 	b.End = e
+}
+
+func (b *Block) EndInstructionExit() {
+	b.End = EndInstructionTypeExit
 }

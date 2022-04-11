@@ -33,6 +33,10 @@ func init() {
 	}
 }
 
+func (m MathOperation) String() string {
+	return mathOpsNames[m]
+}
+
 type MathNode struct {
 	Op  MathOperation
 	Lhs Node
@@ -63,6 +67,10 @@ var compareOps = map[string]CompareOperation{
 }
 
 var compareOpsNames = make(map[CompareOperation]string)
+
+func (c CompareOperation) String() string {
+	return compareOpsNames[c]
+}
 
 func init() {
 	for k, v := range compareOps {
