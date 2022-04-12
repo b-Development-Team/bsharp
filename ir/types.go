@@ -117,6 +117,7 @@ type CastNode struct {
 
 func (c *CastNode) Type() types.Type { return c.typ }
 func (c *CastNode) Pos() *tokens.Pos { return c.Value.Pos() }
+func (c *CastNode) Args() []Node     { return []Node{c.Value} }
 
 func NewCastNode(val Node, typ types.Type) *CastNode {
 	return &CastNode{

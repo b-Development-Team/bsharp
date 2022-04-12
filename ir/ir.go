@@ -12,6 +12,7 @@ type Node interface {
 
 type Call interface {
 	Type() types.Type
+	Args() []Node
 }
 
 type Block interface{} // TODO: Have something in this to make sure its a block

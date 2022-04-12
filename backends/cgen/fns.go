@@ -16,7 +16,7 @@ func (c *CGen) addFnCall(n *ir.FnCallNode) (*Code, error) {
 
 	call := &strings.Builder{}
 	fmt.Fprintf(call, "%s(", fn.Value)
-	for i, arg := range n.Args {
+	for i, arg := range n.Params {
 		if i != 0 {
 			call.WriteString(", ")
 		}

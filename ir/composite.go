@@ -20,6 +20,7 @@ func NewArrayNode(vals []Node, typ types.Type) *ArrayNode {
 }
 
 func (a *ArrayNode) Type() types.Type { return a.typ }
+func (a *ArrayNode) Args() []Node     { return a.Values }
 
 type AppendNode struct {
 	NullCall
@@ -28,6 +29,8 @@ type AppendNode struct {
 	Value Node
 }
 
+func (a *AppendNode) Args() []Node { return []Node{a.Array, a.Value} }
+
 type IndexNode struct {
 	Value Node
 	Index Node
@@ -35,6 +38,7 @@ type IndexNode struct {
 }
 
 func (i *IndexNode) Type() types.Type { return i.typ }
+func (i *IndexNode) Args() []Node     { return []Node{i.Value, i.Index} }
 
 type SetIndexNode struct {
 	NullCall
@@ -44,12 +48,20 @@ type SetIndexNode struct {
 	Value Node
 }
 
+func (s *SetIndexNode) Args() []Node {
+	return []Node{s.Array, s.Index, s.Value}
+}
+
 type SetStructNode struct {
 	NullCall
 
 	Struct Node
 	Field  int
 	Value  Node
+}
+
+func (s *SetStructNode) Args() []Node {
+	return []Node{s.Struct, s.Value}
 }
 
 func NewIndexNode(val, index Node) *IndexNode {
@@ -69,12 +81,14 @@ type LengthNode struct {
 }
 
 func (l *LengthNode) Type() types.Type { return types.INT }
+func (l *LengthNode) Args() []Node     { return []Node{l.Value} }
 
 type MakeNode struct {
 	typ types.Type
 }
 
 func (m *MakeNode) Type() types.Type { return m.typ }
+func (m *MakeNode) Args() []Node     { return []Node{} }
 
 type SetNode struct {
 	NullCall
@@ -84,6 +98,8 @@ type SetNode struct {
 	Value Node
 }
 
+func (s *SetNode) Args() []Node { return []Node{s.Map, s.Key, s.Value} }
+
 type GetNode struct {
 	Map Node
 	Key Node
@@ -92,6 +108,7 @@ type GetNode struct {
 }
 
 func (g *GetNode) Type() types.Type { return g.typ }
+func (g *GetNode) Args() []Node     { return []Node{g.Map, g.Key} }
 
 func NewGetNode(m, k Node) *GetNode {
 	return &GetNode{
@@ -109,6 +126,7 @@ type GetStructNode struct {
 }
 
 func (g *GetStructNode) Type() types.Type { return g.typ }
+func (g *GetStructNode) Args() []Node     { return []Node{g.Struct} }
 
 type ExistsNode struct {
 	Map Node
@@ -116,6 +134,7 @@ type ExistsNode struct {
 }
 
 func (g *ExistsNode) Type() types.Type { return types.BOOL }
+func (g *ExistsNode) Args() []Node     { return []Node{g.Map, g.Key} }
 
 type KeysNode struct {
 	Map Node
@@ -123,6 +142,7 @@ type KeysNode struct {
 }
 
 func (k *KeysNode) Type() types.Type { return k.typ }
+func (k *KeysNode) Args() []Node     { return []Node{k.Map} }
 
 type SliceNode struct {
 	Value Node
@@ -130,6 +150,7 @@ type SliceNode struct {
 	End   Node
 }
 
+func (s *SliceNode) Args() []Node { return []Node{s.Value, s.Start, s.End} }
 func (s *SliceNode) Type() types.Type {
 	if types.STRING.Equal(s.Value.Type()) {
 		return types.STRING // Strings are immutable

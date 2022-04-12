@@ -45,6 +45,7 @@ type MathNode struct {
 }
 
 func (m *MathNode) Type() types.Type { return m.typ }
+func (m *MathNode) Args() []Node     { return []Node{m.Lhs, m.Rhs} }
 
 type CompareOperation int
 
@@ -85,6 +86,7 @@ type CompareNode struct {
 }
 
 func (c *CompareNode) Type() types.Type { return types.BOOL }
+func (c *CompareNode) Args() []Node     { return []Node{c.Lhs, c.Rhs} }
 
 type LogicalOp int
 
@@ -101,6 +103,7 @@ type LogicalOpNode struct {
 }
 
 func (l *LogicalOpNode) Type() types.Type { return types.BOOL }
+func (l *LogicalOpNode) Args() []Node     { return []Node{l.Val, l.Rhs} }
 
 func NewMathNode(op MathOperation, lhs, rhs Node, typ types.Type) *MathNode {
 	return &MathNode{
@@ -116,9 +119,8 @@ type CanCastNode struct {
 	Typ   types.Type
 }
 
-func (c *CanCastNode) Type() types.Type {
-	return types.BOOL
-}
+func (c *CanCastNode) Type() types.Type { return types.BOOL }
+func (c *CanCastNode) Args() []Node     { return []Node{c.Value} }
 
 func init() {
 	nodeBuilders["MATH"] = nodeBuilder{

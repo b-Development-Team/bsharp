@@ -21,10 +21,10 @@ func (i *Interpreter) evalNode(node ir.Node) (*Value, error) {
 		case *ir.PrintNode:
 			return NewValue(types.NULL, nil), i.evalPrint(c)
 
-		case *ir.CastNode:
+		case *ir.CastNode: // TODO: Constrm
 			return i.evalCast(c)
 
-		case *ir.ReturnNode:
+		case *ir.ReturnNode: // TODO: Functions in SSA
 			return i.evalReturnNode(c)
 
 		case *ir.MathNode:
@@ -36,64 +36,64 @@ func (i *Interpreter) evalNode(node ir.Node) (*Value, error) {
 		case *ir.DefineNode:
 			return i.evalDefineNode(c)
 
-		case *ir.ConcatNode:
+		case *ir.ConcatNode: // TODO: SSAGen, Constrm
 			return i.evalConcat(c)
 
 		case *ir.CompareNode:
 			return i.evalCompareNode(n.Pos(), c)
 
-		case *ir.IndexNode:
+		case *ir.IndexNode: // TODO: SSAGen
 			return i.evalIndex(n.Pos(), c)
 
-		case *ir.LengthNode:
+		case *ir.LengthNode: // TODO: SSAGen
 			return i.evalLength(n.Pos(), c)
 
-		case *ir.MakeNode:
+		case *ir.MakeNode: // TODO: SSAGen
 			return i.evalMake(n.Pos(), c)
 
-		case *ir.SetNode:
+		case *ir.SetNode: // TODO: SSAGen
 			return i.evalSet(n.Pos(), c)
 
-		case *ir.GetNode:
+		case *ir.GetNode: // TODO: SSAGen
 			return i.evalGet(n.Pos(), c)
 
-		case *ir.ArrayNode:
+		case *ir.ArrayNode: // TODO: SSAGen
 			return i.evalArray(c)
 
-		case *ir.AppendNode:
+		case *ir.AppendNode: // TODO: SSAGen
 			return i.evalAppend(c)
 
-		case *ir.LogicalOpNode:
+		case *ir.LogicalOpNode: // TODO: SSAGen, Constrm
 			return i.evalLogicalOp(n.Pos(), c)
 
-		case *ir.FnNode:
+		case *ir.FnNode: // TODO: SSAGen
 			return i.evalFnNode(c)
 
-		case *ir.FnCallNode:
+		case *ir.FnCallNode: // TODO: SSAGen, Functions
 			return i.evalCallNode(c)
 
-		case *ir.ExistsNode:
+		case *ir.ExistsNode: // TODO: SSAGen
 			return i.evalExists(n.Pos(), c)
 
-		case *ir.KeysNode:
+		case *ir.KeysNode: // TODO: SSAGen
 			return i.evalKeys(n.Pos(), c)
 
-		case *ir.TimeNode:
+		case *ir.TimeNode: // TODO: SSAGen
 			return i.evalTime(c), nil
 
-		case *ir.SliceNode:
+		case *ir.SliceNode: // TODO: SSAGen
 			return i.evalSlice(n.Pos(), c)
 
-		case *ir.SetIndexNode:
+		case *ir.SetIndexNode: // TODO: SSAGen
 			return i.evalSetIndex(n.Pos(), c)
 
-		case *ir.GetStructNode:
+		case *ir.GetStructNode: // TODO: SSAGen
 			return i.evalGetStruct(c)
 
-		case *ir.SetStructNode:
+		case *ir.SetStructNode: // TODO: SSAGen
 			return i.evalSetStruct(c)
 
-		case *ir.CanCastNode:
+		case *ir.CanCastNode: // TODO: SSAGen
 			return i.evalCanCast(n.Pos(), c)
 
 		default:

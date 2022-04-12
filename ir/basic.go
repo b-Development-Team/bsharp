@@ -10,11 +10,16 @@ type PrintNode struct {
 	Arg Node
 }
 
+func (p *PrintNode) Args() []Node { return []Node{p.Arg} }
+
 type ConcatNode struct {
 	Values []Node
 }
 
 func (c *ConcatNode) Type() types.Type { return types.STRING }
+func (c *ConcatNode) Args() []Node {
+	return c.Values
+}
 
 type TimeMode int
 
@@ -37,6 +42,7 @@ type TimeNode struct {
 }
 
 func (t *TimeNode) Type() types.Type { return types.INT }
+func (t *TimeNode) Args() []Node     { return []Node{} }
 
 func init() {
 	nodeBuilders["PRINT"] = nodeBuilder{

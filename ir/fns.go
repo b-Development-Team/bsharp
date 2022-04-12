@@ -131,8 +131,8 @@ func (b *Builder) functionPass(p *parser.Parser) error {
 }
 
 type FnCallNode struct {
-	Fn   Node
-	Args []Node
+	Fn     Node
+	Params []Node
 
 	typ types.Type
 	pos *tokens.Pos
@@ -140,13 +140,14 @@ type FnCallNode struct {
 
 func (c *FnCallNode) Type() types.Type { return c.typ }
 func (c *FnCallNode) Pos() *tokens.Pos { return c.pos }
+func (c *FnCallNode) Args() []Node     { return c.Params }
 
 func NewFnCallNode(fn Node, args []Node, typ types.Type, pos *tokens.Pos) *FnCallNode {
 	return &FnCallNode{
-		Fn:   fn,
-		Args: args,
-		typ:  typ,
-		pos:  pos,
+		Fn:     fn,
+		Params: args,
+		typ:    typ,
+		pos:    pos,
 	}
 }
 
@@ -179,9 +180,9 @@ func (b *Builder) buildFnCall(n *parser.CallNode) (Node, error) {
 			},
 			pos: n.Pos(),
 		},
-		Args: args,
-		typ:  fn.RetType,
-		pos:  n.Pos(),
+		Params: args,
+		typ:    fn.RetType,
+		pos:    n.Pos(),
 	}, nil
 }
 
@@ -250,12 +251,15 @@ type ReturnNode struct {
 	Value Node
 }
 
+func (r *ReturnNode) Args() []Node { return []Node{r.Value} }
+
 type FnNode struct {
 	Name string
 	typ  types.Type
 }
 
 func (f *FnNode) Type() types.Type { return f.typ }
+func (f *FnNode) Args() []Node     { return []Node{} }
 
 func init() {
 	nodeBuilders["RETURN"] = nodeBuilder{
@@ -309,10 +313,10 @@ func init() {
 			}
 
 			return &FnCallNode{
-				Fn:   args[0],
-				Args: args[1:],
-				typ:  typ.RetType,
-				pos:  pos,
+				Fn:     args[0],
+				Params: args[1:],
+				typ:    typ.RetType,
+				pos:    pos,
 			}, nil
 		},
 	}

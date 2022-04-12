@@ -16,7 +16,7 @@ func (i *Interpreter) evalCallNode(n *ir.FnCallNode) (*Value, error) {
 	i.stack.Push()
 
 	// Build args
-	args, err := i.evalNodes(n.Args)
+	args, err := i.evalNodes(n.Params)
 	if err != nil {
 		return nil, err
 	}

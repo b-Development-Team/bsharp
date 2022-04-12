@@ -13,6 +13,7 @@ type VarNode struct {
 }
 
 func (v *VarNode) Type() types.Type { return v.typ }
+func (v *VarNode) Args() []Node     { return []Node{} }
 
 type DefineNode struct {
 	NullCall
@@ -22,6 +23,8 @@ type DefineNode struct {
 
 	name string // Variable name for use in Code()
 }
+
+func (d *DefineNode) Args() []Node { return []Node{d.Value} }
 
 func NewDefineNode(id int, val Node, i *IR) *DefineNode {
 	return &DefineNode{
