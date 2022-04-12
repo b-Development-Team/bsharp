@@ -21,14 +21,14 @@ func (i *Interpreter) evalMathNode(pos *tokens.Pos, node *ir.MathNode) (*Value, 
 
 	switch node.Lhs.Type().BasicType() {
 	case types.INT:
-		v := intMathOp(left.Value.(int), right.Value.(int), node.Op)
+		v := mathOp(left.Value.(int), right.Value.(int), node.Op)
 		if v == nil {
 			return nil, pos.Error("unknown math operation: %s", node.Op)
 		}
 		return NewValue(types.INT, *v), nil
 
 	case types.FLOAT:
-		v := floatMathOp(left.Value.(float64), right.Value.(float64), node.Op)
+		v := mathOp(left.Value.(float64), right.Value.(float64), node.Op)
 		if v == nil {
 			return nil, pos.Error("unknown math operation: %s", node.Op)
 		}
@@ -39,36 +39,12 @@ func (i *Interpreter) evalMathNode(pos *tokens.Pos, node *ir.MathNode) (*Value, 
 	}
 }
 
-func intMathOp(lhs int, rhs int, op ir.MathOperation) *int {
-	var out int
-	switch op {
-	case ir.MathOperationAdd:
-		out = lhs + rhs
-
-	case ir.MathOperationSub:
-		out = lhs - rhs
-
-	case ir.MathOperationMul:
-		out = lhs * rhs
-
-	case ir.MathOperationDiv:
-		out = lhs / rhs
-
-	case ir.MathOperationPow:
-		out = int(math.Pow(float64(lhs), float64(rhs)))
-
-	case ir.MathOperationMod:
-		out = lhs % rhs
-
-	default:
-		return nil
-	}
-
-	return &out
+type mathOpValue interface {
+	int | float64
 }
 
-func floatMathOp(lhs float64, rhs float64, op ir.MathOperation) *float64 {
-	var out float64
+func mathOp[T mathOpValue](lhs T, rhs T, op ir.MathOperation) *T {
+	var out T
 	switch op {
 	case ir.MathOperationAdd:
 		out = lhs + rhs
@@ -83,10 +59,22 @@ func floatMathOp(lhs float64, rhs float64, op ir.MathOperation) *float64 {
 		out = lhs / rhs
 
 	case ir.MathOperationPow:
-		out = math.Pow(lhs, rhs)
+		switch any(lhs).(type) {
+		case int:
+			out = T(math.Pow(float64(lhs), float64(rhs)))
+
+		case float64:
+			out = T(math.Pow(float64(lhs), float64(rhs)))
+		}
 
 	case ir.MathOperationMod:
-		out = math.Mod(lhs, rhs)
+		switch any(lhs).(type) {
+		case int:
+			out = T(int(lhs) % int(rhs))
+
+		case float64:
+			out = T(math.Mod(float64(lhs), float64(rhs)))
+		}
 
 	default:
 		return nil
@@ -106,21 +94,21 @@ func (i *Interpreter) evalCompareNode(pos *tokens.Pos, node *ir.CompareNode) (*V
 	}
 	switch node.Lhs.Type().BasicType() {
 	case types.INT:
-		v := intCompOp(left.Value.(int), right.Value.(int), node.Op)
+		v := compOp(left.Value.(int), right.Value.(int), node.Op)
 		if v == nil {
 			return nil, pos.Error("unknown compare operation: %s", node.Op)
 		}
 		return NewValue(types.BOOL, *v), nil
 
 	case types.FLOAT:
-		v := floatCompOp(left.Value.(float64), right.Value.(float64), node.Op)
+		v := compOp(left.Value.(float64), right.Value.(float64), node.Op)
 		if v == nil {
 			return nil, pos.Error("unknown compare operation: %s", node.Op)
 		}
 		return NewValue(types.BOOL, *v), nil
 
 	case types.STRING:
-		v := stringCompOp(left.Value.(string), right.Value.(string), node.Op)
+		v := compOp(left.Value.(string), right.Value.(string), node.Op)
 		if v == nil {
 			return nil, pos.Error("unknown compare operation: %s", node.Op)
 		}
@@ -131,63 +119,11 @@ func (i *Interpreter) evalCompareNode(pos *tokens.Pos, node *ir.CompareNode) (*V
 	}
 }
 
-func intCompOp(lhs int, rhs int, op ir.CompareOperation) *bool {
-	var out bool
-	switch op {
-	case ir.CompareOperationEqual:
-		out = lhs == rhs
-
-	case ir.CompareOperationNotEqual:
-		out = lhs != rhs
-
-	case ir.CompareOperationGreater:
-		out = lhs > rhs
-
-	case ir.CompareOperationGreaterEqual:
-		out = lhs >= rhs
-
-	case ir.CompareOperationLess:
-		out = lhs < rhs
-
-	case ir.CompareOperationLessEqual:
-		out = lhs <= rhs
-
-	default:
-		return nil
-	}
-
-	return &out
+type compOpValue interface {
+	int | float64 | string
 }
 
-func floatCompOp(lhs float64, rhs float64, op ir.CompareOperation) *bool {
-	var out bool
-	switch op {
-	case ir.CompareOperationEqual:
-		out = lhs == rhs
-
-	case ir.CompareOperationNotEqual:
-		out = lhs != rhs
-
-	case ir.CompareOperationGreater:
-		out = lhs > rhs
-
-	case ir.CompareOperationGreaterEqual:
-		out = lhs >= rhs
-
-	case ir.CompareOperationLess:
-		out = lhs < rhs
-
-	case ir.CompareOperationLessEqual:
-		out = lhs <= rhs
-
-	default:
-		return nil
-	}
-
-	return &out
-}
-
-func stringCompOp(lhs string, rhs string, op ir.CompareOperation) *bool {
+func compOp[T compOpValue](lhs T, rhs T, op ir.CompareOperation) *bool {
 	var out bool
 	switch op {
 	case ir.CompareOperationEqual:

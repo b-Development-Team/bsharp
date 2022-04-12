@@ -12,22 +12,22 @@ func (s *SSAGen) Add(node ir.Node) ssa.ID {
 	case *ir.CallNode:
 		switch c := n.Call.(type) {
 		case *ir.DefineNode:
-			return s.addDefine(c)
+			return s.addDefine(n.Pos(), c)
 
 		case *ir.VarNode:
-			return s.addVar(c)
+			return s.addVar(n.Pos(), c)
 
 		case *ir.CompareNode:
-			return s.addCompare(c)
+			return s.addCompare(n.Pos(), c)
 
 		case *ir.MathNode:
-			return s.addMath(c)
+			return s.addMath(n.Pos(), c)
 
 		case *ir.PrintNode:
-			return s.blk.AddInstruction(&ssa.Print{Value: s.Add(c.Arg)})
+			return s.blk.AddInstruction(&ssa.Print{Value: s.Add(c.Arg)}, n.Pos())
 
 		case *ir.CastNode:
-			return s.blk.AddInstruction(&ssa.Cast{Value: s.Add(c.Value), From: c.Value.Type(), To: c.Type()})
+			return s.blk.AddInstruction(&ssa.Cast{Value: s.Add(c.Value), From: c.Value.Type(), To: c.Type()}, n.Pos())
 
 		default:
 			panic(fmt.Sprintf("unknown call node type: %T", c))
@@ -49,7 +49,7 @@ func (s *SSAGen) Add(node ir.Node) ssa.ID {
 		return s.addConst(n)
 
 	case *ir.CastNode:
-		return s.blk.AddInstruction(&ssa.Cast{Value: s.Add(n.Value), From: n.Value.Type(), To: n.Type()})
+		return s.blk.AddInstruction(&ssa.Cast{Value: s.Add(n.Value), From: n.Value.Type(), To: n.Type()}, n.Pos())
 
 	default:
 		panic(fmt.Sprintf("unknown node type: %T", n))

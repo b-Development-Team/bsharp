@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/Nv7-Github/bsharp/tokens"
 	"github.com/Nv7-Github/bsharp/types"
 )
 
@@ -46,6 +47,8 @@ func (b *Block) Remove(id ID) {
 	}
 	copy(b.Order[ind:], b.Order[ind+1:])
 	b.Order = b.Order[:len(b.Order)-1]
+
+	delete(b.Parent.Instructions, id)
 }
 
 // Following returns a list of blocks that can directly be gone to from this block
@@ -62,10 +65,15 @@ func (b *Block) After() []string {
 	return []string{}
 }
 
+type InstructionInfo struct {
+	Block string
+	Pos   *tokens.Pos
+}
+
 type SSA struct {
 	EntryBlock   string
 	Blocks       map[string]*Block
-	Instructions map[ID]string // map[id]block
+	Instructions map[ID]InstructionInfo // map[id]block
 
 	// Before the memrm pass, variable data needs to be stored
 	VariableTypes []types.Type
@@ -78,7 +86,7 @@ func NewSSA() *SSA {
 	return &SSA{
 		EntryBlock:   "",
 		Blocks:       make(map[string]*Block),
-		Instructions: make(map[ID]string),
+		Instructions: make(map[ID]InstructionInfo),
 		cnt:          0,
 	}
 }
@@ -143,11 +151,14 @@ func (s *SSA) String() string {
 	return out.String()
 }
 
-func (b *Block) AddInstruction(i Instruction) ID {
+func (b *Block) AddInstruction(i Instruction, pos *tokens.Pos) ID {
 	id := b.Parent.genID()
 	b.Instructions[id] = i
 	b.Order = append(b.Order, id)
-	b.Parent.Instructions[id] = b.Label
+	b.Parent.Instructions[id] = InstructionInfo{
+		Block: b.Label,
+		Pos:   pos,
+	}
 	return id
 }
 
