@@ -103,22 +103,20 @@ func evalMath(blk *ssa.Block, i *ssa.Math) *ssa.Const {
 }
 
 func evalComp(blk *ssa.Block, i *ssa.Compare) *ssa.Const {
-	switch i.Type().BasicType() {
+	l := blk.Instructions[i.Lhs]
+	var out *bool
+	switch l.Type().BasicType() {
 	case types.INT:
-		return &ssa.Const{
-			Value: compOp(cnst(blk, i.Lhs).(int), cnst(blk, i.Rhs).(int), i.Op),
-			Typ:   types.BOOL,
-		}
-
+		out = compOp(cnst(blk, i.Lhs).(int), cnst(blk, i.Rhs).(int), i.Op)
 	case types.FLOAT:
-		return &ssa.Const{
-			Value: compOp(cnst(blk, i.Lhs).(float64), cnst(blk, i.Rhs).(float64), i.Op),
-			Typ:   types.BOOL,
-		}
+		out = compOp(cnst(blk, i.Lhs).(float64), cnst(blk, i.Rhs).(float64), i.Op)
 
 	case types.STRING:
+		out = compOp(cnst(blk, i.Lhs).(string), cnst(blk, i.Rhs).(string), i.Op)
+	}
+	if out != nil {
 		return &ssa.Const{
-			Value: compOp(cnst(blk, i.Lhs).(string), cnst(blk, i.Rhs).(string), i.Op),
+			Value: *out,
 			Typ:   types.BOOL,
 		}
 	}

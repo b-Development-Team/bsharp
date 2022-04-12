@@ -8,6 +8,7 @@ import (
 	"github.com/Nv7-Github/bsharp/ir"
 	"github.com/Nv7-Github/bsharp/parser"
 	"github.com/Nv7-Github/bsharp/ssa/constrm"
+	"github.com/Nv7-Github/bsharp/ssa/dce"
 	"github.com/Nv7-Github/bsharp/ssa/memrm"
 	"github.com/Nv7-Github/bsharp/tokens"
 )
@@ -70,9 +71,16 @@ func TestSSAGen(t *testing.T) {
 	memrm := memrm.NewMemRM(s)
 	memrm.Eval()
 
+	fmt.Println("BEFORE OPTIMIZATION:")
+	fmt.Println(s)
+
 	// Constant folding
 	constrm.Constrm(s)
 	constrm.Phirm(s)
+
+	// Dead code elimination
+	dce := dce.NewDCE(s)
+	dce.Remove()
 
 	fmt.Println("AFTER:")
 	fmt.Println(s)
