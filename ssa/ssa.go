@@ -48,6 +48,20 @@ func (b *Block) Remove(id ID) {
 	b.Order = b.Order[:len(b.Order)-1]
 }
 
+// Following returns a list of blocks that can directly be gone to from this block
+func (b *Block) After() []string {
+	switch b.End.Type() {
+	case EndInstructionTypeJmp:
+		return []string{b.End.(*EndInstructionJmp).Label}
+
+	case EndInstructionTypeCondJmp:
+		j := b.End.(*EndInstructionCondJmp)
+		return []string{j.IfTrue, j.IfFalse}
+	}
+
+	return []string{}
+}
+
 type SSA struct {
 	EntryBlock   string
 	Blocks       map[string]*Block
@@ -124,15 +138,7 @@ func (s *SSA) String() string {
 		out.WriteString("\t" + blk.End.String() + "\n")
 		out.WriteString("\n")
 
-		switch blk.End.Type() {
-		case EndInstructionTypeJmp:
-			todo = append(todo, blk.End.(*EndInstructionJmp).Label)
-
-		case EndInstructionTypeCondJmp:
-			j := blk.End.(*EndInstructionCondJmp)
-			todo = append(todo, j.IfTrue)
-			todo = append(todo, j.IfFalse)
-		}
+		todo = append(todo, blk.After()...)
 	}
 	return out.String()
 }

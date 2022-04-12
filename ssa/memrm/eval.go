@@ -38,8 +38,23 @@ func (m *MemRM) evalBlock(label string) bool {
 					vals = append(vals, vs...)
 				}
 
+				// Remove all duplicates
+				set := make(map[ssa.ID]struct{}, len(vals))
+				for _, v := range vals {
+					set[v] = struct{}{}
+				}
+				delete(set, id) // Remove trivial
+				if len(set) != len(vals) {
+					n := 0
+					vals = make([]ssa.ID, len(set))
+					for k := range set {
+						vals[n] = k
+						n++
+					}
+				}
+
 				// If just one val, you can replace
-				if len(vals) == 1 {
+				if len(vals) <= 1 {
 					replaceVal = &vals[0]
 				} else {
 					// Step 3: Update using PHI node
