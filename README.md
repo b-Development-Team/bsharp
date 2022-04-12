@@ -17,3 +17,19 @@ To time how long it takes to run a B# program, use the `--time` or `-t` flag.
 ```
 bsharp run file.bsp -t
 ```
+
+To compile a file,  do
+```
+bsharp build file.bsp <file2.bsp> <file3.bsp> -o file
+```
+This will produce a compiled executable.
+
+The C source code that is generated can be viewed using
+```
+bsharp build file.bsp <file2.bsp> <file3.bsp> -o file.c
+```
+
+To time how long it takes to compile a B# program, use the `--time` or `-t` flag.
+```
+bsharp build file.bsp -o file -t
+```
