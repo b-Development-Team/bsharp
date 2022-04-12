@@ -72,6 +72,12 @@ func init() {
 			}
 			_, exists = b.Scope.CurrScopeGetVar(name)
 
+			// check if needs global
+			v := b.Scope.Variable(id)
+			if !v.NeedsGlobal && v.ScopeType == ScopeTypeGlobal && b.Scope.HasType(ScopeTypeFunction) {
+				v.NeedsGlobal = true
+			}
+
 			return &DefineNode{
 				Var:     id,
 				Value:   args[1],

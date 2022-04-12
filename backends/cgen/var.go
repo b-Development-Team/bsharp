@@ -30,7 +30,7 @@ func (c *CGen) addDefine(n *ir.DefineNode) (*Code, error) {
 	// If not declared, then declare
 	if !c.declaredVars[v.ID] {
 		// Check if it is global
-		if v.ScopeType == ir.ScopeTypeGlobal {
+		if v.NeedsGlobal {
 			fmt.Fprintf(c.globals, "%s %s;\n", c.CType(v.Type), name)
 			c.declaredVars[v.ID] = true
 		} else {

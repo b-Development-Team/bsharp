@@ -17,11 +17,12 @@ const (
 )
 
 type Variable struct {
-	Type      types.Type
-	Name      string
-	ID        int
-	Pos       *tokens.Pos
-	ScopeType ScopeType
+	Type        types.Type
+	Name        string
+	ID          int
+	Pos         *tokens.Pos
+	ScopeType   ScopeType
+	NeedsGlobal bool // Useful for backends for which global code is placed inside a function, can allow backends to reduce global variable usage
 }
 
 type scope struct {

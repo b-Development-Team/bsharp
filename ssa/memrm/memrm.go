@@ -40,17 +40,8 @@ func (m *MemRM) Eval() {
 		blk := m.ssa.Blocks[t]
 		todo = todo[1:]
 		done := m.evalBlock(t)
-
 		if !done {
-			switch blk.End.Type() {
-			case ssa.EndInstructionTypeJmp:
-				todo = append(todo, blk.End.(*ssa.EndInstructionJmp).Label)
-
-			case ssa.EndInstructionTypeCondJmp:
-				j := blk.End.(*ssa.EndInstructionCondJmp)
-				todo = append(todo, j.IfTrue)
-				todo = append(todo, j.IfFalse)
-			}
+			todo = append(todo, blk.After()...)
 		}
 	}
 }
