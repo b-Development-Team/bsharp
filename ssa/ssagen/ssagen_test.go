@@ -7,21 +7,22 @@ import (
 
 	"github.com/Nv7-Github/bsharp/ir"
 	"github.com/Nv7-Github/bsharp/parser"
+	"github.com/Nv7-Github/bsharp/ssa/memrm"
 	"github.com/Nv7-Github/bsharp/tokens"
 )
 
 const code = `# SSAGen Test
 [DEFINE i 0]
 
-[IF [COMPARE [VAR i] == 0]
-  [DEFINE i 1]
-]
+#[IF [COMPARE [VAR i] == 0]
+#  [DEFINE i 1]
+#]
 
-[IF [COMPARE [VAR i] == 1]
-  [DEFINE i 2]
-ELSE
-  [DEFINE i 0]
-]
+#[IF [COMPARE [VAR i] == 1]
+#  [DEFINE i 2]
+#ELSE
+#  [DEFINE i 0]
+#]
 
 [WHILE [COMPARE [VAR i] < 10]
   [DEFINE i [MATH [VAR i] + 1]]
@@ -57,5 +58,15 @@ func TestSSAGen(t *testing.T) {
 	i := ir.IR()
 	gen := NewSSAGen(i)
 	gen.Build()
-	fmt.Println(gen.SSA())
+	s := gen.SSA()
+
+	fmt.Println("BEFORE:")
+	fmt.Println(s)
+
+	// Memrm Pass
+	memrm := memrm.NewMemRM(s)
+	memrm.Eval()
+
+	fmt.Println("AFTER:")
+	fmt.Println(s)
 }

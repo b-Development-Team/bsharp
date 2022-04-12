@@ -11,6 +11,8 @@ import (
 type Instruction interface {
 	fmt.Stringer
 	Type() types.Type
+	Args() []ID
+	SetArgs([]ID)
 }
 
 type ID string
@@ -31,6 +33,19 @@ type Block struct {
 	End          EndInstruction
 
 	Before []string
+}
+
+func (b *Block) Remove(id ID) {
+	delete(b.Instructions, id)
+	ind := -1
+	for i, val := range b.Order {
+		if val == id {
+			ind = i
+			break
+		}
+	}
+	copy(b.Order[ind:], b.Order[ind+1:])
+	b.Order = b.Order[:len(b.Order)-1]
 }
 
 type SSA struct {
