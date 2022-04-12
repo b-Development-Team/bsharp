@@ -51,6 +51,14 @@ func Constrm(s *ssa.SSA) {
 						blk.Instructions[id] = v
 					}
 				}
+
+			case *ssa.Compare:
+				if checkInstrConst(instr, blk) {
+					v := evalComp(blk, i)
+					if v != nil {
+						blk.Instructions[id] = v
+					}
+				}
 			}
 		}
 	}
