@@ -114,14 +114,6 @@ func NewMathNode(op MathOperation, lhs, rhs Node, typ types.Type) *MathNode {
 	}
 }
 
-type CanCastNode struct {
-	Value Node
-	Typ   types.Type
-}
-
-func (c *CanCastNode) Type() types.Type { return types.BOOL }
-func (c *CanCastNode) Args() []Node     { return []Node{c.Value} }
-
 func init() {
 	nodeBuilders["MATH"] = nodeBuilder{
 		ArgTypes: []types.Type{types.NewMulType(types.INT, types.FLOAT), types.IDENT, types.NewMulType(types.INT, types.FLOAT)},

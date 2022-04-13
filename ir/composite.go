@@ -58,10 +58,11 @@ type SetStructNode struct {
 	Struct Node
 	Field  int
 	Value  Node
+	pos    *tokens.Pos
 }
 
 func (s *SetStructNode) Args() []Node {
-	return []Node{s.Struct, s.Value}
+	return []Node{s.Struct, s.Value, NewConst(types.INT, s.pos, s.Field)}
 }
 
 func NewIndexNode(val, index Node) *IndexNode {
@@ -121,12 +122,13 @@ func NewGetNode(m, k Node) *GetNode {
 type GetStructNode struct {
 	Struct Node
 	Field  int
+	pos    *tokens.Pos
 
 	typ types.Type
 }
 
 func (g *GetStructNode) Type() types.Type { return g.typ }
-func (g *GetStructNode) Args() []Node     { return []Node{g.Struct} }
+func (g *GetStructNode) Args() []Node     { return []Node{g.Struct, NewConst(types.INT, g.pos, g.Field)} }
 
 type ExistsNode struct {
 	Map Node
@@ -292,6 +294,7 @@ func init() {
 					Struct: args[0],
 					Field:  id,
 					Value:  args[2],
+					pos:    args[1].Pos(),
 				}, nil
 			}
 
@@ -351,6 +354,7 @@ func init() {
 				Struct: args[0],
 				Field:  id,
 				typ:    field.Type,
+				pos:    args[1].Pos(),
 			}, nil
 		},
 	}

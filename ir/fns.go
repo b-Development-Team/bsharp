@@ -176,6 +176,7 @@ func (b *Builder) buildFnCall(n *parser.CallNode) (Node, error) {
 		Fn: &CallNode{
 			Call: &FnNode{
 				Name: n.Name,
+				pos:  n.Pos(),
 				typ:  types.NewFuncType(expected, fn.RetType),
 			},
 			pos: n.Pos(),
@@ -256,10 +257,11 @@ func (r *ReturnNode) Args() []Node { return []Node{r.Value} }
 type FnNode struct {
 	Name string
 	typ  types.Type
+	pos  *tokens.Pos
 }
 
 func (f *FnNode) Type() types.Type { return f.typ }
-func (f *FnNode) Args() []Node     { return []Node{} }
+func (f *FnNode) Args() []Node     { return []Node{NewConst(types.STRING, f.pos, f.Name)} }
 
 func init() {
 	nodeBuilders["RETURN"] = nodeBuilder{
@@ -294,6 +296,7 @@ func init() {
 			return &FnNode{
 				Name: name,
 				typ:  types.NewFuncType(pars, fn.RetType),
+				pos:  args[0].Pos(),
 			}, nil
 		},
 	}

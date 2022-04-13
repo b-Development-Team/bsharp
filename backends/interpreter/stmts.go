@@ -42,58 +42,58 @@ func (i *Interpreter) evalNode(node ir.Node) (*Value, error) {
 		case *ir.CompareNode:
 			return i.evalCompareNode(n.Pos(), c)
 
-		case *ir.IndexNode: // TODO: SSAGen
+		case *ir.IndexNode:
 			return i.evalIndex(n.Pos(), c)
 
-		case *ir.LengthNode: // TODO: SSAGen
+		case *ir.LengthNode:
 			return i.evalLength(n.Pos(), c)
 
-		case *ir.MakeNode: // TODO: SSAGen
+		case *ir.MakeNode:
 			return i.evalMake(n.Pos(), c)
 
-		case *ir.SetNode: // TODO: SSAGen
+		case *ir.SetNode:
 			return i.evalSet(n.Pos(), c)
 
-		case *ir.GetNode: // TODO: SSAGen
+		case *ir.GetNode:
 			return i.evalGet(n.Pos(), c)
 
-		case *ir.ArrayNode: // TODO: SSAGen
+		case *ir.ArrayNode:
 			return i.evalArray(c)
 
-		case *ir.AppendNode: // TODO: SSAGen
+		case *ir.AppendNode:
 			return i.evalAppend(c)
 
 		case *ir.LogicalOpNode: // TODO: SSAGen, Constrm
 			return i.evalLogicalOp(n.Pos(), c)
 
-		case *ir.FnNode: // TODO: SSAGen
+		case *ir.FnNode:
 			return i.evalFnNode(c)
 
 		case *ir.FnCallNode: // TODO: SSAGen, Functions
 			return i.evalCallNode(c)
 
-		case *ir.ExistsNode: // TODO: SSAGen
+		case *ir.ExistsNode:
 			return i.evalExists(n.Pos(), c)
 
-		case *ir.KeysNode: // TODO: SSAGen
+		case *ir.KeysNode:
 			return i.evalKeys(n.Pos(), c)
 
-		case *ir.TimeNode: // TODO: SSAGen
+		case *ir.TimeNode:
 			return i.evalTime(c), nil
 
-		case *ir.SliceNode: // TODO: SSAGen
+		case *ir.SliceNode:
 			return i.evalSlice(n.Pos(), c)
 
-		case *ir.SetIndexNode: // TODO: SSAGen
+		case *ir.SetIndexNode:
 			return i.evalSetIndex(n.Pos(), c)
 
-		case *ir.GetStructNode: // TODO: SSAGen
+		case *ir.GetStructNode:
 			return i.evalGetStruct(c)
 
-		case *ir.SetStructNode: // TODO: SSAGen
+		case *ir.SetStructNode:
 			return i.evalSetStruct(c)
 
-		case *ir.CanCastNode: // TODO: SSAGen
+		case *ir.CanCastNode:
 			return i.evalCanCast(n.Pos(), c)
 
 		default:

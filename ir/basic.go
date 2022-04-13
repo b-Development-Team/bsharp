@@ -39,10 +39,11 @@ var timeModeNames = map[string]TimeMode{
 
 type TimeNode struct {
 	Mode TimeMode
+	pos  *tokens.Pos
 }
 
 func (t *TimeNode) Type() types.Type { return types.INT }
-func (t *TimeNode) Args() []Node     { return []Node{} }
+func (t *TimeNode) Args() []Node     { return []Node{NewConst(types.INT, t.pos, t.Mode)} }
 
 func init() {
 	nodeBuilders["PRINT"] = nodeBuilder{
@@ -86,6 +87,7 @@ func init() {
 
 			return &TimeNode{
 				Mode: mode,
+				pos:  pos,
 			}, nil
 		},
 	}

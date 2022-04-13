@@ -24,7 +24,55 @@ func (s *SSAGen) Add(node ir.Node) ssa.ID {
 			return s.addMath(n.Pos(), c)
 
 		case *ir.PrintNode:
-			return s.blk.AddInstruction(&ssa.Print{Value: s.Add(c.Arg)}, n.Pos())
+			return s.newLiveIRNode(ssa.IRNodePrint, n)
+
+		case *ir.IndexNode:
+			return s.newIRNode(ssa.IRNodeIndex, n)
+
+		case *ir.LengthNode:
+			return s.newIRNode(ssa.IRNodeLength, n)
+
+		case *ir.MakeNode:
+			return s.newIRNode(ssa.IRNodeMake, n)
+
+		case *ir.SetNode:
+			return s.newLiveIRNode(ssa.IRNodeSet, n)
+
+		case *ir.GetNode:
+			return s.newIRNode(ssa.IRNodeGet, n)
+
+		case *ir.ArrayNode:
+			return s.newIRNode(ssa.IRNodeArray, n)
+
+		case *ir.AppendNode:
+			return s.newLiveIRNode(ssa.IRNodeAppend, n)
+
+		case *ir.FnNode:
+			return s.newIRNode(ssa.IRNodeFn, n)
+
+		case *ir.ExistsNode:
+			return s.newIRNode(ssa.IRNodeExists, n)
+
+		case *ir.KeysNode:
+			return s.newIRNode(ssa.IRNodeKeys, n)
+
+		case *ir.TimeNode:
+			return s.newIRNode(ssa.IRNodeTime, n)
+
+		case *ir.SliceNode:
+			return s.newLiveIRNode(ssa.IRNodeSlice, n)
+
+		case *ir.SetIndexNode:
+			return s.newLiveIRNode(ssa.IRNodeSetIndex, n)
+
+		case *ir.GetStructNode:
+			return s.newIRNode(ssa.IRNodeGetStruct, n)
+
+		case *ir.SetStructNode:
+			return s.newLiveIRNode(ssa.IRNodeSetStruct, n)
+
+		case *ir.CanCastNode:
+			return s.newIRNode(ssa.IRNodeCanCast, n)
 
 		case *ir.CastNode:
 			return s.blk.AddInstruction(&ssa.Cast{Value: s.Add(c.Value), From: c.Value.Type(), To: c.Type()}, n.Pos())

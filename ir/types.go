@@ -126,6 +126,17 @@ func NewCastNode(val Node, typ types.Type) *CastNode {
 	}
 }
 
+type CanCastNode struct {
+	Value Node
+	Typ   types.Type
+	pos   *tokens.Pos
+}
+
+func (c *CanCastNode) Type() types.Type { return types.BOOL }
+func (c *CanCastNode) Args() []Node {
+	return []Node{c.Value, NewConst(types.STRING, c.pos, c.Typ.String())}
+}
+
 func init() {
 	nodeBuilders["FLOAT"] = nodeBuilder{
 		ArgTypes: []types.Type{types.NewMulType(types.INT, types.STRING)},
@@ -168,6 +179,7 @@ func init() {
 			return &CanCastNode{
 				Value: args[0],
 				Typ:   typ,
+				pos:   args[1].Pos(),
 			}, nil
 		},
 	}

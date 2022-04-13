@@ -57,9 +57,8 @@ func (d *DCE) Remove() {
 		for _, id := range blk.Order {
 			instr := blk.Instructions[id]
 
-			// TODO: Add all live nodes
 			switch instr.(type) {
-			case *ssa.Print:
+			case *ssa.LiveIRValue:
 				d.markNotDead(id)
 			}
 		}
