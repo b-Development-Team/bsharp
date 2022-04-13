@@ -10,6 +10,7 @@ type SSAGen struct {
 	ir  *ir.IR
 	ssa *ssa.SSA
 	blk *ssa.Block
+	fn  *ir.Function
 }
 
 func NewSSAGen(i *ir.IR) *SSAGen {
@@ -27,6 +28,30 @@ func (s *SSAGen) Build() {
 	for _, v := range s.ir.Variables {
 		s.ssa.VariableTypes[v.ID] = v.Type
 	}
+
+	// Build functions
+	if s.fn == nil { // Don't build if within function
+		for _, fn := range s.ir.Funcs {
+			i := &ir.IR{
+				Funcs:     s.ir.Funcs,
+				Variables: s.ir.Variables,
+				Body:      fn.Body,
+			}
+			gen := NewSSAGen(i)
+			gen.fn = fn
+			gen.Build()
+			ssa := gen.SSA()
+			s.ssa.Funcs[fn.Name] = ssa
+		}
+	} else {
+		// Build param types
+		s.ssa.ParamTypes = make([]types.Type, len(s.fn.Params))
+		for i, par := range s.fn.Params {
+			s.ssa.ParamTypes[i] = par.Type
+		}
+	}
+
+	// Build body
 	for _, node := range s.ir.Body {
 		s.Add(node)
 	}

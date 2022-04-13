@@ -29,7 +29,8 @@ func (m *MemRM) evalBlock(label string) bool {
 			var replaceVal *ssa.ID = nil
 			if !exists {
 				// Step 1: Insert empty phi node
-				b.Instructions[id] = &ssa.Phi{Values: make([]ssa.ID, 0)}
+				p := &ssa.Phi{Values: make([]ssa.ID, 0), Variable: read.Variable}
+				b.Instructions[id] = p
 
 				// Step 2: Get vals using recurse functions
 				vals := make([]ssa.ID, 0, len(b.Before))
@@ -58,7 +59,7 @@ func (m *MemRM) evalBlock(label string) bool {
 					replaceVal = &vals[0]
 				} else {
 					// Step 3: Update using PHI node
-					b.Instructions[id] = &ssa.Phi{Values: vals}
+					p.Values = vals
 					val = id
 
 					// Also, save the value

@@ -8,6 +8,10 @@ import (
 )
 
 func (s *SSAGen) Add(node ir.Node) ssa.ID {
+	if s.blk == nil {
+		return ssa.NullID()
+	}
+
 	switch n := node.(type) {
 	case *ir.CallNode:
 		switch c := n.Call.(type) {
@@ -77,6 +81,9 @@ func (s *SSAGen) Add(node ir.Node) ssa.ID {
 		case *ir.CastNode:
 			return s.blk.AddInstruction(&ssa.Cast{Value: s.Add(c.Value), From: c.Value.Type(), To: c.Type()}, n.Pos())
 
+		case *ir.ReturnNode:
+			return s.addReturn(c)
+
 		default:
 			panic(fmt.Sprintf("unknown call node type: %T", c))
 		}
@@ -98,6 +105,9 @@ func (s *SSAGen) Add(node ir.Node) ssa.ID {
 
 	case *ir.CastNode:
 		return s.blk.AddInstruction(&ssa.Cast{Value: s.Add(n.Value), From: n.Value.Type(), To: n.Type()}, n.Pos())
+
+	case *ir.FnCallNode:
+		return s.addFnCall(n)
 
 	default:
 		panic(fmt.Sprintf("unknown node type: %T", n))

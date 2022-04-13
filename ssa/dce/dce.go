@@ -58,13 +58,16 @@ func (d *DCE) Remove() {
 			instr := blk.Instructions[id]
 
 			switch instr.(type) {
-			case *ssa.LiveIRValue, *ssa.GlobalSetVariable:
+			case *ssa.LiveIRValue, *ssa.GlobalSetVariable, *ssa.FnCallNode:
 				d.markNotDead(id)
 			}
 		}
 
 		if blk.End.Type() == ssa.EndInstructionTypeCondJmp { // Save cond
 			d.markNotDead(blk.End.(*ssa.EndInstructionCondJmp).Cond)
+		}
+		if blk.End.Type() == ssa.EndInstructionTypeReturn { // Save return
+			d.markNotDead(blk.End.(*ssa.EndInstructionReturn).Value)
 		}
 	}
 

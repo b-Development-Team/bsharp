@@ -24,7 +24,7 @@ func (i *Interpreter) evalNode(node ir.Node) (*Value, error) {
 		case *ir.CastNode: // TODO: Constrm
 			return i.evalCast(c)
 
-		case *ir.ReturnNode: // TODO: Functions in SSA
+		case *ir.ReturnNode:
 			return i.evalReturnNode(c)
 
 		case *ir.MathNode:
@@ -69,7 +69,7 @@ func (i *Interpreter) evalNode(node ir.Node) (*Value, error) {
 		case *ir.FnNode:
 			return i.evalFnNode(c)
 
-		case *ir.FnCallNode: // TODO: SSAGen, Functions
+		case *ir.FnCallNode:
 			return i.evalCallNode(c)
 
 		case *ir.ExistsNode:

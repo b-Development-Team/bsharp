@@ -23,6 +23,20 @@ func (s *SSAGen) addDefine(pos *tokens.Pos, n *ir.DefineNode) ssa.ID {
 
 func (s *SSAGen) addVar(pos *tokens.Pos, n *ir.VarNode) ssa.ID {
 	v := s.ir.Variables[n.ID]
+	if s.fn != nil {
+		isParam := true
+		for _, par := range s.fn.Params {
+			if par.ID != n.ID {
+				isParam = false
+				break
+			}
+		}
+		if isParam {
+			return s.blk.AddInstruction(&ssa.GetParam{
+				Variable: n.ID,
+			}, pos)
+		}
+	}
 	if v.NeedsGlobal {
 		return s.blk.AddInstruction(&ssa.GlobalGetVariable{
 			Variable: n.ID,

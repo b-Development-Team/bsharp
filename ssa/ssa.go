@@ -74,9 +74,11 @@ type SSA struct {
 	EntryBlock   string
 	Blocks       map[string]*Block
 	Instructions map[ID]InstructionInfo // map[id]block
+	Funcs        map[string]*SSA
 
 	// Before the memrm pass, variable data needs to be stored
 	VariableTypes []types.Type
+	ParamTypes    []types.Type // Param types if accepts params
 
 	// For IDs
 	cnt int
@@ -87,6 +89,7 @@ func NewSSA() *SSA {
 		EntryBlock:   "",
 		Blocks:       make(map[string]*Block),
 		Instructions: make(map[ID]InstructionInfo),
+		Funcs:        make(map[string]*SSA),
 		cnt:          0,
 	}
 }
@@ -125,6 +128,20 @@ func (s *SSA) genID() ID {
 
 func (s *SSA) String() string {
 	out := &strings.Builder{}
+	// Add functions
+	for name, fn := range s.Funcs {
+		fmt.Fprintf(out, "fn %s(", name)
+		for i, typ := range fn.ParamTypes {
+			if i != 0 {
+				out.WriteString(", ")
+			}
+			out.WriteString(typ.String())
+		}
+		out.WriteString(") {\n")
+		out.WriteString(fn.String())
+		out.WriteString("}\n\n")
+	}
+
 	todo := []string{s.EntryBlock}
 	done := make(map[string]struct{})
 	for len(todo) > 0 {
@@ -168,11 +185,12 @@ const (
 	EndInstructionTypeJmp EndInstructionType = iota
 	EndInstructionTypeCondJmp
 	EndInstructionTypeExit
+	EndInstructionTypeReturn
 )
 
 func (e EndInstructionType) Type() EndInstructionType { return e }
 func (e EndInstructionType) String() string {
-	return "Exit" // only time used as end instruction
+	return [...]string{"Jmp", "CondJmp", "Exit", "Return"}[e]
 }
 
 type EndInstruction interface {
@@ -207,6 +225,18 @@ func (c *EndInstructionCondJmp) String() string {
 	return fmt.Sprintf("CondJmp [%s](%s, %s)", c.Cond.String(), c.IfTrue, c.IfFalse)
 }
 
+type EndInstructionReturn struct {
+	Value ID
+}
+
+func (c *EndInstructionReturn) Type() EndInstructionType {
+	return EndInstructionTypeReturn
+}
+
+func (c *EndInstructionReturn) String() string {
+	return fmt.Sprintf("Return (%s)", c.Value.String())
+}
+
 func (b *Block) EndInstrutionJmp(a *Block) {
 	e := &EndInstructionJmp{
 		Label: a.Label,
@@ -228,4 +258,10 @@ func (b *Block) EndInstrutionCondJmp(cond ID, iftrue *Block, iffalse *Block) {
 
 func (b *Block) EndInstructionExit() {
 	b.End = EndInstructionTypeExit
+}
+
+func (b *Block) EndInstructionReturn(value ID) {
+	b.End = &EndInstructionReturn{
+		Value: value,
+	}
 }

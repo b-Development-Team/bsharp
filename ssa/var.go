@@ -59,3 +59,15 @@ func (g *GlobalGetVariable) String() string {
 }
 func (g *GlobalGetVariable) Args() []ID     { return []ID{} }
 func (g *GlobalGetVariable) SetArgs(_ []ID) {}
+
+type GetParam struct {
+	Variable int
+	Typ      types.Type
+}
+
+func (g *GetParam) Type() types.Type { return g.Typ }
+func (g *GetParam) String() string {
+	return fmt.Sprintf("GetParam [%d]", g.Variable)
+}
+func (g *GetParam) Args() []ID     { return []ID{} }
+func (g *GetParam) SetArgs(_ []ID) {}

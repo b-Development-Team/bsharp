@@ -7,14 +7,16 @@ import (
 
 	"github.com/Nv7-Github/bsharp/ir"
 	"github.com/Nv7-Github/bsharp/parser"
-	"github.com/Nv7-Github/bsharp/ssa/constrm"
-	"github.com/Nv7-Github/bsharp/ssa/dce"
-	"github.com/Nv7-Github/bsharp/ssa/memrm"
+	"github.com/Nv7-Github/bsharp/ssa/pipeline"
 	"github.com/Nv7-Github/bsharp/tokens"
 )
 
 const code = `# SSAGen Test
 [DEFINE i 0]
+
+[FUNC INCR
+	[DEFINE i [MATH [VAR i] + 1]]
+]
 
 #[IF [COMPARE [VAR i] == 0]
 #  [DEFINE i 1]
@@ -27,8 +29,8 @@ const code = `# SSAGen Test
 #]
 
 [WHILE [COMPARE [VAR i] < 10]
-  [DEFINE i [MATH [VAR i] + 1]]
-  [PRINT [STRING [VAR i]]]
+	[PRINT [STRING [VAR i]]]
+  [INCR]
 ]
 
 [PRINT [STRING [VAR i]]]
@@ -67,20 +69,10 @@ func TestSSAGen(t *testing.T) {
 	fmt.Println("BEFORE:")
 	fmt.Println(s)
 
-	// Memrm Pass
-	memrm := memrm.NewMemRM(s)
-	memrm.Eval()
-
-	fmt.Println("BEFORE OPTIMIZATION:")
-	fmt.Println(s)
-
-	// Constant folding
-	constrm.Constrm(s)
-	constrm.Phirm(s)
-
-	// Dead code elimination
-	dce := dce.NewDCE(s)
-	dce.Remove()
+	p := pipeline.New()
+	p.ConstantPropagation()
+	p.DeadCodeElimination()
+	p.Run(s)
 
 	fmt.Println("AFTER:")
 	fmt.Println(s)

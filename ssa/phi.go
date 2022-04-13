@@ -7,8 +7,9 @@ import (
 )
 
 type Phi struct {
-	Values []ID
-	Typ    types.Type
+	Values   []ID
+	Typ      types.Type
+	Variable int // Annotation for putting back mem
 }
 
 func (p *Phi) Type() types.Type { return p.Typ }
