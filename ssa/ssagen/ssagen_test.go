@@ -12,28 +12,9 @@ import (
 )
 
 const code = `# SSAGen Test
-[DEFINE i 0]
-
-[FUNC INCR
-	[DEFINE i [MATH [VAR i] + 1]]
-]
-
-#[IF [COMPARE [VAR i] == 0]
-#  [DEFINE i 1]
-#]
-
-#[IF [COMPARE [VAR i] == 1]
-#  [DEFINE i 2]
-#ELSE
-#  [DEFINE i 2]
-#]
-
-[WHILE [COMPARE [VAR i] < 10]
-	[PRINT [STRING [VAR i]]]
-  [INCR]
-]
-
-[PRINT [STRING [VAR i]]]
+[DEFINE a "Hello, "]
+[DEFINE a [CONCAT [VAR a] "World!"]]
+[PRINT [VAR a]]
 `
 
 type fs struct{}

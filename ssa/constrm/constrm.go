@@ -42,7 +42,6 @@ func Constrm(s *ssa.SSA) {
 		for _, id := range blk.Order {
 			instr := blk.Instructions[id]
 
-			// TODO: The rest of the constant instructions
 			switch i := instr.(type) {
 			case *ssa.Math:
 				if checkInstrConst(instr, blk) {
@@ -59,52 +58,28 @@ func Constrm(s *ssa.SSA) {
 						blk.Instructions[id] = v
 					}
 				}
-			}
-		}
-	}
-}
 
-func Phirm(s *ssa.SSA) {
-	todo := []string{s.EntryBlock}
-	done := make(map[string]struct{})
-	for len(todo) > 0 {
-		t := todo[0]
-		blk := s.Blocks[t]
-		todo = todo[1:]
-		_, exists := done[blk.Label]
-		if !exists {
-			todo = append(todo, blk.After()...)
-			done[blk.Label] = struct{}{}
-		}
-
-		// Constant phi removal
-		for _, id := range blk.Order {
-			instr := blk.Instructions[id]
-			p, ok := instr.(*ssa.Phi)
-			if ok {
-				// Check if const
-				isConst := true
-				for _, val := range p.Values {
-					b := s.Blocks[s.Instructions[val].Block]
-					_, ok := b.Instructions[val].(*ssa.Const)
-					if !ok {
-						isConst = false
-						break
+			case *ssa.Cast:
+				if checkInstrConst(instr, blk) {
+					v := evalCast(blk, i)
+					if v != nil {
+						blk.Instructions[id] = v
 					}
 				}
 
-				if isConst {
-					isSame := true
-					first := globalcnst(s, p.Values[0])
-					for _, v := range p.Values[1:] {
-						if globalcnst(s, v).Value != first.Value {
-							isSame = false
-							break
-						}
+			case *ssa.Concat:
+				if checkInstrConst(instr, blk) {
+					v := evalConcat(blk, i)
+					if v != nil {
+						blk.Instructions[id] = v
 					}
+				}
 
-					if isSame {
-						blk.Instructions[id] = first
+			case *ssa.LogicalOp:
+				if checkInstrConst(instr, blk) {
+					v := evalLogicalOp(blk, i)
+					if v != nil {
+						blk.Instructions[id] = v
 					}
 				}
 			}

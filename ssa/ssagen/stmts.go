@@ -84,6 +84,12 @@ func (s *SSAGen) Add(node ir.Node) ssa.ID {
 		case *ir.ReturnNode:
 			return s.addReturn(c)
 
+		case *ir.ConcatNode:
+			return s.addConcat(n.Pos(), c)
+
+		case *ir.LogicalOpNode:
+			return s.addLogicalOp(n.Pos(), c)
+
 		default:
 			panic(fmt.Sprintf("unknown call node type: %T", c))
 		}

@@ -21,7 +21,7 @@ func (i *Interpreter) evalNode(node ir.Node) (*Value, error) {
 		case *ir.PrintNode:
 			return NewValue(types.NULL, nil), i.evalPrint(c)
 
-		case *ir.CastNode: // TODO: Constrm
+		case *ir.CastNode:
 			return i.evalCast(c)
 
 		case *ir.ReturnNode:
@@ -36,7 +36,7 @@ func (i *Interpreter) evalNode(node ir.Node) (*Value, error) {
 		case *ir.DefineNode:
 			return i.evalDefineNode(c)
 
-		case *ir.ConcatNode: // TODO: SSAGen, Constrm
+		case *ir.ConcatNode:
 			return i.evalConcat(c)
 
 		case *ir.CompareNode:
@@ -63,7 +63,7 @@ func (i *Interpreter) evalNode(node ir.Node) (*Value, error) {
 		case *ir.AppendNode:
 			return i.evalAppend(c)
 
-		case *ir.LogicalOpNode: // TODO: SSAGen, Constrm
+		case *ir.LogicalOpNode:
 			return i.evalLogicalOp(n.Pos(), c)
 
 		case *ir.FnNode:
@@ -108,7 +108,7 @@ func (i *Interpreter) evalNode(node ir.Node) (*Value, error) {
 		case *ir.WhileNode:
 			return NewValue(types.NULL, nil), i.evalWhileNode(b)
 
-		case *ir.SwitchNode:
+		case *ir.SwitchNode: // TODO: SSAGen
 			return NewValue(types.NULL, nil), i.evalSwitchNode(b)
 
 		default:
@@ -121,7 +121,7 @@ func (i *Interpreter) evalNode(node ir.Node) (*Value, error) {
 	case *ir.Const:
 		return i.evalConst(n)
 
-	case *ir.ExtensionCall:
+	case *ir.ExtensionCall: // TODO: SSAGen
 		return i.evalExtensionCall(n)
 
 	case *ir.CastNode:

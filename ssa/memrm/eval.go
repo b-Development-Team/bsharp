@@ -54,17 +54,13 @@ func (m *MemRM) evalBlock(label string) bool {
 					}
 				}
 
-				// If just one val, you can replace
-				if len(vals) <= 1 {
-					replaceVal = &vals[0]
-				} else {
-					// Step 3: Update using PHI node
-					p.Values = vals
-					val = id
+				// NOTE: Doesn't replace with value when just a single value because this guarentees all out-of-block accesses are done using a phi node
+				// Step 3: Update using PHI node
+				p.Values = vals
+				val = id
 
-					// Also, save the value
-					d.Variables[read.Variable] = id
-				}
+				// Also, save the value
+				d.Variables[read.Variable] = id
 			} else {
 				replaceVal = &val
 			}

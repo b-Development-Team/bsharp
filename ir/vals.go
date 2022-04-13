@@ -96,6 +96,10 @@ const (
 	LogicalOpNot
 )
 
+func (l LogicalOp) String() string {
+	return [...]string{"And", "Or", "Not"}[l]
+}
+
 type LogicalOpNode struct {
 	Op  LogicalOp
 	Val Node
