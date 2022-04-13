@@ -20,16 +20,16 @@ const code = `# SSAGen Test
 #  [DEFINE i 1]
 #]
 
-[IF [COMPARE [VAR i] == 1]
-  [DEFINE i 2]
-ELSE
-  [DEFINE i 2]
-]
-
-#[WHILE [COMPARE [VAR i] < 10]
-#  [DEFINE i [MATH [VAR i] + 1]]
-#  [PRINT [STRING [VAR i]]]
+#[IF [COMPARE [VAR i] == 1]
+#  [DEFINE i 2]
+#ELSE
+#  [DEFINE i 2]
 #]
+
+[WHILE [COMPARE [VAR i] < 10]
+  [DEFINE i [MATH [VAR i] + 1]]
+  [PRINT [STRING [VAR i]]]
+]
 
 [PRINT [STRING [VAR i]]]
 `

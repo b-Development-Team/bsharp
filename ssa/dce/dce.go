@@ -58,7 +58,7 @@ func (d *DCE) Remove() {
 			instr := blk.Instructions[id]
 
 			switch instr.(type) {
-			case *ssa.LiveIRValue:
+			case *ssa.LiveIRValue, *ssa.GlobalSetVariable:
 				d.markNotDead(id)
 			}
 		}

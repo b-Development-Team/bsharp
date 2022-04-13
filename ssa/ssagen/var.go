@@ -8,6 +8,13 @@ import (
 
 func (s *SSAGen) addDefine(pos *tokens.Pos, n *ir.DefineNode) ssa.ID {
 	v := s.Add(n.Value)
+	va := s.ir.Variables[n.Var]
+	if va.NeedsGlobal {
+		return s.blk.AddInstruction(&ssa.GlobalSetVariable{
+			Variable: n.Var,
+			Value:    v,
+		}, pos)
+	}
 	return s.blk.AddInstruction(&ssa.SetVariable{
 		Variable: n.Var,
 		Value:    v,
@@ -15,6 +22,12 @@ func (s *SSAGen) addDefine(pos *tokens.Pos, n *ir.DefineNode) ssa.ID {
 }
 
 func (s *SSAGen) addVar(pos *tokens.Pos, n *ir.VarNode) ssa.ID {
+	v := s.ir.Variables[n.ID]
+	if v.NeedsGlobal {
+		return s.blk.AddInstruction(&ssa.GlobalGetVariable{
+			Variable: n.ID,
+		}, pos)
+	}
 	return s.blk.AddInstruction(&ssa.GetVariable{
 		Variable: n.ID,
 	}, pos)

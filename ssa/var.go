@@ -33,3 +33,29 @@ func (g *GetVariable) String() string {
 }
 func (g *GetVariable) Args() []ID     { return []ID{} }
 func (g *GetVariable) SetArgs(_ []ID) {}
+
+type GlobalSetVariable struct {
+	Variable int
+	Value    ID
+}
+
+func (s *GlobalSetVariable) Type() types.Type { return types.NULL }
+func (s *GlobalSetVariable) String() string {
+	return fmt.Sprintf("GlobalSetVariable (%s) -> [%d]", s.Value.String(), s.Variable)
+}
+func (s *GlobalSetVariable) Args() []ID { return []ID{s.Value} }
+func (s *GlobalSetVariable) SetArgs(v []ID) {
+	s.Value = v[0]
+}
+
+type GlobalGetVariable struct {
+	Variable int
+	Typ      types.Type
+}
+
+func (g *GlobalGetVariable) Type() types.Type { return g.Typ }
+func (g *GlobalGetVariable) String() string {
+	return fmt.Sprintf("GetVariable [%d]", g.Variable)
+}
+func (g *GlobalGetVariable) Args() []ID     { return []ID{} }
+func (g *GlobalGetVariable) SetArgs(_ []ID) {}
