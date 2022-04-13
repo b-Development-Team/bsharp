@@ -12,9 +12,22 @@ import (
 )
 
 const code = `# SSAGen Test
-[DEFINE a "Hello, "]
-[DEFINE a [CONCAT [VAR a] "World!"]]
-[PRINT [VAR a]]
+[DEFINE i -1]
+[SWITCH "Hi"
+	[CASE "Hi"
+		[DEFINE i 0]
+	]
+
+	[CASE "Ey"
+		[DEFINE i 1]
+	]
+
+	[DEFAULT
+		[DEFINE i 2]
+	]
+]
+[PRINT [STRING [VAR i]]]
+[PRINT "Hi"]
 `
 
 type fs struct{}

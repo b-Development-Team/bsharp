@@ -48,6 +48,9 @@ func (d *DCE) Remove() {
 				} else {
 					todo = append(todo, j.IfTrue, j.IfFalse)
 				}
+
+			case ssa.EndInstructionTypeSwitch: // TODO: Actually check all constants and resolve all block references
+				todo = append(todo, blk.After()...)
 			}
 
 			done[blk.Label] = struct{}{}
@@ -58,15 +61,19 @@ func (d *DCE) Remove() {
 			instr := blk.Instructions[id]
 
 			switch instr.(type) {
-			case *ssa.LiveIRValue, *ssa.GlobalSetVariable, *ssa.FnCallNode:
+			case *ssa.LiveIRValue, *ssa.GlobalSetVariable, *ssa.FnCall:
 				d.markNotDead(id)
 			}
 		}
 
-		if blk.End.Type() == ssa.EndInstructionTypeCondJmp { // Save cond
+		switch blk.End.Type() {
+		case ssa.EndInstructionTypeCondJmp:
 			d.markNotDead(blk.End.(*ssa.EndInstructionCondJmp).Cond)
-		}
-		if blk.End.Type() == ssa.EndInstructionTypeReturn { // Save return
+
+		case ssa.EndInstructionTypeSwitch:
+			d.markNotDead(blk.End.(*ssa.EndInstructionSwitch).Cond)
+
+		case ssa.EndInstructionTypeReturn:
 			d.markNotDead(blk.End.(*ssa.EndInstructionReturn).Value)
 		}
 	}
@@ -120,6 +127,17 @@ func (d *DCE) Remove() {
 					j.IfTrue = next
 				} else {
 					j.IfFalse = next
+				}
+
+			case ssa.EndInstructionTypeSwitch:
+				j := bl.End.(*ssa.EndInstructionSwitch)
+				for _, cs := range j.Cases {
+					if cs.Label == b.Label {
+						cs.Label = next
+					}
+				}
+				if j.Default == b.Label {
+					j.Default = next
 				}
 			}
 		}

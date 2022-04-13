@@ -108,7 +108,7 @@ func (i *Interpreter) evalNode(node ir.Node) (*Value, error) {
 		case *ir.WhileNode:
 			return NewValue(types.NULL, nil), i.evalWhileNode(b)
 
-		case *ir.SwitchNode: // TODO: SSAGen
+		case *ir.SwitchNode:
 			return NewValue(types.NULL, nil), i.evalSwitchNode(b)
 
 		default:
@@ -121,7 +121,7 @@ func (i *Interpreter) evalNode(node ir.Node) (*Value, error) {
 	case *ir.Const:
 		return i.evalConst(n)
 
-	case *ir.ExtensionCall: // TODO: SSAGen
+	case *ir.ExtensionCall:
 		return i.evalExtensionCall(n)
 
 	case *ir.CastNode:

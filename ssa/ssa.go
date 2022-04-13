@@ -60,6 +60,15 @@ func (b *Block) After() []string {
 	case EndInstructionTypeCondJmp:
 		j := b.End.(*EndInstructionCondJmp)
 		return []string{j.IfTrue, j.IfFalse}
+
+	case EndInstructionTypeSwitch:
+		j := b.End.(*EndInstructionSwitch)
+		out := make([]string, 0, len(j.Cases))
+		for _, cs := range j.Cases {
+			out = append(out, cs.Label)
+		}
+		out = append(out, j.Default)
+		return out
 	}
 
 	return []string{}
@@ -186,11 +195,12 @@ const (
 	EndInstructionTypeCondJmp
 	EndInstructionTypeExit
 	EndInstructionTypeReturn
+	EndInstructionTypeSwitch
 )
 
 func (e EndInstructionType) Type() EndInstructionType { return e }
 func (e EndInstructionType) String() string {
-	return [...]string{"Jmp", "CondJmp", "Exit", "Return"}[e]
+	return [...]string{"Jmp", "CondJmp", "Exit", "Return", "Switch"}[e]
 }
 
 type EndInstruction interface {
@@ -237,6 +247,34 @@ func (c *EndInstructionReturn) String() string {
 	return fmt.Sprintf("Return (%s)", c.Value.String())
 }
 
+type EndInstructionCase struct {
+	Cond  *Const
+	Label string
+}
+
+type EndInstructionSwitch struct {
+	Cond    ID
+	Cases   []EndInstructionCase
+	Default string // nil if no default
+}
+
+func (e *EndInstructionSwitch) Type() EndInstructionType {
+	return EndInstructionTypeSwitch
+}
+
+func (c *EndInstructionSwitch) String() string {
+	out := &strings.Builder{}
+	fmt.Fprintf(out, "Switch [%s](", c.Cond.String())
+	for i, cs := range c.Cases {
+		if i != 0 {
+			out.WriteString(", ")
+		}
+		fmt.Fprintf(out, "{%s, %s}", cs.Cond, cs.Label)
+	}
+	out.WriteRune(')')
+	return out.String()
+}
+
 func (b *Block) EndInstrutionJmp(a *Block) {
 	e := &EndInstructionJmp{
 		Label: a.Label,
@@ -264,4 +302,18 @@ func (b *Block) EndInstructionReturn(value ID) {
 	b.End = &EndInstructionReturn{
 		Value: value,
 	}
+}
+
+func (b *Block) EndInstructionSwitch(cond ID, def string, cases []EndInstructionCase) {
+	b.End = &EndInstructionSwitch{
+		Cond:    cond,
+		Cases:   cases,
+		Default: def,
+	}
+	for _, cs := range cases {
+		blk := b.Parent.Blocks[cs.Label]
+		blk.Before = append(blk.Before, b.Label)
+	}
+	d := b.Parent.Blocks[def]
+	d.Before = append(d.Before, b.Label)
 }

@@ -102,6 +102,9 @@ func (s *SSAGen) Add(node ir.Node) ssa.ID {
 		case *ir.WhileNode:
 			return s.addWhile(b)
 
+		case *ir.SwitchNode:
+			return s.addSwitch(b)
+
 		default:
 			panic(fmt.Sprintf("unknown block node type: %T", b))
 		}
@@ -111,6 +114,9 @@ func (s *SSAGen) Add(node ir.Node) ssa.ID {
 
 	case *ir.CastNode:
 		return s.blk.AddInstruction(&ssa.Cast{Value: s.Add(n.Value), From: n.Value.Type(), To: n.Type()}, n.Pos())
+
+	case *ir.ExtensionCall:
+		return s.addExtensionCall(n)
 
 	case *ir.FnCallNode:
 		return s.addFnCall(n)
