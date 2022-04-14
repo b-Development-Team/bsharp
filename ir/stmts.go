@@ -42,6 +42,13 @@ func NewCallNode(call Call, pos *tokens.Pos) *CallNode {
 	}
 }
 
+func NewBlockNode(blk Block, pos *tokens.Pos) *BlockNode {
+	return &BlockNode{
+		pos:   pos,
+		Block: blk,
+	}
+}
+
 func (b *Builder) buildNode(node parser.Node) (Node, error) {
 	switch n := node.(type) {
 	case *parser.CallNode:

@@ -17,6 +17,7 @@ func NewPhiRM(s *ssa.SSA) *PhiRM {
 	}
 }
 
+// TODO: Make this work with loops
 func (p *PhiRM) Remove() {
 	blk := p.EntryBlock
 	popOn := make(map[string][]string)
@@ -48,8 +49,10 @@ loop:
 			j := bl.End.(*ssa.EndInstructionCondJmp)
 			isLoop := p.checkLoop(bl.Label)
 			if isLoop {
+				start := bl.Label
 				// If it is a loop, then the IfTrue is the body and IfFalse is the end
 				blk = j.IfTrue
+				popOn[start] = []string{j.IfFalse}
 				popOn[j.IfFalse] = []string{}
 				p.Push(bl)
 			} else {

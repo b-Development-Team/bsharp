@@ -7,28 +7,19 @@ import (
 
 	"github.com/Nv7-Github/bsharp/ir"
 	"github.com/Nv7-Github/bsharp/parser"
+	"github.com/Nv7-Github/bsharp/ssa/bspgen"
 	"github.com/Nv7-Github/bsharp/ssa/phirm"
 	"github.com/Nv7-Github/bsharp/ssa/pipeline"
 	"github.com/Nv7-Github/bsharp/tokens"
+	"github.com/davecgh/go-spew/spew"
 )
 
 const code = `# SSAGen Test
-[DEFINE a ""]
-[SWITCH [VAR a]
-	[CASE "Hi"
-		[DEFINE a "e"]
-	]
-
-	[CASE "Hey"
-		[DEFINE a "b"]
-	]
-
-	[DEFAULT
-		[DEFINE a "h"]
-	]
+[DEFINE i 0]
+[WHILE [COMPARE [VAR i] < 10]
+	[PRINT [STRING [VAR i]]]
+	[DEFINE i [MATH [VAR i] + 1]]
 ]
-[PRINT [VAR a]]
-[PRINT "Hi"]
 `
 
 type fs struct{}
@@ -78,8 +69,8 @@ func TestSSAGen(t *testing.T) {
 	fmt.Println(s)
 
 	// Rebuild B#
-	/*g := bspgen.NewBSPGen(s, i)
+	g := bspgen.NewBSPGen(s, i)
 	out := g.Build()
 	fmt.Println("B#:")
-	spew.Dump(out.Body)*/
+	spew.Dump(out.Body)
 }
