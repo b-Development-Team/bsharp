@@ -7,26 +7,27 @@ import (
 
 	"github.com/Nv7-Github/bsharp/ir"
 	"github.com/Nv7-Github/bsharp/parser"
+	"github.com/Nv7-Github/bsharp/ssa/phirm"
 	"github.com/Nv7-Github/bsharp/ssa/pipeline"
 	"github.com/Nv7-Github/bsharp/tokens"
 )
 
 const code = `# SSAGen Test
-[DEFINE i -1]
-[SWITCH "Hi"
+[DEFINE a ""]
+[SWITCH [VAR a]
 	[CASE "Hi"
-		[DEFINE i 0]
+		[DEFINE a "e"]
 	]
 
-	[CASE "Ey"
-		[DEFINE i 1]
+	[CASE "Hey"
+		[DEFINE a "b"]
 	]
 
 	[DEFAULT
-		[DEFINE i 2]
+		[DEFINE a "h"]
 	]
 ]
-[PRINT [STRING [VAR i]]]
+[PRINT [VAR a]]
 [PRINT "Hi"]
 `
 
@@ -70,4 +71,15 @@ func TestSSAGen(t *testing.T) {
 
 	fmt.Println("AFTER:")
 	fmt.Println(s)
+
+	rm := phirm.NewPhiRM(s)
+	rm.Remove()
+	fmt.Println("PHIRM:")
+	fmt.Println(s)
+
+	// Rebuild B#
+	/*g := bspgen.NewBSPGen(s, i)
+	out := g.Build()
+	fmt.Println("B#:")
+	spew.Dump(out.Body)*/
 }

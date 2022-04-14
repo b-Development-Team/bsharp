@@ -97,13 +97,13 @@ func (s *SSAGen) Add(node ir.Node) ssa.ID {
 	case *ir.BlockNode:
 		switch b := n.Block.(type) {
 		case *ir.IfNode:
-			return s.addIf(b)
+			return s.addIf(n.Pos(), b)
 
 		case *ir.WhileNode:
-			return s.addWhile(b)
+			return s.addWhile(n.Pos(), b)
 
 		case *ir.SwitchNode:
-			return s.addSwitch(b)
+			return s.addSwitch(n.Pos(), b)
 
 		default:
 			panic(fmt.Sprintf("unknown block node type: %T", b))

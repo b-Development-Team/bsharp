@@ -87,6 +87,20 @@ func (m *MemRM) evalBlock(label string) bool {
 						instr.SetArgs(args)
 					}
 				}
+				// If used in end of blk, replace
+				switch b.End.Type() {
+				case ssa.EndInstructionTypeCondJmp:
+					j := b.End.(*ssa.EndInstructionCondJmp)
+					if j.Cond == id {
+						j.Cond = val
+					}
+
+				case ssa.EndInstructionTypeSwitch:
+					j := b.End.(*ssa.EndInstructionSwitch)
+					if j.Cond == id {
+						j.Cond = val
+					}
+				}
 			}
 
 			continue

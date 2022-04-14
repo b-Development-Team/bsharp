@@ -32,6 +32,7 @@ type Block struct {
 	Instructions map[ID]Instruction
 	Order        []ID // The list of instructions in the block
 	End          EndInstruction
+	Pos          *tokens.Pos
 
 	Before []string
 }
@@ -115,7 +116,7 @@ func (s *SSA) BlockName(name string) string {
 	}
 }
 
-func (s *SSA) NewBlock(label string) *Block {
+func (s *SSA) NewBlock(label string, pos *tokens.Pos) *Block {
 	if s.EntryBlock == "" {
 		s.EntryBlock = label
 	}
@@ -124,6 +125,7 @@ func (s *SSA) NewBlock(label string) *Block {
 		Label:        label,
 		Instructions: make(map[ID]Instruction),
 		Order:        make([]ID, 0),
+		Pos:          pos,
 	}
 	s.Blocks[b.Label] = b
 	return b

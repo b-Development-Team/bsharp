@@ -3,6 +3,7 @@ package ssagen
 import (
 	"github.com/Nv7-Github/bsharp/ir"
 	"github.com/Nv7-Github/bsharp/ssa"
+	"github.com/Nv7-Github/bsharp/tokens"
 	"github.com/Nv7-Github/bsharp/types"
 )
 
@@ -15,7 +16,7 @@ type SSAGen struct {
 
 func NewSSAGen(i *ir.IR) *SSAGen {
 	s := ssa.NewSSA()
-	b := s.NewBlock("entry")
+	b := s.NewBlock("entry", &tokens.Pos{})
 	return &SSAGen{
 		ir:  i,
 		ssa: s,
