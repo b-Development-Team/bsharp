@@ -1,0 +1,10 @@
+[IMPORT "examples/bsp/tokens.bsp"]
+
+[DEFINE code "[PRINT \"Hello, World!\" 0]\n"]
+[DEFINE tokens [TOKENIZE [VAR code]]]
+[DEFINE i 0]
+[WHILE [COMPARE [VAR i] < [LENGTH [VAR tokens]]]
+  [DEFINE tok [INDEX [VAR tokens] [VAR i]]]
+  [PRINT [CONCAT "{" [STRING [GET [VAR tok] typ]] ", " [GET [VAR tok] val] "}"]]
+  [DEFINE i [MATH [VAR i] + 1]]
+]

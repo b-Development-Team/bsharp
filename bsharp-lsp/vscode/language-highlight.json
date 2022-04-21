@@ -30,7 +30,7 @@
 			]
     },
     "string_escaped_char": {
-			"match": "\\\\[n\"\\\\]",
+			"match": "\\\\[nt\"\\\\]",
 			"name": "constant.character.escape"
     },
     "comment": {

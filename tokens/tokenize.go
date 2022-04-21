@@ -119,6 +119,9 @@ func (t *Tokenizer) addString() {
 
 			case '"':
 				val += "\""
+
+			case 't':
+				val += "\t"
 			}
 			t.s.Eat()
 			continue

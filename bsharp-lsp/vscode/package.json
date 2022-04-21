@@ -3,7 +3,7 @@
 	"description": "The B# programming language!",
 	"author": "Microsoft Corporation",
 	"license": "MIT",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/b-Development-Team/bsharp"

@@ -73,6 +73,10 @@ var matchers = map[string][]Matcher{
 			Matchers: []TokenMatcher{TokMatchT(tokens.TokenTypeLBrack), TokMatchTV(tokens.TokenTypeIdent, "RETURNS"), TokMatchT(tokens.TokenTypeIdent)},
 			Results:  []protocol.UInteger{MatchedTokenNone, MatchedTokenNone, MatchedTokenType},
 		},
+		{
+			Matchers: []TokenMatcher{TokMatchT(tokens.TokenTypeLBrack), TokMatchTV(tokens.TokenTypeIdent, "TYPEDEF"), TokMatchT(tokens.TokenTypeIdent), TokMatchT(tokens.TokenTypeIdent)},
+			Results:  []protocol.UInteger{MatchedTokenNone, MatchedTokenNone, MatchedTokenNone, MatchedTokenType},
+		},
 	},
 }
 

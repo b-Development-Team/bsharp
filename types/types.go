@@ -250,9 +250,9 @@ func (s *StructType) String() string {
 	out := &strings.Builder{}
 	out.WriteString("STRUCT{")
 	for i, field := range s.Fields {
-		fmt.Fprintf(out, "%s %s", field.Name, field.Type.String())
+		fmt.Fprintf(out, "%s:%s", field.Name, field.Type.String())
 		if i != len(s.Fields)-1 {
-			out.WriteString(", ")
+			out.WriteString(",")
 		}
 	}
 	out.WriteString("}")
