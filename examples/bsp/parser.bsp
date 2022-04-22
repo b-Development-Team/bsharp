@@ -1,0 +1,20 @@
+[IMPORT "examples/bsp/tokens.bsp"]
+
+# Value nodes
+[TYPEDEF parserNode STRUCT{typ:INT,val:ANY,pos:pos}]
+[TYPEDEF parserCallnode STRUCT{name:STRING,args:ARRAY{parserNode}}]
+[TYPEDEF parserIdentNode STRING]
+[TYPEDEF parserBoolNode BOOL]
+[TYPEDEF parserNullNode STRUCT{}]
+[TYPEDEF parserStringNode STRING]
+[TYPEDEF parserNumNode STRING]
+
+# parser types
+[DEFINE parserTypCall 0]
+[DEFINE parserTypIdent 1]
+[DEFINE parserTypBool 2]
+[DEFINE parserTypNull 3]
+[DEFINE parserTypString 4]
+[DEFINE parserTypNumber 5]
+
+# Code

@@ -18,11 +18,11 @@
 [TYPEDEF tokenizer STRUCT{tokens:ARRAY{token},pos:INT,char:INT,line:INT,code:STRING}]
 
 # Tokenizer utils
-[FUNC IND [PARAM tokenizer tokenizer] [RETURNS INT] [RETURN [GET [VAR tokenizer] pos]]]
+[FUNC TOKIND [PARAM tokenizer tokenizer] [RETURNS INT] [RETURN [GET [VAR tokenizer] pos]]]
 
 [FUNC INCR [PARAM tokenizer tokenizer]
   # Check char
-  [DEFINE char [INDEX [GET [VAR tokenizer] code] [IND [VAR tokenizer]]]]
+  [DEFINE char [INDEX [GET [VAR tokenizer] code] [TOKIND [VAR tokenizer]]]]
   [IF [COMPARE [VAR char] == "\n"]
     [SET [VAR tokenizer] line [MATH [GET [VAR tokenizer] line] + 1]]
     [SET [VAR tokenizer] char 1]
@@ -46,8 +46,8 @@
   [DEFINE code [GET [VAR tok] code]]
   [DEFINE running TRUE]
   [DEFINE val ""]
-  [WHILE [AND [COMPARE [IND [VAR tok]] < [LENGTH [VAR code]]] [VAR running]]
-    [DEFINE char [INDEX [VAR code] [IND [VAR tok]]]]
+  [WHILE [AND [COMPARE [TOKIND [VAR tok]] < [LENGTH [VAR code]]] [VAR running]]
+    [DEFINE char [INDEX [VAR code] [TOKIND [VAR tok]]]]
     [DEFINE isNum FALSE]
     [SWITCH [VAR char]
       [CASE "0" [DEFINE isNum TRUE]]
@@ -79,8 +79,8 @@
   [DEFINE code [GET [VAR tok] code]]
   [DEFINE running TRUE]
   [DEFINE val ""]
-  [WHILE [AND [COMPARE [IND [VAR tok]] < [LENGTH [VAR code]]] [VAR running]]
-    [DEFINE char [INDEX [VAR code] [IND [VAR tok]]]]
+  [WHILE [AND [COMPARE [TOKIND [VAR tok]] < [LENGTH [VAR code]]] [VAR running]]
+    [DEFINE char [INDEX [VAR code] [TOKIND [VAR tok]]]]
     [IF [COMPARE [VAR char] == "\""]
       # End
       [INCR [VAR tok]]
@@ -89,7 +89,7 @@
       # Escape codes
       [IF [COMPARE [VAR char] == "\\"]
         [INCR [VAR tok]]
-        [DEFINE char [INDEX [VAR code] [IND [VAR tok]]]] # Next char
+        [DEFINE char [INDEX [VAR code] [TOKIND [VAR tok]]]] # Next char
         [SWITCH [VAR char]
           [CASE "\"" [DEFINE val [CONCAT [VAR val] "\""]]]
           [CASE "t" [DEFINE val [CONCAT [VAR val] "\t"]]]
@@ -112,8 +112,8 @@
   [DEFINE code [GET [VAR tok] code]]
   [DEFINE running TRUE]
   [DEFINE val ""]
-  [WHILE [AND [COMPARE [IND [VAR tok]] < [LENGTH [VAR code]]] [VAR running]]
-    [DEFINE char [INDEX [VAR code] [IND [VAR tok]]]]
+  [WHILE [AND [COMPARE [TOKIND [VAR tok]] < [LENGTH [VAR code]]] [VAR running]]
+    [DEFINE char [INDEX [VAR code] [TOKIND [VAR tok]]]]
     [IF [ISIDENT [VAR char]]
       # End
       [INCR [VAR tok]]
@@ -144,8 +144,8 @@
   [SET [VAR out] pos 0]
   [SET [VAR out] char 1]
   [SET [VAR out] line 1]
-  [WHILE [COMPARE [IND [VAR out]] < [LENGTH [VAR code]]]
-    [DEFINE char [INDEX [VAR code] [IND [VAR out]]]]
+  [WHILE [COMPARE [TOKIND [VAR out]] < [LENGTH [VAR code]]]
+    [DEFINE char [INDEX [VAR code] [TOKIND [VAR out]]]]
     [SWITCH [VAR char]
       [CASE "["
         [ADDTOK [VAR out] [TOKEN [VAR tokTypeLBrack] "[" [POS [VAR out]]]]
@@ -169,7 +169,7 @@
       [CASE "9" [ADDNUM [VAR out]]]
       [CASE "-" 
         # Check if next is num
-        [DEFINE next [INDEX [VAR code] [MATH [IND [VAR out]] + 1]]]
+        [DEFINE next [INDEX [VAR code] [MATH [TOKIND [VAR out]] + 1]]]
         [DEFINE isNum FALSE]
         [SWITCH [VAR next]
           [CASE "0" [DEFINE isNum TRUE]]
