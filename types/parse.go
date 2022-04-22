@@ -33,6 +33,9 @@ func parse(tokens []token, names map[string]Type) (Type, []token, error) {
 		case "STRING":
 			return STRING, tokens[1:], nil
 
+		case "ANY":
+			return ANY, tokens[1:], nil
+
 		case "ARRAY":
 			// Eat "ARRAY"
 			tokens = tokens[1:]

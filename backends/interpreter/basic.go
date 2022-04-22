@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Nv7-Github/bsharp/ir"
+	"github.com/Nv7-Github/bsharp/tokens"
 	"github.com/Nv7-Github/bsharp/types"
 )
 
@@ -15,6 +16,14 @@ func (i *Interpreter) evalPrint(c *ir.PrintNode) error {
 	}
 	_, err = i.stdout.Write([]byte(v.Value.(string) + "\n"))
 	return err
+}
+
+func (i *Interpreter) evalPanic(c *ir.PanicNode, pos *tokens.Pos) error {
+	v, err := i.evalNode(c.Arg)
+	if err != nil {
+		return err
+	}
+	return pos.Error("%s", v.Value.(string))
 }
 
 func (i *Interpreter) evalConcat(c *ir.ConcatNode) (*Value, error) {

@@ -12,6 +12,13 @@ type PrintNode struct {
 
 func (p *PrintNode) Args() []Node { return []Node{p.Arg} }
 
+type PanicNode struct {
+	NullCall
+	Arg Node
+}
+
+func (p *PanicNode) Args() []Node { return []Node{p.Arg} }
+
 type ConcatNode struct {
 	Values []Node
 }
@@ -50,6 +57,15 @@ func init() {
 		ArgTypes: []types.Type{types.STRING},
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
 			return &PrintNode{
+				Arg: args[0],
+			}, nil
+		},
+	}
+
+	nodeBuilders["PANIC"] = nodeBuilder{
+		ArgTypes: []types.Type{types.STRING},
+		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
+			return &PanicNode{
 				Arg: args[0],
 			}, nil
 		},

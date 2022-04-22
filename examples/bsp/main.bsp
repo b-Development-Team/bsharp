@@ -1,7 +1,11 @@
 [IMPORT "examples/bsp/tokens.bsp"]
 
-[DEFINE code "[PRINT \"Hello, World!\" 0]\n"]
-[DEFINE tokens [TOKENIZE [VAR code]]]
+[DEFINE code "[PRINT \"Hello, World!\" -1.234]\n"]
+[DEFINE tokenserr [TOKENIZE [VAR code]]]
+[IF [CANCAST [VAR tokenserr] error]
+  [FAIL [VAR tokenserr]]
+]
+[DEFINE tokens [CAST [VAR tokenserr] ARRAY{token}]]
 [DEFINE i 0]
 [WHILE [COMPARE [VAR i] < [LENGTH [VAR tokens]]]
   [DEFINE tok [INDEX [VAR tokens] [VAR i]]]

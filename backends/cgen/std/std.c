@@ -223,6 +223,11 @@ static inline void array_bounds(array* a, int i, const char* pos) {
   }
 }
 
+static inline void panic(string* msg, const char* pos) {
+  fprintf(stderr, "%s: %.*s\n", pos, msg->len, msg->data);
+  exit(EXIT_FAILURE);
+}
+
 void array_grow(array* a, int len) {
   if (a->cap < (a->off + len)) {
     a->cap = len + a->off;

@@ -2,7 +2,7 @@ package ssagen
 
 import (
 	"github.com/Nv7-Github/bsharp/ir"
-	"github.com/Nv7-Github/bsharp/ssa"
+	"github.com/Nv7-Github/bsharp/old/ssa"
 	"github.com/Nv7-Github/bsharp/tokens"
 	"github.com/Nv7-Github/bsharp/types"
 )

@@ -6,10 +6,10 @@ import (
 	"testing"
 
 	"github.com/Nv7-Github/bsharp/ir"
+	"github.com/Nv7-Github/bsharp/old/ssa/bspgen"
+	"github.com/Nv7-Github/bsharp/old/ssa/phirm"
+	"github.com/Nv7-Github/bsharp/old/ssa/pipeline"
 	"github.com/Nv7-Github/bsharp/parser"
-	"github.com/Nv7-Github/bsharp/ssa/bspgen"
-	"github.com/Nv7-Github/bsharp/ssa/phirm"
-	"github.com/Nv7-Github/bsharp/ssa/pipeline"
 	"github.com/Nv7-Github/bsharp/tokens"
 	"github.com/davecgh/go-spew/spew"
 )

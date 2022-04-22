@@ -1,0 +1,11 @@
+# This lib may change as the language evolves
+[TYPEDEF option ANY]
+[TYPEDEF error STRUCT{msg:STRING}]
+[FUNC ERROR [PARAM msg STRING] [RETURNS option]
+  [DEFINE out [MAKE error]]
+  [SET [VAR out] msg [VAR msg]]
+  [RETURN [ANY [VAR out]]]
+]
+[FUNC FAIL [PARAM err ANY]
+  [PANIC [GET [CAST [VAR err] error] msg]]
+]

@@ -93,6 +93,9 @@ func (cg *CGen) AddNode(node ir.Node) (*Code, error) {
 		case *ir.CanCastNode:
 			return cg.addCanCast(c)
 
+		case *ir.PanicNode:
+			return cg.addPanic(c, n.Pos())
+
 		default:
 			return nil, n.Pos().Error("unknown call node: %T", c)
 		}

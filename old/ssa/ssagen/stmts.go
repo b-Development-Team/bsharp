@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Nv7-Github/bsharp/ir"
-	"github.com/Nv7-Github/bsharp/ssa"
+	"github.com/Nv7-Github/bsharp/old/ssa"
 )
 
 func (s *SSAGen) Add(node ir.Node) ssa.ID {

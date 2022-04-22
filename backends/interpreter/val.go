@@ -35,6 +35,9 @@ func (i *Interpreter) canCastAny(v interface{}, t types.Type) bool {
 
 	case types.STRUCT:
 		_, ok = v.(*[]any)
+		if ok {
+			ok = len(*(v.(*[]any))) == len(t.(*types.StructType).Fields)
+		}
 
 	case types.MAP:
 		typ := t.(*types.MapType)

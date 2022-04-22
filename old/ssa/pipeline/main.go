@@ -1,10 +1,10 @@
 package pipeline
 
 import (
-	"github.com/Nv7-Github/bsharp/ssa"
-	"github.com/Nv7-Github/bsharp/ssa/constrm"
-	"github.com/Nv7-Github/bsharp/ssa/dce"
-	"github.com/Nv7-Github/bsharp/ssa/memrm"
+	"github.com/Nv7-Github/bsharp/old/ssa"
+	"github.com/Nv7-Github/bsharp/old/ssa/constrm"
+	"github.com/Nv7-Github/bsharp/old/ssa/dce"
+	"github.com/Nv7-Github/bsharp/old/ssa/memrm"
 )
 
 type Pipeline struct {

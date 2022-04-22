@@ -1,7 +1,7 @@
 // Package memrm turns variable instructions into PHI nodes, algorithm based on https://pp.info.uni-karlsruhe.de/uploads/publikationen/braun13cc.pdf
 package memrm
 
-import "github.com/Nv7-Github/bsharp/ssa"
+import "github.com/Nv7-Github/bsharp/old/ssa"
 
 type BlockData struct {
 	Filled    bool

@@ -1,6 +1,6 @@
 package constrm
 
-import "github.com/Nv7-Github/bsharp/ssa"
+import "github.com/Nv7-Github/bsharp/old/ssa"
 
 func Phirm(s *ssa.SSA) {
 	todo := []string{s.EntryBlock}

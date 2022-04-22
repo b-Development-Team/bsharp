@@ -3,7 +3,7 @@ package constrm
 import (
 	"strconv"
 
-	"github.com/Nv7-Github/bsharp/ssa"
+	"github.com/Nv7-Github/bsharp/old/ssa"
 	"github.com/Nv7-Github/bsharp/types"
 )
 

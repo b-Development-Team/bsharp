@@ -1,9 +1,11 @@
+[IMPORT "errors.bsp"]
 [TYPEDEF pos STRUCT{char:INT,line:INT}]
 [TYPEDEF token STRUCT{typ:INT,val:STRING,pos:pos}]
 [DEFINE tokTypeNumber 0]
 [DEFINE tokTypeString 1]
 [DEFINE tokTypeLBrack 2]
 [DEFINE tokTypeRBrack 3]
+[DEFINE tokTypeIdent 4]
 
 [FUNC TOKEN [PARAM typ INT] [PARAM val STRING] [PARAM pos pos] [RETURNS token]
   [DEFINE out [MAKE token]]
@@ -71,8 +73,71 @@
   [ADDTOK [VAR tok] [TOKEN [VAR tokTypeNumber] [VAR val] [VAR pos]]]
 ]
 
-# TODO: Figure out errors
-[FUNC TOKENIZE [PARAM code STRING] [RETURNS ARRAY{token}]
+[FUNC ADDSTR [PARAM tok tokenizer]
+  [INCR [VAR tok]] # Eat "
+  [DEFINE pos [POS [VAR tok]]]
+  [DEFINE code [GET [VAR tok] code]]
+  [DEFINE running TRUE]
+  [DEFINE val ""]
+  [WHILE [AND [COMPARE [IND [VAR tok]] < [LENGTH [VAR code]]] [VAR running]]
+    [DEFINE char [INDEX [VAR code] [IND [VAR tok]]]]
+    [IF [COMPARE [VAR char] == "\""]
+      # End
+      [INCR [VAR tok]]
+      [DEFINE running FALSE]
+    ELSE
+      # Escape codes
+      [IF [COMPARE [VAR char] == "\\"]
+        [INCR [VAR tok]]
+        [DEFINE char [INDEX [VAR code] [IND [VAR tok]]]] # Next char
+        [SWITCH [VAR char]
+          [CASE "\"" [DEFINE val [CONCAT [VAR val] "\""]]]
+          [CASE "t" [DEFINE val [CONCAT [VAR val] "\t"]]]
+          [CASE "n" [DEFINE val [CONCAT [VAR val] "\n"]]]
+          [CASE "\\" [DEFINE val [CONCAT [VAR val] "\\"]]]
+        ]
+        [INCR [VAR tok]]
+      ELSE
+        # VAlue
+        [DEFINE val [CONCAT [VAR val] [VAR char]]]
+        [INCR [VAR tok]]
+      ]
+    ]
+  ]
+  [ADDTOK [VAR tok] [TOKEN [VAR tokTypeString] [VAR val] [VAR pos]]]
+]
+
+[FUNC ADDIDENT [PARAM tok tokenizer]
+  [DEFINE pos [POS [VAR tok]]]
+  [DEFINE code [GET [VAR tok] code]]
+  [DEFINE running TRUE]
+  [DEFINE val ""]
+  [WHILE [AND [COMPARE [IND [VAR tok]] < [LENGTH [VAR code]]] [VAR running]]
+    [DEFINE char [INDEX [VAR code] [IND [VAR tok]]]]
+    [IF [ISIDENT [VAR char]]
+      # End
+      [INCR [VAR tok]]
+      [DEFINE val [CONCAT [VAR val] [VAR char]]]
+    ELSE
+      [DEFINE running FALSE]
+    ]
+  ]
+  [ADDTOK [VAR tok] [TOKEN [VAR tokTypeIdent] [VAR val] [VAR pos]]]
+]
+
+[FUNC ISIDENT [PARAM char STRING] [RETURNS BOOL]
+  [DEFINE letters "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ{}-+*/^%=!<>,:"]
+  [DEFINE i 0]
+  [WHILE [COMPARE [VAR i] < [LENGTH [VAR letters]]]
+    [IF [COMPARE [INDEX [VAR letters] [VAR i]] == [VAR char]]
+      [RETURN TRUE]
+    ]
+    [DEFINE i [MATH [VAR i] + 1]]
+  ]
+  [RETURN FALSE]
+]
+
+[FUNC TOKENIZE [PARAM code STRING] [RETURNS option] # ARRAY{token}
   [DEFINE out [MAKE tokenizer]]
   [SET [VAR out] tokens [MAKE ARRAY{token}]]
   [SET [VAR out] code [VAR code]]
@@ -124,6 +189,7 @@
           # Add ident
         ]
       ]
+      [CASE "\"" [ADDSTR [VAR out]]]
 
       # Ignore whitespace
       [CASE "\t" [INCR [VAR out]]]
@@ -132,10 +198,13 @@
 
       [DEFAULT
         # TODO: Try add ident
-        # TODO: Strings
-        [INCR [VAR out]]
+        [IF [ISIDENT [VAR char]]
+          [ADDIDENT [VAR out]]
+        ELSE
+          [RETURN [ERROR [CONCAT "unexpected character: \"" [VAR char] "\""]]]
+        ]
       ]
     ]
   ]
-  [RETURN [GET [VAR out] tokens]]
+  [RETURN [ANY [GET [VAR out] tokens]]]
 ]

@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/Nv7-Github/bsharp/ir"
+	"github.com/Nv7-Github/bsharp/tokens"
 	"github.com/Nv7-Github/bsharp/types"
 )
 
@@ -15,6 +16,16 @@ func (c *CGen) addPrint(n *ir.PrintNode) (*Code, error) {
 	}
 	return &Code{
 		Pre: JoinCode(v.Pre, fmt.Sprintf("string_print(%s);", v.Value)),
+	}, nil
+}
+
+func (c *CGen) addPanic(n *ir.PanicNode, pos *tokens.Pos) (*Code, error) {
+	v, err := c.AddNode(n.Arg)
+	if err != nil {
+		return nil, err
+	}
+	return &Code{
+		Pre: JoinCode(v.Pre, fmt.Sprintf("panic(%s, %q);", v.Value, pos.String())),
 	}, nil
 }
 

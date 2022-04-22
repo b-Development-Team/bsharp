@@ -2,7 +2,7 @@
 package phirm
 
 import (
-	"github.com/Nv7-Github/bsharp/ssa"
+	"github.com/Nv7-Github/bsharp/old/ssa"
 )
 
 type PhiRM struct {

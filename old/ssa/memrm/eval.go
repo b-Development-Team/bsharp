@@ -1,7 +1,7 @@
 package memrm
 
 import (
-	"github.com/Nv7-Github/bsharp/ssa"
+	"github.com/Nv7-Github/bsharp/old/ssa"
 )
 
 func (m *MemRM) evalBlock(label string) bool {

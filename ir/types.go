@@ -87,7 +87,7 @@ func (b *Builder) typePass(p *parser.Parser) error {
 		}
 		typ, err := types.ParseType(typV.Value, b.typeNames)
 		if err != nil {
-			return err
+			return call.Args[1].Pos().Error("%s", err.Error())
 		}
 
 		// Check if type already exists

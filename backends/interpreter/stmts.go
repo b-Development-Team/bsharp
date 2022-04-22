@@ -96,6 +96,9 @@ func (i *Interpreter) evalNode(node ir.Node) (*Value, error) {
 		case *ir.CanCastNode:
 			return i.evalCanCast(n.Pos(), c)
 
+		case *ir.PanicNode:
+			return nil, i.evalPanic(c, n.Pos())
+
 		default:
 			return nil, n.Pos().Error("unknown call node: %T", c)
 		}

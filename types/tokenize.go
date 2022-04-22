@@ -52,6 +52,7 @@ var constTokens = [][]rune{
 	[]rune("BOOL"),
 	[]rune("NULL"),
 	[]rune("STRUCT"),
+	[]rune("ANY"),
 }
 
 var tokenStarters = map[rune]struct{}{}
