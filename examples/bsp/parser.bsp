@@ -1,11 +1,11 @@
 [IMPORT "examples/bsp/tokens.bsp"]
 
 # Value nodes
+[TYPEDEF parser STRUCT{tokens:ARRAY{token},ind:INT}]
 [TYPEDEF parserNode STRUCT{typ:INT,val:ANY,pos:pos}]
-[TYPEDEF parserCallnode STRUCT{name:STRING,args:ARRAY{parserNode}}]
+[TYPEDEF parserCallNode STRUCT{name:STRING,args:ARRAY{parserNode}}]
 [TYPEDEF parserIdentNode STRING]
 [TYPEDEF parserBoolNode BOOL]
-[TYPEDEF parserNullNode STRUCT{}]
 [TYPEDEF parserStringNode STRING]
 [TYPEDEF parserNumNode STRING]
 
@@ -17,4 +17,152 @@
 [DEFINE parserTypString 4]
 [DEFINE parserTypNumber 5]
 
-# Code
+# Util
+[FUNC PARSERINCR [PARAM parser parser]
+  [SET [VAR parser] ind [MATH [GET [VAR parser] ind] + 1]]
+]
+
+[FUNC HASNEXT [PARAM p parser] [RETURNS BOOL]
+  [RETURN [COMPARE [GET [VAR p] ind] < [LENGTH [GET [VAR p] tokens]]]]
+]
+
+[FUNC PRINTNODE [PARAM node parserNode] [PARAM tab STRING]
+  [SWITCH [GET [VAR node] typ]
+    [CASE 1 [PRINT [CONCAT [VAR tab] [POSSTR [GET [VAR node] pos]] ": IDENT: \"" [CAST [GET [VAR node] val] parserIdentNode] "\""]] [RETURN NULL]]
+    [CASE 2 
+      [DEFINE val [CAST [GET [VAR node] val] parserBoolNode]]
+      [IF [VAR val]
+        [PRINT [CONCAT [VAR tab] [POSSTR [GET [VAR node] pos]] ": [Const] BOOL: TRUE"]]
+      ELSE
+        [PRINT [CONCAT [VAR tab] [POSSTR [GET [VAR node] pos]] ": [Const] BOOL: FALSE"]]
+      ]
+      [RETURN NULL]
+    ]
+    [CASE 3 [PRINT [CONCAT [VAR tab] [POSSTR [GET [VAR node] pos]] ": [Const] NULL"]]]
+    [CASE 4 [PRINT [CONCAT [VAR tab] [POSSTR [GET [VAR node] pos]] ": STRING: \"" [CAST [GET [VAR node] val] parserStringNode] "\""]] [RETURN NULL]]
+    [CASE 5 [PRINT [CONCAT [VAR tab] [POSSTR [GET [VAR node] pos]] ": Number: " [CAST [GET [VAR node] val] parserNumNode]]] [RETURN NULL]]
+  ]
+
+  # Its a call
+  [DEFINE call [CAST [GET [VAR node] val] parserCallNode]]
+  [PRINT [CONCAT [VAR tab] [POSSTR [GET [VAR node] pos]] ": " [GET [VAR call] name] " {"]]
+  [DEFINE i 0]
+  [DEFINE args [GET [VAR call] args]]
+  [WHILE [COMPARE [VAR i] < [LENGTH [VAR args]]]
+    [PRINTNODE [INDEX [VAR args] [VAR i]] [CONCAT [VAR tab] "\t"]]
+    [DEFINE i [MATH [VAR i] + 1]]
+  ]
+  [PRINT [CONCAT [VAR tab] "}"]]
+]
+
+# Parsing logic
+[FUNC PARSENODE [PARAM p parser] [RETURNS ANY]
+  [DEFINE curr [INDEX [GET [VAR p] tokens] [GET [VAR p] ind]]]
+  [DEFINE out [MAKE parserNode]]
+  [SET [VAR out] pos [GET [VAR curr] pos]]
+  [SWITCH [GET [VAR curr] typ]
+    [CASE 0 # Number
+      [SET [VAR out] typ [VAR parserTypNumber]]
+      [SET [VAR out] val [ANY [GET [VAR curr] val]]]
+      [PARSERINCR [VAR p]]
+      [RETURN [ANY [VAR out]]]
+    ]
+
+    [CASE 1 # String
+      [SET [VAR out] typ [VAR parserTypString]]
+      [SET [VAR out] val [ANY [GET [VAR curr] val]]]
+      [PARSERINCR [VAR p]]
+      [RETURN [ANY [VAR out]]]
+    ]
+
+    [CASE 4 # Ident
+      [DEFINE val [GET [VAR curr] val]]
+      # Check if it is a const
+      [SWITCH [VAR val]
+        [CASE "TRUE"
+          [SET [VAR out] typ [VAR parserTypBool]]
+          [SET [VAR out] val [ANY TRUE]]
+          [PARSERINCR [VAR p]]
+          [RETURN [ANY [VAR out]]]
+        ]
+
+        [CASE "FALSE"
+          [SET [VAR out] typ [VAR parserTypBool]]
+          [SET [VAR out] val [ANY FALSE]]
+          [PARSERINCR [VAR p]]
+          [RETURN [ANY [VAR out]]]
+        ]
+
+        [CASE "NULL"
+          [SET [VAR out] typ [VAR parserTypNull]]
+          [PARSERINCR [VAR p]]
+          [RETURN [ANY [VAR out]]]
+        ]
+      ]
+
+      [SET [VAR out] typ [VAR parserTypIdent]]
+      [SET [VAR out] val [ANY [VAR val]]]
+      [PARSERINCR [VAR p]]
+      [RETURN [ANY [VAR out]]]
+    ]
+  ]
+
+  # Parse val
+  [DEFINE typ [GET [VAR curr] typ]]
+  [IF [COMPARE [VAR typ] != [VAR tokTypeLBrack]]
+    [RETURN [ERR [GET [VAR curr] pos] "expected \"[\""]]
+  ]
+  [PARSERINCR [VAR p]]
+
+  # Name
+  [DEFINE curr [INDEX [GET [VAR p] tokens] [GET [VAR p] ind]]]
+  [DEFINE typ [GET [VAR curr] typ]]
+  [DEFINE pos [GET [VAR curr] pos]]
+  [IF [COMPARE [VAR typ] != [VAR tokTypeIdent]]
+    [RETURN [ERR [GET [VAR curr] pos] "expected name"]]
+  ]
+  [DEFINE name [GET [VAR curr] val]]
+  [PARSERINCR [VAR p]]
+
+  # Args
+  [DEFINE args [MAKE ARRAY{parserNode}]]
+  [DEFINE running TRUE]
+  [WHILE [VAR running]
+    [DEFINE curr [INDEX [GET [VAR p] tokens] [GET [VAR p] ind]]]
+    [IF [COMPARE [GET [VAR curr] typ] == [VAR tokTypeRBrack]] # Eat RBrack
+      [PARSERINCR [VAR p]] # Eat RBrack
+      [DEFINE running FALSE]
+    ELSE
+      [DEFINE argerr [PARSENODE [VAR p]]]
+      [IF [CANCAST [VAR argerr] error]
+        [RETURN [VAR argerr]]
+      ]
+      [APPEND [VAR args] [CAST [VAR argerr] parserNode]]
+    ]
+  ]
+
+  # Build out
+  [SET [VAR out] pos [VAR pos]]
+  [SET [VAR out] typ [VAR parserTypCall]]
+  [DEFINE call [MAKE parserCallNode]]
+  [SET [VAR call] name [VAR name]]
+  [SET [VAR call] args [VAR args]]
+  [SET [VAR out] val [ANY [VAR call]]]
+  [RETURN [ANY [VAR out]]]
+]
+
+# API
+[FUNC PARSE [PARAM tok ARRAY{token}] [RETURNS ANY] # ARRAY{parserNode}
+  [DEFINE p [MAKE parser]]
+  [SET [VAR p] tokens [VAR tok]]
+  [SET [VAR p] ind 0]
+  [DEFINE out [MAKE ARRAY{parserNode}]]
+  [WHILE [HASNEXT [VAR p]]
+    [DEFINE valerr [PARSENODE [VAR p]]]
+    [IF [CANCAST [VAR valerr] error]
+      [RETURN [VAR valerr]]
+    ]
+    [APPEND [VAR out] [CAST [VAR valerr] parserNode]]
+  ]
+  [RETURN [ANY [VAR out]]]
+]

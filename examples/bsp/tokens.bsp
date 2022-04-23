@@ -1,5 +1,5 @@
 [IMPORT "errors.bsp"]
-[TYPEDEF pos STRUCT{char:INT,line:INT}]
+[TYPEDEF pos STRUCT{char:INT,line:INT,file:STRING}]
 [TYPEDEF token STRUCT{typ:INT,val:STRING,pos:pos}]
 [DEFINE tokTypeNumber 0]
 [DEFINE tokTypeString 1]
@@ -15,18 +15,21 @@
   [RETURN [VAR out]]
 ]
 
-[TYPEDEF tokenizer STRUCT{tokens:ARRAY{token},pos:INT,char:INT,line:INT,code:STRING}]
+[TYPEDEF tokenizer STRUCT{tokens:ARRAY{token},pos:INT,char:INT,line:INT,code:STRING,file:STRING}]
 
 # Tokenizer utils
 [FUNC TOKIND [PARAM tokenizer tokenizer] [RETURNS INT] [RETURN [GET [VAR tokenizer] pos]]]
 
-[FUNC INCR [PARAM tokenizer tokenizer]
+[FUNC TOKINCR [PARAM tokenizer tokenizer]
   # Check char
+  [SET [VAR tokenizer] char [MATH [GET [VAR tokenizer] char] + 1]]
   [DEFINE char [INDEX [GET [VAR tokenizer] code] [TOKIND [VAR tokenizer]]]]
   [IF [COMPARE [VAR char] == "\n"]
     [SET [VAR tokenizer] line [MATH [GET [VAR tokenizer] line] + 1]]
     [SET [VAR tokenizer] char 1]
   ]
+
+  # Incr
   [SET [VAR tokenizer] pos [MATH [GET [VAR tokenizer] pos] + 1]]
 ]
 
@@ -34,7 +37,16 @@
   [DEFINE out [MAKE pos]]
   [SET [VAR out] char [GET [VAR tok] char]]
   [SET [VAR out] line [GET [VAR tok] line]]
+  [SET [VAR out] file [GET [VAR tok] file]]
   [RETURN [VAR out]]
+]
+
+[FUNC POSSTR [PARAM pos pos] [RETURNS STRING]
+  [RETURN [CONCAT [GET [VAR pos] file] ":" [STRING [GET [VAR pos] line]] ":" [STRING [GET [VAR pos] char]]]]
+]
+
+[FUNC ERR [PARAM pos pos] [PARAM msg STRING] [RETURNS ANY]
+  [RETURN [ERROR [CONCAT [POSSTR [VAR pos]] ": " [VAR msg]]]]
 ]
 
 [FUNC ADDTOK [PARAM tok tokenizer] [PARAM token token]
@@ -65,7 +77,7 @@
     ]
     [IF [VAR isNum]
       [DEFINE val [CONCAT [VAR val] [VAR char]]]
-      [INCR [VAR tok]]
+      [TOKINCR [VAR tok]]
     ELSE
       [DEFINE running FALSE]
     ]
@@ -74,7 +86,7 @@
 ]
 
 [FUNC ADDSTR [PARAM tok tokenizer]
-  [INCR [VAR tok]] # Eat "
+  [TOKINCR [VAR tok]] # Eat "
   [DEFINE pos [POS [VAR tok]]]
   [DEFINE code [GET [VAR tok] code]]
   [DEFINE running TRUE]
@@ -83,12 +95,12 @@
     [DEFINE char [INDEX [VAR code] [TOKIND [VAR tok]]]]
     [IF [COMPARE [VAR char] == "\""]
       # End
-      [INCR [VAR tok]]
+      [TOKINCR [VAR tok]]
       [DEFINE running FALSE]
     ELSE
       # Escape codes
       [IF [COMPARE [VAR char] == "\\"]
-        [INCR [VAR tok]]
+        [TOKINCR [VAR tok]]
         [DEFINE char [INDEX [VAR code] [TOKIND [VAR tok]]]] # Next char
         [SWITCH [VAR char]
           [CASE "\"" [DEFINE val [CONCAT [VAR val] "\""]]]
@@ -96,11 +108,11 @@
           [CASE "n" [DEFINE val [CONCAT [VAR val] "\n"]]]
           [CASE "\\" [DEFINE val [CONCAT [VAR val] "\\"]]]
         ]
-        [INCR [VAR tok]]
+        [TOKINCR [VAR tok]]
       ELSE
         # VAlue
         [DEFINE val [CONCAT [VAR val] [VAR char]]]
-        [INCR [VAR tok]]
+        [TOKINCR [VAR tok]]
       ]
     ]
   ]
@@ -116,7 +128,7 @@
     [DEFINE char [INDEX [VAR code] [TOKIND [VAR tok]]]]
     [IF [ISIDENT [VAR char]]
       # End
-      [INCR [VAR tok]]
+      [TOKINCR [VAR tok]]
       [DEFINE val [CONCAT [VAR val] [VAR char]]]
     ELSE
       [DEFINE running FALSE]
@@ -137,9 +149,10 @@
   [RETURN FALSE]
 ]
 
-[FUNC TOKENIZE [PARAM code STRING] [RETURNS option] # ARRAY{token}
+[FUNC TOKENIZE [PARAM file STRING] [PARAM code STRING] [RETURNS option] # ARRAY{token}
   [DEFINE out [MAKE tokenizer]]
   [SET [VAR out] tokens [MAKE ARRAY{token}]]
+  [SET [VAR out] file [VAR file]]
   [SET [VAR out] code [VAR code]]
   [SET [VAR out] pos 0]
   [SET [VAR out] char 1]
@@ -149,12 +162,12 @@
     [SWITCH [VAR char]
       [CASE "["
         [ADDTOK [VAR out] [TOKEN [VAR tokTypeLBrack] "[" [POS [VAR out]]]]
-        [INCR [VAR out]]
+        [TOKINCR [VAR out]]
       ]
 
       [CASE "]"
         [ADDTOK [VAR out] [TOKEN [VAR tokTypeRBrack] "]" [POS [VAR out]]]]
-        [INCR [VAR out]]
+        [TOKINCR [VAR out]]
       ]
 
       [CASE "0" [ADDNUM [VAR out]]]
@@ -186,22 +199,21 @@
         [IF [VAR isNum]
           [ADDNUM [VAR out]]
         ELSE
-          # Add ident
+          [ADDIDENT [VAR out]]
         ]
       ]
       [CASE "\"" [ADDSTR [VAR out]]]
 
       # Ignore whitespace
-      [CASE "\t" [INCR [VAR out]]]
-      [CASE " " [INCR [VAR out]]]
-      [CASE "\n" [INCR [VAR out]]]
+      [CASE "\t" [TOKINCR [VAR out]]]
+      [CASE " " [TOKINCR [VAR out]]]
+      [CASE "\n" [TOKINCR [VAR out]]]
 
       [DEFAULT
-        # TODO: Try add ident
         [IF [ISIDENT [VAR char]]
           [ADDIDENT [VAR out]]
         ELSE
-          [RETURN [ERROR [CONCAT "unexpected character: \"" [VAR char] "\""]]]
+          [RETURN [ERR [POS [VAR out]] [CONCAT "unexpected character: \"" [VAR char] "\""]]]
         ]
       ]
     ]

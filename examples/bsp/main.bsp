@@ -1,14 +1,35 @@
 [IMPORT "examples/bsp/tokens.bsp"]
+[IMPORT "examples/bsp/parser.bsp"]
 
-[DEFINE code "[PRINT \"Hello, World!\" -1.234]\n"]
-[DEFINE tokenserr [TOKENIZE [VAR code]]]
+[DEFINE code "[PRINT \"Hello, World!\" -1.234 1.1 [MATH 1 + 1]]\n"]
+
+# Tokenize
+[DEFINE tokenserr [TOKENIZE "hello.bsp" [VAR code]]]
 [IF [CANCAST [VAR tokenserr] error]
   [FAIL [VAR tokenserr]]
 ]
 [DEFINE tokens [CAST [VAR tokenserr] ARRAY{token}]]
+
+# Print
+[PRINT "TOKENS: "]
 [DEFINE i 0]
 [WHILE [COMPARE [VAR i] < [LENGTH [VAR tokens]]]
   [DEFINE tok [INDEX [VAR tokens] [VAR i]]]
-  [PRINT [CONCAT "{" [STRING [GET [VAR tok] typ]] ", " [GET [VAR tok] val] "}"]]
+  [PRINT [CONCAT "{" [POSSTR [GET [VAR tok] pos]] ", " [STRING [GET [VAR tok] typ]] ", " [GET [VAR tok] val] "}"]]
+  [DEFINE i [MATH [VAR i] + 1]]
+]
+
+# Parse
+[DEFINE perr [PARSE [VAR tokens]]]
+[IF [CANCAST [VAR perr] error]
+  [FAIL [VAR perr]]
+]
+[DEFINE p [CAST [VAR perr] ARRAY{parserNode}]]
+
+# Print
+[PRINT "\nNODES: "]
+[DEFINE i 0]
+[WHILE [COMPARE [VAR i] < [LENGTH [VAR p]]]
+  [PRINTNODE [INDEX [VAR p] [VAR i]] ""]
   [DEFINE i [MATH [VAR i] + 1]]
 ]
