@@ -25,7 +25,7 @@ func (c *CGen) addPanic(n *ir.PanicNode, pos *tokens.Pos) (*Code, error) {
 		return nil, err
 	}
 	return &Code{
-		Pre: JoinCode(v.Pre, fmt.Sprintf("panic(%s, %q);", v.Value, pos.String())),
+		Pre: JoinCode(v.Pre, fmt.Sprintf("bsp_panic(%s, %q);", v.Value, pos.String())),
 	}, nil
 }
 

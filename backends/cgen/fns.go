@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/Nv7-Github/bsharp/ir"
+	"github.com/Nv7-Github/bsharp/types"
 )
 
 func (c *CGen) addFnCall(n *ir.FnCallNode) (*Code, error) {
@@ -25,7 +26,7 @@ func (c *CGen) addFnCall(n *ir.FnCallNode) (*Code, error) {
 			return nil, err
 		}
 		call.WriteString(arg.Value)
-		pre = JoinCode(pre, fn.Pre)
+		pre = JoinCode(pre, arg.Pre)
 	}
 	call.WriteString(")")
 
@@ -58,12 +59,16 @@ func (c *CGen) addReturn(n *ir.ReturnNode) (*Code, error) {
 		return nil, err
 	}
 	c.isReturn = true
+	// Check if null return
+	if types.NULL.Equal(n.Value.Type()) {
+		return &Code{Pre: JoinCode(v.Pre, c.stack.FreeCode(), "return;")}, nil
+	}
 	// Grab if dynamic
-	pre := JoinCode(c.stack.FreeCode(), v.Pre, fmt.Sprintf("return %s;", v.Value))
+	pre := JoinCode(c.stack.FreeCode(), fmt.Sprintf("return %s;", v.Value))
 	if isDynamic(n.Value.Type()) {
 		pre = JoinCode(c.GrabCode(v.Value, n.Value.Type()), pre)
 	}
 	return &Code{
-		Pre: pre,
+		Pre: JoinCode(v.Pre, pre),
 	}, nil
 }

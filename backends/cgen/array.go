@@ -51,6 +51,9 @@ func typName(typ types.Type) string {
 		}
 		return out.String()
 
+	case types.ANY:
+		return "a"
+
 	default:
 		panic("unknown")
 	}

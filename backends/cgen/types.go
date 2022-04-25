@@ -62,31 +62,35 @@ func (c *CGen) CType(typ types.Type) string {
 		name := typName(typ)
 		_, exists := c.addedFns[name]
 		if exists {
-			return name
+			return "struct " + name + "*"
 		}
-		fmt.Fprintf(c.globalfns, "struct %s {\n", name)
+		sTyp := &strings.Builder{}
+		fmt.Fprintf(sTyp, "struct %s {\n", name)
 		for i, field := range typ.(*types.StructType).Fields {
-			fmt.Fprintf(c.globalfns, "%s%s f%d;\n", c.Config.Tab, c.CType(field.Type), i)
+			fmt.Fprintf(sTyp, "%s%s f%d;\n", c.Config.Tab, c.CType(field.Type), i)
 		}
-		fmt.Fprintf(c.globalfns, "%sint refs;\n", c.Config.Tab)
-		c.globalfns.WriteString("};\n\n")
+		fmt.Fprintf(sTyp, "%sint refs;\n", c.Config.Tab)
+		sTyp.WriteString("};\n\n")
+		c.globaltyps.WriteString(sTyp.String())
 
 		// Free function
-		fmt.Fprintf(c.globalfns, "void %s_free(struct %s* val) {;\n", name, name)
-		fmt.Fprintf(c.globalfns, "%sif (val == NULL) {\n%s%sreturn;\n%s}\n", c.Config.Tab, c.Config.Tab, c.Config.Tab, c.Config.Tab)
-		fmt.Fprintf(c.globalfns, "%sval->refs--;\n", c.Config.Tab)
-		fmt.Fprintf(c.globalfns, "%sif(val->refs == 0) {\n", c.Config.Tab)
+		out := &strings.Builder{}
+		fmt.Fprintf(out, "void %s_free(struct %s* val) {;\n", name, name)
+		fmt.Fprintf(out, "%sif (val == NULL) {\n%s%sreturn;\n%s}\n", c.Config.Tab, c.Config.Tab, c.Config.Tab, c.Config.Tab)
+		fmt.Fprintf(out, "%sval->refs--;\n", c.Config.Tab)
+		fmt.Fprintf(out, "%sif(val->refs == 0) {\n", c.Config.Tab)
 		for i, field := range typ.(*types.StructType).Fields {
 			if isDynamic(field.Type) {
-				fmt.Fprintf(c.globalfns, "%s%s%s;\n", c.Config.Tab, c.Config.Tab, c.FreeCode(fmt.Sprintf("val->f%d", i), field.Type))
+				fmt.Fprintf(out, "%s%s%s;\n", c.Config.Tab, c.Config.Tab, c.FreeCode(fmt.Sprintf("val->f%d", i), field.Type))
 			}
 		}
-		fmt.Fprintf(c.globalfns, "%s%sfree(val);\n", c.Config.Tab, c.Config.Tab)
-		fmt.Fprintf(c.globalfns, "%s}\n", c.Config.Tab)
-		c.globalfns.WriteString("}\n\n")
+		fmt.Fprintf(out, "%s%sfree(val);\n", c.Config.Tab, c.Config.Tab)
+		fmt.Fprintf(out, "%s}\n", c.Config.Tab)
+		out.WriteString("}\n\n")
 
 		// Return
 		c.addedFns[name] = struct{}{}
+		c.globalfns.WriteString(out.String())
 		return "struct " + name + "*"
 
 	case types.ANY:

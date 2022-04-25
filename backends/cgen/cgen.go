@@ -107,6 +107,7 @@ func (c *CGen) addFree(bld *strings.Builder) {
 
 func (c *CGen) Build() (string, error) {
 	top := &strings.Builder{}
+	c.globaltyps = &strings.Builder{}
 
 	out := &strings.Builder{}
 	// Add fn types
@@ -120,7 +121,6 @@ func (c *CGen) Build() (string, error) {
 		}
 		top.WriteString(");\n")
 	}
-	c.globaltyps = top
 
 	// Add fns
 	for _, fn := range c.ir.Funcs {
@@ -160,16 +160,19 @@ func (c *CGen) Build() (string, error) {
 	c.stack.Pop()
 	out.WriteString(c.Config.Tab + "return 0;\n}\n")
 
-	// Add globals
-	top.WriteString("\n")
-	top.WriteString(c.globals.String())
-	top.WriteString("\n")
-	top.WriteString(c.globalfns.String())
-
-	// Runtime
+	// Combine
 	topCode := strings.Replace(std, "const char* const anytyps[];", c.typCode(), 1)
+	code := &strings.Builder{}
+	code.WriteString(topCode)
+	code.WriteString(c.globaltyps.String())
+	code.WriteString(top.String())
+	code.WriteRune('\n')
+	code.WriteString(c.globals.String())
+	code.WriteRune('\n')
+	code.WriteString(c.globalfns.String())
+	code.WriteString(out.String())
 
-	return topCode + top.String() + out.String(), nil
+	return code.String(), nil
 }
 
 func (c *CGen) GetTmp(name string) string {

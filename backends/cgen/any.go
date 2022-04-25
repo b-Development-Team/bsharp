@@ -88,6 +88,6 @@ func (c *CGen) addAnyFromCast(n *ir.CastNode) (*Code, error) {
 	pre := JoinCode(a.Pre, fmt.Sprintf("any_try_cast(%q, %s, %d);", n.Pos().String(), a.Value, c.typID(n.Type())))
 	return &Code{
 		Pre:   pre,
-		Value: fmt.Sprintf("*((%s*)(%s->value))", c.CType(n.Type()), a.Value),
+		Value: fmt.Sprintf("(*((%s*)(%s->value)))", c.CType(n.Type()), a.Value),
 	}, nil
 }

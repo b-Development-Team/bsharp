@@ -44,6 +44,9 @@ func init() {
 				return nil, args[0].Pos().Error("unknown variable: %s", name)
 			}
 			va := b.Scope.Variable(v)
+			if !va.NeedsGlobal && va.ScopeType == ScopeTypeGlobal && b.Scope.HasType(ScopeTypeFunction) {
+				va.NeedsGlobal = true
+			}
 
 			return &VarNode{
 				ID:   v,
