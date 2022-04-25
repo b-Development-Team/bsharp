@@ -37,6 +37,10 @@ func (c *CGen) addAnyCast(n *ir.CastNode) (*Code, error) {
 
 	freefn := "NULL"
 	pre := v.Pre
+	// Need to be able to get pointer
+	name := c.GetTmp("cnst")
+	pre = JoinCode(pre, fmt.Sprintf("%s %s = %s;", c.CType(n.Value.Type()), name, v.Value))
+	v.Value = name
 	if isDynamic(n.Value.Type()) {
 		// Grab value
 		pre = JoinCode(pre, c.GrabCode(v.Value, n.Value.Type()))
@@ -52,11 +56,6 @@ func (c *CGen) addAnyCast(n *ir.CastNode) (*Code, error) {
 			c.addedFns[name] = struct{}{}
 		}
 		freefn = name
-	} else {
-		// Need to be able to get pointer
-		name := c.GetTmp("cnst")
-		pre = JoinCode(pre, fmt.Sprintf("%s %s = %s;", c.CType(n.Value.Type()), name, v.Value))
-		v.Value = name
 	}
 
 	a := c.GetTmp("any")

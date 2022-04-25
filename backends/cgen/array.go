@@ -93,12 +93,12 @@ func (c *CGen) addArray(n *ir.ArrayNode) (*Code, error) {
 			return nil, err
 		}
 		pre = JoinCode(pre, val.Pre)
+		// Need to be able to get pointer
+		name := c.GetTmp("cnst")
+		pre = JoinCode(pre, fmt.Sprintf("%s %s = %s;", c.CType(v.Type()), name, val.Value))
+		val.Value = name
 		if isDynamic(v.Type()) {
 			pre = JoinCode(pre, c.GrabCode(val.Value, v.Type()))
-		} else { // Need to be able to get pointer
-			name := c.GetTmp("cnst")
-			pre = JoinCode(pre, fmt.Sprintf("%s %s = %s;", c.CType(v.Type()), name, val.Value))
-			val.Value = name
 		}
 		pre = JoinCode(pre, fmt.Sprintf("array_append(%s, &(%s));", arr, val.Value))
 	}
@@ -155,11 +155,9 @@ func (c *CGen) addAppend(n *ir.AppendNode) (*Code, error) {
 	}
 
 	// Need to be able to get pointer
-	if !isDynamic(n.Value.Type()) {
-		name := c.GetTmp("cnst")
-		pre = JoinCode(pre, fmt.Sprintf("%s %s = %s;", c.CType(n.Value.Type()), name, val.Value))
-		val.Value = name
-	}
+	name := c.GetTmp("cnst")
+	pre = JoinCode(pre, fmt.Sprintf("%s %s = %s;", c.CType(n.Value.Type()), name, val.Value))
+	val.Value = name
 	pre = JoinCode(pre, fmt.Sprintf("array_append(%s, &(%s));", arr.Value, val.Value))
 	return &Code{
 		Pre: pre,
@@ -229,17 +227,16 @@ func (c *CGen) addSetIndex(pos *tokens.Pos, n *ir.SetIndexNode) (*Code, error) {
 		check = fmt.Sprintf("array_bounds(%s, %s, %q);", arr.Value, ind.Value, pos.String())
 	}
 	free := ""
+	// Need to be able to get pointer
+	name := c.GetTmp("cnst")
+	pre = JoinCode(pre, fmt.Sprintf("%s %s = %s;", c.CType(n.Value.Type()), name, val.Value))
+	val.Value = name
 	if isDynamic(n.Value.Type()) {
 		pre = JoinCode(pre, c.GrabCode(val.Value, n.Value.Type()))
 		old := c.GetTmp("old")
 		pre = JoinCode(arr.Pre, ind.Pre, check, fmt.Sprintf("%s %s = (*((%s*)(array_get(%s, %s))));", c.CType(n.Value.Type()), old, c.CType(n.Value.Type()), arr.Value, ind.Value), pre)
 		free = c.FreeCode(old, n.Value.Type())
 	} else {
-		// Need to be able to get pointer
-		name := c.GetTmp("cnst")
-		pre = JoinCode(pre, fmt.Sprintf("%s %s = %s;", c.CType(n.Value.Type()), name, val.Value))
-		val.Value = name
-
 		pre = JoinCode(arr.Pre, ind.Pre, check, pre)
 	}
 

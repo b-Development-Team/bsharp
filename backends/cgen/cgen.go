@@ -99,6 +99,9 @@ func (c *CGen) addCode(bld *strings.Builder, code *Code) {
 }
 
 func (c *CGen) addFree(bld *strings.Builder) {
+	if c.isReturn {
+		return
+	}
 	free := c.stack.FreeCode()
 	if free != "" {
 		bld.WriteString(Indent(free, c.Config))

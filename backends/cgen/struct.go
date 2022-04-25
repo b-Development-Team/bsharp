@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Nv7-Github/bsharp/ir"
+	"github.com/Nv7-Github/bsharp/types"
 )
 
 func (c *CGen) addGetStruct(n *ir.GetStructNode) (*Code, error) {
@@ -45,4 +46,19 @@ func (c *CGen) addSetStruct(n *ir.SetStructNode) (*Code, error) {
 	return &Code{
 		Pre: JoinCode(pre, code, free),
 	}, nil
+}
+
+func (c *CGen) ZeroValue(t types.Type) string {
+	switch t.BasicType() {
+	case types.INT, types.FLOAT:
+		return "0"
+
+	case types.BOOL:
+		return "false"
+
+	case types.STRING, types.ARRAY, types.MAP, types.FUNCTION, types.STRUCT, types.ANY:
+		return "NULL"
+	}
+
+	panic("invalid type") // might be NULL, but NULL should never be in a struct
 }

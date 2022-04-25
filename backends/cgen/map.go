@@ -99,8 +99,14 @@ func (c *CGen) addMake(n *ir.MakeNode) (*Code, error) {
 	if types.STRUCT.Equal(n.Type()) {
 		name := c.GetTmp("struct")
 		t := typName(n.Type())
-		pre := fmt.Sprintf("struct %s* %s = malloc(sizeof(struct %s*));", t, name, t)
+		pre := fmt.Sprintf("struct %s* %s = malloc(sizeof(struct %s));", t, name, t)
 		pre = JoinCode(pre, fmt.Sprintf("%s->refs = 1;", name))
+		// Initialize all fields
+		typ := n.Type().(*types.StructType)
+		for i, f := range typ.Fields {
+			pre = JoinCode(pre, fmt.Sprintf("%s->f%d = %s;", name, i, c.ZeroValue(f.Type)))
+		}
+
 		c.stack.Add(c.FreeCode(name, n.Type()))
 		return &Code{
 			Pre:   pre,
