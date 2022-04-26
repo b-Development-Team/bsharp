@@ -136,7 +136,7 @@ func (c *CGen) Build() (string, error) {
 			c.declaredVars[arg.ID] = true
 		}
 		out.WriteString(") {\n")
-		c.stack.Push()
+		c.stack.Push(true)
 		for _, stmt := range fn.Body {
 			code, err := c.AddNode(stmt)
 			if err != nil {
