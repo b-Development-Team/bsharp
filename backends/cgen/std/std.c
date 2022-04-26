@@ -870,17 +870,26 @@ typedef void (*anyfreefn)(void*);
 
 typedef struct any {
   void* value;
+  int size;
   int typ;
   int refs;
   anyfreefn freefn;
 } any;
 
-any* any_new(void* val, int typ, anyfreefn freefn) {
+any* any_new(void* val, int size, int typ, anyfreefn freefn) {
   any* a = malloc(sizeof(any));
   a->refs = 1;
   a->value = val;
   a->typ = typ;
   a->freefn = freefn;
+  if (size > 0) {
+    a->size = size;
+	  a->value = malloc(size);
+	  memcpy(a->value, val, size);
+  } else {
+    a->value = val;
+    a->size = 0;
+  }
   return a;
 }
 
@@ -892,6 +901,9 @@ void any_free(any* a) {
   if (a->refs == 0) {
     if (a->freefn != NULL) {
       a->freefn(a->value);
+    }
+    if (a->size > 0) {
+      free(a->value);
     }
     free(a);
   }
