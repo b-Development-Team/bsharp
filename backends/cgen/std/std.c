@@ -882,14 +882,9 @@ any* any_new(void* val, int size, int typ, anyfreefn freefn) {
   a->value = val;
   a->typ = typ;
   a->freefn = freefn;
-  if (size > 0) {
-    a->size = size;
-	  a->value = malloc(size);
-	  memcpy(a->value, val, size);
-  } else {
-    a->value = val;
-    a->size = 0;
-  }
+  a->size = size;
+  a->value = malloc(size);
+  memcpy(a->value, val, size);
   return a;
 }
 
@@ -902,9 +897,7 @@ void any_free(any* a) {
     if (a->freefn != NULL) {
       a->freefn(a->value);
     }
-    if (a->size > 0) {
-      free(a->value);
-    }
+    free(a->value);
     free(a);
   }
 }
