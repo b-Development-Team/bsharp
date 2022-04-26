@@ -42,7 +42,6 @@ func (c *CGen) addAnyCast(n *ir.CastNode) (*Code, error) {
 	pre = JoinCode(pre, fmt.Sprintf("%s %s = %s;", c.CType(n.Value.Type()), name, v.Value))
 	v.Value = name
 
-	size := "0"
 	if isDynamic(n.Value.Type()) {
 		// Grab value
 		pre = JoinCode(pre, c.GrabCode(v.Value, n.Value.Type()))
@@ -58,12 +57,10 @@ func (c *CGen) addAnyCast(n *ir.CastNode) (*Code, error) {
 			c.addedFns[name] = struct{}{}
 		}
 		freefn = name
-	} else {
-		size = fmt.Sprintf("sizeof(%s)", c.CType(n.Value.Type()))
 	}
 
 	a := c.GetTmp("any")
-	code := fmt.Sprintf("any* %s = any_new((void*)(&%s), %s, %d, %s);\n", a, v.Value, size, c.typID(n.Value.Type()), freefn)
+	code := fmt.Sprintf("any* %s = any_new((void*)(&%s), sizeof(%s), %d, %s);\n", a, v.Value, c.CType(n.Value.Type()), c.typID(n.Value.Type()), freefn)
 	c.stack.Add(c.FreeCode(a, types.ANY))
 	return &Code{
 		Pre:   JoinCode(pre, code),
