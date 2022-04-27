@@ -8,6 +8,7 @@ const (
 	TokenTypeIdent TokenType = iota
 	TokenTypeNumber
 	TokenTypeString
+	TokenTypeByte
 	TokenTypeLBrack
 	TokenTypeRBrack
 )

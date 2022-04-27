@@ -27,6 +27,14 @@ func (b *Builder) buildString(n *parser.StringNode) Node {
 	}
 }
 
+func (b *Builder) buildByte(n *parser.ByteNode) Node {
+	return &Const{
+		typ:   types.BYTE,
+		pos:   n.Pos(),
+		Value: n.Value,
+	}
+}
+
 func (b *Builder) buildIdent(n *parser.IdentNode) Node {
 	return &Const{
 		typ:   types.IDENT,

@@ -14,6 +14,11 @@ func (c *CGen) addConst(n *ir.Const) *Code {
 			Value: fmt.Sprintf("%d", n.Value),
 		}
 
+	case types.BYTE:
+		return &Code{
+			Value: fmt.Sprintf("%d", n.Value),
+		}
+
 	case types.FLOAT:
 		return &Code{
 			Value: fmt.Sprintf("%f", n.Value),
@@ -109,6 +114,21 @@ func (c *CGen) addCast(n *ir.CastNode) (*Code, error) {
 			}, nil
 		}
 
+	case types.BYTE:
+		switch n.Type().BasicType() {
+		case types.INT:
+			return &Code{
+				Pre:   v.Pre,
+				Value: fmt.Sprintf("(long)(%s)", v.Value),
+			}, nil
+		}
+
+	case types.ARRAY: // ARRAY{BYTE}
+		return &Code{
+			Pre:   v.Pre,
+			Value: fmt.Sprintf("array_byte_to_string(%s)", v.Value),
+		}, nil
+
 	case types.FLOAT:
 		switch n.Type().BasicType() {
 		case types.INT:
@@ -139,6 +159,12 @@ func (c *CGen) addCast(n *ir.CastNode) (*Code, error) {
 			return &Code{
 				Pre:   v.Pre,
 				Value: fmt.Sprintf("bsharp_atof(%s)", v.Value),
+			}, nil
+
+		case types.BYTE:
+			return &Code{
+				Pre:   v.Pre,
+				Value: fmt.Sprintf("byte_to_string(%s)", v.Value),
 			}, nil
 		}
 

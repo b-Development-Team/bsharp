@@ -39,7 +39,7 @@ func (c *CGen) addMapFns(typ *types.MapType) mapFns {
 	// Add compare fn
 	fmt.Fprintf(c.globalfns, "int %s_compare(const void *va, const void *vb, void *udata) {\n%sconst struct %s *a = va;\n%sconst struct %s *b = vb;\n%s", name, c.Config.Tab, name, c.Config.Tab, name, c.Config.Tab)
 	switch typ.KeyType.BasicType() {
-	case types.INT, types.FLOAT:
+	case types.INT, types.FLOAT, types.BYTE:
 		c.globalfns.WriteString("return (a->key == b->key) ? 0 : 1;")
 
 	case types.STRING:
@@ -50,7 +50,7 @@ func (c *CGen) addMapFns(typ *types.MapType) mapFns {
 	// Add hash fn
 	fmt.Fprintf(c.globalfns, "static inline uint64_t %s_hash(const void *item, uint64_t seed0, uint64_t seed1) {\n%sconst struct %s *v = item;\n%s", name, c.Config.Tab, name, c.Config.Tab)
 	switch typ.KeyType.BasicType() {
-	case types.INT, types.FLOAT:
+	case types.INT, types.FLOAT, types.BYTE:
 		c.globalfns.WriteString("return *(uint64_t*)(v->key);")
 
 	case types.STRING:

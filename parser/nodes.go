@@ -81,7 +81,20 @@ func (s *StringNode) Pos() *tokens.Pos {
 }
 
 func (s *StringNode) String() string {
-	return fmt.Sprintf("String(\"%s\", %s)", s.Value, s.Pos().String())
+	return fmt.Sprintf("String(%q, %s)", s.Value, s.Pos().String())
+}
+
+type ByteNode struct {
+	pos   *tokens.Pos
+	Value byte
+}
+
+func (s *ByteNode) Pos() *tokens.Pos {
+	return s.pos
+}
+
+func (s *ByteNode) String() string {
+	return fmt.Sprintf("Byte('%c', %s)", s.Value, s.Pos().String())
 }
 
 type NumberNode struct {

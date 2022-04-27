@@ -89,6 +89,9 @@ func (c *CGen) hashCase(v *ir.Const, typ types.Type) string {
 	case types.INT:
 		return fmt.Sprintf("%d", v.Value.(int))
 
+	case types.BYTE:
+		return fmt.Sprintf("%d", int(v.Value.(byte)))
+
 	case types.FLOAT:
 		return fmt.Sprintf("%f", v.Value.(float64))
 

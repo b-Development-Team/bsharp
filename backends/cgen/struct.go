@@ -50,7 +50,7 @@ func (c *CGen) addSetStruct(n *ir.SetStructNode) (*Code, error) {
 
 func (c *CGen) ZeroValue(t types.Type) string {
 	switch t.BasicType() {
-	case types.INT, types.FLOAT:
+	case types.INT, types.FLOAT, types.BYTE:
 		return "0"
 
 	case types.BOOL:

@@ -58,6 +58,22 @@ func (i *Interpreter) evalCast(c *ir.CastNode) (*Value, error) {
 		}
 		fallthrough
 
+	case types.BYTE:
+		switch c.Type().BasicType() {
+		case types.INT:
+		case types.BYTE:
+			return NewValue(c.Type(), int(v.Value.(byte))), nil
+		}
+		fallthrough
+
+	case types.ARRAY: // ARRAY{BYTE}
+		v := *v.Value.(*[]any)
+		vals := make([]byte, len(v))
+		for i, val := range v {
+			vals[i] = val.(byte)
+		}
+		return NewValue(c.Type(), string(vals)), nil
+
 	case types.FLOAT:
 		switch c.Type().BasicType() {
 		case types.INT:
@@ -83,6 +99,9 @@ func (i *Interpreter) evalCast(c *ir.CastNode) (*Value, error) {
 				return nil, c.Pos().Error("cannot cast %q to FLOAT", v.Value.(string))
 			}
 			return NewValue(c.Type(), val), nil
+
+		case types.STRING:
+			return NewValue(c.Type(), string(v.Value.(byte))), nil
 		}
 		fallthrough
 

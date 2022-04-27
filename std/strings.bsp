@@ -33,14 +33,14 @@
     ]
     # Add curr char if not out of bounds
     [IF [COMPARE [VAR i] < [LENGTH [VAR str]]]
-      [DEFINE curr [CONCAT [VAR curr] [INDEX [VAR str] [VAR i]]]]
+      [DEFINE curr [CONCAT [VAR curr] [STRING [INDEX [VAR str] [VAR i]]]]]
     ]
     [DEFINE i [MATH [VAR i] + 1]]
   ]
 
   # Add remaining characters
   [WHILE [COMPARE [VAR i] < [LENGTH [VAR str]]]
-    [DEFINE curr [CONCAT [VAR curr] [INDEX [VAR str] [VAR i]]]]
+    [DEFINE curr [CONCAT [VAR curr] [STRING [INDEX [VAR str] [VAR i]]]]]
     [DEFINE i [MATH [VAR i] + 1]]
   ]
   [IF [COMPARE [VAR curr] != ""]

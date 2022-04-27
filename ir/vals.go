@@ -152,7 +152,7 @@ func init() {
 	}
 
 	nodeBuilders["COMPARE"] = nodeBuilder{
-		ArgTypes: []types.Type{types.NewMulType(types.STRING, types.INT, types.FLOAT), types.IDENT, types.NewMulType(types.STRING, types.INT, types.FLOAT)},
+		ArgTypes: []types.Type{types.NewMulType(types.STRING, types.INT, types.BYTE, types.FLOAT), types.IDENT, types.NewMulType(types.STRING, types.INT, types.BYTE, types.FLOAT)},
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
 			// Get op
 			op, exists := compareOps[args[1].(*Const).Value.(string)]

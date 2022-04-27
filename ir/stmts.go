@@ -120,6 +120,9 @@ func (b *Builder) buildNode(node parser.Node) (Node, error) {
 	case *parser.StringNode:
 		return b.buildString(n), nil
 
+	case *parser.ByteNode:
+		return b.buildByte(n), nil
+
 	case *parser.NumberNode:
 		return b.buildNumber(n)
 

@@ -61,6 +61,7 @@ There are 7 data types in B#:
 | Type | Description |
 | - | - |
 | `INT` | Represents an integer. |
+| `BYTE` | Represents a byte, or a single character of a string. |
 | `FLOAT` | Represents a floating-point number (decimal). |
 | `BOOL`  | Represents a value of either true or false.
 | `STRING` | Represents textual data. |

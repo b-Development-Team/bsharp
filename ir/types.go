@@ -146,14 +146,14 @@ func init() {
 	}
 
 	nodeBuilders["STRING"] = nodeBuilder{
-		ArgTypes: []types.Type{types.NewMulType(types.INT, types.FLOAT, types.BOOL)},
+		ArgTypes: []types.Type{types.NewMulType(types.INT, types.FLOAT, types.BOOL, types.BYTE, types.NewArrayType(types.BYTE))},
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
 			return NewCastNode(args[0], types.STRING), nil
 		},
 	}
 
 	nodeBuilders["INT"] = nodeBuilder{
-		ArgTypes: []types.Type{types.NewMulType(types.FLOAT, types.STRING)},
+		ArgTypes: []types.Type{types.NewMulType(types.FLOAT, types.STRING, types.BYTE)},
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
 			return NewCastNode(args[0], types.INT), nil
 		},

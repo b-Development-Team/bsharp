@@ -28,6 +28,7 @@ type BasicType int
 
 const (
 	INT BasicType = iota
+	BYTE
 	FLOAT
 	BOOL
 	STRING
@@ -46,6 +47,7 @@ const (
 
 var basicTypeNames = map[BasicType]string{
 	INT:      "INT",
+	BYTE:     "BYTE",
 	FLOAT:    "FLOAT",
 	STRING:   "STRING",
 	BOOL:     "BOOL",

@@ -5,7 +5,7 @@ import (
 	"github.com/Nv7-Github/bsharp/types"
 )
 
-var hashable = types.NewMulType(types.INT, types.STRING, types.FLOAT) // Only types as key to map and switch
+var hashable = types.NewMulType(types.INT, types.BYTE, types.STRING, types.FLOAT) // Only types as key to map and switch
 
 type ArrayNode struct {
 	Values []Node
@@ -203,7 +203,7 @@ func init() {
 			if types.ARRAY.Equal(args[0].Type()) {
 				outTyp = args[0].Type().(*types.ArrayType).ElemType
 			} else {
-				outTyp = types.STRING
+				outTyp = types.BYTE
 			}
 
 			return &IndexNode{

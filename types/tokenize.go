@@ -48,6 +48,7 @@ var constTokens = [][]rune{
 	[]rune("FUNC"),
 	[]rune("STRING"),
 	[]rune("INT"),
+	[]rune("BYTE"),
 	[]rune("FLOAT"),
 	[]rune("BOOL"),
 	[]rune("NULL"),

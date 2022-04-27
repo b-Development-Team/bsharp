@@ -4,7 +4,7 @@
   "patterns": [{ "include": "#node" }, { "include": "#comment" }],
   "repository": {
     "value": {
-      "patterns": [{ "include": "#node" }, { "include": "#comment" }, { "include": "#string" }, { "include": "#number" }, { "include": "#keyword" }, { "include": "#ident" }]
+      "patterns": [{ "include": "#node" }, { "include": "#comment" }, { "include": "#string" }, { "include": "#byte" }, { "include": "#number" }, { "include": "#keyword" }, { "include": "#ident" }]
     },
     "ident": {
       "match": "(?:\\p{L}|\\{|\\}|\\+|-|\\*|\\/|%|==|!=|<=|>=|<|>|\\^|,|:)+",
@@ -29,8 +29,18 @@
 				}
 			]
     },
+    "byte": {
+			"begin": "'",
+			"end": "'",
+			"name": "string.quoted.single.bsharp",
+			"patterns": [
+				{
+					"include": "#string_escaped_char"
+				}
+			]
+    },
     "string_escaped_char": {
-			"match": "\\\\[nt\"\\\\]",
+			"match": "\\\\[nt\"\\\\']",
 			"name": "constant.character.escape"
     },
     "comment": {

@@ -14,6 +14,9 @@ func typName(typ types.Type) string {
 	case types.INT:
 		return "i"
 
+	case types.BYTE:
+		return "u"
+
 	case types.FLOAT:
 		return "f"
 

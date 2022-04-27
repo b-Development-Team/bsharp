@@ -68,7 +68,7 @@
     ]
 
     # Make line
-    [DEFINE line [CONCAT [VAR line] [VAR color] "[" [VAR char] "]"]]
+    [DEFINE line [CONCAT [VAR line] [VAR color] "[" [STRING [VAR char]] "]"]]
 
     [DEFINE j [MATH [VAR j] + 1]]
   ]

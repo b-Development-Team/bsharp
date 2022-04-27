@@ -30,6 +30,12 @@ func (t *Tokenizer) Tokenize() error {
 		case '"':
 			t.addString()
 
+		case '\'':
+			err := t.addByte()
+			if err != nil {
+				return err
+			}
+
 		case '#': // Comment
 			t.s.Eat()
 			for t.s.HasNext() {
@@ -136,6 +142,53 @@ func (t *Tokenizer) addString() {
 		Value: val,
 		Pos:   pos,
 	})
+}
+
+func (t *Tokenizer) addByte() error {
+	pos := t.s.Pos()
+	t.s.Eat() // Eat first '
+	if !t.s.CanPeek(2) {
+		return pos.Error("expected closing single quote")
+	}
+
+	var val byte
+	c := t.s.Char()
+	if c == '\\' { // Escape code
+		t.s.Eat() // Eat backslash
+		v := t.s.Char()
+		switch v {
+		case '\'':
+			val = '\''
+
+		case 'n':
+			val = '\n'
+
+		case '\\':
+			val = '\\'
+
+		case 't':
+			val = '\t'
+		}
+		t.s.Eat()
+	} else {
+		val = byte(c)
+		t.s.Eat()
+	}
+
+	if t.s.Char() != '\'' {
+		return t.s.Pos().Error("expected closing single quote")
+	}
+
+	pos = pos.Extend(t.s.Pos())
+	t.s.Eat() // Eat closing quote
+
+	t.addToken(Token{
+		Typ:   TokenTypeByte,
+		Value: string(val),
+		Pos:   pos,
+	})
+
+	return nil
 }
 
 func isLetter(char rune) bool {

@@ -25,11 +25,11 @@ func (i *Interpreter) evalIndex(pos *tokens.Pos, n *ir.IndexNode) (*Value, error
 		return NewValue(n.Type(), a[ind]), nil
 
 	case types.STRING:
-		a := []rune(v.Value.(string))
+		a := v.Value.(string)
 		if ind < 0 || ind >= len(a) {
 			return nil, pos.Error("index out of bounds: %d with length %d", ind, len(a))
 		}
-		return NewValue(n.Type(), string(a[ind])), nil
+		return NewValue(n.Type(), a[ind]), nil
 
 	default:
 		return nil, pos.Error("cannot index type %s", v.Type.String())
@@ -76,6 +76,9 @@ func (i *Interpreter) evalLength(pos *tokens.Pos, n *ir.LengthNode) (*Value, err
 		case types.INT:
 			return NewValue(types.INT, len(v.Value.(map[int]any))), nil
 
+		case types.BYTE:
+			return NewValue(types.INT, len(v.Value.(map[byte]any))), nil
+
 		case types.FLOAT:
 			return NewValue(types.INT, len(v.Value.(map[float64]any))), nil
 
@@ -104,6 +107,9 @@ func (i *Interpreter) evalMake(pos *tokens.Pos, n *ir.MakeNode) (*Value, error) 
 	switch typ.KeyType.BasicType() {
 	case types.INT:
 		out = make(map[int]any)
+
+	case types.BYTE:
+		out = make(map[byte]any)
 
 	case types.FLOAT:
 		out = make(map[float64]any)
@@ -135,6 +141,9 @@ func (i *Interpreter) evalSet(pos *tokens.Pos, n *ir.SetNode) (*Value, error) {
 	case types.INT:
 		m.Value.(map[int]any)[k.Value.(int)] = v.Value
 
+	case types.BYTE:
+		m.Value.(map[byte]any)[k.Value.(byte)] = v.Value
+
 	case types.FLOAT:
 		m.Value.(map[float64]any)[k.Value.(float64)] = v.Value
 
@@ -163,6 +172,9 @@ func (i *Interpreter) evalGet(pos *tokens.Pos, n *ir.GetNode) (*Value, error) {
 	case types.INT:
 		out, exists = m.Value.(map[int]any)[k.Value.(int)]
 
+	case types.BYTE:
+		out, exists = m.Value.(map[byte]any)[k.Value.(byte)]
+
 	case types.FLOAT:
 		out, exists = m.Value.(map[float64]any)[k.Value.(float64)]
 
@@ -188,34 +200,29 @@ func (i *Interpreter) evalKeys(pos *tokens.Pos, n *ir.KeysNode) (*Value, error) 
 	var out []any
 	switch m.Type.(*types.MapType).KeyType.BasicType() {
 	case types.INT:
-		v := m.Value.(map[int]any)
-		out = make([]any, len(v))
-		i := 0
-		for k := range v {
-			out[i] = k
-			i++
-		}
+		out = getKeys(m.Value.(map[int]any))
+
+	case types.BYTE:
+		out = getKeys(m.Value.(map[byte]any))
 
 	case types.FLOAT:
-		v := m.Value.(map[float64]any)
-		out = make([]any, len(v))
-		i := 0
-		for k := range v {
-			out[i] = k
-			i++
-		}
+		out = getKeys(m.Value.(map[float64]any))
 
 	case types.STRING:
-		v := m.Value.(map[string]any)
-		out = make([]any, len(v))
-		i := 0
-		for k := range v {
-			out[i] = k
-			i++
-		}
+		out = getKeys(m.Value.(map[string]any))
 	}
 
 	return NewValue(n.Type(), &out), nil
+}
+
+func getKeys[T comparable](v map[T]any) []any {
+	out := make([]any, len(v))
+	i := 0
+	for k := range v {
+		out[i] = k
+		i++
+	}
+	return out
 }
 
 func (i *Interpreter) evalExists(pos *tokens.Pos, n *ir.ExistsNode) (*Value, error) {
@@ -231,6 +238,9 @@ func (i *Interpreter) evalExists(pos *tokens.Pos, n *ir.ExistsNode) (*Value, err
 	switch k.Type.BasicType() {
 	case types.INT:
 		_, exists = m.Value.(map[int]any)[k.Value.(int)]
+
+	case types.BYTE:
+		_, exists = m.Value.(map[byte]any)[k.Value.(byte)]
 
 	case types.FLOAT:
 		_, exists = m.Value.(map[float64]any)[k.Value.(float64)]

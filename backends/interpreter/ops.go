@@ -100,6 +100,13 @@ func (i *Interpreter) evalCompareNode(pos *tokens.Pos, node *ir.CompareNode) (*V
 		}
 		return NewValue(types.BOOL, *v), nil
 
+	case types.BYTE:
+		v := compOp(left.Value.(byte), right.Value.(byte), node.Op)
+		if v == nil {
+			return nil, pos.Error("unknown compare operation: %s", node.Op)
+		}
+		return NewValue(types.BOOL, *v), nil
+
 	case types.FLOAT:
 		v := compOp(left.Value.(float64), right.Value.(float64), node.Op)
 		if v == nil {
@@ -120,7 +127,7 @@ func (i *Interpreter) evalCompareNode(pos *tokens.Pos, node *ir.CompareNode) (*V
 }
 
 type compOpValue interface {
-	int | float64 | string
+	int | float64 | string | byte
 }
 
 func compOp[T compOpValue](lhs T, rhs T, op ir.CompareOperation) *bool {

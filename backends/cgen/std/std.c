@@ -92,10 +92,8 @@ void string_free(string* val) {
   }
 }
 
-string* string_ind(string* val, int index) {
-  char* data = malloc(1);
-  data[0] = val->data[index];
-  return string_new(data, 1);
+char string_ind(string* val, int index) {
+  return val->data[index];
 }
 
 string* string_itoa(int val) {
@@ -196,7 +194,6 @@ static inline void* array_get(array* a, int i) {
   return a->data + ((a->off + i) * a->elemsize);
 }
 
-
 typedef void (*array_free_fn)(array*);
 
 void array_free(array* a, array_free_fn free_fn) {
@@ -248,6 +245,19 @@ void array_set(array* a, int i, void* val) {
 void array_slice(array* a, int start, int end) {
   a->off = start;
   a->len = end - start;
+}
+
+// a is an array of char
+string* array_byte_to_string(array* a) {
+  char* data = malloc(a->len);
+  memcpy(data, a->data, a->len);
+  return string_new(data, a->len);
+}
+
+string* byte_to_string(char b) {
+  char* data = malloc(1);
+  data[0] = b;
+  return string_new(data, 1);
 }
 
 // https://github.com/tidwall/hashmap.c

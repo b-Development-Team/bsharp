@@ -24,6 +24,9 @@ func parse(tokens []token, names map[string]Type) (Type, []token, error) {
 		case "FLOAT":
 			return FLOAT, tokens[1:], nil
 
+		case "BYTE":
+			return BYTE, tokens[1:], nil
+
 		case "BOOL":
 			return BOOL, tokens[1:], nil
 

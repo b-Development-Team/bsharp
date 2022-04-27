@@ -20,6 +20,9 @@ func (c *CGen) CType(typ types.Type) string {
 	case types.BOOL:
 		return "bool"
 
+	case types.BYTE:
+		return "char"
+
 	case types.STRING:
 		return "string*"
 

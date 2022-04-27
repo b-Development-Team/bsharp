@@ -68,7 +68,7 @@ func textDocumentDidSave(context *glsp.Context, params *protocol.DidSaveTextDocu
 
 	// Make diagnostic
 	context.Notify(protocol.ServerTextDocumentPublishDiagnostics, protocol.PublishDiagnosticsParams{
-		URI: params.TextDocument.URI,
+		URI: filepath.Join(RootURI, v.Pos.File),
 		Diagnostics: []protocol.Diagnostic{
 			{
 				Range: protocol.Range{

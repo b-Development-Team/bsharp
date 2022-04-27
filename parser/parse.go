@@ -15,6 +15,14 @@ func (p *Parser) ParseNode() (Node, error) {
 			Value: t.Value,
 		}, nil
 
+	case tokens.TokenTypeByte:
+		t := p.t.Tok()
+		p.t.Eat()
+		return &ByteNode{
+			pos:   t.Pos,
+			Value: t.Value[0],
+		}, nil
+
 	case tokens.TokenTypeIdent:
 		t := p.t.Tok()
 		p.t.Eat()
