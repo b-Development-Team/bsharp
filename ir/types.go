@@ -159,6 +159,13 @@ func init() {
 		},
 	}
 
+	nodeBuilders["BYTE"] = nodeBuilder{
+		ArgTypes: []types.Type{types.NewMulType(types.INT)},
+		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
+			return NewCastNode(args[0], types.BYTE), nil
+		},
+	}
+
 	nodeBuilders["ANY"] = nodeBuilder{
 		ArgTypes: []types.Type{types.ALL},
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
@@ -174,7 +181,7 @@ func init() {
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
 			typ, err := types.ParseType(args[1].(*Const).Value.(string), b.typeNames)
 			if err != nil {
-				return nil, err
+				return nil, args[1].Pos().Error("%s", err.Error())
 			}
 			return &CanCastNode{
 				Value: args[0],

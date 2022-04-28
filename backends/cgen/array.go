@@ -120,8 +120,7 @@ func (c *CGen) addIndex(pos *tokens.Pos, n *ir.IndexNode) (*Code, error) {
 	}
 	if types.STRING.Equal(n.Value.Type()) {
 		name := c.GetTmp("ind")
-		pre := fmt.Sprintf("string* %s = string_ind(%s, %s);", name, arr.Value, ind.Value)
-		c.stack.Add(c.FreeCode(name, types.STRING))
+		pre := fmt.Sprintf("char %s = string_ind(%s, %s);", name, arr.Value, ind.Value)
 		// Bounds check
 		if c.Config.BoundsCheck {
 			pre = JoinCode(fmt.Sprintf("string_bounds(%s, %s, %q);", arr.Value, ind.Value, pos.String()), pre)

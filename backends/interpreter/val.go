@@ -53,20 +53,23 @@ func (i *Interpreter) evalCast(c *ir.CastNode) (*Value, error) {
 		case types.FLOAT:
 			return NewValue(c.Type(), float64(v.Value.(int))), nil
 
+		case types.BYTE:
+			return NewValue(c.Type(), byte(v.Value.(int))), nil
+
 		case types.STRING:
 			return NewValue(c.Type(), strconv.Itoa(v.Value.(int))), nil
 		}
-		fallthrough
 
 	case types.BYTE:
 		switch c.Type().BasicType() {
 		case types.INT:
-		case types.BYTE:
 			return NewValue(c.Type(), int(v.Value.(byte))), nil
-		}
-		fallthrough
 
-	case types.ARRAY: // ARRAY{BYTE}
+		case types.STRING:
+			return NewValue(c.Type(), string(v.Value.(byte))), nil
+		}
+
+	case types.ARRAY:
 		v := *v.Value.(*[]any)
 		vals := make([]byte, len(v))
 		for i, val := range v {
@@ -82,7 +85,6 @@ func (i *Interpreter) evalCast(c *ir.CastNode) (*Value, error) {
 		case types.STRING:
 			return NewValue(c.Type(), strconv.FormatFloat(v.Value.(float64), 'f', -1, 64)), nil
 		}
-		fallthrough
 
 	case types.STRING:
 		switch c.Type().BasicType() {
@@ -103,7 +105,6 @@ func (i *Interpreter) evalCast(c *ir.CastNode) (*Value, error) {
 		case types.STRING:
 			return NewValue(c.Type(), string(v.Value.(byte))), nil
 		}
-		fallthrough
 
 	case types.BOOL:
 		switch c.Type().BasicType() {
@@ -114,9 +115,7 @@ func (i *Interpreter) evalCast(c *ir.CastNode) (*Value, error) {
 			}
 			return NewValue(c.Type(), val), nil
 		}
-		fallthrough
-
-	default:
-		return nil, c.Pos().Error("cannot cast type \"%s\" to \"%s\"", v.Type.BasicType(), c.Type().BasicType())
 	}
+
+	return nil, c.Pos().Error("cannot cast type \"%s\" to \"%s\"", v.Type.BasicType(), c.Type().BasicType())
 }

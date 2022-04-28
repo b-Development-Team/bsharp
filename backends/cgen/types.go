@@ -9,7 +9,7 @@ import (
 
 const Namespace = "bsharp__"
 
-func (c *CGen) CType(typ types.Type) string {
+func (c *CGen) CType(typ types.Type, fn ...bool) string {
 	switch typ.BasicType() {
 	case types.INT:
 		return "long"
@@ -59,7 +59,10 @@ func (c *CGen) CType(typ types.Type) string {
 		return "map*"
 
 	case types.NULL:
-		return "void"
+		if len(fn) > 0 {
+			return "void"
+		}
+		return "void*"
 
 	case types.STRUCT:
 		name := typName(typ)

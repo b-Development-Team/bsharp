@@ -6,6 +6,7 @@
 [DEFINE tokTypeLBrack 2]
 [DEFINE tokTypeRBrack 3]
 [DEFINE tokTypeIdent 4]
+[DEFINE tokTypeByte 5]
 
 [FUNC TOKEN [PARAM typ INT] [PARAM val STRING] [PARAM pos pos] [RETURNS token]
   [DEFINE out [MAKE token]]
@@ -103,7 +104,7 @@
         [TOKINCR [VAR tok]]
         [DEFINE char [INDEX [VAR code] [TOKIND [VAR tok]]]] # Next char
         [SWITCH [VAR char]
-          [CASE '\"' [DEFINE val [CONCAT [VAR val] "\""]]]
+          [CASE '"' [DEFINE val [CONCAT [VAR val] "\""]]]
           [CASE 't' [DEFINE val [CONCAT [VAR val] "\t"]]]
           [CASE 'n' [DEFINE val [CONCAT [VAR val] "\n"]]]
           [CASE '\\' [DEFINE val [CONCAT [VAR val] "\\"]]]
@@ -117,6 +118,40 @@
     ]
   ]
   [ADDTOK [VAR tok] [TOKEN [VAR tokTypeString] [VAR val] [VAR pos]]]
+]
+
+[FUNC ADDBYTE [PARAM tok tokenizer] [RETURNS ANY]
+  [TOKINCR [VAR tok]] # Eat '
+  [DEFINE pos [POS [VAR tok]]]
+  [DEFINE val ' ']
+
+  [DEFINE code [GET [VAR tok] code]]
+  [DEFINE char [INDEX [VAR code] [TOKIND [VAR tok]]]]
+  [IF [COMPARE [VAR char] == '\\']
+    [TOKINCR [VAR tok]] # Eat backslash
+    [DEFINE char [INDEX [VAR code] [TOKIND [VAR tok]]]]
+    [SWITCH [VAR char]
+      [CASE '\'' [DEFINE val '\'']]
+      [CASE 'n' [DEFINE val '\n']]
+      [CASE '\\' [DEFINE val '\\']]
+      [CASE 't' [DEFINE val '\t']]
+      [DEFAULT [RETURN [ERR [POS [VAR tok]] "invalid escape code"]]]
+    ]
+    [TOKINCR [VAR tok]] # Eat escape code
+  ELSE
+    [DEFINE val [VAR char]]
+    [TOKINCR [VAR tok]] # Eat char
+  ]
+  
+  [DEFINE char [INDEX [VAR code] [TOKIND [VAR tok]]]]
+  [IF [COMPARE [VAR char] != '\'']
+    [RETURN [ERR [POS [VAR tok]] "expected closing single quote"]]
+  ]
+  [TOKINCR [VAR tok]]
+
+  [ADDTOK [VAR tok] [TOKEN [VAR tokTypeByte] [STRING [VAR val]] [VAR pos]]]
+
+  [RETURN [ANY NULL]]
 ]
 
 [FUNC ADDIDENT [PARAM tok tokenizer]
@@ -203,6 +238,13 @@
         ]
       ]
       [CASE '"' [ADDSTR [VAR out]]]
+
+      [CASE '\''
+        [DEFINE err [ADDBYTE [VAR out]]]
+        [IF [CANCAST [VAR err] error]
+          [RETURN [VAR err]]
+        ]
+      ]
 
       # Ignore whitespace
       [CASE '\t' [TOKINCR [VAR out]]]

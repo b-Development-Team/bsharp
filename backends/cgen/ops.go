@@ -72,7 +72,7 @@ func (c *CGen) addCompare(n *ir.CompareNode) (*Code, error) {
 	}
 
 	switch n.Lhs.Type().BasicType() {
-	case types.INT, types.FLOAT:
+	case types.INT, types.FLOAT, types.BYTE:
 		return &Code{
 			Pre:   JoinCode(l.Pre, r.Pre),
 			Value: fmt.Sprintf("(%s %s %s)", l.Value, compOpCodes[n.Op], r.Value),

@@ -28,7 +28,10 @@ func (t *Tokenizer) Tokenize() error {
 			t.addNum()
 
 		case '"':
-			t.addString()
+			err := t.addString()
+			if err != nil {
+				return err
+			}
 
 		case '\'':
 			err := t.addByte()
@@ -102,7 +105,7 @@ func (t *Tokenizer) addNum() {
 	})
 }
 
-func (t *Tokenizer) addString() {
+func (t *Tokenizer) addString() error {
 	pos := t.s.Pos()
 	t.s.Eat() // Eat first '"'
 
@@ -128,6 +131,9 @@ func (t *Tokenizer) addString() {
 
 			case 't':
 				val += "\t"
+
+			default:
+				return t.s.Pos().Error("invalid escape code")
 			}
 			t.s.Eat()
 			continue
@@ -142,6 +148,8 @@ func (t *Tokenizer) addString() {
 		Value: val,
 		Pos:   pos,
 	})
+
+	return nil
 }
 
 func (t *Tokenizer) addByte() error {
@@ -168,6 +176,9 @@ func (t *Tokenizer) addByte() error {
 
 		case 't':
 			val = '\t'
+
+		default:
+			return t.s.Pos().Error("invalid escape code")
 		}
 		t.s.Eat()
 	} else {

@@ -115,9 +115,9 @@ func (c *CGen) Build() (string, error) {
 	out := &strings.Builder{}
 	// Add fn types
 	for _, fn := range c.ir.Funcs {
-		fmt.Fprintf(top, "%s %s(", c.CType(fn.RetType), Namespace+fn.Name)
+		fmt.Fprintf(top, "%s %s(", c.CType(fn.RetType, true), Namespace+fn.Name)
 		for i, arg := range fn.Params {
-			fmt.Fprintf(top, "%s", c.CType(arg.Type))
+			fmt.Fprintf(top, "%s", c.CType(arg.Type, true))
 			if i != len(fn.Params)-1 {
 				top.WriteString(", ")
 			}
@@ -127,9 +127,9 @@ func (c *CGen) Build() (string, error) {
 
 	// Add fns
 	for _, fn := range c.ir.Funcs {
-		fmt.Fprintf(out, "%s %s(", c.CType(fn.RetType), Namespace+fn.Name)
+		fmt.Fprintf(out, "%s %s(", c.CType(fn.RetType, true), Namespace+fn.Name)
 		for i, arg := range fn.Params {
-			fmt.Fprintf(out, "%s %s", c.CType(arg.Type), Namespace+arg.Name+strconv.Itoa(arg.ID))
+			fmt.Fprintf(out, "%s %s", c.CType(arg.Type, true), Namespace+arg.Name+strconv.Itoa(arg.ID))
 			if i != len(fn.Params)-1 {
 				out.WriteString(", ")
 			}

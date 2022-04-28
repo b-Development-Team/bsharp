@@ -104,6 +104,12 @@ func (c *CGen) addCast(n *ir.CastNode) (*Code, error) {
 				Value: fmt.Sprintf("(double)(%s)", v.Value),
 			}, nil
 
+		case types.BYTE:
+			return &Code{
+				Pre:   v.Pre,
+				Value: fmt.Sprintf("(char)(%s)", v.Value),
+			}, nil
+
 		case types.STRING:
 			name := c.GetTmp("itoa")
 			pre := JoinCode(v.Pre, fmt.Sprintf("string* %s = string_itoa(%s);", name, v.Value))
@@ -120,6 +126,12 @@ func (c *CGen) addCast(n *ir.CastNode) (*Code, error) {
 			return &Code{
 				Pre:   v.Pre,
 				Value: fmt.Sprintf("(long)(%s)", v.Value),
+			}, nil
+
+		case types.STRING:
+			return &Code{
+				Pre:   v.Pre,
+				Value: fmt.Sprintf("byte_to_string(%s)", v.Value),
 			}, nil
 		}
 
@@ -159,12 +171,6 @@ func (c *CGen) addCast(n *ir.CastNode) (*Code, error) {
 			return &Code{
 				Pre:   v.Pre,
 				Value: fmt.Sprintf("bsharp_atof(%s)", v.Value),
-			}, nil
-
-		case types.BYTE:
-			return &Code{
-				Pre:   v.Pre,
-				Value: fmt.Sprintf("byte_to_string(%s)", v.Value),
 			}, nil
 		}
 

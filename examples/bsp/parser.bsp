@@ -8,6 +8,7 @@
 [TYPEDEF parserBoolNode BOOL]
 [TYPEDEF parserStringNode STRING]
 [TYPEDEF parserNumNode STRING]
+[TYPEDEF parserByteNode BYTE]
 
 # parser types
 [DEFINE parserTypCall 0]
@@ -16,6 +17,7 @@
 [DEFINE parserTypNull 3]
 [DEFINE parserTypString 4]
 [DEFINE parserTypNumber 5]
+[DEFINE parserTypByte 6]
 
 # Util
 [FUNC PARSERINCR [PARAM parser parser]
@@ -41,6 +43,7 @@
     [CASE 3 [PRINT [CONCAT [VAR tab] [POSSTR [GET [VAR node] pos]] ": [Const] NULL"]]]
     [CASE 4 [PRINT [CONCAT [VAR tab] [POSSTR [GET [VAR node] pos]] ": STRING: \"" [CAST [GET [VAR node] val] parserStringNode] "\""]] [RETURN NULL]]
     [CASE 5 [PRINT [CONCAT [VAR tab] [POSSTR [GET [VAR node] pos]] ": Number: " [CAST [GET [VAR node] val] parserNumNode]]] [RETURN NULL]]
+    [CASE 6 [PRINT [CONCAT [VAR tab] [POSSTR [GET [VAR node] pos]] ": Byte: " [STRING [CAST [GET [VAR node] val] parserByteNode]]]] [RETURN NULL]]
   ]
 
   # Its a call
@@ -102,6 +105,13 @@
 
       [SET [VAR out] typ [VAR parserTypIdent]]
       [SET [VAR out] val [ANY [VAR val]]]
+      [PARSERINCR [VAR p]]
+      [RETURN [ANY [VAR out]]]
+    ]
+
+    [CASE 5 # Byte
+      [SET [VAR out] typ [VAR parserTypByte]]
+      [SET [VAR out] val [ANY [INDEX [GET [VAR curr] val] 0]]]
       [PARSERINCR [VAR p]]
       [RETURN [ANY [VAR out]]]
     ]
