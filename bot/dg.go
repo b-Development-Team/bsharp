@@ -55,14 +55,14 @@ func (c *Ctx) Message(m string, attachments ...*discordgo.File) error {
 
 	if c.followup {
 		if c.hasResponded != nil {
-			_, err := c.DG.FollowupMessageEdit(c.b.appID, c.i, *c.hasResponded, &discordgo.WebhookEdit{
+			_, err := c.DG.FollowupMessageEdit(c.i, *c.hasResponded, &discordgo.WebhookEdit{
 				Content: m,
 				Embeds:  make([]*discordgo.MessageEmbed, 0),
 				Files:   attachments,
 			})
 			return err
 		}
-		msg, err := c.DG.FollowupMessageCreate(c.b.appID, c.i, true, &discordgo.WebhookParams{
+		msg, err := c.DG.FollowupMessageCreate(c.i, true, &discordgo.WebhookParams{
 			Content: m,
 			Files:   attachments,
 		})
@@ -101,14 +101,14 @@ func (c *Ctx) Embed(emb *discordgo.MessageEmbed, components ...discordgo.Message
 
 	if c.followup {
 		if c.hasResponded != nil {
-			_, err := c.DG.FollowupMessageEdit(c.b.appID, c.i, *c.hasResponded, &discordgo.WebhookEdit{
+			_, err := c.DG.FollowupMessageEdit(c.i, *c.hasResponded, &discordgo.WebhookEdit{
 				Content:    "",
 				Embeds:     []*discordgo.MessageEmbed{emb},
 				Components: components,
 			})
 			return err
 		}
-		msg, err := c.DG.FollowupMessageCreate(c.b.appID, c.i, true, &discordgo.WebhookParams{
+		msg, err := c.DG.FollowupMessageCreate(c.i, true, &discordgo.WebhookParams{
 			Embeds:     []*discordgo.MessageEmbed{emb},
 			Components: components,
 		})
