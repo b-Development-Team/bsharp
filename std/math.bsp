@@ -19,7 +19,7 @@
 
 [FUNC RANDINT [PARAM lower INT] [PARAM upper INT] [RETURNS INT]
   [DEFINE seed [MATH [MATH [MATH 1103515245 * [VAR seed]] + 12345] % 2147483647]] # Glibc rand algorithm
-  [RETURN [MATH [MATH [VAR seed] % [MATH [VAR upper] + [VAR lower]]] - [VAR lower]]]
+  [RETURN [MATH [MATH [VAR seed] % [MATH [VAR upper] - [VAR lower]]] + [VAR lower]]]
 ]
 
 [FUNC RANDOM [PARAM lower FLOAT] [PARAM upper FLOAT] [RETURNS FLOAT]
