@@ -109,9 +109,9 @@ func (i *Interpreter) evalCast(c *ir.CastNode) (*Value, error) {
 	case types.BOOL:
 		switch c.Type().BasicType() {
 		case types.STRING:
-			val := "false"
+			val := "FALSE"
 			if v.Value.(bool) {
-				val = "true"
+				val = "TRUE"
 			}
 			return NewValue(c.Type(), val), nil
 		}

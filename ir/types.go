@@ -29,12 +29,22 @@ func (b *Builder) defPass(p *parser.Parser) error {
 
 			// Get type
 			typV, ok := call.Args[1].(*parser.IdentNode)
+			var typ types.Type
 			if !ok {
-				return call.Args[1].Pos().Error("expected identifier as second argument to TYPEDEF")
+				// check if its null
+				_, ok := call.Args[1].(*parser.NullNode)
+				if ok {
+					typ = types.NULL
+				} else {
+					return call.Args[1].Pos().Error("expected identifier as second argument to TYPEDEF")
+				}
 			}
-			typ, err := types.ParseType(typV.Value, b.typeNames)
-			if err != nil {
-				return call.Args[1].Pos().Error("%s", err.Error())
+			if typ == nil {
+				var err error
+				typ, err = types.ParseType(typV.Value, b.typeNames)
+				if err != nil {
+					return call.Args[1].Pos().Error("%s", err.Error())
+				}
 			}
 
 			// Check if type already exists

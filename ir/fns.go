@@ -34,7 +34,7 @@ func (b *Builder) functionPass(p *parser.Parser) error {
 		// Check if exists
 		_, exists := b.Funcs[name]
 		if exists {
-			return call.Pos().Error("function %s already exists!", name)
+			return call.Pos().Error("cannot redefine function %s", name)
 		}
 
 		// Get params

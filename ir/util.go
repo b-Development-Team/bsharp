@@ -15,11 +15,11 @@ func MatchTypes(pos *tokens.Pos, args []Node, typs []types.Type) error {
 			return pos.Error("wrong number of arguments: expected at least %d, got %d", len(typs)-2, len(args))
 		}
 		for i, v := range args {
-			if i < len(typs)-2 && !v.Type().Equal(typs[i]) {
+			if i < len(typs)-2 && !typs[i].Equal(v.Type()) {
 				return args[i].Pos().Error("wrong argument type: expected %s, got %s", typs[i], args[i].Type())
 			}
 
-			if i >= len(typs)-2 && !v.Type().Equal(typs[len(typs)-2]) {
+			if i >= len(typs)-2 && !typs[len(typs)-2].Equal(v.Type()) {
 				return args[i].Pos().Error("wrong variadic argument type: expected %s, got %s", typs[len(typs)-2], args[i].Type())
 			}
 		}

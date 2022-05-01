@@ -49,7 +49,7 @@
       "name": "comment.bsharp"
     },
     "node": {
-      "begin": "\\[([A-Z]+)",
+      "begin": "\\[([^ \\t\\n\\]]+)",
       "end": "\\]",
       "captures": {
         "1": {
