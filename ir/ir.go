@@ -45,6 +45,7 @@ type Builder struct {
 	currFn     string
 	extensions map[string]*Extension
 	typeNames  map[string]types.Type
+	consts     map[string]*Const
 }
 
 func (b *Builder) AddExtension(e *Extension) {
@@ -65,6 +66,7 @@ func NewBuilder() *Builder {
 		imported:   make(map[string]empty),
 		extensions: make(map[string]*Extension),
 		typeNames:  make(map[string]types.Type),
+		consts:     make(map[string]*Const),
 	}
 }
 
