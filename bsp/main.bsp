@@ -1,5 +1,5 @@
-[IMPORT "examples/bsp/tokens.bsp"]
-[IMPORT "examples/bsp/parser.bsp"]
+[IMPORT "bsp/tokens.bsp"]
+[IMPORT "bsp/parser.bsp"]
 
 [DEFINE code "[PRINT \"Hello, World!\" -1.234 1.1 [MATH 1 + 1] 'h']\n"]
 

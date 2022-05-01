@@ -1,4 +1,4 @@
-[IMPORT "examples/bsp/tokens.bsp"]
+[IMPORT "bsp/tokens.bsp"]
 
 # Value nodes
 [TYPEDEF parser STRUCT{tokens:ARRAY{token},ind:INT}]

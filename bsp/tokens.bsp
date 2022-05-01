@@ -159,29 +159,24 @@
   [DEFINE code [GET [VAR tok] code]]
   [DEFINE running TRUE]
   [DEFINE val ""]
+  [DEFINE bracks 0]
   [WHILE [AND [COMPARE [TOKIND [VAR tok]] < [LENGTH [VAR code]]] [VAR running]]
     [DEFINE char [INDEX [VAR code] [TOKIND [VAR tok]]]]
-    [IF [ISIDENT [VAR char]]
-      # End
+    [SWITCH [VAR char]
+      [CASE '{' [DEFINE bracks [MATH [VAR bracks] + 1]]]
+      [CASE '}' [DEFINE bracks [MATH [VAR bracks] - 1]]]
+      [CASE ' ' [DEFINE running FALSE]]
+      [CASE '\t' [DEFINE running FALSE]]
+      [CASE '\n' [DEFINE running FALSE]]
+      [CASE ']' [DEFINE running FALSE]]
+    ]
+
+    [IF [VAR running]
       [TOKINCR [VAR tok]]
       [DEFINE val [CONCAT [VAR val] [STRING [VAR char]]]]
-    ELSE
-      [DEFINE running FALSE]
     ]
   ]
   [ADDTOK [VAR tok] [TOKEN [VAR tokTypeIdent] [VAR val] [VAR pos]]]
-]
-
-[FUNC ISIDENT [PARAM char BYTE] [RETURNS BOOL]
-  [DEFINE letters "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ{}-+*/^%=!<>,:"]
-  [DEFINE i 0]
-  [WHILE [COMPARE [VAR i] < [LENGTH [VAR letters]]]
-    [IF [COMPARE [INDEX [VAR letters] [VAR i]] == [VAR char]]
-      [RETURN TRUE]
-    ]
-    [DEFINE i [MATH [VAR i] + 1]]
-  ]
-  [RETURN FALSE]
 ]
 
 [FUNC TOKENIZE [PARAM file STRING] [PARAM code STRING] [RETURNS option] # ARRAY{token}
@@ -252,11 +247,7 @@
       [CASE '\n' [TOKINCR [VAR out]]]
 
       [DEFAULT
-        [IF [ISIDENT [VAR char]]
-          [ADDIDENT [VAR out]]
-        ELSE
-          [RETURN [ERR [POS [VAR out]] [CONCAT "unexpected character: \"" [STRING [VAR char]] "\""]]]
-        ]
+        [ADDIDENT [VAR out]]
       ]
     ]
   ]

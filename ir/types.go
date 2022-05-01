@@ -6,46 +6,6 @@ import (
 	"github.com/Nv7-Github/bsharp/types"
 )
 
-var validFirstLetters = map[rune]struct{}{
-	'a': {},
-	'b': {},
-	'c': {},
-	'd': {},
-	'e': {},
-	'f': {},
-	'g': {},
-	'h': {},
-	'i': {},
-	'j': {},
-	'k': {},
-	'l': {},
-	'm': {},
-	'n': {},
-	'o': {},
-	'p': {},
-	'q': {},
-	'r': {},
-	's': {},
-	't': {},
-	'u': {},
-	'v': {},
-	'w': {},
-	'x': {},
-	'y': {},
-	'z': {},
-	'0': {},
-	'1': {},
-	'2': {},
-	'3': {},
-	'4': {},
-	'5': {},
-	'6': {},
-	'7': {},
-	'8': {},
-	'9': {},
-	'_': {},
-}
-
 // Typedef pass
 func (b *Builder) typePass(p *parser.Parser) error {
 	for _, node := range p.Nodes {
@@ -66,18 +26,6 @@ func (b *Builder) typePass(p *parser.Parser) error {
 		name, ok := call.Args[0].(*parser.IdentNode)
 		if !ok {
 			return call.Args[0].Pos().Error("expected identifier as first argument to TYPEDEF")
-		}
-
-		// Check if first letter is valid
-		if _, ok := validFirstLetters[[]rune(name.Value)[0]]; !ok {
-			return name.Pos().Error("invalid type name")
-		}
-		if len([]rune(name.Value)) > 1 {
-			for _, val := range []rune(name.Value)[1:] {
-				if _, ok := types.ValidIdentLetters[val]; !ok {
-					return name.Pos().Error("invalid type name")
-				}
-			}
 		}
 
 		// Get type

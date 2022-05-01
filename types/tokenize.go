@@ -1,7 +1,6 @@
 package types
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -64,72 +63,6 @@ func init() {
 	}
 }
 
-var ValidIdentLetters = map[rune]struct{}{
-	'a': {},
-	'b': {},
-	'c': {},
-	'd': {},
-	'e': {},
-	'f': {},
-	'g': {},
-	'h': {},
-	'i': {},
-	'j': {},
-	'k': {},
-	'l': {},
-	'm': {},
-	'n': {},
-	'o': {},
-	'p': {},
-	'q': {},
-	'r': {},
-	's': {},
-	't': {},
-	'u': {},
-	'v': {},
-	'w': {},
-	'x': {},
-	'y': {},
-	'z': {},
-	'A': {},
-	'B': {},
-	'C': {},
-	'D': {},
-	'E': {},
-	'F': {},
-	'G': {},
-	'H': {},
-	'I': {},
-	'J': {},
-	'K': {},
-	'L': {},
-	'M': {},
-	'N': {},
-	'O': {},
-	'P': {},
-	'Q': {},
-	'R': {},
-	'S': {},
-	'T': {},
-	'U': {},
-	'V': {},
-	'W': {},
-	'X': {},
-	'Y': {},
-	'Z': {},
-	'0': {},
-	'1': {},
-	'2': {},
-	'3': {},
-	'4': {},
-	'5': {},
-	'6': {},
-	'7': {},
-	'8': {},
-	'9': {},
-	'_': {},
-}
-
 func tokenize(val []rune) ([]token, error) {
 	tokens := make([]token, 0)
 	for i := 0; i < len(val); i++ {
@@ -147,25 +80,8 @@ func tokenize(val []rune) ([]token, error) {
 		case ':':
 			tokens = append(tokens, token{tokenTypeColon, nil})
 
-		case 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '_':
-			// ident
-			var ident string
-			for i < len(val) {
-				_, exists := ValidIdentLetters[char]
-				if !exists {
-					break
-				}
-				ident += string(char)
-				if i >= len(val) {
-					break
-				}
-				i++
-				if i < len(val) {
-					char = val[i]
-				}
-			}
-			tokens = append(tokens, token{tokenTypeIdent, &ident})
-			i--
+		case ' ', '\t', '\n', '\r':
+			continue
 
 		default:
 			if _, ok := tokenStarters[char]; ok {
@@ -179,7 +95,26 @@ func tokenize(val []rune) ([]token, error) {
 					}
 				}
 			} else {
-				return nil, fmt.Errorf("unexpected character in type: %s", string(char))
+				// add ident
+				ident := ""
+			loop:
+				for i < len(val) {
+					switch char {
+					case ',', ':', '}', '{', ' ', '\t', '\n':
+						break loop
+					}
+					ident += string(char)
+					if i >= len(val) {
+						break
+					}
+					i++
+					if i < len(val) {
+						char = val[i]
+					}
+				}
+
+				tokens = append(tokens, token{tokenTypeIdent, &ident})
+				i--
 			}
 		}
 	}
