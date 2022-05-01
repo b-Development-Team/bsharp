@@ -1,5 +1,22 @@
-[DEFINE src "[PRINT [FTOA [MATH 1.0 + 1.0]]]"]
+# Intro
+[IMPORT "strings.bsp"]
+[PRINT [JOIN [ARRAY 
+  "Welcome to interp! This is a B++ compatible parser and a very limited interpreter."
+  "EXAMPLE: [PRINT [FTOA [MATH 1.0 + 1.0]]]"
+  "EXAMPLE: [PRINT \"Hello, World!\"]"
+  "EXAMPLE: [PRINT [ITOA 1 + 2]]"
+  "Functions:"
+  "- FTOA: Converts float to string"
+  "- ITOA: Converts int to string"
+  "- MATH: Adds two floats or string"
+  "- PRINT: Prints a string"
+  "NOTE: This doesn't have any type-checking or checks for correctly formatted code, make sure to have good code!"
+] "\n"]]
+[BUTTONS [ARRAY [ARRAY [BUTTON "Done reading!" "done"]]]]
+[DEFINE src [INPUT "Enter a program"]]
+[PRINT "```\n**OUTPUT**:\n```"]
 
+# Actual code
 [DEFINE intvals [MAKE ARRAY{INT}]]
 [DEFINE floatvals [MAKE ARRAY{FLOAT}]]
 [DEFINE stringvals [MAKE ARRAY{STRING}]]
@@ -8,16 +25,16 @@
   [DEFINE i 0]
   [WHILE [COMPARE [VAR i] < [LENGTH [VAR src]]]
     [SWITCH [INDEX [VAR src] [VAR i]]
-      [CASE "0" [DEFINE i [MATH [VAR i] + 1]]]
-      [CASE "1" [DEFINE i [MATH [VAR i] + 1]]]
-      [CASE "2" [DEFINE i [MATH [VAR i] + 1]]]
-      [CASE "3" [DEFINE i [MATH [VAR i] + 1]]]
-      [CASE "4" [DEFINE i [MATH [VAR i] + 1]]]
-      [CASE "5" [DEFINE i [MATH [VAR i] + 1]]]
-      [CASE "6" [DEFINE i [MATH [VAR i] + 1]]]
-      [CASE "7" [DEFINE i [MATH [VAR i] + 1]]]
-      [CASE "8" [DEFINE i [MATH [VAR i] + 1]]]
-      [CASE "9" [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '0' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '1' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '2' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '3' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '4' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '5' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '6' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '7' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '8' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '9' [DEFINE i [MATH [VAR i] + 1]]]
       [DEFAULT
         [RETURN FALSE]
       ]
@@ -30,17 +47,17 @@
   [DEFINE i 0]
   [WHILE [COMPARE [VAR i] < [LENGTH [VAR src]]]
     [SWITCH [INDEX [VAR src] [VAR i]]
-      [CASE "0" [DEFINE i [MATH [VAR i] + 1]]]
-      [CASE "1" [DEFINE i [MATH [VAR i] + 1]]]
-      [CASE "2" [DEFINE i [MATH [VAR i] + 1]]]
-      [CASE "3" [DEFINE i [MATH [VAR i] + 1]]]
-      [CASE "4" [DEFINE i [MATH [VAR i] + 1]]]
-      [CASE "5" [DEFINE i [MATH [VAR i] + 1]]]
-      [CASE "6" [DEFINE i [MATH [VAR i] + 1]]]
-      [CASE "7" [DEFINE i [MATH [VAR i] + 1]]]
-      [CASE "8" [DEFINE i [MATH [VAR i] + 1]]]
-      [CASE "9" [DEFINE i [MATH [VAR i] + 1]]]
-      [CASE "." [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '0' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '1' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '2' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '3' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '4' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '5' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '6' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '7' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '8' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '9' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '.' [DEFINE i [MATH [VAR i] + 1]]]
       [DEFAULT
         [RETURN FALSE]
       ]
@@ -51,7 +68,7 @@
 
 [FUNC EVAL [PARAM src STRING] [RETURNS INT]
   # Check if string
-  [IF [COMPARE [INDEX [VAR src] 0] != "["]
+  [IF [COMPARE [INDEX [VAR src] 0] != '[']
     [IF [ISINT [VAR src]]
       [APPEND [VAR intvals] [INT [VAR src]]]
       [RETURN [MATH [LENGTH [VAR intvals]] - 1]]
@@ -61,11 +78,11 @@
       [RETURN [MATH [LENGTH [VAR floatvals]] - 1]]
     ]
     # String literal?
-    [IF [COMPARE [INDEX [VAR src] 0] == "\""]#"
+    [IF [COMPARE [INDEX [VAR src] 0] == '"']
       [DEFINE val ""]
       [DEFINE i 1]
       [WHILE [COMPARE [VAR i] < [MATH [LENGTH [VAR src]] - 1]]
-        [DEFINE val [CONCAT [VAR val] [INDEX [VAR src] [VAR i]]]]
+        [DEFINE val [CONCAT [VAR val] [STRING [INDEX [VAR src] [VAR i]]]]]
         [DEFINE i [MATH [VAR i] + 1]]
       ]
       [APPEND [VAR stringvals] [VAR val]]
@@ -78,26 +95,26 @@
   # Get rid of lparen
   [DEFINE i 1]
   [DEFINE fn ""]
-  [WHILE [COMPARE [INDEX [VAR src] [VAR i]] != " "] # Go to the space
-    [DEFINE fn [CONCAT [VAR fn] [INDEX [VAR src] [VAR i]]]] # Append
+  [WHILE [COMPARE [INDEX [VAR src] [VAR i]] != ' '] # Go to the space
+    [DEFINE fn [CONCAT [VAR fn] [STRING [INDEX [VAR src] [VAR i]]]]] # Append
     [DEFINE i [MATH [VAR i] + 1]]
   ]
   # Eat space
   [DEFINE i [MATH [VAR i] + 1]]
   # Get body
   [DEFINE argsraw [MAKE ARRAY{STRING}]]
-  [WHILE [COMPARE [INDEX [VAR src] [VAR i]] != "]"] # Go to the closing bracket
+  [WHILE [COMPARE [INDEX [VAR src] [VAR i]] != ']'] # Go to the closing bracket
     [DEFINE arg ""]
     # Count brackets
     [DEFINE bracks 0]
     [DEFINE openQuote [COMPARE 1 == 0]] # False
 
-    [IF [COMPARE [INDEX [VAR src] [VAR i]] == "["] # Eat lbrack if there is one
+    [IF [COMPARE [INDEX [VAR src] [VAR i]] == '['] # Eat lbrack if there is one
       [DEFINE i [MATH [VAR i] + 1]]
       [DEFINE arg "["]
       [DEFINE bracks 1]
     ELSE 
-      [IF [COMPARE [INDEX [VAR src] [VAR i]] == "\""] # Eat quote
+      [IF [COMPARE [INDEX [VAR src] [VAR i]] == '"'] # Eat quote
         [DEFINE openQuote TRUE]
         [DEFINE i [MATH [VAR i] + 1]]
         [DEFINE arg "\""]
@@ -107,15 +124,15 @@
     [DEFINE done FALSE]
     [WHILE [NOT [VAR done]] # Wait for closing bracket and closing quote
       [SWITCH [INDEX [VAR src] [VAR i]]
-        [CASE "["
+        [CASE '['
           [DEFINE bracks [MATH [VAR bracks] + 1]]
-          [DEFINE arg [CONCAT [VAR arg] [INDEX [VAR src] [VAR i]]]]
+          [DEFINE arg [CONCAT [VAR arg] [STRING [INDEX [VAR src] [VAR i]]]]]
           [DEFINE i [MATH [VAR i] + 1]]
         ]
 
-        [CASE "]"
+        [CASE ']'
           [IF [COMPARE [VAR bracks] >= 1]
-            [DEFINE arg [CONCAT [VAR arg] [INDEX [VAR src] [VAR i]]]]
+            [DEFINE arg [CONCAT [VAR arg] [STRING [INDEX [VAR src] [VAR i]]]]]
             [DEFINE i [MATH [VAR i] + 1]]
           ] # Eat rbrack
           [DEFINE bracks [MATH [VAR bracks] - 1]]
@@ -124,30 +141,30 @@
           ]
         ]
 
-        [CASE "\"" #" Quote 
+        [CASE '"' # Quote 
           [DEFINE openQuote [NOT [VAR openQuote]]]
-          [DEFINE arg [CONCAT [VAR arg] [INDEX [VAR src] [VAR i]]]]
+          [DEFINE arg [CONCAT [VAR arg] [STRING [INDEX [VAR src] [VAR i]]]]]
           [DEFINE i [MATH [VAR i] + 1]]
         ]
 
-        [CASE " "
+        [CASE ' '
           [IF [AND [COMPARE [VAR bracks] == 0] [NOT [VAR openQuote]]]
             [DEFINE done TRUE]
           ELSE
-            [DEFINE arg [CONCAT [VAR arg] [INDEX [VAR src] [VAR i]]]]
+            [DEFINE arg [CONCAT [VAR arg] [STRING [INDEX [VAR src] [VAR i]]]]]
           ]
           [DEFINE i [MATH [VAR i] + 1]]
         ]
 
         [DEFAULT 
-          [DEFINE arg [CONCAT [VAR arg] [INDEX [VAR src] [VAR i]]]]
+          [DEFINE arg [CONCAT [VAR arg] [STRING [INDEX [VAR src] [VAR i]]]]]
           [DEFINE i [MATH [VAR i] + 1]]
         ]
       ]
     ]
 
     [APPEND [VAR argsraw] [VAR arg]]
-    [IF [COMPARE [INDEX [VAR src] [VAR i]] == " "] [DEFINE i [MATH [VAR i] + 1]]] # eat if space
+    [IF [COMPARE [INDEX [VAR src] [VAR i]] == ' '] [DEFINE i [MATH [VAR i] + 1]]] # eat if space
   ]
 
   # Build args
