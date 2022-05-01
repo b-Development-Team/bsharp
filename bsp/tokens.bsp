@@ -1,12 +1,12 @@
 [IMPORT "errors.bsp"]
 [TYPEDEF pos STRUCT{char:INT,line:INT,file:STRING}]
 [TYPEDEF token STRUCT{typ:INT,val:STRING,pos:pos}]
-[DEFINE tokTypeNumber 0]
-[DEFINE tokTypeString 1]
-[DEFINE tokTypeLBrack 2]
-[DEFINE tokTypeRBrack 3]
-[DEFINE tokTypeIdent 4]
-[DEFINE tokTypeByte 5]
+[CONSTDEF tokTypeNumber 0]
+[CONSTDEF tokTypeString 1]
+[CONSTDEF tokTypeLBrack 2]
+[CONSTDEF tokTypeRBrack 3]
+[CONSTDEF tokTypeIdent 4]
+[CONSTDEF tokTypeByte 5]
 
 [FUNC TOKEN [PARAM typ INT] [PARAM val STRING] [PARAM pos pos] [RETURNS token]
   [DEFINE out [MAKE token]]
@@ -83,7 +83,7 @@
       [DEFINE running FALSE]
     ]
   ]
-  [ADDTOK [VAR tok] [TOKEN [VAR tokTypeNumber] [VAR val] [VAR pos]]]
+  [ADDTOK [VAR tok] [TOKEN [CONST tokTypeNumber] [VAR val] [VAR pos]]]
 ]
 
 [FUNC ADDSTR [PARAM tok tokenizer]
@@ -117,7 +117,7 @@
       ]
     ]
   ]
-  [ADDTOK [VAR tok] [TOKEN [VAR tokTypeString] [VAR val] [VAR pos]]]
+  [ADDTOK [VAR tok] [TOKEN [CONST tokTypeString] [VAR val] [VAR pos]]]
 ]
 
 [FUNC ADDBYTE [PARAM tok tokenizer] [RETURNS ANY]
@@ -149,7 +149,7 @@
   ]
   [TOKINCR [VAR tok]]
 
-  [ADDTOK [VAR tok] [TOKEN [VAR tokTypeByte] [STRING [VAR val]] [VAR pos]]]
+  [ADDTOK [VAR tok] [TOKEN [CONST tokTypeByte] [STRING [VAR val]] [VAR pos]]]
 
   [RETURN [ANY NULL]]
 ]
@@ -176,7 +176,7 @@
       [DEFINE val [CONCAT [VAR val] [STRING [VAR char]]]]
     ]
   ]
-  [ADDTOK [VAR tok] [TOKEN [VAR tokTypeIdent] [VAR val] [VAR pos]]]
+  [ADDTOK [VAR tok] [TOKEN [CONST tokTypeIdent] [VAR val] [VAR pos]]]
 ]
 
 [FUNC TOKENIZE [PARAM file STRING] [PARAM code STRING] [RETURNS option] # ARRAY{token}
@@ -191,12 +191,12 @@
     [DEFINE char [INDEX [VAR code] [TOKIND [VAR out]]]]
     [SWITCH [VAR char]
       [CASE '['
-        [ADDTOK [VAR out] [TOKEN [VAR tokTypeLBrack] "[" [POS [VAR out]]]]
+        [ADDTOK [VAR out] [TOKEN [CONST tokTypeLBrack] "[" [POS [VAR out]]]]
         [TOKINCR [VAR out]]
       ]
 
       [CASE ']'
-        [ADDTOK [VAR out] [TOKEN [VAR tokTypeRBrack] "]" [POS [VAR out]]]]
+        [ADDTOK [VAR out] [TOKEN [CONST tokTypeRBrack] "]" [POS [VAR out]]]]
         [TOKINCR [VAR out]]
       ]
 
