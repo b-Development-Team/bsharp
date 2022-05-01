@@ -1,5 +1,6 @@
-[IMPORT "examples/bsp/tokens.bsp"]
-[IMPORT "examples/bsp/parser.bsp"]
+[IMPORT "bsp/tokens.bsp"]
+[IMPORT "bsp/parser.bsp"]
+[IMPORT "bsp/types.bsp"]
 
 [DEFINE code "[PRINT \"Hello, World!\" -1.234 1.1 [MATH 1 + 1] 'h']\n"]
 
@@ -33,3 +34,20 @@
   [PRINTNODE [INDEX [VAR p] [VAR i]] ""]
   [DEFINE i [MATH [VAR i] + 1]]
 ]
+
+# Types
+[PRINT "\nTYPES:"]
+[DEFINE a [_ARRAY [_INT]]]
+[DEFINE b [FUNCTION [ARRAY [_INT] [_STRING]] [_NULL]]]
+[DEFINE c [STRUCT [ARRAY [FIELD "h" [_INT]] [FIELD "i" [_STRING]]]]]
+[DEFINE d [STRUCT [ARRAY [FIELD "h" [_INT]] [FIELD "j" [_STRING]]]]]
+[PRINT [TSTRING [VAR a]]]
+[PRINT [TSTRING [VAR b]]]
+[PRINT [TSTRING [VAR c]]]
+[PRINT [TSTRING [VAR d]]]
+
+[DEFINE e [TEQUAL [VAR c] [VAR d]]]
+[IF [VAR e] [PRINT "TRUE"] ELSE [PRINT "FALSE"]]
+
+[DEFINE f [TEQUAL [VAR c] [VAR c]]]
+[IF [VAR f] [PRINT "TRUE"] ELSE [PRINT "FALSE"]]

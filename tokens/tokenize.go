@@ -1,9 +1,5 @@
 package tokens
 
-import (
-	"unicode"
-)
-
 func (t *Tokenizer) Tokenize() error {
 	for t.s.HasNext() {
 	Tokens:
@@ -70,9 +66,6 @@ func (t *Tokenizer) Tokenize() error {
 			fallthrough
 
 		default:
-			if !isLetter(t.s.Char()) {
-				return t.s.Pos().Error("unexpected character: %s", string(t.s.Char()))
-			}
 			t.addIdent()
 		}
 	}
@@ -202,16 +195,23 @@ func (t *Tokenizer) addByte() error {
 	return nil
 }
 
-func isLetter(char rune) bool {
-	return char == '+' || char == '-' || char == '*' || char == '/' || char == '^' || char == '%' || char == '=' || char == '!' || char == '<' || char == '>' || char == '{' || char == '}' || char == ',' || char == ':' || unicode.IsLetter(char)
-}
-
 func (t *Tokenizer) addIdent() {
 	pos := t.s.Pos()
 	val := ""
+	bracks := 0
+loop:
 	for t.s.HasNext() {
-		if !isLetter(t.s.Char()) {
-			break
+		switch t.s.Char() {
+		case '{':
+			bracks++
+
+		case '}':
+			bracks--
+
+		case ' ', '\n', '\t', ']':
+			if bracks == 0 {
+				break loop
+			}
 		}
 
 		val += string(t.s.Char())

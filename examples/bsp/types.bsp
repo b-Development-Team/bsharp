@@ -1,4 +1,0 @@
-# Basic types
-[TYPEDEF basicType INT]
-[DEFINE basicTypeInt 0]
-[FUNC INT [RETURNS basicType] [RETURN [VAR basicTypeInt]]]

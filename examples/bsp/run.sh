@@ -1,1 +1,0 @@
-bsharp run examples/bsp/main.bsp examples/bsp/parser.bsp examples/bsp/tokens.bsp examples/bsp/types.bsp

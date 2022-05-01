@@ -9,7 +9,7 @@ func (b *Builder) Build(p *parser.Parser, fs FS) error {
 	if err != nil {
 		return err
 	}
-	err = b.typePass(p)
+	err = b.defPass(p)
 	if err != nil {
 		return err
 	}

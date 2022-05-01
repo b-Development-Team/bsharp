@@ -6,97 +6,85 @@ import (
 	"github.com/Nv7-Github/bsharp/types"
 )
 
-var validFirstLetters = map[rune]struct{}{
-	'a': {},
-	'b': {},
-	'c': {},
-	'd': {},
-	'e': {},
-	'f': {},
-	'g': {},
-	'h': {},
-	'i': {},
-	'j': {},
-	'k': {},
-	'l': {},
-	'm': {},
-	'n': {},
-	'o': {},
-	'p': {},
-	'q': {},
-	'r': {},
-	's': {},
-	't': {},
-	'u': {},
-	'v': {},
-	'w': {},
-	'x': {},
-	'y': {},
-	'z': {},
-	'0': {},
-	'1': {},
-	'2': {},
-	'3': {},
-	'4': {},
-	'5': {},
-	'6': {},
-	'7': {},
-	'8': {},
-	'9': {},
-	'_': {},
-}
-
-// Typedef pass
-func (b *Builder) typePass(p *parser.Parser) error {
+// Typedef & Constdef pass
+func (b *Builder) defPass(p *parser.Parser) error {
 	for _, node := range p.Nodes {
 		call, ok := node.(*parser.CallNode)
 		if !ok {
 			continue
 		}
-		if call.Name != "TYPEDEF" {
-			continue
-		}
 
-		// Check if valid signature
-		if len(call.Args) != 2 {
-			return call.Pos().Error("expected two arguments to TYPEDEF")
-		}
+		switch call.Name {
+		case "TYPEDEF":
+			// Check if valid signature
+			if len(call.Args) != 2 {
+				return call.Pos().Error("expected two arguments to TYPEDEF")
+			}
 
-		// Check name
-		name, ok := call.Args[0].(*parser.IdentNode)
-		if !ok {
-			return call.Args[0].Pos().Error("expected identifier as first argument to TYPEDEF")
-		}
+			// Check name
+			name, ok := call.Args[0].(*parser.IdentNode)
+			if !ok {
+				return call.Args[0].Pos().Error("expected identifier as first argument to TYPEDEF")
+			}
 
-		// Check if first letter is valid
-		if _, ok := validFirstLetters[[]rune(name.Value)[0]]; !ok {
-			return name.Pos().Error("invalid type name")
-		}
-		if len([]rune(name.Value)) > 1 {
-			for _, val := range []rune(name.Value)[1:] {
-				if _, ok := types.ValidIdentLetters[val]; !ok {
-					return name.Pos().Error("invalid type name")
+			// Get type
+			typV, ok := call.Args[1].(*parser.IdentNode)
+			var typ types.Type
+			if !ok {
+				// check if its null
+				_, ok := call.Args[1].(*parser.NullNode)
+				if ok {
+					typ = types.NULL
+				} else {
+					return call.Args[1].Pos().Error("expected identifier as second argument to TYPEDEF")
 				}
 			}
+			if typ == nil {
+				var err error
+				typ, err = types.ParseType(typV.Value, b.typeNames)
+				if err != nil {
+					return call.Args[1].Pos().Error("%s", err.Error())
+				}
+			}
+
+			// Check if type already exists
+			if _, ok := b.typeNames[name.Value]; ok {
+				return name.Pos().Error("type already exists")
+			}
+
+			// Add type
+			b.typeNames[name.Value] = typ
+
+		case "CONSTDEF":
+			// Check if valid signature
+			if len(call.Args) != 2 {
+				return call.Pos().Error("expected two arguments to CONSTDEF")
+			}
+
+			// Check name
+			name, ok := call.Args[0].(*parser.IdentNode)
+			if !ok {
+				return call.Args[0].Pos().Error("expected identifier as first argument to CONSTDEF")
+			}
+
+			// Build val
+			_, ok = call.Args[1].(*parser.CallNode)
+			if ok {
+				return call.Args[1].Pos().Error("expected constant as second argument to CONSTDEF")
+			}
+			val, err := b.buildNode(call.Args[1])
+			if err != nil {
+				return err
+			}
+			v, ok := val.(*Const)
+			if !ok {
+				return call.Args[1].Pos().Error("expected constant as second argument to CONSTDEF")
+			}
+
+			// Add consts
+			b.consts[name.Value] = v
 		}
 
-		// Get type
-		typV, ok := call.Args[1].(*parser.IdentNode)
-		if !ok {
-			return call.Args[1].Pos().Error("expected identifier as second argument to TYPEDEF")
-		}
-		typ, err := types.ParseType(typV.Value, b.typeNames)
-		if err != nil {
-			return call.Args[1].Pos().Error("%s", err.Error())
-		}
-
-		// Check if type already exists
-		if _, ok := b.typeNames[name.Value]; ok {
-			return name.Pos().Error("type already exists")
-		}
-
-		// Add type
-		b.typeNames[name.Value] = typ
 	}
 
 	return nil
@@ -105,6 +93,13 @@ func (b *Builder) typePass(p *parser.Parser) error {
 func (b *Builder) checkTypeDef(n *parser.CallNode) error {
 	if b.Scope.CurrType() != ScopeTypeGlobal {
 		return n.Pos().Error("TYPEDEF can only be used in global scope")
+	}
+	return nil
+}
+
+func (b *Builder) checkConst(n *parser.CallNode) error {
+	if b.Scope.CurrType() != ScopeTypeGlobal {
+		return n.Pos().Error("CONST can only be used in global scope")
 	}
 	return nil
 }

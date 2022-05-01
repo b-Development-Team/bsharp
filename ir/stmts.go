@@ -72,6 +72,29 @@ func (b *Builder) buildNode(node parser.Node) (Node, error) {
 			case "TYPEDEF":
 				return nil, b.checkTypeDef(n)
 
+			case "CONSTDEF":
+				return nil, b.checkConst(n)
+
+			case "CONST":
+				arg, err := b.buildNode(n.Args[0])
+				if err != nil {
+					return nil, err
+				}
+				if !types.IDENT.Equal(arg.Type()) {
+					return nil, arg.Pos().Error("expected identifier as argument to CONST")
+				}
+				name := arg.(*Const).Value.(string)
+				v, exists := b.consts[name]
+				if !exists {
+					return nil, arg.Pos().Error("undefined constant: %s", name)
+				}
+				return &Const{
+					typ: v.typ,
+					pos: n.Pos(),
+
+					Value: v.Value,
+				}, nil
+
 			case "IMPORT":
 				if b.Scope.CurrType() != ScopeTypeGlobal {
 					return nil, n.Pos().Error("import must be at the top level")

@@ -1,4 +1,4 @@
-[IMPORT "examples/bsp/tokens.bsp"]
+[IMPORT "bsp/tokens.bsp"]
 
 # Value nodes
 [TYPEDEF parser STRUCT{tokens:ARRAY{token},ind:INT}]
@@ -11,13 +11,13 @@
 [TYPEDEF parserByteNode BYTE]
 
 # parser types
-[DEFINE parserTypCall 0]
-[DEFINE parserTypIdent 1]
-[DEFINE parserTypBool 2]
-[DEFINE parserTypNull 3]
-[DEFINE parserTypString 4]
-[DEFINE parserTypNumber 5]
-[DEFINE parserTypByte 6]
+[CONSTDEF parserTypCall 0]
+[CONSTDEF parserTypIdent 1]
+[CONSTDEF parserTypBool 2]
+[CONSTDEF parserTypNull 3]
+[CONSTDEF parserTypString 4]
+[CONSTDEF parserTypNumber 5]
+[CONSTDEF parserTypByte 6]
 
 # Util
 [FUNC PARSERINCR [PARAM parser parser]
@@ -64,53 +64,53 @@
   [DEFINE out [MAKE parserNode]]
   [SET [VAR out] pos [GET [VAR curr] pos]]
   [SWITCH [GET [VAR curr] typ]
-    [CASE 0 # Number
-      [SET [VAR out] typ [VAR parserTypNumber]]
+    [CASE [CONST tokTypeNumber] # Number
+      [SET [VAR out] typ [CONST parserTypNumber]]
       [SET [VAR out] val [ANY [GET [VAR curr] val]]]
       [PARSERINCR [VAR p]]
       [RETURN [ANY [VAR out]]]
     ]
 
-    [CASE 1 # String
-      [SET [VAR out] typ [VAR parserTypString]]
+    [CASE [CONST tokTypeString] # String
+      [SET [VAR out] typ [CONST parserTypString]]
       [SET [VAR out] val [ANY [GET [VAR curr] val]]]
       [PARSERINCR [VAR p]]
       [RETURN [ANY [VAR out]]]
     ]
 
-    [CASE 4 # Ident
+    [CASE [CONST tokTypeIdent] # Ident
       [DEFINE val [GET [VAR curr] val]]
       # Check if it is a const
       [SWITCH [VAR val]
         [CASE "TRUE"
-          [SET [VAR out] typ [VAR parserTypBool]]
+          [SET [VAR out] typ [CONST parserTypBool]]
           [SET [VAR out] val [ANY TRUE]]
           [PARSERINCR [VAR p]]
           [RETURN [ANY [VAR out]]]
         ]
 
         [CASE "FALSE"
-          [SET [VAR out] typ [VAR parserTypBool]]
+          [SET [VAR out] typ [CONST parserTypBool]]
           [SET [VAR out] val [ANY FALSE]]
           [PARSERINCR [VAR p]]
           [RETURN [ANY [VAR out]]]
         ]
 
         [CASE "NULL"
-          [SET [VAR out] typ [VAR parserTypNull]]
+          [SET [VAR out] typ [CONST parserTypNull]]
           [PARSERINCR [VAR p]]
           [RETURN [ANY [VAR out]]]
         ]
       ]
 
-      [SET [VAR out] typ [VAR parserTypIdent]]
+      [SET [VAR out] typ [CONST parserTypIdent]]
       [SET [VAR out] val [ANY [VAR val]]]
       [PARSERINCR [VAR p]]
       [RETURN [ANY [VAR out]]]
     ]
 
-    [CASE 5 # Byte
-      [SET [VAR out] typ [VAR parserTypByte]]
+    [CASE [CONST tokTypeByte] # Byte
+      [SET [VAR out] typ [CONST parserTypByte]]
       [SET [VAR out] val [ANY [INDEX [GET [VAR curr] val] 0]]]
       [PARSERINCR [VAR p]]
       [RETURN [ANY [VAR out]]]
@@ -119,7 +119,7 @@
 
   # Parse val
   [DEFINE typ [GET [VAR curr] typ]]
-  [IF [COMPARE [VAR typ] != [VAR tokTypeLBrack]]
+  [IF [COMPARE [VAR typ] != [CONST tokTypeLBrack]]
     [RETURN [ERR [GET [VAR curr] pos] "expected \"[\""]]
   ]
   [PARSERINCR [VAR p]]
@@ -128,7 +128,7 @@
   [DEFINE curr [INDEX [GET [VAR p] tokens] [GET [VAR p] ind]]]
   [DEFINE typ [GET [VAR curr] typ]]
   [DEFINE pos [GET [VAR curr] pos]]
-  [IF [COMPARE [VAR typ] != [VAR tokTypeIdent]]
+  [IF [COMPARE [VAR typ] != [CONST tokTypeIdent]]
     [RETURN [ERR [GET [VAR curr] pos] "expected name"]]
   ]
   [DEFINE name [GET [VAR curr] val]]
@@ -139,7 +139,7 @@
   [DEFINE running TRUE]
   [WHILE [VAR running]
     [DEFINE curr [INDEX [GET [VAR p] tokens] [GET [VAR p] ind]]]
-    [IF [COMPARE [GET [VAR curr] typ] == [VAR tokTypeRBrack]] # Eat RBrack
+    [IF [COMPARE [GET [VAR curr] typ] == [CONST tokTypeRBrack]] # Eat RBrack
       [PARSERINCR [VAR p]] # Eat RBrack
       [DEFINE running FALSE]
     ELSE
@@ -153,7 +153,7 @@
 
   # Build out
   [SET [VAR out] pos [VAR pos]]
-  [SET [VAR out] typ [VAR parserTypCall]]
+  [SET [VAR out] typ [CONST parserTypCall]]
   [DEFINE call [MAKE parserCallNode]]
   [SET [VAR call] name [VAR name]]
   [SET [VAR call] args [VAR args]]

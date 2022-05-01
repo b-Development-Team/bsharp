@@ -134,7 +134,7 @@ func (m *MapType) Equal(b Type) bool {
 }
 
 func (m *MapType) String() string {
-	return fmt.Sprintf("MAP{%s,%s}", m.KeyType.String(), m.ValType.String())
+	return fmt.Sprintf("MAP{%s, %s}", m.KeyType.String(), m.ValType.String())
 }
 
 type MulType struct {
@@ -254,7 +254,7 @@ func (s *StructType) String() string {
 	for i, field := range s.Fields {
 		fmt.Fprintf(out, "%s:%s", field.Name, field.Type.String())
 		if i != len(s.Fields)-1 {
-			out.WriteString(",")
+			out.WriteString(", ")
 		}
 	}
 	out.WriteString("}")
