@@ -123,7 +123,7 @@ func (c *CGen) addIndex(pos *tokens.Pos, n *ir.IndexNode) (*Code, error) {
 		pre := fmt.Sprintf("char %s = string_ind(%s, %s);", name, arr.Value, ind.Value)
 		// Bounds check
 		if c.Config.BoundsCheck {
-			pre = JoinCode(fmt.Sprintf("string_bounds(%s, %s, %q);", arr.Value, ind.Value, pos.String()), pre)
+			pre = JoinCode(fmt.Sprintf("string_bounds(%s, %s, %d);", arr.Value, ind.Value, c.posID(pos)), pre)
 		}
 		return &Code{
 			Pre:   JoinCode(arr.Pre, ind.Pre, pre),
@@ -134,7 +134,7 @@ func (c *CGen) addIndex(pos *tokens.Pos, n *ir.IndexNode) (*Code, error) {
 	pre := JoinCode(arr.Pre, ind.Pre)
 	// Bounds check
 	if c.Config.BoundsCheck {
-		pre = JoinCode(pre, fmt.Sprintf("array_bounds(%s, %s, %q);", arr.Value, ind.Value, pos.String()))
+		pre = JoinCode(pre, fmt.Sprintf("array_bounds(%s, %s, %d);", arr.Value, ind.Value, c.posID(pos)))
 	}
 	return &Code{
 		Pre:   pre,

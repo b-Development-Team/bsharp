@@ -50,6 +50,9 @@ func (c *CGen) addAnyCast(n *ir.CastNode) (*Code, error) {
 		name := typName(n.Value.Type()) + "_anyfree"
 		_, exists := c.addedFns[name]
 		if !exists {
+			// Add type
+			c.CType(n.Value.Type())
+
 			fmt.Fprintf(c.globalfns, "void %s(void* val) {\n", name)
 			fmt.Fprintf(c.globalfns, "%s%s v = *((%s*)val);\n", c.Config.Tab, c.CType(n.Value.Type()), c.CType(n.Value.Type()))
 			fmt.Fprintf(c.globalfns, "%s%s;\n", c.Config.Tab, c.FreeCode("v", n.Value.Type()))
@@ -85,7 +88,7 @@ func (c *CGen) addAnyFromCast(n *ir.CastNode) (*Code, error) {
 	if err != nil {
 		return nil, err
 	}
-	pre := JoinCode(a.Pre, fmt.Sprintf("any_try_cast(%q, %s, %d);", n.Pos().String(), a.Value, c.typID(n.Type())))
+	pre := JoinCode(a.Pre, fmt.Sprintf("any_try_cast(%d, %s, %d);", c.posID(n.Pos()), a.Value, c.typID(n.Type())))
 	return &Code{
 		Pre:   pre,
 		Value: fmt.Sprintf("(*((%s*)(%s->value)))", c.CType(n.Type()), a.Value),

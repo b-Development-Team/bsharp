@@ -9,6 +9,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
+const char* const posdata[];
+
 typedef struct string {
   char* data;
 
@@ -66,9 +68,9 @@ static inline void string_print(string* val) {
   printf("%.*s\n", val->len, val->data);
 }
 
-static inline void string_bounds(string* s, int i, const char* pos) {
+static inline void string_bounds(string* s, int i, int pos) {
   if (i < 0 || i >= s->len) {
-    fprintf(stderr, "%s: index out of bounds: %d with length %d\n", pos, i, s->len);
+    fprintf(stderr, "%s: index out of bounds: %d with length %d\n", posdata[pos], i, s->len);
     exit(EXIT_FAILURE);
   }
 }
@@ -213,15 +215,15 @@ void array_free(array* a, array_free_fn free_fn) {
   }
 }
 
-static inline void array_bounds(array* a, int i, const char* pos) {
+static inline void array_bounds(array* a, int i, int pos) {
   if (i < 0 || i >= a->len) {
-    fprintf(stderr, "%s: index out of bounds: %d with length %d\n", pos, i, a->len);
+    fprintf(stderr, "%s: index out of bounds: %d with length %d\n", posdata[pos], i, a->len);
     exit(EXIT_FAILURE);
   }
 }
 
-static inline void bsp_panic(string* msg, const char* pos) {
-  fprintf(stderr, "%s: %.*s\n", pos, msg->len, msg->data);
+static inline void bsp_panic(string* msg, int pos) {
+  fprintf(stderr, "%s: %.*s\n", posdata[pos], msg->len, msg->data);
   exit(EXIT_FAILURE);
 }
 
@@ -914,9 +916,9 @@ void any_free(any* a) {
 
 const char* const anytyps[];
 
-void any_try_cast(const char* pos, any* a, int typ) {
+void any_try_cast(int pos, any* a, int typ) {
   if (a->typ != typ) {
-    fprintf(stderr, "%s: cannot cast value of type %s to %s\n", pos, anytyps[a->typ], anytyps[typ]);
+    fprintf(stderr, "%s: cannot cast value of type %s to %s\n", posdata[pos], anytyps[a->typ], anytyps[typ]);
     exit(1);
   }
 }

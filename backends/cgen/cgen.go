@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/Nv7-Github/bsharp/ir"
+	"github.com/Nv7-Github/bsharp/tokens"
 	"github.com/Nv7-Github/bsharp/types"
 )
 
@@ -57,8 +58,10 @@ type CGen struct {
 	isReturn     bool
 	addedFns     map[string]struct{}
 
-	typIDs map[string]int
-	idTyps []types.Type
+	posIDs  map[string]int
+	posData []*tokens.Pos
+	typIDs  map[string]int
+	idTyps  []types.Type
 
 	globals    *strings.Builder
 	globalfns  *strings.Builder
@@ -77,6 +80,8 @@ func NewCGen(i *ir.IR) *CGen {
 		globals:      &strings.Builder{},
 		addedFns:     make(map[string]struct{}),
 		globalfns:    &strings.Builder{},
+		posIDs:       make(map[string]int),
+		posData:      make([]*tokens.Pos, 0),
 		typIDs:       make(map[string]int),
 		idTyps:       make([]types.Type, 0),
 	}
@@ -165,6 +170,7 @@ func (c *CGen) Build() (string, error) {
 
 	// Combine
 	topCode := strings.Replace(std, "const char* const anytyps[];", c.typCode(), 1)
+	topCode = strings.Replace(topCode, "const char* const posdata[];", c.posCode(), 1)
 	code := &strings.Builder{}
 	code.WriteString(topCode)
 	code.WriteString(c.globaltyps.String())

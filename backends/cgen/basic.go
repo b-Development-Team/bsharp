@@ -25,7 +25,7 @@ func (c *CGen) addPanic(n *ir.PanicNode, pos *tokens.Pos) (*Code, error) {
 		return nil, err
 	}
 	return &Code{
-		Pre: JoinCode(v.Pre, fmt.Sprintf("bsp_panic(%s, %q);", v.Value, pos.String())),
+		Pre: JoinCode(v.Pre, fmt.Sprintf("bsp_panic(%s, %d);", v.Value, c.posID(pos))),
 	}, nil
 }
 
@@ -98,4 +98,24 @@ func (c *CGen) addLogicalOp(n *ir.LogicalOpNode) (*Code, error) {
 	}
 
 	panic("invalid op")
+}
+
+func (c *CGen) posID(pos *tokens.Pos) int {
+	id, exists := c.posIDs[pos.String()]
+	if !exists {
+		id = len(c.posIDs)
+		c.posIDs[pos.String()] = id
+		c.posData = append(c.posData, pos)
+	}
+	return id
+}
+
+func (c *CGen) posCode() string {
+	out := &strings.Builder{}
+	out.WriteString("const char* const posdata[] = {\n")
+	for _, p := range c.posData {
+		fmt.Fprintf(out, "%s%q,\n", c.Config.Tab, p.String())
+	}
+	out.WriteString("};")
+	return out.String()
 }
