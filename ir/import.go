@@ -36,7 +36,7 @@ func (b *Builder) importPass(p *parser.Parser, fs FS) error {
 		// Check if imported
 		_, exists := b.imported[name]
 		if exists {
-			return nil
+			continue
 		}
 
 		// Get file

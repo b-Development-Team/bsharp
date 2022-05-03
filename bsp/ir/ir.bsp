@@ -1,0 +1,25 @@
+[IMPORT "bsp/types.bsp"]
+[IMPORT "bsp/tokens.bsp"]
+[IMPORT "bsp/ir/scope.bsp"]
+
+[TYPEDEF nodeKind INT]
+[TYPEDEF node STRUCT{typ:type, kind:nodeKind, val: ANY, pos:pos}]
+
+[TYPEDEF callKind INT]
+[TYPEDEF call STRUCT{kind:callKind, val:ANY}]
+
+[TYPEDEF param STRUCT{id:INT, name:STRING, typ: type, pos: pos}]
+[TYPEDEF function STRUCT{name:STRING, params:ARRAY{param}, retType:type, body:ARRAY{node}, pos:pos, scope:scopeInfo}]
+
+[TYPEDEF builder STRUCT{scope:scope, body:ARRAY{node}, funcs:MAP{STRING, function}}]
+
+[FUNC newBuilder [RETURNS builder]
+  [DEFINE out [MAKE builder]]
+  [SET [VAR out] body [MAKE ARRAY{node}]]
+  [SET [VAR out] funcs [MAKE MAP{STRING, function}]]
+  [DEFINE scope [MAKE scope]]
+  [SET [VAR scope] frames [MAKE ARRAY{scopeFrame}]]
+  [SET [VAR scope] variables [MAKE ARRAY{variable}]]
+  [SET [VAR out] scope [VAR scope]]
+  [RETURN [VAR out]]
+]

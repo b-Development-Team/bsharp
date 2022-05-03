@@ -1,0 +1,48 @@
+[IMPORT "bsp/types.bsp"]
+[IMPORT "bsp/tokens.bsp"]
+[TYPEDEF scopeType INT]
+[CONSTDEF scopeTypeGlobal 0]
+[CONSTDEF scopeTypeFunction 1]
+[CONSTDEF scopeTypeIf 2]
+[CONSTDEF scopeTypeWhile 3]
+[CONSTDEF scopeTypeSwitch 4]
+[CONSTDEF scopeTypeCase 5]
+
+[TYPEDEF variable STRUCT{typ:type, name:STRING, id:INT, pos:pos, scope:scopeType, needsGlobal:BOOL}]
+[TYPEDEF scopeFrame STRUCT{typ:scopeType, variables:MAP{STRING, INT}}]
+[TYPEDEF scope STRUCT{frames:ARRAY{scopeFrame}, variables:ARRAY{variable}}]
+[TYPEDEF scopeInfo ARRAY{scopeFrame}]
+
+[FUNC scopePush [PARAM scope scope] [PARAM typ scopeType]
+  [DEFINE frame [MAKE scopeFrame]]
+  [SET [VAR frame] variables [MAKE MAP{STRING, INT}]]
+  [SET [VAR frame] typ [VAR typ]]
+  [APPEND [GET [VAR scope] frames] [VAR frame]]
+]
+
+[FUNC scopePop [PARAM scope scope]
+  [DEFINE frames [GET [VAR scope] frames]]
+  [SLICE [VAR frames] 0 [MATH [LENGTH [VAR frames]] - 1]]
+]
+
+[FUNC scopeContainsType [PARAM scope scope] [PARAM typ scopeType] [RETURNS BOOL]
+  [DEFINE frames [GET [VAR scope] frames]]
+  [DEFINE i 0]
+  [WHILE [COMPARE [VAR i] < [LENGTH [VAR frames]]]
+    [IF [COMPARE [GET [INDEX [VAR frames] [VAR i]] typ] == [VAR typ]]
+      [RETURN TRUE]
+    ]
+  ]
+  [RETURN FALSE]
+]
+
+[FUNC scopeCurrType [PARAM scope scope] [RETURNS scopeType]
+  [DEFINE f [INDEX [GET [VAR scope] frames] [MATH [LENGTH [GET [VAR scope] frames]] - 1]]]
+  [RETURN [GET [VAR f] typ]]
+]
+
+[FUNC scopeVariable [PARAM scope scope] [PARAM var INT] [RETURNS variable]
+  [RETURN [INDEX [GET [VAR scope] variables] [VAR var]]]
+]
+
+# TODO: currScopeInfo, getVar, currScopeGetVar, addVariable

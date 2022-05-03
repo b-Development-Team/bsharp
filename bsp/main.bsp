@@ -1,6 +1,7 @@
 [IMPORT "bsp/tokens.bsp"]
 [IMPORT "bsp/parser.bsp"]
 [IMPORT "bsp/types.bsp"]
+[IMPORT "bsp/ir/ir.bsp"]
 
 [DEFINE code "[PRINT \"Hello, World!\" -1.234 1.1 [MATH 1 + 1] 'h']\n"]
 
@@ -51,3 +52,6 @@
 
 [DEFINE f [TEQUAL [VAR c] [VAR c]]]
 [IF [VAR f] [PRINT "TRUE"] ELSE [PRINT "FALSE"]]
+
+# IR
+[DEFINE bld [newBuilder]]

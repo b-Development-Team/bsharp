@@ -1,6 +1,8 @@
 package ir
 
-import "github.com/Nv7-Github/bsharp/parser"
+import (
+	"github.com/Nv7-Github/bsharp/parser"
+)
 
 func (b *Builder) Build(p *parser.Parser, fs FS) error {
 	b.imported[p.Filename()] = empty{} // Mark as imported
