@@ -84,19 +84,23 @@ func init() {
 		ArgTypes: []types.Type{types.IDENT, types.VARIADIC},
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
 			if len(args) > 1 {
-				return nil, pos.Error("TIME takes 0 or 1 arguments")
+				b.Error(ErrorLevelError, pos, "TIME takes 0 or 1 arguments")
+				return &TimeNode{
+					Mode: TimeModeSeconds,
+					pos:  pos,
+				}, nil
 			}
 
 			mode := TimeModeSeconds
 			if len(args) == 1 {
-				i, ok := args[0].(*Const)
-				if !ok {
-					return nil, pos.Error("TIME mode must be an identifier")
-				}
-
+				i := args[0].(*Const)
 				m, ok := timeModeNames[i.Value.(string)]
 				if !ok {
-					return nil, pos.Error("TIME mode must be SECONDS, MICRO, MILLI, or NANO")
+					b.Error(ErrorLevelError, pos, "TIME mode must be SECONDS, MICRO, MILLI, or NANO")
+					return &TimeNode{
+						Mode: TimeModeSeconds,
+						pos:  pos,
+					}, nil
 				}
 				mode = m
 			}

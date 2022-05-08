@@ -61,26 +61,31 @@ func textDocumentDidSave(context *glsp.Context, params *protocol.DidSaveTextDocu
 		})
 		return nil
 	}
-	v, ok := err.(*tokens.PosError)
-	if !ok {
-		return nil // No diagnostic error
-	}
 
-	// Make diagnostic
-	context.Notify(protocol.ServerTextDocumentPublishDiagnostics, protocol.PublishDiagnosticsParams{
-		URI: filepath.Join(RootURI, v.Pos.File),
-		Diagnostics: []protocol.Diagnostic{
-			{
-				Range: protocol.Range{
-					Start: protocol.Position{Line: uint32(v.Pos.Line), Character: uint32(v.Pos.Char)},
-					End:   protocol.Position{Line: uint32(v.Pos.EndLine), Character: uint32(v.Pos.EndChar)},
-				},
-				Severity: Ptr(protocol.DiagnosticSeverityError),
-				Source:   Ptr("bsharp"),
-				Message:  v.Msg,
+	if len(ir.Errors) == 0 {
+		return nil
+	}
+	diagnostics := make(map[string][]protocol.Diagnostic)
+	for _, e := range ir.Errors {
+		if diagnostics[e.Pos.File] == nil {
+			diagnostics[e.Pos.File] = make([]protocol.Diagnostic, 0)
+		}
+		diagnostics[e.Pos.File] = append(diagnostics[e.Pos.File], protocol.Diagnostic{
+			Range: protocol.Range{
+				Start: protocol.Position{Line: uint32(e.Pos.Line), Character: uint32(e.Pos.Char)},
+				End:   protocol.Position{Line: uint32(e.Pos.EndLine), Character: uint32(e.Pos.EndChar)},
 			},
-		},
-	})
+			Severity: Ptr(protocol.DiagnosticSeverityError),
+			Source:   Ptr("bsharp"),
+			Message:  e.Message,
+		})
+	}
+	for k, v := range diagnostics {
+		context.Notify(protocol.ServerTextDocumentPublishDiagnostics, protocol.PublishDiagnosticsParams{
+			URI:         filepath.Join(RootURI, k),
+			Diagnostics: v,
+		})
+	}
 
 	return nil
 }

@@ -169,7 +169,7 @@ func init() {
 			if len(args) > 1 {
 				for _, arg := range args[1:] {
 					if !typ.Equal(arg.Type()) {
-						return nil, arg.Pos().Error("expected type %s, got %s", typ.String(), arg.Type().String())
+						b.Error(ErrorLevelError, arg.Pos(), "expected type %s, got %s", typ.String(), arg.Type().String())
 					}
 				}
 			}
@@ -186,7 +186,7 @@ func init() {
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
 			arrTyp := args[0].Type().(*types.ArrayType)
 			if !arrTyp.ElemType.Equal(args[1].Type()) {
-				return nil, args[1].Pos().Error("cannot append value of type %s to array with element type %s", args[1].Type().String(), arrTyp.ElemType.String())
+				b.Error(ErrorLevelError, args[1].Pos(), "cannot append value of type %s to array with element type %s", args[1].Type().String(), arrTyp.ElemType.String())
 			}
 
 			return &AppendNode{
@@ -229,14 +229,16 @@ func init() {
 			typV := args[0].(*Const).Value.(string)
 			typ, err := types.ParseType(typV, b.typeNames)
 			if err != nil {
-				return nil, args[0].Pos().Error("%s", err.Error())
+				b.Error(ErrorLevelError, args[0].Pos(), "%s", err.Error())
+				return NewTypedValue(types.INVALID), nil
 			}
 			if !types.ARRAY.Equal(typ) && !types.MAP.Equal(typ) && !types.STRUCT.Equal(typ) {
-				return nil, args[0].Pos().Error("expected map, array, or struct type, got %s", typ.String())
+				b.Error(ErrorLevelError, args[0].Pos(), "expected map, array, or struct type, got %s", typ.String())
+				return NewTypedValue(types.INVALID), nil
 			}
 			if types.MAP.Equal(typ) { // Check key type
 				if !hashable.Equal(typ.(*types.MapType).KeyType) {
-					return nil, args[0].Pos().Error("unhashable key type: %s", typ.(*types.MapType).KeyType.String())
+					b.Error(ErrorLevelError, args[0].Pos(), "unhashable key type: %s", typ.(*types.MapType).KeyType.String())
 				}
 			}
 			return &MakeNode{
@@ -253,10 +255,10 @@ func init() {
 				// Check types
 				mapTyp := args[0].Type().(*types.MapType)
 				if !mapTyp.KeyType.Equal(args[1].Type()) {
-					return nil, args[1].Pos().Error("expected type %s for map key, got %s", mapTyp.KeyType.String(), args[1].Type().String())
+					b.Error(ErrorLevelError, args[1].Pos(), "expected type %s for map key, got %s", mapTyp.KeyType.String(), args[1].Type().String())
 				}
 				if !mapTyp.ValType.Equal(args[2].Type()) {
-					return nil, args[2].Pos().Error("expected type %s for map value, got %s", mapTyp.ValType.String(), args[2].Type().String())
+					b.Error(ErrorLevelError, args[2].Pos(), "expected type %s for map value, got %s", mapTyp.ValType.String(), args[2].Type().String())
 				}
 
 				return &SetNode{
@@ -271,7 +273,8 @@ func init() {
 				// Check types
 				structTyp := args[0].Type().(*types.StructType)
 				if !types.IDENT.Equal(args[1].Type()) {
-					return nil, args[1].Pos().Error("expected type %s for struct field name, got %s", types.IDENT.String(), args[1].Type().String())
+					b.Error(ErrorLevelError, args[1].Pos(), "expected type %s for struct field name, got %s", types.IDENT.String(), args[1].Type().String())
+					return NewTypedValue(types.INVALID), nil
 				}
 				name := args[1].(*Const).Value.(string)
 				var field *types.StructField
@@ -284,10 +287,9 @@ func init() {
 					}
 				}
 				if field == nil {
-					return nil, args[1].Pos().Error("unknown struct field: %s", name)
-				}
-				if !field.Type.Equal(args[2].Type()) {
-					return nil, args[2].Pos().Error("expected type %s for struct field value, got %s", field.Type.String(), args[2].Type().String())
+					b.Error(ErrorLevelError, args[1].Pos(), "unknown struct field: %s", name)
+				} else if !field.Type.Equal(args[2].Type()) {
+					b.Error(ErrorLevelError, args[2].Pos(), "expected type %s for struct field value, got %s", field.Type.String(), args[2].Type().String())
 				}
 
 				return &SetStructNode{
@@ -301,10 +303,10 @@ func init() {
 			// Array type
 			arrTyp := args[0].Type().(*types.ArrayType)
 			if !types.INT.Equal(args[1].Type()) {
-				return nil, args[1].Pos().Error("expected type %s for array index, got %s", types.INT.String(), args[1].Type().String())
+				b.Error(ErrorLevelError, args[1].Pos(), "expected type %s for array index, got %s", types.INT.String(), args[1].Type().String())
 			}
 			if !arrTyp.ElemType.Equal(args[2].Type()) {
-				return nil, args[2].Pos().Error("expected type %s for array value, got %s", arrTyp.ElemType.String(), args[2].Type().String())
+				b.Error(ErrorLevelError, args[2].Pos(), "expected type %s for array value, got %s", arrTyp.ElemType.String(), args[2].Type().String())
 			}
 			return &SetIndexNode{
 				Array: args[0],
@@ -322,7 +324,7 @@ func init() {
 				// Check types
 				mapTyp := args[0].Type().(*types.MapType)
 				if !mapTyp.KeyType.Equal(args[1].Type()) {
-					return nil, args[1].Pos().Error("expected type %s for map key, got %s", mapTyp.KeyType.String(), args[1].Type().String())
+					b.Error(ErrorLevelError, args[1].Pos(), "expected type %s for map key, got %s", mapTyp.KeyType.String(), args[1].Type().String())
 				}
 
 				return &GetNode{
@@ -335,7 +337,8 @@ func init() {
 			// Struct type
 			structTyp := args[0].Type().(*types.StructType)
 			if !types.IDENT.Equal(args[1].Type()) {
-				return nil, args[1].Pos().Error("expected type %s for struct field name, got %s", types.IDENT.String(), args[1].Type().String())
+				b.Error(ErrorLevelError, args[1].Pos(), "expected type %s for struct field name, got %s", types.IDENT.String(), args[1].Type().String())
+				return NewTypedValue(types.INVALID), nil
 			}
 			name := args[1].(*Const).Value.(string)
 			var field *types.StructField
@@ -348,7 +351,8 @@ func init() {
 				}
 			}
 			if field == nil {
-				return nil, args[1].Pos().Error("unknown struct field: %s", name)
+				b.Error(ErrorLevelError, args[1].Pos(), "unknown struct field: %s", name)
+				return NewTypedValue(types.INVALID), nil
 			}
 			return &GetStructNode{
 				Struct: args[0],

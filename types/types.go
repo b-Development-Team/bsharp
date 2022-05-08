@@ -43,6 +43,7 @@ const (
 	ALL
 	VARIADIC
 	IDENT
+	INVALID
 )
 
 var basicTypeNames = map[BasicType]string{

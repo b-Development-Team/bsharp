@@ -124,9 +124,9 @@ func (b *Builder) buildNode(node parser.Node) (Node, error) {
 			}
 			args[i] = node
 		}
-		err := MatchTypes(n.Pos(), args, builder.ArgTypes)
-		if err != nil {
-			return nil, err
+		hasErr := b.MatchTypes(n.Pos(), args, builder.ArgTypes)
+		if hasErr {
+			b.FixTypes(&args, builder.ArgTypes, n.Pos())
 		}
 		call, err := builder.Build(b, n.Pos(), args)
 		if err != nil {

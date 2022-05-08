@@ -167,9 +167,9 @@ func (b *Builder) buildFnCall(n *parser.CallNode) (Node, error) {
 	for i, par := range fn.Params {
 		expected[i] = par.Type
 	}
-	err := MatchTypes(n.Pos(), args, expected)
-	if err != nil {
-		return nil, err
+	hasE := b.MatchTypes(n.Pos(), args, expected)
+	if hasE {
+		return NewTypedNode(fn.RetType, n.Pos()), nil
 	}
 
 	return &FnCallNode{
@@ -268,12 +268,15 @@ func init() {
 		ArgTypes: []types.Type{types.ALL},
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
 			if !b.Scope.HasType(ScopeTypeFunction) {
-				return nil, pos.Error("return statement outside of function")
+				b.Error(ErrorLevelError, pos, "RETURN statement outside of function")
+				return &ReturnNode{Value: args[0]}, nil
 			}
+
 			retTyp := b.Funcs[b.currFn].RetType
 			if !args[0].Type().Equal(retTyp) {
-				return nil, args[0].Pos().Error("expected return type %s, got %s", retTyp.String(), args[0].Type().String())
+				b.Error(ErrorLevelError, args[0].Pos(), "expected return type %s, got %s", retTyp.String(), args[0].Type().String())
 			}
+
 			return &ReturnNode{
 				Value: args[0],
 			}, nil
@@ -286,7 +289,8 @@ func init() {
 			name := args[0].(*Const).Value.(string)
 			fn, exists := b.Funcs[name]
 			if !exists {
-				return nil, pos.Error("unknown function: %s", name)
+				b.Error(ErrorLevelError, pos, "undefined function: %s", name)
+				return NewTypedValue(types.INVALID), nil
 			}
 			pars := make([]types.Type, len(fn.Params))
 			for i, par := range fn.Params {
@@ -307,9 +311,9 @@ func init() {
 			// Match types
 			typ := args[0].Type().(*types.FuncType)
 			if len(typ.ParTypes) > 0 {
-				err := MatchTypes(pos, args[1:], typ.ParTypes)
-				if err != nil {
-					return nil, err
+				err := b.MatchTypes(pos, args[1:], typ.ParTypes)
+				if err {
+					return NewTypedValue(types.INVALID), nil
 				}
 			} else {
 				args = args[:1]

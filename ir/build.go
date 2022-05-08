@@ -1,6 +1,8 @@
 package ir
 
 import (
+	"fmt"
+
 	"github.com/Nv7-Github/bsharp/parser"
 )
 
@@ -31,5 +33,8 @@ func (b *Builder) Build(p *parser.Parser, fs FS) error {
 		}
 	}
 
+	if len(b.Errors) > 0 {
+		return fmt.Errorf("built with %d errors", len(b.Errors))
+	}
 	return nil
 }

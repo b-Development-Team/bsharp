@@ -53,6 +53,11 @@ func main() {
 		ir := ir.NewBuilder()
 		err = ir.Build(v, fs)
 		if err != nil {
+			if len(ir.Errors) > 0 {
+				for _, err := range ir.Errors {
+					fmt.Println(err.Pos.Error("%s", err.Message))
+				}
+			}
 			p.Fail(err.Error())
 		}
 

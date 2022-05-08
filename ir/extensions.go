@@ -34,9 +34,9 @@ func (b *Builder) buildExtensionCall(n *parser.CallNode) (Node, error) {
 		}
 		args[i] = node
 	}
-	err := MatchTypes(n.Pos(), args, ext.Params)
-	if err != nil {
-		return nil, err
+	err := b.MatchTypes(n.Pos(), args, ext.Params)
+	if err {
+		return NewTypedNode(ext.RetType, n.Pos()), nil
 	}
 
 	return &ExtensionCall{

@@ -73,7 +73,8 @@ func init() {
 	blockBuilders["IF"] = blockBuilder{
 		Build: func(b *Builder, pos *tokens.Pos, args []parser.Node) (Block, error) {
 			if len(args) < 2 {
-				return nil, pos.Error("IF requires at least 2 arguments")
+				b.Error(ErrorLevelError, pos, "IF requires at least 2 arguments")
+				return &IfNode{Condition: NewTypedNode(types.INVALID, pos)}, nil
 			}
 
 			cond, err := b.buildNode(args[0])
@@ -81,7 +82,8 @@ func init() {
 				return nil, err
 			}
 			if !types.BOOL.Equal(cond.Type()) {
-				return nil, cond.Pos().Error("expected boolean for condition in IF statement")
+				b.Error(ErrorLevelError, cond.Pos(), "expected boolean for condition in IF statement")
+				return &IfNode{Condition: NewTypedNode(types.INVALID, pos)}, nil
 			}
 
 			body := make([]Node, 0, len(args)-1)
@@ -136,7 +138,8 @@ func init() {
 	blockBuilders["WHILE"] = blockBuilder{
 		Build: func(b *Builder, pos *tokens.Pos, args []parser.Node) (Block, error) {
 			if len(args) < 2 {
-				return nil, pos.Error("WHILE requires at least 2 arguments")
+				b.Error(ErrorLevelError, pos, "WHILE requires at least 2 arguments")
+				return &WhileNode{Condition: NewTypedNode(types.INVALID, pos)}, nil
 			}
 			cond, err := b.buildNode(args[0])
 			if err != nil {
@@ -163,10 +166,12 @@ func init() {
 	blockBuilders["CASE"] = blockBuilder{
 		Build: func(b *Builder, pos *tokens.Pos, args []parser.Node) (Block, error) {
 			if b.Scope.CurrType() != ScopeTypeSwitch {
-				return nil, pos.Error("CASE can only be used inside SWITCH")
+				b.Error(ErrorLevelError, pos, "CASE can only be used inside SWITCH")
+				return NewTypedValue(types.INVALID), nil
 			}
 			if len(args) < 2 {
-				return nil, pos.Error("CASE requires at least 2 arguments")
+				b.Error(ErrorLevelError, pos, "CASE requires at least 2 arguments")
+				return &Case{}, nil
 			}
 
 			val, err := b.buildNode(args[0])
@@ -175,10 +180,12 @@ func init() {
 			}
 			cnst, ok := val.(*Const)
 			if !ok {
-				return nil, val.Pos().Error("expected constant for CASE value")
+				b.Error(ErrorLevelError, val.Pos(), "expected constant for CASE value")
+				return &Case{}, nil
 			}
 			if !hashable.Equal(cnst.Type()) {
-				return nil, val.Pos().Error("expected hashable type for CASE value")
+				b.Error(ErrorLevelError, val.Pos(), "expected hashable type for CASE value")
+				return &Case{}, nil
 			}
 
 			body := make([]Node, len(args)-1)
@@ -200,10 +207,12 @@ func init() {
 	blockBuilders["DEFAULT"] = blockBuilder{
 		Build: func(b *Builder, pos *tokens.Pos, args []parser.Node) (Block, error) {
 			if b.Scope.CurrType() != ScopeTypeSwitch {
-				return nil, pos.Error("DEFAULT can only be used inside SWITCH")
+				b.Error(ErrorLevelError, pos, "DEFAULT can only be used inside SWITCH")
+				return NewTypedValue(types.INVALID), nil
 			}
 			if len(args) < 1 {
-				return nil, pos.Error("DEFAULT requires at least 1 argument")
+				b.Error(ErrorLevelError, pos, "DEFAULT requires at least 1 argument")
+				return &Default{}, nil
 			}
 
 			body := make([]Node, len(args))
@@ -225,7 +234,8 @@ func init() {
 	blockBuilders["SWITCH"] = blockBuilder{
 		Build: func(b *Builder, pos *tokens.Pos, args []parser.Node) (Block, error) {
 			if len(args) < 2 {
-				return nil, pos.Error("SWITCH requires at least 2 arguments")
+				b.Error(ErrorLevelError, pos, "SWITCH requires at least 2 arguments")
+				return &SwitchNode{Value: NewTypedNode(types.INVALID, pos)}, nil
 			}
 
 			val, err := b.buildNode(args[0])
@@ -233,7 +243,7 @@ func init() {
 				return nil, err
 			}
 			if !hashable.Equal(val.Type()) {
-				return nil, val.Pos().Error("expected hashable type for SWITCH value")
+				b.Error(ErrorLevelError, val.Pos(), "expected hashable type for SWITCH value")
 			}
 
 			// Get cases
@@ -247,23 +257,29 @@ func init() {
 				}
 				blk, ok := node.(*BlockNode)
 				if !ok {
-					return nil, v.Pos().Error("expected case")
+					b.Error(ErrorLevelError, v.Pos(), "expected case")
+					continue
 				}
 				cs, ok := blk.Block.(*Case)
+				if cs.Value == nil {
+					continue
+				}
 				if !ok {
 					// Default
 					_, ok := blk.Block.(*Default)
 					if ok {
 						if def != nil {
-							return nil, node.Pos().Error("only one default case allowed")
+							b.Error(ErrorLevelError, node.Pos(), "only one default case allowed")
 						}
 						def = blk
 						continue
 					}
-					return nil, v.Pos().Error("expected case")
+					b.Error(ErrorLevelError, v.Pos(), "expected case")
+					continue
 				}
 				if !cs.Value.Type().Equal(val.Type()) {
-					return nil, v.Pos().Error("expected case with type %s", val.Type())
+					b.Error(ErrorLevelError, v.Pos(), "expected case with type %s", val.Type())
+					continue
 				}
 				cases = append(cases, blk)
 			}
