@@ -1,0 +1,12 @@
+[IMPORT "bsp/ir/ir.bsp"]
+
+[FUNC addPrint [PARAM b builder] [PARAM pos pos] [PARAM args ARRAY{node}] [RETURNS ANY]
+    [DEFINE out [MAKE node]]
+    [SET [VAR out] typ [_NULL]]
+    [SET [VAR out] kind [CONST nodeKindPrint]]
+    [SET [VAR out] val [ANY [INDEX [VAR args] 0]]] # Arg
+    [SET [VAR out] pos [VAR pos]]
+    [RETURN [ANY [VAR out]]]
+]
+
+[addNodeBuilder "PRINT" [ARRAY [_STRING]] [FN addPrint]]

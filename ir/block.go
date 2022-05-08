@@ -261,7 +261,7 @@ func init() {
 					continue
 				}
 				cs, ok := blk.Block.(*Case)
-				if cs.Value == nil {
+				if ok && cs.Value == nil {
 					continue
 				}
 				if !ok {

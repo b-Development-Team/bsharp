@@ -1,0 +1,46 @@
+[IMPORT "bsp/ir/ir.bsp"]
+[IMPORT "bsp/parser.bsp"]
+
+[FUNC matchTypes [PARAM n ARRAY{node}] [PARAM typs ARRAY{type}] [PARAM b builder] 
+    # TODO
+]
+
+[FUNC buildStmt [PARAM b builder] [PARAM p parserNode] [RETURNS ANY] # node or error
+    [SWITCH [GET [VAR p] typ]
+        [CASE [CONST parserTypCall]
+            [DEFINE call [CAST [GET [VAR p] val] parserCallNode]]
+            [PRINT [GET [VAR call] name]]
+
+            # Check if exists
+            [IF [NOT [EXISTS [VAR nodeBuilders] [GET [VAR call] name]]]
+                [RETURN [ERROR [CONCAT "unknown tag: " [GET [VAR call] name]]]]
+            ]
+
+            # Build args
+            [DEFINE args [MAKE ARRAY{node}]] # TODO: GROW, using APPEND right now
+            [DEFINE i 0]
+            [DEFINE pars [GET [VAR call] args]]
+            [WHILE [COMPARE [VAR i] < [LENGTH [VAR pars]]]
+                [DEFINE v [buildStmt [VAR b] [INDEX [VAR pars] [VAR i]]]]
+                [IF [CANCAST [VAR v] error]
+                    [RETURN [VAR v]]
+                ]
+                [APPEND [VAR args] [CAST [VAR v] node]]
+                [DEFINE i [MATH [VAR i] + 1]]
+            ]
+
+            # Check typs
+            [DEFINE bld [GET [VAR nodeBuilders] [GET [VAR call] name]]]
+            [matchTypes [VAR args] [GET [VAR bld] args] [VAR b]]
+
+            # Build
+            [DEFINE out [CALL [GET [VAR bld] fn] [VAR b] [GET [VAR p] pos] [VAR args]]]
+            [RETURN [VAR out]]
+        ]
+
+        [DEFAULT
+            [RETURN [ERROR [CONCAT "unknown parser node type: " [STRING [GET [VAR p] typ]]]]]
+        ]
+    ]
+    [RETURN [ANY NULL]]
+]

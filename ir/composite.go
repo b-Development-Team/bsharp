@@ -184,7 +184,10 @@ func init() {
 	nodeBuilders["APPEND"] = nodeBuilder{
 		ArgTypes: []types.Type{types.ARRAY, types.ALL},
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
-			arrTyp := args[0].Type().(*types.ArrayType)
+			arrTyp, ok := args[0].Type().(*types.ArrayType)
+			if !ok { // invalid
+				return NewTypedValue(types.INVALID), nil
+			}
 			if !arrTyp.ElemType.Equal(args[1].Type()) {
 				b.Error(ErrorLevelError, args[1].Pos(), "cannot append value of type %s to array with element type %s", args[1].Type().String(), arrTyp.ElemType.String())
 			}
@@ -335,7 +338,10 @@ func init() {
 			}
 
 			// Struct type
-			structTyp := args[0].Type().(*types.StructType)
+			structTyp, ok := args[0].Type().(*types.StructType)
+			if !ok { // invalid
+				return NewTypedValue(types.INVALID), nil
+			}
 			if !types.IDENT.Equal(args[1].Type()) {
 				b.Error(ErrorLevelError, args[1].Pos(), "expected type %s for struct field name, got %s", types.IDENT.String(), args[1].Type().String())
 				return NewTypedValue(types.INVALID), nil

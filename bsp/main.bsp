@@ -2,8 +2,9 @@
 [IMPORT "bsp/parser.bsp"]
 [IMPORT "bsp/types.bsp"]
 [IMPORT "bsp/ir/ir.bsp"]
+[IMPORT "bsp/ir/build.bsp"]
 
-[DEFINE code "[PRINT \"Hello, World!\" -1.234 1.1 [MATH 1 + 1] 'h']\n"]
+[DEFINE code "[PRINT \"Hello, World!\"]\n"]
 
 # Tokenize
 [DEFINE tokenserr [TOKENIZE "hello.bsp" [VAR code]]]
@@ -54,4 +55,11 @@
 [IF [VAR f] [PRINT "TRUE"] ELSE [PRINT "FALSE"]]
 
 # IR
+[PRINT "\nIR:"]
 [DEFINE bld [newBuilder]]
+[DEFINE out [irBuild [VAR bld] [VAR p]]]
+[IF [CANCAST [VAR out] error]
+  [FAIL [VAR out]]
+]
+[DEFINE ir [CAST [VAR out] ir]]
+[PRINT [CONCAT "Node Count: " [STRING [LENGTH [GET [VAR ir] body]]]]]

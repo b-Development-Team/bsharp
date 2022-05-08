@@ -1,25 +1,53 @@
 [IMPORT "bsp/types.bsp"]
 [IMPORT "bsp/tokens.bsp"]
 [IMPORT "bsp/ir/scope.bsp"]
+[IMPORT "bsp/types.bsp"]
 
 [TYPEDEF nodeKind INT]
-[TYPEDEF node STRUCT{typ:type, kind:nodeKind, val: ANY, pos:pos}]
+[CONSTDEF nodeKindPrint 0]
+[TYPEDEF node STRUCT{typ:type, kind:nodeKind, val:ANY, pos:pos}]
 
-[TYPEDEF callKind INT]
-[TYPEDEF call STRUCT{kind:callKind, val:ANY}]
+# Nodes
+[TYPEDEF printNode node] # arg
 
+# Others
 [TYPEDEF param STRUCT{id:INT, name:STRING, typ: type, pos: pos}]
 [TYPEDEF function STRUCT{name:STRING, params:ARRAY{param}, retType:type, body:ARRAY{node}, pos:pos, scope:scopeInfo}]
 
-[TYPEDEF builder STRUCT{scope:scope, body:ARRAY{node}, funcs:MAP{STRING, function}}]
+[TYPEDEF errorLevel INT]
+[CONSTDEF errorLevelError 0]
+[CONSTDEF errorLevelWarning 1] # TODO: Use this
+[TYPEDEF irError STRUCT{level:errorLevel, pos:pos, message:STRING}]
+
+[TYPEDEF builder STRUCT{scope:scope, body:ARRAY{node}, funcs:MAP{STRING, function}, errors:ARRAY{irError}, imported: MAP{STRING, BOOL}}]
 
 [FUNC newBuilder [RETURNS builder]
   [DEFINE out [MAKE builder]]
   [SET [VAR out] body [MAKE ARRAY{node}]]
+  [SET [VAR out] errors [MAKE ARRAY{irError}]]
+  [SET [VAR out] imported [MAKE MAP{STRING, BOOL}]]
   [SET [VAR out] funcs [MAKE MAP{STRING, function}]]
   [DEFINE scope [MAKE scope]]
   [SET [VAR scope] frames [MAKE ARRAY{scopeFrame}]]
   [SET [VAR scope] variables [MAKE ARRAY{variable}]]
   [SET [VAR out] scope [VAR scope]]
   [RETURN [VAR out]]
+]
+
+[FUNC bldErr [PARAM b builder] [PARAM level errorLevel] [PARAM pos pos] [PARAM message STRING]
+  [DEFINE err [MAKE irError]]
+  [SET [VAR err] level [VAR level]]
+  [SET [VAR err] pos [VAR pos]]
+  [SET [VAR err] message [VAR message]]
+  [APPEND [GET [VAR b] errors] [VAR err]]
+]
+
+# Node builders
+[TYPEDEF nodeBuilder STRUCT{args:ARRAY{type}, fn:FUNC{builder, pos, ARRAY{node}}ANY}]
+[DEFINE nodeBuilders [MAKE MAP{STRING, nodeBuilder}]]
+[FUNC addNodeBuilder [PARAM name STRING] [PARAM args ARRAY{type}] [PARAM fn FUNC{builder, pos, ARRAY{node}}ANY]
+  [DEFINE bld [MAKE nodeBuilder]]
+  [SET [VAR bld] args [VAR args]]
+  [SET [VAR bld] fn [VAR fn]]
+  [SET [VAR nodeBuilders] [VAR name] [VAR bld]]
 ]

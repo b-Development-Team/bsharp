@@ -155,6 +155,7 @@
 ]
 
 [FUNC ADDIDENT [PARAM tok tokenizer]
+  [PRINT "IDENT"]
   [DEFINE pos [POS [VAR tok]]]
   [DEFINE code [GET [VAR tok] code]]
   [DEFINE running TRUE]

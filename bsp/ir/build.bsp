@@ -1,0 +1,25 @@
+[IMPORT "bsp/ir/ir.bsp"]
+[IMPORT "bsp/parser.bsp"]
+[IMPORT "bsp/ir/stmts.bsp"]
+[IMPORT "errors.bsp"]
+
+# Builders
+[IMPORT "bsp/ir/basic.bsp"]
+
+[TYPEDEF ir STRUCT{body:ARRAY{node}}]
+
+[FUNC irBuild [PARAM b builder] [PARAM n ARRAY{parserNode}] [RETURNS ANY]
+    [DEFINE i 0]
+    [DEFINE body [MAKE ARRAY{node}]]
+    [WHILE [COMPARE [VAR i] < [LENGTH [VAR n]]]
+        [DEFINE r [buildStmt [VAR b] [INDEX [VAR n] [VAR i]]]]
+        [IF [CANCAST [VAR r] error]
+            [RETURN [VAR r]]
+        ]
+        [APPEND [VAR body] [CAST [VAR r] node]]
+        [DEFINE i [MATH [VAR i] + 1]]
+    ]
+    [DEFINE ir [MAKE ir]]
+    [SET [VAR ir] body [VAR body]]
+    [RETURN [ANY [VAR ir]]]
+]
