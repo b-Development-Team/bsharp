@@ -5,10 +5,12 @@
 
 [TYPEDEF nodeKind INT]
 [CONSTDEF nodeKindPrint 0]
+[CONSTDEF nodeKindConst 1]
 [TYPEDEF node STRUCT{typ:type, kind:nodeKind, val:ANY, pos:pos}]
 
 # Nodes
 [TYPEDEF printNode node] # arg
+[TYPEDEF constNode ANY]
 
 # Others
 [TYPEDEF param STRUCT{id:INT, name:STRING, typ: type, pos: pos}]

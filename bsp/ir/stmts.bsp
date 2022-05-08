@@ -9,7 +9,6 @@
     [SWITCH [GET [VAR p] typ]
         [CASE [CONST parserTypCall]
             [DEFINE call [CAST [GET [VAR p] val] parserCallNode]]
-            [PRINT [GET [VAR call] name]]
 
             # Check if exists
             [IF [NOT [EXISTS [VAR nodeBuilders] [GET [VAR call] name]]]
@@ -37,6 +36,53 @@
             [DEFINE out [CALL [GET [VAR bld] fn] [VAR b] [GET [VAR p] pos] [VAR args]]]
             [RETURN [VAR out]]
         ]
+
+        [CASE [CONST parserTypIdent]
+            [DEFINE out [MAKE node]]
+            [SET [VAR out] typ [_IDENT]]
+            [SET [VAR out] val [ANY [CAST [GET [VAR p] val] STRING]]] # Just a check
+            [SET [VAR out] kind [CONST nodeKindConst]]
+            [SET [VAR out] pos [GET [VAR p] pos]]
+            [RETURN [ANY [VAR out]]]
+        ]
+
+        [CASE [CONST parserTypBool]
+            [DEFINE out [MAKE node]]
+            [SET [VAR out] typ [_BOOL]]
+            [SET [VAR out] val [ANY [CAST [GET [VAR p] val] BOOL]]] # Just a check
+            [SET [VAR out] kind [CONST nodeKindConst]]
+            [SET [VAR out] pos [GET [VAR p] pos]]
+            [RETURN [ANY [VAR out]]]
+        ]
+
+        [CASE [CONST parserTypNull]
+            [DEFINE out [MAKE node]]
+            [SET [VAR out] typ [_NULL]]
+            [SET [VAR out] val [ANY NULL]] # Just a check
+            [SET [VAR out] kind [CONST nodeKindConst]]
+            [SET [VAR out] pos [GET [VAR p] pos]]
+            [RETURN [ANY [VAR out]]]
+        ]
+
+        [CASE [CONST parserTypString]
+            [DEFINE out [MAKE node]]
+            [SET [VAR out] typ [_STRING]]
+            [SET [VAR out] val [ANY [CAST [GET [VAR p] val] STRING]]] # Just a check
+            [SET [VAR out] kind [CONST nodeKindConst]]
+            [SET [VAR out] pos [GET [VAR p] pos]]
+            [RETURN [ANY [VAR out]]]
+        ]
+
+        [CASE [CONST parserTypByte]
+            [DEFINE out [MAKE node]]
+            [SET [VAR out] typ [_STRING]]
+            [SET [VAR out] val [ANY [CAST [GET [VAR p] val] BYTE]]] # Just a check
+            [SET [VAR out] kind [CONST nodeKindConst]]
+            [SET [VAR out] pos [GET [VAR p] pos]]
+            [RETURN [ANY [VAR out]]]
+        ]
+
+        # TODO: parserTypNumber
 
         [DEFAULT
             [RETURN [ERROR [CONCAT "unknown parser node type: " [STRING [GET [VAR p] typ]]]]]

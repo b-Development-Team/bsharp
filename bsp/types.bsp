@@ -20,6 +20,12 @@
 [CONSTDEF _NULL 9]
 [CONSTDEF ANY 10]
 
+# Special
+[CONSTDEF ALL 11]
+[CONSTDEF VARIADIC 12]
+[CONSTDEF IDENT 13]
+[CONSTDEF INVALID 14]
+
 [FUNC _INT [RETURNS type] [DEFINE out [MAKE type]] [SET [VAR out] typ [CONST INT]] [SET [VAR out] val [ANY NULL]] [RETURN [VAR out]]]
 [FUNC _BYTE [RETURNS type] [DEFINE out [MAKE type]] [SET [VAR out] typ [CONST BYTE]] [SET [VAR out] val [ANY NULL]] [RETURN [VAR out]]]
 [FUNC _FLOAT [RETURNS type] [DEFINE out [MAKE type]] [SET [VAR out] typ [CONST FLOAT]] [SET [VAR out] val [ANY NULL]] [RETURN [VAR out]]]
@@ -31,6 +37,10 @@
 [FUNC _STRUCT [RETURNS type] [DEFINE out [MAKE type]] [SET [VAR out] typ [CONST STRUCT]] [SET [VAR out] val [ANY NULL]] [RETURN [VAR out]]]
 [FUNC _NULL [RETURNS type] [DEFINE out [MAKE type]] [SET [VAR out] typ [CONST _NULL]] [SET [VAR out] val [ANY NULL]] [RETURN [VAR out]]]
 [FUNC _ANY [RETURNS type] [DEFINE out [MAKE type]] [SET [VAR out] typ [CONST ANY]] [SET [VAR out] val [ANY NULL]] [RETURN [VAR out]]]
+[FUNC _ALL [RETURNS type] [DEFINE out [MAKE type]] [SET [VAR out] typ [CONST ALL]] [SET [VAR out] val [ANY NULL]] [RETURN [VAR out]]]
+[FUNC _VARIADIC [RETURNS type] [DEFINE out [MAKE type]] [SET [VAR out] typ [CONST VARIADIC]] [SET [VAR out] val [ANY NULL]] [RETURN [VAR out]]]
+[FUNC _IDENT [RETURNS type] [DEFINE out [MAKE type]] [SET [VAR out] typ [CONST IDENT]] [SET [VAR out] val [ANY NULL]] [RETURN [VAR out]]]
+[FUNC _INVALID [RETURNS type] [DEFINE out [MAKE type]] [SET [VAR out] typ [CONST INVALID]] [SET [VAR out] val [ANY NULL]] [RETURN [VAR out]]]
 
 [FUNC _ARRAY [PARAM elTyp type] [RETURNS type]
   [DEFINE out [MAKE arrayType]]
