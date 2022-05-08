@@ -177,7 +177,12 @@ func (b *Bot) BuildCode(filename string, src string, ctx *Ctx) (*ir.IR, error) {
 	}
 	err = bld.Build(parser, &fs{b: b, gld: ctx.Guild()})
 	if err != nil {
-		return nil, err
+		e := &strings.Builder{}
+		for _, v := range bld.Errors {
+			e.WriteString(v.Pos.Error("%s", v.Message).Error())
+		}
+		e.WriteString(err.Error())
+		return nil, errors.New(e.String())
 	}
 	return bld.IR(), nil
 }

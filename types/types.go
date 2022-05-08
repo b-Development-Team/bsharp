@@ -61,6 +61,7 @@ var basicTypeNames = map[BasicType]string{
 	VARIADIC: "VARIADIC",
 	IDENT:    "IDENT",
 	STRUCT:   "STRUCT",
+	INVALID:  "INVALID",
 }
 
 func (b BasicType) BasicType() BasicType {
