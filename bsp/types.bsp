@@ -7,6 +7,7 @@
 [TYPEDEF structField STRUCT{name:STRING, typ:type}]
 [TYPEDEF structType ARRAY{structField}]
 [TYPEDEF nil NULL]
+[TYPEDEF mulType ARRAY{type}]
 
 [CONSTDEF INT 0]
 [CONSTDEF BYTE 1]
@@ -25,6 +26,7 @@
 [CONSTDEF VARIADIC 12]
 [CONSTDEF IDENT 13]
 [CONSTDEF INVALID 14]
+[CONSTDEF MULTYPE 15]
 
 [FUNC _INT [RETURNS type] [DEFINE out [MAKE type]] [SET [VAR out] typ [CONST INT]] [SET [VAR out] val [ANY NULL]] [RETURN [VAR out]]]
 [FUNC _BYTE [RETURNS type] [DEFINE out [MAKE type]] [SET [VAR out] typ [CONST BYTE]] [SET [VAR out] val [ANY NULL]] [RETURN [VAR out]]]
@@ -85,6 +87,13 @@
   [RETURN [VAR val]]
 ]
 
+[FUNC MULTYPE [PARAM typs ARRAY{type}] [RETURNS type]
+  [DEFINE out [MAKE type]]
+  [SET [VAR out] typ [CONST MULTYPE]]
+  [SET [VAR out] val [ANY [VAR typs]]]
+  [RETURN [VAR out]]
+]
+
 [FUNC TSTRING [PARAM t type] [RETURNS STRING]
   [IF [CANCAST [GET [VAR t] val] nil]
     [SWITCH [GET [VAR t] typ]
@@ -143,6 +152,18 @@
         [DEFINE i [MATH [VAR i] + 1]]
       ]
       [RETURN [CONCAT [VAR out] "}"]]
+    ]
+
+    [CASE [CONST MULTYPE]
+      [DEFINE out ""]
+      [DEFINE vals [CAST [GET [VAR t] val] mulType]]
+      [DEFINE i 0]
+      [WHILE [COMPARE [VAR i] < [LENGTH [VAR vals]]]
+        [IF [COMPARE [VAR i] > 0]
+          [DEFINE out [CONCAT [VAR out] "|"]]
+        ]
+        [DEFINE out [CONCAT [VAR out] [TSTRING [INDEX [VAR vals] [VAR i]]]]]
+      ]
     ]
   ]
   
@@ -209,6 +230,18 @@
         [DEFINE i [MATH [VAR i] + 1]]
       ]
       [RETURN TRUE]
+    ]
+
+    [CASE [CONST MULTYPE]
+      [DEFINE vals [CAST [GET [VAR a] val] mulType]]
+      [DEFINE i 0]
+      [WHILE [COMPARE [VAR i] < [LENGTH [VAR vals]]]
+        [IF [TEQUAL [INDEX [VAR vals] [VAR i]] [VAR b]]
+          [RETURN TRUE]
+        ]
+        [DEFINE i [MATH [VAR i] + 1]]
+      ]
+      [RETURN FALSE]
     ]
   ]
 

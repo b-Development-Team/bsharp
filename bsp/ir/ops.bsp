@@ -1,0 +1,46 @@
+[IMPORT "bsp/ir/ir.bsp"]
+
+[CONSTDEF mathOpAdd 0]
+[CONSTDEF mathOpSub 1]
+[CONSTDEF mathOpMul 2]
+[CONSTDEF mathOpDiv 3]
+[CONSTDEF mathOpPow 4]
+[CONSTDEF mathOpMod 5]
+
+[FUNC addMath [PARAM b builder] [PARAM pos pos] [PARAM args ARRAY{node}] [RETURNS ANY]
+    [DEFINE op 0]
+    [DEFINE val [CAST [GET [INDEX [VAR args] 1] val] STRING]]
+    [SWITCH [VAR val]
+        [CASE "+" [DEFINE op [CONST mathOpAdd]]]
+        [CASE "-" [DEFINE op [CONST mathOpSub]]]
+        [CASE "*" [DEFINE op [CONST mathOpMul]]]
+        [CASE "/" [DEFINE op [CONST mathOpDiv]]]
+        [CASE "^" [DEFINE op [CONST mathOpPow]]]
+        [CASE "%" [DEFINE op [CONST mathOpMod]]]
+        [DEFAULT
+            [bldErr [VAR b] [CONST errorLevelError] [VAR pos] [CONCAT "unknown math operation: " [VAR val]]]
+        ]
+    ]
+
+    [DEFINE v [MAKE mathNode]]
+    [SET [VAR v] op [VAR op]]
+
+    [DEFINE lhs [INDEX [VAR args] 0]]
+    [DEFINE rhs [INDEX [VAR args] 2]]
+    [IF [NOT [TEQUAL [GET [VAR lhs] typ] [GET [VAR rhs] typ]]]
+        [bldErr [VAR b] [CONST errorLevelError] [VAR pos] "lhs and rhs must have same type"]
+        [DEFINE rhs [VAR lhs]]
+    ]
+    [SET [VAR v] lhs [VAR lhs]]
+    [SET [VAR v] rhs [VAR rhs]]
+
+    [DEFINE out [MAKE node]]
+    [SET [VAR out] typ [GET [VAR lhs] typ]]
+    [SET [VAR out] val [ANY [VAR v]]]
+    [SET [VAR out] kind [CONST nodeKindMath]]
+    [SET [VAR out] pos [VAR pos]]
+
+    [RETURN [ANY [VAR out]]]
+]
+
+[addNodeBuilder "MATH" [ARRAY [MULTYPE [ARRAY [_INT] [_FLOAT]]] [MULTYPE [ARRAY [_INT] [_FLOAT]]]] [FN addMath]]

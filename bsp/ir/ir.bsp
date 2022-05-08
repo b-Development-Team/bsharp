@@ -7,10 +7,12 @@
 [CONSTDEF nodeKindPrint 0]
 [CONSTDEF nodeKindConst 1]
 [CONSTDEF nodeKindTyped 2]
+[CONSTDEF nodeKindMath 3]
 [TYPEDEF node STRUCT{typ:type, kind:nodeKind, val:ANY, pos:pos}]
 
 # Nodes
 [TYPEDEF printNode node] # arg
+[TYPEDEF mathNode STRUCT{lhs:node, op:INT, rhs:node}]
 [TYPEDEF constNode ANY]
 
 # Others

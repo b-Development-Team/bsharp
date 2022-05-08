@@ -5,6 +5,7 @@
 
 # Builders
 [IMPORT "bsp/ir/basic.bsp"]
+[IMPORT "bsp/ir/ops.bsp"]
 
 [TYPEDEF ir STRUCT{body:ARRAY{node}}]
 
