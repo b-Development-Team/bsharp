@@ -41,7 +41,8 @@ func init() {
 			name := args[0].(*Const).Value.(string)
 			v, exists := b.Scope.GetVar(name)
 			if !exists {
-				return nil, args[0].Pos().Error("unknown variable: %s", name)
+				b.Error(ErrorLevelError, args[0].Pos(), "undefined variable: %s", name)
+				return NewTypedValue(types.INVALID), nil
 			}
 			va := b.Scope.Variable(v)
 			if !va.NeedsGlobal && va.ScopeType == ScopeTypeGlobal && b.Scope.HasType(ScopeTypeFunction) {

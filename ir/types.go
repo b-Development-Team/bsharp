@@ -18,13 +18,15 @@ func (b *Builder) defPass(p *parser.Parser) error {
 		case "TYPEDEF":
 			// Check if valid signature
 			if len(call.Args) != 2 {
-				return call.Pos().Error("expected two arguments to TYPEDEF")
+				b.Error(ErrorLevelError, call.Pos(), "expected two arguments to TYPEDEF")
+				continue
 			}
 
 			// Check name
 			name, ok := call.Args[0].(*parser.IdentNode)
 			if !ok {
-				return call.Args[0].Pos().Error("expected identifier as first argument to TYPEDEF")
+				b.Error(ErrorLevelError, call.Args[0].Pos(), "expected identifier as first argument to TYPEDEF")
+				continue
 			}
 
 			// Get type
@@ -36,20 +38,23 @@ func (b *Builder) defPass(p *parser.Parser) error {
 				if ok {
 					typ = types.NULL
 				} else {
-					return call.Args[1].Pos().Error("expected identifier as second argument to TYPEDEF")
+					b.Error(ErrorLevelError, call.Args[1].Pos(), "expected identifier as second argument to TYPEDEF")
+					continue
 				}
 			}
 			if typ == nil {
 				var err error
 				typ, err = types.ParseType(typV.Value, b.typeNames)
 				if err != nil {
-					return call.Args[1].Pos().Error("%s", err.Error())
+					b.Error(ErrorLevelError, call.Args[1].Pos(), "%s", err.Error())
+					continue
 				}
 			}
 
 			// Check if type already exists
 			if _, ok := b.typeNames[name.Value]; ok {
-				return name.Pos().Error("type already exists")
+				b.Error(ErrorLevelError, name.Pos(), "cannot redefine type %s", name.Value)
+				continue
 			}
 
 			// Add type
@@ -58,19 +63,22 @@ func (b *Builder) defPass(p *parser.Parser) error {
 		case "CONSTDEF":
 			// Check if valid signature
 			if len(call.Args) != 2 {
-				return call.Pos().Error("expected two arguments to CONSTDEF")
+				b.Error(ErrorLevelError, call.Pos(), "expected two arguments to CONSTDEF")
+				continue
 			}
 
 			// Check name
 			name, ok := call.Args[0].(*parser.IdentNode)
 			if !ok {
-				return call.Args[0].Pos().Error("expected identifier as first argument to CONSTDEF")
+				b.Error(ErrorLevelError, call.Args[0].Pos(), "expected identifier as first argument to CONSTDEF")
+				continue
 			}
 
 			// Build val
 			_, ok = call.Args[1].(*parser.CallNode)
 			if ok {
-				return call.Args[1].Pos().Error("expected constant as second argument to CONSTDEF")
+				b.Error(ErrorLevelError, call.Args[1].Pos(), "expected constant value as second argument to CONSTDEF")
+				continue
 			}
 			val, err := b.buildNode(call.Args[1])
 			if err != nil {
@@ -78,7 +86,8 @@ func (b *Builder) defPass(p *parser.Parser) error {
 			}
 			v, ok := val.(*Const)
 			if !ok {
-				return call.Args[1].Pos().Error("expected constant as second argument to CONSTDEF")
+				b.Error(ErrorLevelError, call.Args[1].Pos(), "expected constant value as second argument to CONSTDEF")
+				continue
 			}
 
 			// Add consts
@@ -92,14 +101,14 @@ func (b *Builder) defPass(p *parser.Parser) error {
 
 func (b *Builder) checkTypeDef(n *parser.CallNode) error {
 	if b.Scope.CurrType() != ScopeTypeGlobal {
-		return n.Pos().Error("TYPEDEF can only be used in global scope")
+		b.Error(ErrorLevelError, n.Pos(), "TYPEDEF can only be used in global scope")
 	}
 	return nil
 }
 
 func (b *Builder) checkConst(n *parser.CallNode) error {
 	if b.Scope.CurrType() != ScopeTypeGlobal {
-		return n.Pos().Error("CONST can only be used in global scope")
+		b.Error(ErrorLevelError, n.Pos(), "CONSTDEF can only be used in global scope")
 	}
 	return nil
 }
@@ -176,7 +185,8 @@ func init() {
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
 			typ, err := types.ParseType(args[1].(*Const).Value.(string), b.typeNames)
 			if err != nil {
-				return nil, args[1].Pos().Error("%s", err.Error())
+				b.Error(ErrorLevelError, args[1].Pos(), "%s", err.Error())
+				typ = types.INVALID
 			}
 			return &CanCastNode{
 				Value: args[0],

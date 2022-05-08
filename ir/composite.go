@@ -369,7 +369,7 @@ func init() {
 			// Check types
 			mapTyp := args[0].Type().(*types.MapType)
 			if !mapTyp.KeyType.Equal(args[1].Type()) {
-				return nil, args[1].Pos().Error("expected type %s for map key, got %s", mapTyp.KeyType.String(), args[1].Type().String())
+				b.Error(ErrorLevelError, args[1].Pos(), "expected type %s for map key, got %s", mapTyp.KeyType.String(), args[1].Type().String())
 			}
 
 			return &ExistsNode{

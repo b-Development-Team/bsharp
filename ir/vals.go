@@ -124,7 +124,7 @@ func init() {
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
 			op, exists := mathOps[args[1].(*Const).Value.(string)]
 			if !exists {
-				return nil, args[1].Pos().Error("unknown math operation: %s", args[1].(*Const).Value.(string))
+				b.Error(ErrorLevelError, args[1].Pos(), "unknown math operation: %s", args[1].(*Const).Value.(string))
 			}
 
 			// Get common type
@@ -157,7 +157,7 @@ func init() {
 			// Get op
 			op, exists := compareOps[args[1].(*Const).Value.(string)]
 			if !exists {
-				return nil, args[1].Pos().Error("unknown compare operation: %s", args[1].(*Const).Value.(string))
+				b.Error(ErrorLevelError, args[1].Pos(), "unknown compare operation: %s", args[1].(*Const).Value.(string))
 			}
 
 			// Check if can compare

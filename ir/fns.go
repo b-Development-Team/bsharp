@@ -19,14 +19,16 @@ func (b *Builder) functionPass(p *parser.Parser) error {
 		// Its a function!
 		body := call.Args
 		if len(body) < 1 {
-			return call.Pos().Error("expected body")
+			b.Error(ErrorLevelError, call.Pos(), "invalid function definition")
+			continue
 		}
 
 		// Get name
 		nm := body[0]
 		nameV, ok := nm.(*parser.IdentNode)
 		if !ok {
-			return nm.Pos().Error("expected function name")
+			b.Error(ErrorLevelError, nm.Pos(), "expected function name")
+			continue
 		}
 		name := nameV.Value
 		body = body[1:]
@@ -34,7 +36,8 @@ func (b *Builder) functionPass(p *parser.Parser) error {
 		// Check if exists
 		_, exists := b.Funcs[name]
 		if exists {
-			return call.Pos().Error("cannot redefine function %s", name)
+			b.Error(ErrorLevelError, nm.Pos(), "cannot redefine function %s", name)
+			return nil
 		}
 
 		// Get params
@@ -55,14 +58,17 @@ func (b *Builder) functionPass(p *parser.Parser) error {
 
 			// Its a param!
 			if len(call.Args) != 2 {
-				return call.Pos().Error("expected param")
+				b.Error(ErrorLevelError, call.Pos(), "expected param")
+				continue
 			}
 
 			// Get name
+			hasErr := false
 			nm := call.Args[0]
 			nameV, ok := nm.(*parser.IdentNode)
 			if !ok {
-				return nm.Pos().Error("expected param name")
+				b.Error(ErrorLevelError, nm.Pos(), "expected param name")
+				hasErr = true
 			}
 			name := nameV.Value
 
@@ -70,14 +76,18 @@ func (b *Builder) functionPass(p *parser.Parser) error {
 			typVal := call.Args[1]
 			typV, ok := typVal.(*parser.IdentNode)
 			if !ok {
-				return typVal.Pos().Error("expected param type")
+				b.Error(ErrorLevelError, typVal.Pos(), "expected param type")
+				continue
 			}
 			typ, err := types.ParseType(typV.Value, b.typeNames)
 			if err != nil {
-				return typV.Pos().Error("%s", err.Error())
+				b.Error(ErrorLevelError, typV.Pos(), "%s", err.Error())
 			}
 
 			// Add param
+			if hasErr {
+				continue
+			}
 			params = append(params, &Param{
 				ID:   -1,
 				Name: name,
@@ -94,16 +104,19 @@ func (b *Builder) functionPass(p *parser.Parser) error {
 			retTypVal, ok := retTypFn.(*parser.CallNode)
 			if ok && retTypVal.Name == "RETURNS" {
 				if len(retTypVal.Args) != 1 {
-					return retTypVal.Pos().Error("expected return type")
+					b.Error(ErrorLevelError, retTypVal.Pos(), "expected return type")
+					continue
 				}
 				retTypV, ok := retTypVal.Args[0].(*parser.IdentNode)
 				if !ok {
-					return retTypVal.Args[0].Pos().Error("expected return type")
+					b.Error(ErrorLevelError, retTypVal.Args[0].Pos(), "expected return type")
+					continue
 				}
 				var err error
 				retType, err = types.ParseType(retTypV.Value, b.typeNames)
 				if err != nil {
-					return retTypV.Pos().Error("%s", err.Error())
+					b.Error(ErrorLevelError, retTypV.Pos(), "%s", err.Error())
+					continue
 				}
 				body = body[1:]
 			}
@@ -189,22 +202,26 @@ func (b *Builder) buildFnCall(n *parser.CallNode) (Node, error) {
 
 func (b *Builder) buildFnDef(n *parser.CallNode) error {
 	if b.Scope.CurrType() != ScopeTypeGlobal {
-		return n.Pos().Error("functions can only be defined in global scope")
+		b.Error(ErrorLevelError, n.Pos(), "functions can only be defined in global scope")
+		return nil
 	}
 
 	// Get name
 	if len(n.Args) == 0 {
-		return n.Pos().Error("invalid function definition")
+		b.Error(ErrorLevelError, n.Pos(), "invalid function definition")
+		return nil
 	}
 	_, ok := n.Args[len(n.Args)-1].(*parser.IdentNode)
 	if !ok {
-		return n.Pos().Error("invalid function definition")
+		b.Error(ErrorLevelError, n.Pos(), "invalid function definition")
+		return nil
 	}
 	name := n.Args[len(n.Args)-1].(*parser.IdentNode).Value
 	n.Args = n.Args[:len(n.Args)-1]
 	fn, exists := b.Funcs[name]
 	if !exists {
-		return n.Pos().Error("invalid function definition")
+		b.Error(ErrorLevelError, n.Pos(), "invalid function definition")
+		return nil
 	}
 
 	// Add params
@@ -228,15 +245,18 @@ func (b *Builder) buildFnDef(n *parser.CallNode) error {
 	// Check if return
 	if !types.NULL.Equal(fn.RetType) {
 		if len(body) == 0 {
-			return n.Pos().Error("expected return statement")
+			b.Error(ErrorLevelError, n.Pos(), "expected return statement")
+			return nil
 		}
 		call, ok := body[len(body)-1].(*CallNode)
 		if !ok {
-			return n.Pos().Error("expected return statement")
+			b.Error(ErrorLevelError, n.Pos(), "expected return statement")
+			return nil
 		}
 		_, ok = call.Call.(*ReturnNode)
 		if !ok {
-			return n.Pos().Error("expected return statement")
+			b.Error(ErrorLevelError, n.Pos(), "expected return statement")
+			return nil
 		}
 	}
 

@@ -81,12 +81,14 @@ func (b *Builder) buildNode(node parser.Node) (Node, error) {
 					return nil, err
 				}
 				if !types.IDENT.Equal(arg.Type()) {
-					return nil, arg.Pos().Error("expected identifier as argument to CONST")
+					b.Error(ErrorLevelError, arg.Pos(), "expected identifier as argument to CONST")
+					return NewTypedNode(types.INVALID, arg.Pos()), nil
 				}
 				name := arg.(*Const).Value.(string)
 				v, exists := b.consts[name]
 				if !exists {
-					return nil, arg.Pos().Error("undefined constant: %s", name)
+					b.Error(ErrorLevelError, arg.Pos(), "undefined constant: %s", name)
+					return NewTypedNode(types.INVALID, arg.Pos()), nil
 				}
 				return &Const{
 					typ: v.typ,
@@ -97,7 +99,7 @@ func (b *Builder) buildNode(node parser.Node) (Node, error) {
 
 			case "IMPORT":
 				if b.Scope.CurrType() != ScopeTypeGlobal {
-					return nil, n.Pos().Error("import must be at the top level")
+					b.Error(ErrorLevelError, n.Pos(), "IMPORT must be at global scope")
 				}
 				return nil, nil
 			}
@@ -114,7 +116,8 @@ func (b *Builder) buildNode(node parser.Node) (Node, error) {
 				return b.buildExtensionCall(n)
 			}
 
-			return nil, n.Pos().Error("unknown function: " + n.Name)
+			b.Error(ErrorLevelError, n.Pos(), "unknown function: %s", n.Name)
+			return NewTypedNode(types.INVALID, n.Pos()), nil
 		}
 		args := make([]Node, len(n.Args))
 		for i, arg := range n.Args {

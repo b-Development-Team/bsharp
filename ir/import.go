@@ -22,14 +22,16 @@ func (b *Builder) importPass(p *parser.Parser, fs FS) error {
 
 		// Its an import!
 		if len(call.Args) != 1 {
-			return call.Pos().Error("expected 1 argument to IMPORT")
+			b.Error(ErrorLevelError, call.Pos(), "expect 1 argument to IMPORT")
+			continue
 		}
 
 		// Get name
 		nm := call.Args[0]
 		nameV, ok := nm.(*parser.StringNode)
 		if !ok {
-			return nm.Pos().Error("expected import name")
+			b.Error(ErrorLevelError, nm.Pos(), "expected import name")
+			continue
 		}
 		name := nameV.Value
 
@@ -48,7 +50,8 @@ func (b *Builder) importPass(p *parser.Parser, fs FS) error {
 			tok := tokens.NewTokenizer(stream)
 			err := tok.Tokenize()
 			if err != nil {
-				return call.Pos().Error("%s", err.Error())
+				b.Error(ErrorLevelError, call.Pos(), "%s", err.Error())
+				continue
 			}
 			p = parser.NewParser(tok)
 			err = p.Parse()
@@ -59,7 +62,8 @@ func (b *Builder) importPass(p *parser.Parser, fs FS) error {
 			var err error
 			p, err = fs.Parse(name)
 			if err != nil {
-				return call.Pos().Error("%s", err.Error())
+				b.Error(ErrorLevelError, call.Pos(), "%s", err.Error())
+				continue
 			}
 		}
 
