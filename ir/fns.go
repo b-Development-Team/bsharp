@@ -329,7 +329,10 @@ func init() {
 		ArgTypes: []types.Type{types.FUNCTION, types.ALL, types.VARIADIC},
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
 			// Match types
-			typ := args[0].Type().(*types.FuncType)
+			typ, ok := args[0].Type().(*types.FuncType)
+			if !ok {
+				return NewTypedValue(types.INVALID), nil
+			}
 			if len(typ.ParTypes) > 0 {
 				err := b.MatchTypes(pos, args[1:], typ.ParTypes)
 				if err {

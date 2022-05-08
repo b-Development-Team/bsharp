@@ -148,12 +148,21 @@ func (c *CGen) addSet(n *ir.SetNode) (*Code, error) {
 	fmt.Fprintf(pre, "if (%s != NULL) {\n", name)
 	fmt.Fprintf(pre, "%s%s(%s);\n%s%s->len--;\n", c.Config.Tab, fns.freeFn, name, c.Config.Tab, m.Value)
 	pre.WriteString("}\n")
-	fmt.Fprintf(pre, "%s->len++;", m.Value)
+	fmt.Fprintf(pre, "%s->len++;\n", m.Value)
 
 	// Store
 	fmt.Fprintf(pre, "hashmap_set(%s->map, &(struct %s){ .key=%s, .val=%s });", m.Value, fns.structName, k.Value, v.Value)
+
+	// Grab
+	grab := ""
+	if isDynamic(n.Key.Type()) {
+		grab = JoinCode(grab, c.GrabCode(k.Value, n.Key.Type()))
+	}
+	if isDynamic(n.Value.Type()) {
+		grab = JoinCode(grab, c.GrabCode(v.Value, n.Value.Type()))
+	}
 	return &Code{
-		Pre: JoinCode(m.Pre, k.Pre, v.Pre, pre.String()),
+		Pre: JoinCode(m.Pre, k.Pre, v.Pre, grab, pre.String()),
 	}, nil
 }
 
