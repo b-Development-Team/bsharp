@@ -1,8 +1,12 @@
 [IMPORT "bsp/ir/ir.bsp"]
 [IMPORT "bsp/parser.bsp"]
 
-[FUNC matchTypes [PARAM n ARRAY{node}] [PARAM typs ARRAY{type}] [PARAM b builder] 
+[FUNC matchTypes [PARAM n ARRAY{node}] [PARAM pos pos] [PARAM typs ARRAY{type}] [PARAM b builder] [RETURNS BOOL] 
     # TODO
+    [RETURN FALSE]
+]
+
+[FUNC fixTypes [PARAM n ARRAY{node}] [PARAM typs ARRAY{type}]
 ]
 
 [FUNC buildStmt [PARAM b builder] [PARAM p parserNode] [RETURNS ANY] # node or error
@@ -12,7 +16,13 @@
 
             # Check if exists
             [IF [NOT [EXISTS [VAR nodeBuilders] [GET [VAR call] name]]]
-                [RETURN [ERROR [CONCAT "unknown tag: " [GET [VAR call] name]]]]
+                [bldErr [VAR b] [CONST errorLevelError] [GET [VAR p] pos] [CONCAT "unknown tag: " [GET [VAR call] name]]]
+                [DEFINE out [MAKE node]]
+                [SET [VAR out] kind [CONST nodeKindTyped]]
+                [SET [VAR out] typ [_INVALID]]
+                [SET [VAR out] val [ANY NULL]]
+                [SET [VAR out] pos [GET [VAR p] pos]]
+                [RETURN [ANY [VAR out]]]
             ]
 
             # Build args
@@ -30,7 +40,10 @@
 
             # Check typs
             [DEFINE bld [GET [VAR nodeBuilders] [GET [VAR call] name]]]
-            [matchTypes [VAR args] [GET [VAR bld] args] [VAR b]]
+            [DEFINE hasErr [matchTypes [VAR args] [GET [VAR p] pos] [GET [VAR bld] args] [VAR b]]]
+            [IF [VAR hasErr]
+                [fixTypes [VAR args] [GET [VAR bld] args]]
+            ]
 
             # Build
             [DEFINE out [CALL [GET [VAR bld] fn] [VAR b] [GET [VAR p] pos] [VAR args]]]
@@ -82,11 +95,76 @@
             [RETURN [ANY [VAR out]]]
         ]
 
-        # TODO: parserTypNumber
+        [CASE [CONST parserTypNumber]
+            [DEFINE out [MAKE node]]
+            [DEFINE val [CAST [GET [VAR p] val] STRING]]
+            [IF [ISINT [VAR val]]
+                [SET [VAR out] typ [_INT]]
+                [SET [VAR out] val [ANY [INT [VAR val]]]]
+            ELSE
+                [IF [ISFLOAT [VAR val]]
+                    [SET [VAR out] typ [_FLOAT]]
+                    [SET [VAR out] val [ANY [FLOAT [VAR val]]]]
+                ELSE
+                    [bldErr [VAR b] [CONST errorLevelError] [GET [VAR p] pos] [CONCAT "invalid number: " [VAR val]]]
+                    [SET [VAR out] typ [_INT]]
+                    [SET [VAR out] val [ANY 0]]
+                ]
+            ]
+
+            [SET [VAR out] kind [CONST nodeKindConst]]
+            [SET [VAR out] pos [GET [VAR p] pos]]
+            [RETURN [ANY [VAR out]]]
+        ]
 
         [DEFAULT
             [RETURN [ERROR [CONCAT "unknown parser node type: " [STRING [GET [VAR p] typ]]]]]
         ]
     ]
     [RETURN [ANY NULL]]
+]
+
+[FUNC ISINT [PARAM src STRING] [RETURNS BOOL]
+  [DEFINE i 0]
+  [WHILE [COMPARE [VAR i] < [LENGTH [VAR src]]]
+    [SWITCH [INDEX [VAR src] [VAR i]]
+      [CASE '0' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '1' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '2' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '3' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '4' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '5' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '6' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '7' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '8' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '9' [DEFINE i [MATH [VAR i] + 1]]]
+      [DEFAULT
+        [RETURN FALSE]
+      ]
+    ]
+  ]
+  [RETURN TRUE]
+]
+
+[FUNC ISFLOAT [PARAM src STRING] [RETURNS BOOL]
+  [DEFINE i 0]
+  [WHILE [COMPARE [VAR i] < [LENGTH [VAR src]]]
+    [SWITCH [INDEX [VAR src] [VAR i]]
+      [CASE '0' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '1' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '2' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '3' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '4' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '5' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '6' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '7' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '8' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '9' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '.' [DEFINE i [MATH [VAR i] + 1]]]
+      [DEFAULT
+        [RETURN FALSE]
+      ]
+    ]
+  ]
+  [RETURN TRUE]
 ]

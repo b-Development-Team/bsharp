@@ -151,6 +151,9 @@
 
 [FUNC TEQUAL [PARAM a type] [PARAM b type] [RETURNS BOOL]
   [IF [CANCAST [GET [VAR a] val] nil]
+    [IF [COMPARE [GET [VAR a] typ] == [CONST ALL]]
+      [RETURN TRUE]
+    ]
     [RETURN [COMPARE [GET [VAR a] typ] == [GET [VAR b] typ]]]
   ]
 

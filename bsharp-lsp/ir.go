@@ -48,7 +48,7 @@ func scopeRecurse(bl *ir.BlockNode, pos *tokens.Pos) *ir.ScopeInfo {
 		return b.ScopeInfo()
 
 	case *ir.IfNode:
-		if b.Else[0].Pos().Extend(b.Else[len(b.Else)-1].Pos()).Contains(pos) { // In else
+		if len(b.Else) > 0 && b.Else[0].Pos().Extend(b.Else[len(b.Else)-1].Pos()).Contains(pos) { // In else
 			for _, node := range b.Else {
 				_, ok := node.(*ir.BlockNode)
 				if ok && node.Pos().Contains(pos) {

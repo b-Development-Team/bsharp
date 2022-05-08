@@ -4,7 +4,7 @@
 [IMPORT "bsp/ir/ir.bsp"]
 [IMPORT "bsp/ir/build.bsp"]
 
-[DEFINE code "[PRINT \"Hello, World!\"]\n"]
+[DEFINE code "[PRINT \"Hello, World!\"]\n[MATH 1 + 1]\n[STRING 1]\n"]
 
 # Tokenize
 [DEFINE tokenserr [TOKENIZE "hello.bsp" [VAR code]]]
@@ -59,6 +59,13 @@
 [DEFINE bld [newBuilder]]
 [DEFINE out [irBuild [VAR bld] [VAR p]]]
 [IF [CANCAST [VAR out] error]
+  # Print errors
+  [DEFINE i 0]
+  [WHILE [COMPARE [VAR i] < [LENGTH [GET [VAR bld] errors]]]
+    [DEFINE err [INDEX [GET [VAR bld] errors] [VAR i]]]
+    [PRINT [CONCAT [POSSTR [GET [VAR err] pos]] ": " [GET [VAR err] message]]]
+    [DEFINE i [MATH [VAR i] + 1]]
+  ]
   [FAIL [VAR out]]
 ]
 [DEFINE ir [CAST [VAR out] ir]]

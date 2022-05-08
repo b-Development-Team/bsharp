@@ -19,6 +19,12 @@
         [APPEND [VAR body] [CAST [VAR r] node]]
         [DEFINE i [MATH [VAR i] + 1]]
     ]
+
+    # Check for errors
+    [IF [COMPARE [LENGTH [GET [VAR b] errors]] > 0]
+        [RETURN [ERROR [CONCAT "built with " [STRING [LENGTH [GET [VAR b] errors]]] " errors"]]]
+    ]
+
     [DEFINE ir [MAKE ir]]
     [SET [VAR ir] body [VAR body]]
     [RETURN [ANY [VAR ir]]]

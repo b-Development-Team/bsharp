@@ -59,7 +59,7 @@ func (b *Builder) FixTypes(args *[]Node, typs []types.Type, pos *tokens.Pos) {
 	}
 
 	if len(*args) < len(typs) {
-		start := len(*args) - 1
+		start := len(*args)
 		*args = append(*args, make([]Node, len(typs)-len(*args))...)
 		for i := start; i < len(*args); i++ {
 			(*args)[i] = NewTypedNode(typs[i], pos)
