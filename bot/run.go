@@ -179,7 +179,7 @@ func (b *Bot) BuildCode(filename string, src string, ctx *Ctx) (*ir.IR, error) {
 	if err != nil {
 		e := &strings.Builder{}
 		for _, v := range bld.Errors {
-			e.WriteString(v.Pos.Error("%s", v.Message).Error())
+			e.WriteString(v.Pos.Error("%s", v.Message).Error() + "\n")
 		}
 		e.WriteString(err.Error())
 		return nil, errors.New(e.String())
