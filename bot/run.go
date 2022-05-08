@@ -178,10 +178,13 @@ func (b *Bot) BuildCode(filename string, src string, ctx *Ctx) (*ir.IR, error) {
 	err = bld.Build(parser, &fs{b: b, gld: ctx.Guild()})
 	if err != nil {
 		e := &strings.Builder{}
+		e.WriteString("```")
 		for _, v := range bld.Errors {
-			e.WriteString(v.Pos.Error("%s", v.Message).Error() + "\n")
+			e.WriteString(v.Pos.Error("%s", v.Message).Error())
+			e.WriteRune('\n')
 		}
 		e.WriteString(err.Error())
+		e.WriteString("```")
 		return nil, errors.New(e.String())
 	}
 	return bld.IR(), nil
