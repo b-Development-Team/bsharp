@@ -108,6 +108,10 @@
       [CASE [CONST STRUCT] [RETURN "STRUCT"]]
       [CASE [CONST _NULL] [RETURN "NULL"]]
       [CASE [CONST ANY] [RETURN "ANY"]]
+      [CASE [CONST INVALID] [RETURN "INVALID"]]
+      [CASE [CONST IDENT] [RETURN "IDENT"]]
+      [CASE [CONST VARIADIC] [RETURN "VARIADIC"]]
+      [DEFAULT [RETURN [STRING [GET [VAR t] typ]]]]
     ]
   ]
 
@@ -163,7 +167,9 @@
           [DEFINE out [CONCAT [VAR out] "|"]]
         ]
         [DEFINE out [CONCAT [VAR out] [TSTRING [INDEX [VAR vals] [VAR i]]]]]
+        [DEFINE i [MATH [VAR i] + 1]]
       ]
+      [RETURN [VAR out]]
     ]
   ]
   
@@ -178,7 +184,7 @@
     [RETURN [COMPARE [GET [VAR a] typ] == [GET [VAR b] typ]]]
   ]
 
-  [IF [COMPARE [GET [VAR a] typ] != [GET [VAR b] typ]]
+  [IF [AND [COMPARE [GET [VAR a] typ] != [GET [VAR b] typ]] [COMPARE [GET [VAR a] typ] != [CONST MULTYPE]]]
     [RETURN FALSE]
   ]
 

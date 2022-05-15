@@ -43,4 +43,4 @@
     [RETURN [ANY [VAR out]]]
 ]
 
-[addNodeBuilder "MATH" [ARRAY [MULTYPE [ARRAY [_INT] [_FLOAT]]] [MULTYPE [ARRAY [_INT] [_FLOAT]]]] [FN addMath]]
+[addNodeBuilder "MATH" [ARRAY [MULTYPE [ARRAY [_INT] [_FLOAT]]] [_IDENT] [MULTYPE [ARRAY [_INT] [_FLOAT]]]] [FN addMath]]

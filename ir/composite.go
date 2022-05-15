@@ -304,7 +304,10 @@ func init() {
 			}
 
 			// Array type
-			arrTyp := args[0].Type().(*types.ArrayType)
+			arrTyp, ok := args[0].Type().(*types.ArrayType)
+			if !ok {
+				return NewTypedValue(types.NULL), nil
+			}
 			if !types.INT.Equal(args[1].Type()) {
 				b.Error(ErrorLevelError, args[1].Pos(), "expected type %s for array index, got %s", types.INT.String(), args[1].Type().String())
 			}

@@ -8,6 +8,7 @@
 [CONSTDEF nodeKindConst 1]
 [CONSTDEF nodeKindTyped 2]
 [CONSTDEF nodeKindMath 3]
+[CONSTDEF nodeKindTyped 4]
 [TYPEDEF node STRUCT{typ:type, kind:nodeKind, val:ANY, pos:pos}]
 
 # Nodes

@@ -122,7 +122,11 @@ func init() {
 	nodeBuilders["MATH"] = nodeBuilder{
 		ArgTypes: []types.Type{types.NewMulType(types.INT, types.FLOAT), types.IDENT, types.NewMulType(types.INT, types.FLOAT)},
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
-			op, exists := mathOps[args[1].(*Const).Value.(string)]
+			opV, ok := args[1].(*Const)
+			if !ok {
+				return NewTypedValue(types.INVALID), nil
+			}
+			op, exists := mathOps[opV.Value.(string)]
 			if !exists {
 				b.Error(ErrorLevelError, args[1].Pos(), "unknown math operation: %s", args[1].(*Const).Value.(string))
 			}
