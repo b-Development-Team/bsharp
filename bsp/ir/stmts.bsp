@@ -56,6 +56,19 @@
 ]
 
 [FUNC fixTypes [PARAM n ARRAY{node}] [PARAM typs ARRAY{type}] [PARAM pos pos]
+    # Fix existing
+    [DEFINE i 0]
+    [WHILE [COMPARE [VAR i] < [LENGTH [VAR n]]]
+        [DEFINE v [INDEX [VAR n] [VAR i]]]
+        [IF [NOT [TEQUAL [INDEX [VAR typs] [VAR i]] [GET [VAR v] typ]]]
+            [DEFINE node [MAKE node]]
+            [SET [VAR node] kind [CONST nodeKindTyped]]
+            [SET [VAR node] typ [INDEX [VAR typs] [VAR i]]]
+            [SET [VAR n] [VAR i] [VAR node]]
+        ]
+        [DEFINE i [MATH [VAR i] + 1]]
+    ]
+
     [IF [COMPARE [LENGTH [VAR typs]] > 0]
         [DEFINE last [INDEX [VAR typs] [MATH [LENGTH [VAR typs]] - 1]]]
         [IF [TEQUAL [_VARIADIC] [VAR last]] # Variadic

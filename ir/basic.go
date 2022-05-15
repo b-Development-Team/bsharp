@@ -37,6 +37,10 @@ const (
 	TimeModeNano
 )
 
+func (t TimeMode) String() string {
+	return [...]string{"SECONDS", "MICRO", "MILLI", "NANO"}[t]
+}
+
 var timeModeNames = map[string]TimeMode{
 	"SECONDS": TimeModeSeconds,
 	"MICRO":   TimeModeMicro,
@@ -50,7 +54,7 @@ type TimeNode struct {
 }
 
 func (t *TimeNode) Type() types.Type { return types.INT }
-func (t *TimeNode) Args() []Node     { return []Node{NewConst(types.INT, t.pos, t.Mode)} }
+func (t *TimeNode) Args() []Node     { return []Node{NewConst(types.IDENT, t.pos, t.Mode.String())} }
 
 func init() {
 	nodeBuilders["PRINT"] = nodeBuilder{
@@ -93,7 +97,24 @@ func init() {
 
 			mode := TimeModeSeconds
 			if len(args) == 1 {
-				i := args[0].(*Const)
+				i, ok := args[0].(*Const)
+				if !ok {
+					b.Error(ErrorLevelError, pos, "TIME mode must be a constant")
+					return &TimeNode{
+						Mode: TimeModeSeconds,
+						pos:  pos,
+					}, nil
+				}
+
+				_, ok = i.Value.(string)
+				if !ok {
+					b.Error(ErrorLevelError, pos, "TIME mode must be a string")
+					return &TimeNode{
+						Mode: TimeModeSeconds,
+						pos:  pos,
+					}, nil
+				}
+
 				m, ok := timeModeNames[i.Value.(string)]
 				if !ok {
 					b.Error(ErrorLevelError, pos, "TIME mode must be SECONDS, MICRO, MILLI, or NANO")

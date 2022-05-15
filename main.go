@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Nv7-Github/bsharp/backends/bsp"
 	"github.com/Nv7-Github/bsharp/backends/cgen"
 	"github.com/Nv7-Github/bsharp/backends/interpreter"
 	"github.com/Nv7-Github/bsharp/ir"
@@ -26,10 +27,17 @@ type Build struct {
 	Optimize bool     `arg:"-O,--optimize" help:"whether to optimize during compiling"`
 }
 
+type BSPGen struct {
+	Files  []string `arg:"positional,-i,--input" help:"input B# program"`
+	Output string   `arg:"required,-o,--output" help:"output B# file"`
+}
+
 type Args struct {
-	Run   *Run   `arg:"subcommand:run" help:"run a B# program"`
-	Build *Build `arg:"subcommand:build" help:"compile a B# program"`
-	Time  bool   `help:"print timing for each stage" arg:"-t"`
+	Run    *Run    `arg:"subcommand:run" help:"run a B# program"`
+	Build  *Build  `arg:"subcommand:build" help:"compile a B# program"`
+	BSPGen *BSPGen `arg:"subcommand:ir" help:"view the IR in B# form"`
+
+	Time bool `help:"print timing for each stage" arg:"-t"`
 }
 
 func main() {
@@ -157,6 +165,51 @@ func main() {
 
 		if args.Time {
 			fmt.Println("Compiled in", time.Since(start))
+		}
+
+	case args.BSPGen != nil:
+		start := time.Now()
+		files := make(map[string]struct{}, len(args.BSPGen.Files))
+		for _, f := range args.BSPGen.Files {
+			files[f] = struct{}{}
+		}
+
+		// Build
+		fs := &dirFS{files}
+		v, err := fs.Parse(args.BSPGen.Files[0])
+		if err != nil {
+			p.Fail(err.Error())
+		}
+		ir := ir.NewBuilder()
+		err = ir.Build(v, fs)
+		if err != nil {
+			if len(ir.Errors) > 0 {
+				for _, err := range ir.Errors {
+					fmt.Println(err.Pos.Error("%s", err.Message))
+				}
+			}
+			p.Fail(err.Error())
+		}
+
+		if args.Time {
+			fmt.Println("Built in", time.Since(start))
+		}
+
+		// Make B#
+		start = time.Now()
+		gen := bsp.NewBSP(ir.IR())
+		out, err := gen.Build()
+		if err != nil {
+			p.Fail(err.Error())
+		}
+		if args.Time {
+			fmt.Println("Generated B# in", time.Since(start))
+		}
+
+		// Save
+		err = os.WriteFile(args.BSPGen.Output, []byte(out), os.ModePerm)
+		if err != nil {
+			p.Fail(err.Error())
 		}
 	}
 }

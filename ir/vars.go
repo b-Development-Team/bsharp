@@ -10,10 +10,11 @@ type VarNode struct {
 	typ types.Type
 
 	name string // Variable name for use in Code()
+	pos  *tokens.Pos
 }
 
 func (v *VarNode) Type() types.Type { return v.typ }
-func (v *VarNode) Args() []Node     { return []Node{} }
+func (v *VarNode) Args() []Node     { return []Node{NewConst(types.IDENT, v.pos, v.name)} }
 
 type DefineNode struct {
 	NullCall
@@ -22,17 +23,10 @@ type DefineNode struct {
 	InScope bool // Check if accessing var outside of function (helps with recursion)
 
 	name string // Variable name for use in Code()
+	pos  *tokens.Pos
 }
 
-func (d *DefineNode) Args() []Node { return []Node{d.Value} }
-
-func NewDefineNode(id int, val Node, i *IR) *DefineNode {
-	return &DefineNode{
-		Var:   id,
-		Value: val,
-		name:  i.Variables[id].Name,
-	}
-}
+func (d *DefineNode) Args() []Node { return []Node{NewConst(types.IDENT, d.pos, d.name), d.Value} }
 
 func init() {
 	nodeBuilders["VAR"] = nodeBuilder{
@@ -53,6 +47,7 @@ func init() {
 				ID:   v,
 				typ:  va.Type,
 				name: name,
+				pos:  args[0].Pos(),
 			}, nil
 		},
 	}
@@ -90,6 +85,7 @@ func init() {
 				Value:   args[1],
 				name:    name,
 				InScope: exists,
+				pos:     args[0].Pos(),
 			}, nil
 		},
 	}

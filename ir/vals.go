@@ -41,11 +41,15 @@ type MathNode struct {
 	Op  MathOperation
 	Lhs Node
 	Rhs Node
-	typ types.Type
+
+	typ   types.Type
+	opPos *tokens.Pos
 }
 
 func (m *MathNode) Type() types.Type { return m.typ }
-func (m *MathNode) Args() []Node     { return []Node{m.Lhs, m.Rhs} }
+func (m *MathNode) Args() []Node {
+	return []Node{m.Lhs, NewConst(types.IDENT, m.opPos, m.Op.String()), m.Rhs}
+}
 
 type CompareOperation int
 
@@ -80,13 +84,17 @@ func init() {
 }
 
 type CompareNode struct {
-	Op  CompareOperation
+	Op    CompareOperation
+	opPos *tokens.Pos
+
 	Lhs Node
 	Rhs Node
 }
 
 func (c *CompareNode) Type() types.Type { return types.BOOL }
-func (c *CompareNode) Args() []Node     { return []Node{c.Lhs, c.Rhs} }
+func (c *CompareNode) Args() []Node {
+	return []Node{c.Lhs, NewConst(types.IDENT, c.opPos, c.Op.String()), c.Rhs}
+}
 
 type LogicalOp int
 
@@ -125,6 +133,11 @@ func init() {
 			opV, ok := args[1].(*Const)
 			if !ok {
 				return NewTypedValue(types.INVALID), nil
+			} else {
+				_, ok = opV.Value.(string)
+				if !ok {
+					return NewTypedValue(types.INVALID), nil
+				}
 			}
 			op, exists := mathOps[opV.Value.(string)]
 			if !exists {
@@ -147,10 +160,11 @@ func init() {
 
 			// Build node
 			return &MathNode{
-				Op:  op,
-				Lhs: args[0],
-				Rhs: args[2],
-				typ: outTyp,
+				Op:    op,
+				opPos: args[1].Pos(),
+				Lhs:   args[0],
+				Rhs:   args[2],
+				typ:   outTyp,
 			}, nil
 		},
 	}
@@ -159,6 +173,10 @@ func init() {
 		ArgTypes: []types.Type{types.NewMulType(types.STRING, types.INT, types.BYTE, types.FLOAT), types.IDENT, types.NewMulType(types.STRING, types.INT, types.BYTE, types.FLOAT)},
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
 			// Get op
+			_, ok := args[1].(*Const)
+			if !ok {
+				return NewTypedValue(types.INVALID), nil
+			}
 			op, exists := compareOps[args[1].(*Const).Value.(string)]
 			if !exists {
 				b.Error(ErrorLevelError, args[1].Pos(), "unknown compare operation: %s", args[1].(*Const).Value.(string))
@@ -170,9 +188,10 @@ func init() {
 			}
 			// Return node
 			return &CompareNode{
-				Op:  op,
-				Lhs: args[0],
-				Rhs: args[2],
+				Op:    op,
+				opPos: args[1].Pos(),
+				Lhs:   args[0],
+				Rhs:   args[2],
 			}, nil
 		},
 	}

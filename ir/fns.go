@@ -281,7 +281,7 @@ type FnNode struct {
 }
 
 func (f *FnNode) Type() types.Type { return f.typ }
-func (f *FnNode) Args() []Node     { return []Node{NewConst(types.STRING, f.pos, f.Name)} }
+func (f *FnNode) Args() []Node     { return []Node{NewConst(types.IDENT, f.pos, f.Name)} }
 
 func init() {
 	nodeBuilders["RETURN"] = nodeBuilder{

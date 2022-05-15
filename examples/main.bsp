@@ -18,7 +18,7 @@
 ELSE
   [PRINT "6 is 4, uh oh!"]
 ]
-[PRINT [INDEX "Hi!" 0]]
+[PRINT [STRING [INDEX "Hi!" 0]]]
 [PRINT [STRING [LENGTH "Hello, World!"]]]
 
 [DEFINE i 0]

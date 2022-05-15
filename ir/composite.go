@@ -85,11 +85,12 @@ func (l *LengthNode) Type() types.Type { return types.INT }
 func (l *LengthNode) Args() []Node     { return []Node{l.Value} }
 
 type MakeNode struct {
-	typ types.Type
+	typ    types.Type
+	typPos *tokens.Pos
 }
 
 func (m *MakeNode) Type() types.Type { return m.typ }
-func (m *MakeNode) Args() []Node     { return []Node{} }
+func (m *MakeNode) Args() []Node     { return []Node{NewConst(types.IDENT, m.typPos, m.typ.String())} }
 
 type SetNode struct {
 	NullCall
@@ -245,7 +246,8 @@ func init() {
 				}
 			}
 			return &MakeNode{
-				typ: typ,
+				typ:    typ,
+				typPos: args[0].Pos(),
 			}, nil
 		},
 	}
