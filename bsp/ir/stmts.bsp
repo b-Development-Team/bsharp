@@ -1,7 +1,37 @@
 [IMPORT "bsp/ir/ir.bsp"]
 [IMPORT "bsp/parser.bsp"]
 
-[FUNC matchTypes [PARAM n ARRAY{node}] [PARAM pos pos] [PARAM typs ARRAY{type}] [PARAM b builder] [RETURNS BOOL] 
+[FUNC matchTypes [PARAM n ARRAY{node}] [PARAM pos pos] [PARAM typs ARRAY{type}] [PARAM b builder] [RETURNS BOOL]
+    [IF [COMPARE [LENGTH [VAR typs]] > 0]
+        [DEFINE last [INDEX [VAR typs] [MATH [LENGTH [VAR typs]] - 1]]]
+        [DEFINE min [MATH [LENGTH [VAR typs]] - 2]]
+        [IF [TEQUAL [_VARIADIC] [VAR last]] # Variadic
+            [IF [COMPARE [LENGTH [VAR n]] < [VAR min]]
+                [bldErr [VAR b] [CONST errorLevelError] [VAR pos] [CONCAT "wrong number of arguments: expected at least " [STRING [VAR min]] ", got " [STRING [LENGTH [VAR n]]]]]
+                [RETURN TRUE]
+            ]
+        ]
+
+        [DEFINE hasError FALSE]
+        [DEFINE i 0]
+        [DEFINE varType [INDEX [VAR typs] [MATH [LENGTH [VAR typs]] - 2]]]
+        [WHILE [COMPARE [VAR i] < [LENGTH [VAR n]]]
+            [DEFINE v [INDEX [VAR n] [VAR i]]]
+            [IF [COMPARE [VAR i] < [VAR min]] # Still comparing type-by-type
+                [DEFINE t [INDEX [VAR typs] [VAR i]]]
+                [IF [AND [NOT [TEQUAL [VAR t] [GET [VAR v] typ]]] [NOT [TEQUAL [_INVALID] [GET [VAR v] typ]]]]
+                    [DEFINE hasError TRUE]
+                    [bldErr [VAR b] [CONST errorLevelError] [VAR pos] [CONCAT "wrong argument type: expected " [TSTRING [VAR t]] ", got " [TSTRING [GET [VAR v] typ]]]]
+                ]
+            ELSE
+                [IF [NOT [TEQUAL [VAR varType] [GET [VAR v] typ]]]
+                    
+                ]
+            ]
+
+            # Comparing to variadic fixTypes
+        ]
+    ]
     # TODO
     [RETURN FALSE]
 ]
