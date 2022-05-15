@@ -25,15 +25,32 @@
                 ]
             ELSE
                 [IF [NOT [TEQUAL [VAR varType] [GET [VAR v] typ]]]
-                    
+                    [DEFINE hasError TRUE]
+                    [bldErr [VAR b] [CONST errorLevelError] [VAR pos] [CONCAT "wrong variadic argument type: expected " [TSTRING [VAR varType]] ", got " [TSTRING [GET [VAR v] typ]]]]
                 ]
             ]
+        ]
 
-            # Comparing to variadic fixTypes
+        [RETURN [VAR hasError]]
+    ]
+
+    [IF [COMPARE [LENGTH [VAR typs]] != [LENGTH [VAR n]]]
+        [bldErr [VAR b] [CONST errorLevelError] [VAR pos] [CONCAT "wrong number of arguments: expected " [STRING [LENGTH [VAR typs]]] ", got " [STRING [LENGTH [VAR typs]]]]]
+        [RETURN TRUE]
+    ]
+
+    [DEFINE hasErr FALSE]
+    [DEFINE i 0]
+    [WHILE [COMPARE [VAR i] < [LENGTH [VAR n]]]
+        [DEFINE arg [INDEX [VAR n] [VAR i]]]
+        [DEFINE t [INDEX [VAR typs] [VAR i]]]
+        [IF [NOT [TEQUAL [VAR t] [GET [VAR arg] typ]]]
+            [bldErr [VAR b] [CONST errorLevelError] [VAR pos] [CONCAT "wrong argument type: expected " [TSTRING [VAR t]] ", got " [TSTRING [GET [VAR arg] typ]]]]
+            [DEFINE hasErr TRUE]
         ]
     ]
-    # TODO
-    [RETURN FALSE]
+
+    [RETURN [VAR hasErr]]
 ]
 
 [FUNC fixTypes [PARAM n ARRAY{node}] [PARAM typs ARRAY{type}]
