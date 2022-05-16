@@ -50,7 +50,22 @@ func (b *BSP) addConst(v *ir.Const) (string, error) {
 		return strconv.Itoa(v.Value.(int)), nil
 
 	case types.BYTE:
-		return fmt.Sprintf("[BYTE %d]", v.Value.(byte)), nil
+		switch v.Value.(byte) {
+		case '\n':
+			return `'\n'`, nil
+
+		case '\'':
+			return `'\''`, nil
+
+		case '\\':
+			return `'\\'`, nil
+
+		case '\t':
+			return `'\t'`, nil
+
+		default:
+			return "'" + string(v.Value.(byte)) + "'", nil
+		}
 
 	case types.FLOAT:
 		v := strconv.FormatFloat(v.Value.(float64), 'f', -1, 64)

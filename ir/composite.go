@@ -62,7 +62,7 @@ type SetStructNode struct {
 }
 
 func (s *SetStructNode) Args() []Node {
-	return []Node{s.Struct, s.Value, NewConst(types.INT, s.pos, s.Field)}
+	return []Node{s.Struct, NewConst(types.IDENT, s.pos, s.Struct.Type().(*types.StructType).Fields[s.Field].Name), s.Value}
 }
 
 func NewIndexNode(val, index Node) *IndexNode {
@@ -129,7 +129,9 @@ type GetStructNode struct {
 }
 
 func (g *GetStructNode) Type() types.Type { return g.typ }
-func (g *GetStructNode) Args() []Node     { return []Node{g.Struct, NewConst(types.INT, g.pos, g.Field)} }
+func (g *GetStructNode) Args() []Node {
+	return []Node{g.Struct, NewConst(types.IDENT, g.pos, g.Struct.Type().(*types.StructType).Fields[g.Field].Name)}
+}
 
 type ExistsNode struct {
 	Map Node

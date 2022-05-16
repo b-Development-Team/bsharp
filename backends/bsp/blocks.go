@@ -10,9 +10,12 @@ import (
 func (b *BSP) Tab(val string) string {
 	lines := strings.Split(val, "\n")
 	out := &strings.Builder{}
-	for _, line := range lines {
+	for i, line := range lines {
 		out.WriteString(b.Config.Tab)
 		out.WriteString(line)
+		if i != len(lines)-1 {
+			out.WriteString(b.Config.Newline)
+		}
 	}
 	return out.String()
 }

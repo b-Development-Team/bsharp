@@ -122,7 +122,7 @@ type CastNode struct {
 func (c *CastNode) Type() types.Type { return c.typ }
 func (c *CastNode) Pos() *tokens.Pos { return c.Value.Pos() }
 func (c *CastNode) Args() []Node {
-	return []Node{c.Value, NewConst(types.STRING, c.Value.Pos(), c.typ.String())}
+	return []Node{c.Value, NewConst(types.IDENT, c.Value.Pos(), c.typ.String())}
 }
 
 func NewCastNode(val Node, typ types.Type) *CastNode {
@@ -140,7 +140,7 @@ type CanCastNode struct {
 
 func (c *CanCastNode) Type() types.Type { return types.BOOL }
 func (c *CanCastNode) Args() []Node {
-	return []Node{c.Value, NewConst(types.STRING, c.pos, c.Typ.String())}
+	return []Node{c.Value, NewConst(types.IDENT, c.pos, c.Typ.String())}
 }
 
 func init() {
@@ -185,7 +185,11 @@ func init() {
 	nodeBuilders["CANCAST"] = nodeBuilder{
 		ArgTypes: []types.Type{types.ALL, types.IDENT},
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
-			typ, err := types.ParseType(args[1].(*Const).Value.(string), b.typeNames)
+			c, ok := args[1].(*Const)
+			if !ok {
+				return NewTypedValue(types.INVALID), nil
+			}
+			typ, err := types.ParseType(c.Value.(string), b.typeNames)
 			if err != nil {
 				b.Error(ErrorLevelError, args[1].Pos(), "%s", err.Error())
 				typ = types.INVALID

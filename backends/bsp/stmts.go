@@ -56,6 +56,30 @@ func (b *BSP) buildNode(node ir.Node) (string, error) {
 		case *ir.ReturnNode:
 			return b.addCall("RETURN", c)
 
+		case *ir.CanCastNode:
+			return b.addCall("CANCAST", c)
+
+		case *ir.PanicNode:
+			return b.addCall("PANIC", c)
+
+		case *ir.SetStructNode:
+			return b.addCall("SET", c)
+
+		case *ir.GetStructNode:
+			return b.addCall("GET", c)
+
+		case *ir.SliceNode:
+			return b.addCall("SLICE", c)
+
+		case *ir.SetIndexNode:
+			return b.addCall("SET", c)
+
+		case *ir.ExistsNode:
+			return b.addCall("EXISTS", c)
+
+		case *ir.LogicalOpNode:
+			return b.addCall(c.Op.String(), c)
+
 		case *ir.CastNode:
 			return b.addCast(c)
 

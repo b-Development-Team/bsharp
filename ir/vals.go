@@ -105,7 +105,7 @@ const (
 )
 
 func (l LogicalOp) String() string {
-	return [...]string{"And", "Or", "Not"}[l]
+	return [...]string{"AND", "OR", "NOT"}[l]
 }
 
 type LogicalOpNode struct {
@@ -115,7 +115,12 @@ type LogicalOpNode struct {
 }
 
 func (l *LogicalOpNode) Type() types.Type { return types.BOOL }
-func (l *LogicalOpNode) Args() []Node     { return []Node{l.Val, l.Rhs} }
+func (l *LogicalOpNode) Args() []Node {
+	if l.Rhs == nil {
+		return []Node{l.Val}
+	}
+	return []Node{l.Val, l.Rhs}
+}
 
 func NewMathNode(op MathOperation, lhs, rhs Node, typ types.Type) *MathNode {
 	return &MathNode{
