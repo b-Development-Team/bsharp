@@ -55,7 +55,7 @@ var basicTypeNames = map[BasicType]string{
 	ARRAY:    "ARRAY",
 	MAP:      "MAP",
 	FUNCTION: "FUNCTION",
-	NULL:     "NULL",
+	NULL:     "NIL",
 	ALL:      "ALL",
 	ANY:      "ANY",
 	VARIADIC: "VARIADIC",

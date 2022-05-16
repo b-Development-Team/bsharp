@@ -6,7 +6,6 @@
 [TYPEDEF funcType STRUCT{pars:ARRAY{type}, ret: type}]
 [TYPEDEF structField STRUCT{name:STRING, typ:type}]
 [TYPEDEF structType ARRAY{structField}]
-[TYPEDEF nil NULL]
 [TYPEDEF mulType ARRAY{type}]
 
 [CONSTDEF INT 0]
@@ -95,7 +94,7 @@
 ]
 
 [FUNC TSTRING [PARAM t type] [RETURNS STRING]
-  [IF [CANCAST [GET [VAR t] val] nil]
+  [IF [CANCAST [GET [VAR t] val] NIL]
     [SWITCH [GET [VAR t] typ]
       [CASE [CONST INT] [RETURN "INT"]]
       [CASE [CONST BYTE] [RETURN "BYTE"]]
@@ -106,7 +105,7 @@
       [CASE [CONST MAP] [RETURN "MAP"]]
       [CASE [CONST FUNCTION] [RETURN "FUNCTION"]]
       [CASE [CONST STRUCT] [RETURN "STRUCT"]]
-      [CASE [CONST _NULL] [RETURN "NULL"]]
+      [CASE [CONST _NULL] [RETURN "NIL"]]
       [CASE [CONST ANY] [RETURN "ANY"]]
       [CASE [CONST INVALID] [RETURN "INVALID"]]
       [CASE [CONST IDENT] [RETURN "IDENT"]]
@@ -177,7 +176,7 @@
 ]
 
 [FUNC TEQUAL [PARAM a type] [PARAM b type] [RETURNS BOOL]
-  [IF [CANCAST [GET [VAR a] val] nil]
+  [IF [CANCAST [GET [VAR a] val] NIL]
     [IF [COMPARE [GET [VAR a] typ] == [CONST ALL]]
       [RETURN TRUE]
     ]

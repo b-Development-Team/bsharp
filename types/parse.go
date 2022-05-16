@@ -30,7 +30,7 @@ func parse(tokens []token, names map[string]Type) (Type, []token, error) {
 		case "BOOL":
 			return BOOL, tokens[1:], nil
 
-		case "NULL":
+		case "NIL":
 			return NULL, tokens[1:], nil
 
 		case "STRING":
