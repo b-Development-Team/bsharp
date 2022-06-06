@@ -68,8 +68,7 @@ func (i *Interpreter) evalLength(pos *tokens.Pos, n *ir.LengthNode) (*Value, err
 		return NewValue(types.INT, len(a)), nil
 
 	case types.STRING:
-		a := []rune(v.Value.(string))
-		return NewValue(types.INT, len(a)), nil
+		return NewValue(types.INT, len(v.Value.(string))), nil
 
 	case types.MAP:
 		switch v.Type.(*types.MapType).KeyType {
