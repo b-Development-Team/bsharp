@@ -72,3 +72,4 @@
 
 # Add builders
 [IMPORT "bstar/funcs/vars.bsp"]
+[IMPORT "bstar/funcs/random.bsp"]

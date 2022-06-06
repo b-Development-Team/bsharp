@@ -1,3 +1,4 @@
+# TODO: Error checking in all the funcs when indexing args, casting, etc.
 [IMPORT "bstar/parser.bsp"]
 [IMPORT "errors.bsp"]
 
@@ -17,3 +18,13 @@
 [FUNC ADD_BLD [PARAM name STRING] [PARAM fn FUNC{ARRAY{node}}ANY]
   [SET [VAR blds] [VAR name] [VAR fn]]
 ]
+
+# Basic funcs
+[FUNC node_array [PARAM args ARRAY{node}] [RETURNS ANY]
+  [DEFINE out [MAKE node]]
+  [SET [VAR out] kind [CONST nodeKindArray]]
+  [SET [VAR out] val [ANY [VAR args]]]
+  [RETURN [ANY [VAR out]]]
+]
+
+[ADD_BLD "ARRAY" [FN node_array]]

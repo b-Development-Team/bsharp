@@ -1,0 +1,23 @@
+[IMPORT "bstar/interp.bsp"]
+[IMPORT "bstar/funcs/funcs.bsp"]
+[IMPORT "math.bsp"]
+
+[FUNC node_choose [PARAM args ARRAY{node}] [RETURNS ANY]
+  [DEFINE arr [CAST [GET [INDEX [VAR args] 0] val] ARRAY{node}]]
+  [DEFINE ind [RANDINT 0 [LENGTH [VAR arr]]]]
+  [RETURN [ANY [INDEX [VAR arr] [VAR ind]]]]
+]
+
+[ADD_BLD "CHOOSE" [FN node_choose]]
+
+[FUNC node_choosechar [PARAM args ARRAY{node}] [RETURNS ANY]
+  [DEFINE str [CAST [GET [INDEX [VAR args] 0] val] STRING]]
+  [DEFINE ind [RANDINT 0 [LENGTH [VAR str]]]]
+
+  [DEFINE out [MAKE node]]
+  [SET [VAR out] kind [CONST nodeKindString]]
+  [SET [VAR out] val [ANY [STRING [INDEX [VAR str] [VAR ind]]]]]
+  [RETURN [ANY [VAR out]]]
+]
+
+[ADD_BLD "CHOOSECHAR" [FN node_choosechar]]

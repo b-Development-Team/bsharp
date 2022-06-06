@@ -1,4 +1,3 @@
-# TODO: Error checking when indexing args, casting, etc.
 [IMPORT "bstar/interp.bsp"]
 [IMPORT "bstar/funcs/funcs.bsp"]
 
