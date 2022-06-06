@@ -61,6 +61,23 @@
     [RETURN [VAR out]]
   ]
 
+  [IF [COMPARE [INDEX [VAR code] 0] == '#']
+    [DEFINE i 0]
+    [WHILE [COMPARE [VAR i] < [LENGTH [VAR code]]]
+      [IF [COMPARE [INDEX [VAR code] [VAR i]] == '\n']
+        [DEFINE node [MAKE node]]
+        [SET [VAR node] kind [CONST nodeKindString]]
+        [SET [VAR node] val [ANY ""]]
+
+        [DEFINE out [MAKE STRUCT{val:node, len:INT}]]
+        [SET [VAR out] len [MATH [VAR i] + 1]]
+        [SET [VAR out] val [VAR node]]
+        [RETURN [VAR out]]
+      ]
+      [DEFINE i [MATH [VAR i] + 1]]
+    ]
+  ]
+
   [IF [COMPARE [INDEX [VAR code] 0] == '"']
     [DEFINE i 1]
     [DEFINE backslash FALSE]
@@ -177,6 +194,13 @@
         [RETURN [VAR out]]
       ]
 
+      [CASE '#'
+        [DEFINE out [MAKE STRUCT{val:node, len:INT}]]
+        [SET [VAR out] len [VAR i]]
+        [SET [VAR out] val [nodeFromString [VAR val]]]
+        [RETURN [VAR out]]
+      ]
+
       [CASE '"'
         [DEFINE out [MAKE STRUCT{val:node, len:INT}]]
         [SET [VAR out] len [VAR i]]
@@ -201,7 +225,20 @@
 ]
 
 [FUNC nodeFromString [PARAM val STRING] [RETURNS node]
-  # TODO: Check if its a float or int, and parse if it is
+  [IF [ISINT [VAR val]]
+    [DEFINE out [MAKE node]]
+    [SET [VAR out] kind [CONST nodeKindInt]]
+    [SET [VAR out] val [ANY [INT [VAR val]]]]
+    [RETURN [VAR out]]
+  ]
+
+  [IF [ISFLOAT [VAR val]]
+    [DEFINE out [MAKE node]]
+    [SET [VAR out] kind [CONST nodeKindFloat]]
+    [SET [VAR out] val [ANY [FLOAT [VAR val]]]]
+    [RETURN [VAR out]]
+  ]
+
   [DEFINE out [MAKE node]]
   [SET [VAR out] kind [CONST nodeKindString]]
   [SET [VAR out] val [ANY [VAR val]]]
@@ -217,4 +254,58 @@
     [DEFINE i [MATH [VAR i] + [GET [VAR def] len]]]
   ]
   [RETURN [VAR out]]
+]
+
+
+[FUNC ISINT [PARAM src STRING] [RETURNS BOOL]
+  [IF [COMPARE [LENGTH [VAR src]] == 0] [RETURN FALSE]]
+
+  [DEFINE i 0]
+  [WHILE [COMPARE [VAR i] < [LENGTH [VAR src]]]
+    [SWITCH [INDEX [VAR src] [VAR i]]
+      [CASE '0' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '1' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '2' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '3' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '4' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '5' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '6' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '7' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '8' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '9' [DEFINE i [MATH [VAR i] + 1]]]
+      [DEFAULT
+        [RETURN FALSE]
+      ]
+    ]
+  ]
+  [RETURN TRUE]
+]
+
+[FUNC ISFLOAT [PARAM src STRING] [RETURNS BOOL]
+  [IF [COMPARE [LENGTH [VAR src]] == 0] [RETURN FALSE]]
+
+  [DEFINE hasPeriod FALSE]
+  [DEFINE i 0]
+  [WHILE [COMPARE [VAR i] < [LENGTH [VAR src]]]
+    [SWITCH [INDEX [VAR src] [VAR i]]
+      [CASE '0' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '1' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '2' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '3' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '4' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '5' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '6' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '7' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '8' [DEFINE i [MATH [VAR i] + 1]]]
+      [CASE '9' [DEFINE i [MATH [VAR i] + 1]]]
+      [DEFAULT
+        [IF [AND [COMPARE [INDEX [VAR src] [VAR i]] == '.'] [NOT [VAR hasPeriod]]]
+          [DEFINE hasPeriod TRUE]
+        ELSE
+          [RETURN FALSE]
+        ]
+      ]
+    ]
+  ]
+  [RETURN TRUE]
 ]
