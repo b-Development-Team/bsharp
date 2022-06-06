@@ -104,16 +104,16 @@ func (b *BSP) buildSwitch(n *ir.SwitchNode) (string, error) {
 		out.WriteString(b.Config.Newline)
 	}
 	if n.Default != nil {
-		fmt.Fprintf(out, "[DEFAULT%s", b.Config.Newline)
+		fmt.Fprintf(out, "%s[DEFAULT%s", b.Config.Tab, b.Config.Newline)
 		for _, v := range n.Default.Block.(*ir.Default).Body {
 			s, err := b.buildNode(v)
 			if err != nil {
 				return "", err
 			}
-			out.WriteString(b.Tab(s))
+			out.WriteString(b.Tab(b.Tab(s)))
 			out.WriteString(b.Config.Newline)
 		}
-		fmt.Fprintf(out, "]%s", b.Config.Newline)
+		fmt.Fprintf(out, "%s]%s", b.Config.Tab, b.Config.Newline)
 	}
 	fmt.Fprintf(out, "]")
 	return out.String(), nil
