@@ -164,20 +164,26 @@ func (i *Interpreter) evalLogicalOp(pos *tokens.Pos, node *ir.LogicalOpNode) (*V
 		return nil, err
 	}
 
-	var right *Value
-	if node.Rhs != nil {
-		right, err = i.evalNode(node.Rhs)
-		if err != nil {
-			return nil, err
-		}
-	}
-
 	switch node.Op {
 	case ir.LogicalOpAnd:
-		return NewValue(types.BOOL, val.Value.(bool) && right.Value.(bool)), nil
+		if val.Value.(bool) {
+			right, err := i.evalNode(node.Rhs)
+			if err != nil {
+				return nil, err
+			}
+			return NewValue(types.BOOL, right.Value.(bool)), nil
+		}
+		return NewValue(types.BOOL, val.Value.(bool)), nil
 
 	case ir.LogicalOpOr:
-		return NewValue(types.BOOL, val.Value.(bool) || right.Value.(bool)), nil
+		if !val.Value.(bool) {
+			right, err := i.evalNode(node.Rhs)
+			if err != nil {
+				return nil, err
+			}
+			return NewValue(types.BOOL, right.Value.(bool)), nil
+		}
+		return NewValue(types.BOOL, val.Value.(bool)), nil
 
 	case ir.LogicalOpNot:
 		return NewValue(types.BOOL, !val.Value.(bool)), nil

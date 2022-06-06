@@ -1,0 +1,1 @@
+bsharp run bstar/main.bsp bstar/parser.bsp

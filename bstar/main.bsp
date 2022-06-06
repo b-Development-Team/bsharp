@@ -1,0 +1,9 @@
+[IMPORT "bstar/parser.bsp"]
+
+[DEFINE source "[HI \"Hello, World!\"]"]
+[DEFINE parsed [parse [VAR source]]]
+[DEFINE i 0]
+[WHILE [COMPARE [VAR i] < [LENGTH [VAR parsed]]]
+  [PRINT [NODE_STRING [INDEX [VAR parsed] [VAR i]]]]
+  [DEFINE i [MATH [VAR i] + 1]]
+]

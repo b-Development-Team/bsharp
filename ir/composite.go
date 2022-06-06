@@ -167,6 +167,14 @@ func init() {
 	nodeBuilders["ARRAY"] = nodeBuilder{
 		ArgTypes: []types.Type{types.ALL, types.VARIADIC},
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
+			if len(args) == 0 {
+				b.Error(ErrorLevelError, pos, "ARRAY requires at least one argument")
+				return &ArrayNode{
+					Values: args,
+					typ:    types.NewArrayType(types.INVALID),
+				}, nil
+			}
+
 			// Check types
 			typ := args[0].Type()
 			if len(args) > 1 {

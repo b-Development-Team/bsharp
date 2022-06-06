@@ -46,9 +46,19 @@ func (b *Builder) MatchTypes(pos *tokens.Pos, args []Node, typs []types.Type) bo
 }
 
 func (b *Builder) FixTypes(args *[]Node, typs []types.Type, pos *tokens.Pos) {
+	if len(*args) > len(typs) && len(typs) > 0 && typs[len(typs)-1] != types.VARIADIC {
+		*args = (*args)[:len(typs)]
+	}
+
 	// Fix existing
 	for i, v := range *args {
-		if !v.Type().Equal(typs[i]) && !types.INVALID.Equal(v.Type()) {
+		var typ types.Type
+		if typs[len(typs)-1] == types.VARIADIC {
+			typ = typs[len(typs)-2]
+		} else {
+			typ = typs[i]
+		}
+		if !v.Type().Equal(typ) && !types.INVALID.Equal(v.Type()) {
 			(*args)[i] = NewTypedNode(typs[i], v.Pos())
 		}
 	}
