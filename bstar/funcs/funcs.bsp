@@ -1,0 +1,19 @@
+[IMPORT "bstar/parser.bsp"]
+[IMPORT "errors.bsp"]
+
+[FUNC NODE_ERR [PARAM node node] [PARAM msg STRING] [RETURNS ANY]
+  [RETURN [ERROR [CONCAT "Error at \"" [NODE_STRING [VAR node]] "\": " [VAR msg]]]]
+]
+
+[FUNC EMPTY_NODE [RETURNS node] 
+  [DEFINE out [MAKE node]]
+  [SET [VAR out] kind [CONST nodeKindString]]
+  [SET [VAR out] val [ANY ""]]
+  [RETURN [VAR out]]
+]
+
+[DEFINE blds [MAKE MAP{STRING, FUNC{ARRAY{node}}ANY}]]
+
+[FUNC ADD_BLD [PARAM name STRING] [PARAM fn FUNC{ARRAY{node}}ANY]
+  [SET [VAR blds] [VAR name] [VAR fn]]
+]

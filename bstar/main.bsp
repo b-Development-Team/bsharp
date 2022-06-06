@@ -1,9 +1,15 @@
 [IMPORT "bstar/parser.bsp"]
+[IMPORT "bstar/interp.bsp"]
 
-[DEFINE source "[HI \"Hello, World!\"]"]
-[DEFINE parsed [parse [VAR source]]]
+[DEFINE source "[DEFINE a 0]\n[VAR a]"]
+[DEFINE parsed [PARSE [VAR source]]] # Parse
+[DEFINE parsed [INTERP [VAR parsed]]] # Interpret
+
+# Print
+[DEFINE out ""]
 [DEFINE i 0]
 [WHILE [COMPARE [VAR i] < [LENGTH [VAR parsed]]]
-  [PRINT [NODE_STRING [INDEX [VAR parsed] [VAR i]]]]
+  [DEFINE out [CONCAT [VAR out] [NODE_STRING [INDEX [VAR parsed] [VAR i]]]]]
   [DEFINE i [MATH [VAR i] + 1]]
 ]
+[PRINT [VAR out]]

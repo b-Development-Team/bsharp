@@ -8,7 +8,7 @@
 [FUNC NODE_STRING [PARAM node node] [RETURNS STRING]
   [SWITCH [GET [VAR node] kind]
     [CASE [CONST nodeKindString]
-      [RETURN [CONCAT "\"" [CAST [GET [VAR node] val] STRING] "\""]]
+      [RETURN [CAST [GET [VAR node] val] STRING]]
     ]
 
     [CASE [CONST nodeKindInt]
@@ -208,13 +208,12 @@
   [RETURN [VAR out]]
 ]
 
-[FUNC parse [PARAM code STRING] [RETURNS ARRAY{node}]
+[FUNC PARSE [PARAM code STRING] [RETURNS ARRAY{node}]
   [DEFINE out [MAKE ARRAY{node}]]
   [DEFINE i 0]
   [WHILE [COMPARE [VAR i] < [LENGTH [VAR code]]]  
     [DEFINE def [parseDef [SLICE [VAR code] [VAR i] [LENGTH [VAR code]]]]]
     [APPEND [VAR out] [GET [VAR def] val]]
-    #[PRINT [STRING [GET [VAR def] len]]]
     [DEFINE i [MATH [VAR i] + [GET [VAR def] len]]]
   ]
   [RETURN [VAR out]]

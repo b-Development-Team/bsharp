@@ -32,6 +32,10 @@ func init() {
 	nodeBuilders["VAR"] = nodeBuilder{
 		ArgTypes: []types.Type{types.IDENT},
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
+			_, ok := args[0].(*Const)
+			if !ok {
+				return NewTypedValue(types.INVALID), nil
+			}
 			name := args[0].(*Const).Value.(string)
 			v, exists := b.Scope.GetVar(name)
 			if !exists {

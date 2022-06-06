@@ -388,6 +388,10 @@ func init() {
 		ArgTypes: []types.Type{types.MAP, hashable},
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
 			// Check types
+			_, ok := args[0].Type().(*types.MapType)
+			if !ok {
+				return NewTypedValue(types.BOOL), nil
+			}
 			mapTyp := args[0].Type().(*types.MapType)
 			if !mapTyp.KeyType.Equal(args[1].Type()) {
 				b.Error(ErrorLevelError, args[1].Pos(), "expected type %s for map key, got %s", mapTyp.KeyType.String(), args[1].Type().String())
