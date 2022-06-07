@@ -1,5 +1,5 @@
 # TODO: Error checking in all the funcs when indexing args, casting, etc.
-[IMPORT "bstar/parser.bsp"]
+[IMPORT "bpp/parser.bsp"]
 [IMPORT "errors.bsp"]
 
 [FUNC NODE_ERR [PARAM node node] [PARAM msg STRING] [RETURNS ANY]

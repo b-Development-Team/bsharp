@@ -1,5 +1,5 @@
-[IMPORT "bstar/interp.bsp"]
-[IMPORT "bstar/funcs/funcs.bsp"]
+[IMPORT "bpp/interp.bsp"]
+[IMPORT "bpp/funcs/funcs.bsp"]
 [IMPORT "math.bsp"]
 
 [FUNC node_choose [PARAM self node] [PARAM args ARRAY{node}] [RETURNS ANY]

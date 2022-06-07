@@ -1,6 +1,6 @@
-[IMPORT "bstar/parser.bsp"]
+[IMPORT "bpp/parser.bsp"]
 [IMPORT "errors.bsp"]
-[IMPORT "bstar/funcs/funcs.bsp"]
+[IMPORT "bpp/funcs/funcs.bsp"]
 
 [FUNC evalNode [PARAM node node] [RETURNS ANY]
   [SWITCH [GET [VAR node] kind]

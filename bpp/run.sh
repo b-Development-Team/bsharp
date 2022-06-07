@@ -1,0 +1,1 @@
+bsharp run bpp/main.bsp bpp/parser.bsp bpp/interp.bsp bpp/funcs/vars.bsp bpp/funcs/funcs.bsp bpp/funcs/math.bsp bpp/funcs/ops.bsp bpp/funcs/blks.bsp bpp/funcs/blds.bsp -t
