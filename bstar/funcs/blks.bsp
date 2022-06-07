@@ -2,7 +2,7 @@
 [IMPORT "bstar/funcs/funcs.bsp"]
 [IMPORT "math.bsp"]
 
-[FUNC node_if [PARAM args ARRAY{node}] [RETURNS ANY]
+[FUNC node_if [PARAM self node] [PARAM args ARRAY{node}] [RETURNS ANY]
   # Eval cond
   [DEFINE cond_err [evalNode [INDEX [VAR args] 1]]] # first arg is function name
   [IF [CANCAST [VAR cond_err] error]

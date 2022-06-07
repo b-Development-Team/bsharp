@@ -3,7 +3,7 @@
 
 [DEFINE vars [MAKE MAP{STRING, node}]]
 
-[FUNC node_define [PARAM args ARRAY{node}] [RETURNS ANY]
+[FUNC node_define [PARAM self node] [PARAM args ARRAY{node}] [RETURNS ANY]
   [DEFINE name [CAST [GET [INDEX [VAR args] 0] val] STRING]]
   [SET [VAR vars] [VAR name] [INDEX [VAR args] 1]]
   [RETURN [ANY [EMPTY_NODE]]]
@@ -11,7 +11,7 @@
 
 [ADD_BLD "DEFINE" [FN node_define]]
 
-[FUNC node_var [PARAM args ARRAY{node}] [RETURNS ANY]
+[FUNC node_var [PARAM self node]  [PARAM args ARRAY{node}] [RETURNS ANY]
   [DEFINE name [CAST [GET [INDEX [VAR args] 0] val] STRING]]
   [RETURN [ANY [GET [VAR vars] [VAR name]]]]
 ]

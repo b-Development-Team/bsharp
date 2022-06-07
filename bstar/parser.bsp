@@ -61,23 +61,6 @@
     [RETURN [VAR out]]
   ]
 
-  [IF [COMPARE [INDEX [VAR code] 0] == '#']
-    [DEFINE i 0]
-    [WHILE [COMPARE [VAR i] < [LENGTH [VAR code]]]
-      [IF [COMPARE [INDEX [VAR code] [VAR i]] == '\n']
-        [DEFINE node [MAKE node]]
-        [SET [VAR node] kind [CONST nodeKindString]]
-        [SET [VAR node] val [ANY ""]]
-
-        [DEFINE out [MAKE STRUCT{val:node, len:INT}]]
-        [SET [VAR out] len [MATH [VAR i] + 1]]
-        [SET [VAR out] val [VAR node]]
-        [RETURN [VAR out]]
-      ]
-      [DEFINE i [MATH [VAR i] + 1]]
-    ]
-  ]
-
   [IF [COMPARE [INDEX [VAR code] 0] == '"']
     [DEFINE i 1]
     [DEFINE backslash FALSE]
@@ -194,13 +177,6 @@
         [RETURN [VAR out]]
       ]
 
-      [CASE '#'
-        [DEFINE out [MAKE STRUCT{val:node, len:INT}]]
-        [SET [VAR out] len [VAR i]]
-        [SET [VAR out] val [nodeFromString [VAR val]]]
-        [RETURN [VAR out]]
-      ]
-
       [CASE '"'
         [DEFINE out [MAKE STRUCT{val:node, len:INT}]]
         [SET [VAR out] len [VAR i]]
@@ -301,6 +277,7 @@
       [DEFAULT
         [IF [AND [COMPARE [INDEX [VAR src] [VAR i]] == '.'] [NOT [VAR hasPeriod]]]
           [DEFINE hasPeriod TRUE]
+          [DEFINE i [MATH [VAR i] + 1]]
         ELSE
           [RETURN FALSE]
         ]

@@ -32,7 +32,7 @@ func (i *Interpreter) evalMathNode(pos *tokens.Pos, node *ir.MathNode) (*Value, 
 		if v == nil {
 			return nil, pos.Error("unknown math operation: %s", node.Op)
 		}
-		return NewValue(types.INT, *v), nil
+		return NewValue(types.FLOAT, *v), nil
 
 	default:
 		return nil, pos.Error("cannot perform operations on type %s", left.Type.String())

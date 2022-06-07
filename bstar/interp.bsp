@@ -20,7 +20,7 @@
       # Check if blk, if so do that without building args
       [IF [EXISTS [VAR blks] [VAR name]]
         [DEFINE blk [GET [VAR blks] [VAR name]]]
-        [RETURN [CALL [VAR blk] [VAR args]]]
+        [RETURN [CALL [VAR blk] [VAR node] [VAR args]]]
       ]
 
       # Build params
@@ -40,7 +40,7 @@
         [RETURN [NODE_ERR [VAR node] [CONCAT "unknown tag: \"" [VAR name] "\""]]]
       ]
       [DEFINE bld [GET [VAR blds] [VAR name]]]
-      [RETURN [CALL [VAR bld] [VAR pars]]]
+      [RETURN [CALL [VAR bld] [VAR node] [VAR pars]]]
     ]
 
     [CASE [CONST nodeKindArray]

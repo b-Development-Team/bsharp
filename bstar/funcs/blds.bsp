@@ -1,4 +1,4 @@
 [IMPORT "bstar/funcs/vars.bsp"]
-[IMPORT "bstar/funcs/random.bsp"]
+[IMPORT "bstar/funcs/math.bsp"]
 [IMPORT "bstar/funcs/ops.bsp"]
 [IMPORT "bstar/funcs/blks.bsp"]
