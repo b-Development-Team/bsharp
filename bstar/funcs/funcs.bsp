@@ -14,9 +14,14 @@
 ]
 
 [DEFINE blds [MAKE MAP{STRING, FUNC{ARRAY{node}}ANY}]]
+[DEFINE blks [MAKE MAP{STRING, FUNC{ARRAY{node}}ANY}]]
 
 [FUNC ADD_BLD [PARAM name STRING] [PARAM fn FUNC{ARRAY{node}}ANY]
   [SET [VAR blds] [VAR name] [VAR fn]]
+]
+
+[FUNC ADD_BLK [PARAM name STRING] [PARAM fn FUNC{ARRAY{node}}ANY]
+  [SET [VAR blks] [VAR name] [VAR fn]]
 ]
 
 # Basic funcs

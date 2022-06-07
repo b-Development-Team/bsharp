@@ -1,0 +1,21 @@
+[IMPORT "bstar/interp.bsp"]
+[IMPORT "bstar/funcs/funcs.bsp"]
+[IMPORT "math.bsp"]
+
+[FUNC node_if [PARAM args ARRAY{node}] [RETURNS ANY]
+  # Eval cond
+  [DEFINE cond_err [evalNode [INDEX [VAR args] 1]]] # first arg is function name
+  [IF [CANCAST [VAR cond_err] error]
+    [RETURN [VAR cond_err]]
+  ]
+
+  [DEFINE cond [CAST [GET [CAST [VAR cond_err] node] val] INT]]
+
+  [IF [COMPARE [VAR cond] == 1] # True
+    [RETURN [evalNode [INDEX [VAR args] 2]]]
+  ]
+
+  [RETURN [evalNode [INDEX [VAR args] 3]]]
+]
+
+[ADD_BLK "IF" [FN node_if]]

@@ -14,14 +14,22 @@
         [RETURN [NODE_ERR [INDEX [VAR args] 0] "expected STRING for tag name"]]
       ]
 
-      # Build params
+      # Get name
       [DEFINE name [CAST [GET [INDEX [VAR args] 0] val] STRING]]
+
+      # Check if blk, if so do that without building args
+      [IF [EXISTS [VAR blks] [VAR name]]
+        [DEFINE blk [GET [VAR blks] [VAR name]]]
+        [RETURN [CALL [VAR blk] [VAR args]]]
+      ]
+
+      # Build params
       [DEFINE pars [MAKE ARRAY{node}]]
       [DEFINE i 1]
       [WHILE [COMPARE [VAR i] < [LENGTH [VAR args]]]
         [DEFINE err [evalNode [INDEX [VAR args] [VAR i]]]]
         [IF [CANCAST [VAR err] error]
-          [FAIL [VAR err]]
+          [RETURN [VAR err]]
         ]
         [APPEND [VAR pars] [CAST [VAR err] node]]
         [DEFINE i [MATH [VAR i] + 1]]
@@ -42,7 +50,7 @@
       [WHILE [COMPARE [VAR i] < [LENGTH [VAR curr]]] 
         [DEFINE err [evalNode [VAR node]]]
         [IF [CANCAST [VAR err] error]
-          [FAIL [VAR err]]
+          [RETURN [VAR err]]
         ]
         [APPEND [VAR args] [CAST [VAR err] node]]
         [DEFINE i [MATH [VAR i] + 1]]
@@ -69,8 +77,3 @@
   ]
   [RETURN [VAR out]]
 ]
-
-# Add builders
-[IMPORT "bstar/funcs/vars.bsp"]
-[IMPORT "bstar/funcs/random.bsp"]
-[IMPORT "bstar/funcs/ops.bsp"]
