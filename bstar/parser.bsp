@@ -275,7 +275,7 @@
       [CASE '8' [DEFINE i [MATH [VAR i] + 1]]]
       [CASE '9' [DEFINE i [MATH [VAR i] + 1]]]
       [DEFAULT
-        [IF [AND [COMPARE [INDEX [VAR src] [VAR i]] == '.'] [NOT [VAR hasPeriod]]]
+        [IF [AND [AND [COMPARE [INDEX [VAR src] [VAR i]] == '.'] [NOT [VAR hasPeriod]]] [COMPARE [VAR i] > 0]]
           [DEFINE hasPeriod TRUE]
           [DEFINE i [MATH [VAR i] + 1]]
         ELSE
