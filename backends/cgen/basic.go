@@ -119,3 +119,16 @@ func (c *CGen) posCode() string {
 	out.WriteString("};")
 	return out.String()
 }
+
+func (c *CGen) addInput(n *ir.ExtensionCall) (*Code, error) {
+	prompt, err := c.AddNode(n.Args[0])
+	if err != nil {
+		return nil, err
+	}
+	name := c.GetTmp("input")
+	c.stack.Add(c.FreeCode(name, types.STRING))
+	return &Code{
+		Pre:   JoinCode(prompt.Pre, fmt.Sprintf("string* %s = string_input(%s);", name, prompt.Value)),
+		Value: name,
+	}, nil
+}

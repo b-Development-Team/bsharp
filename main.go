@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	_ "embed"
 	"fmt"
 	"os"
@@ -14,6 +15,7 @@ import (
 	"github.com/Nv7-Github/bsharp/backends/cgen"
 	"github.com/Nv7-Github/bsharp/backends/interpreter"
 	"github.com/Nv7-Github/bsharp/ir"
+	"github.com/Nv7-Github/bsharp/types"
 	"github.com/alexflint/go-arg"
 )
 
@@ -40,6 +42,14 @@ type Args struct {
 	Time bool `help:"print timing for each stage" arg:"-t"`
 }
 
+var exts = []*ir.Extension{
+	{
+		Name:    "INPUT",
+		Params:  []types.Type{types.STRING},
+		RetType: types.STRING,
+	},
+}
+
 func main() {
 	args := Args{}
 	p := arg.MustParse(&args)
@@ -59,6 +69,9 @@ func main() {
 			p.Fail(err.Error())
 		}
 		ir := ir.NewBuilder()
+		for _, ext := range exts {
+			ir.AddExtension(ext)
+		}
 		err = ir.Build(v, fs)
 		if err != nil {
 			if len(ir.Errors) > 0 {
@@ -76,6 +89,15 @@ func main() {
 		// Run
 		start = time.Now()
 		interp := interpreter.NewInterpreter(ir.IR(), os.Stdout)
+		reader := bufio.NewReader(os.Stdin)
+		interp.AddExtension(interpreter.NewExtension("INPUT", func(v []any) (any, error) {
+			fmt.Print(v[0].(string))
+			line, _, err := reader.ReadLine()
+			if err != nil {
+				return nil, err
+			}
+			return string(line), nil
+		}, []types.Type{types.STRING}, types.STRING))
 		// Cleanup function
 		c := make(chan os.Signal)
 		signal.Notify(c, os.Interrupt, syscall.SIGTERM)
@@ -106,6 +128,9 @@ func main() {
 			p.Fail(err.Error())
 		}
 		ir := ir.NewBuilder()
+		for _, ext := range exts {
+			ir.AddExtension(ext)
+		}
 		err = ir.Build(v, fs)
 		if err != nil {
 			if len(ir.Errors) > 0 {

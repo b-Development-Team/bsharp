@@ -124,6 +124,15 @@ func (cg *CGen) AddNode(node ir.Node) (*Code, error) {
 	case *ir.CastNode:
 		return cg.addCast(n)
 
+	case *ir.ExtensionCall:
+		switch n.Name {
+		case "INPUT":
+			return cg.addInput(n)
+
+		default:
+			return nil, n.Pos().Error("unknown extension call: %s", n.Name)
+		}
+
 	default:
 		return nil, n.Pos().Error("unknown node: %T", node)
 	}
