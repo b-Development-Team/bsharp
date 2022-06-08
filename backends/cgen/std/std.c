@@ -119,6 +119,14 @@ static inline string* string_btoa(bool val) {
   return val ? string_from_const("true") : string_from_const("false");
 }
 
+string* string_input(string* prompt) {
+  printf("%.*s", prompt->len, prompt->data);
+  char* line = NULL;
+  size_t len_val; // required for getline to work, just the size of the buffer
+  size_t len = getline(&line, &len_val, stdin);
+  return string_new(line, (int)len-1); // -1 to remove trailing newline
+}
+
 // Parse int code
 long bsharp_atoi(string* s) {
   // Make null terminated buffer
