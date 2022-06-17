@@ -221,9 +221,9 @@ func main() {
 		conf := &bstar.BStarConfig{Seperator: " "}
 		for _, line := range out {
 			code.WriteString(line.Code(conf))
-			code.WriteString("\n")
+			code.WriteString(" ")
 		}
-		err = os.WriteFile(args.BSPGen.Output, []byte(code.String()), os.ModePerm)
+		err = os.WriteFile(args.BStarGen.Output, []byte(code.String()), os.ModePerm)
 		if err != nil {
 			p.Fail(err.Error())
 		}

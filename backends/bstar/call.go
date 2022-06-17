@@ -1,7 +1,6 @@
 package bstar
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/Nv7-Github/bsharp/ir"
@@ -38,7 +37,7 @@ func (b *BStar) buildCall(n *ir.CallNode) (Node, error) {
 		return blockNode(true, constNode("INT"), blockNode(true, constNode("TIME"))), nil
 
 	case *ir.MathNode:
-		return blockNode(true, args...), nil
+		return blockNode(true, append([]Node{constNode("MATH")}, args...)...), nil
 
 	case *ir.VarNode:
 		v := b.ir.Variables[c.ID]
@@ -58,12 +57,25 @@ func (b *BStar) buildCall(n *ir.CallNode) (Node, error) {
 		return args[0], nil
 
 	case *ir.PrintNode:
-		return blockNode(false, constNode("STR"), args[0]), nil
+		return blockNode(false, constNode("CONCAT"), args[0], constNode(`"\n"`)), nil
 
 	case *ir.ConcatNode:
 		return blockNode(true, append([]Node{constNode("CONCAT")}, args...)...), nil
 
+	case *ir.IndexNode:
+		return blockNode(true, constNode("INDEX"), args[0], args[1]), nil
+
+	case *ir.LengthNode:
+		return blockNode(true, constNode("LENGTH"), args[0]), nil
+
+	case *ir.CompareNode:
+		op := c.Op.String()
+		if c.Op == ir.CompareOperationEqual {
+			op = "="
+		}
+		return blockNode(true, constNode("COMPARE"), args[0], constNode(op), args[2]), nil
+
 	default:
-		return nil, fmt.Errorf("unknown call: %T", c)
+		return nil, n.Pos().Error("unknown call: %T", c)
 	}
 }

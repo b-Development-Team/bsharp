@@ -63,7 +63,7 @@ func (b *BStar) Build() ([]Node, error) {
 			return nil, err
 		}
 		_, ok := node.(*BlockNode)
-		if ok {
+		if ok && node.(*BlockNode).DoesPrint {
 			node = b.noPrint(node)
 		}
 		out = append(out, node)
@@ -73,4 +73,8 @@ func (b *BStar) Build() ([]Node, error) {
 
 func (b *BStar) noPrint(node Node) Node {
 	return blockNode(false, constNode("DEFINE"), constNode("noprint"), node)
+}
+
+func (b *BStar) noPrintNode() Node {
+	return blockNode(false, constNode("DEFINE"), constNode("noprint"), constNode("NOPRINT"))
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Nv7-Github/bsharp/ir"
+	"github.com/Nv7-Github/bsharp/types"
 )
 
 func (b *BStar) buildNode(node ir.Node) (Node, error) {
@@ -12,12 +13,15 @@ func (b *BStar) buildNode(node ir.Node) (Node, error) {
 		return b.buildCall(n)
 
 	case *ir.Const:
+		if n.Type().Equal(types.STRING) {
+			return constNode(fmt.Sprintf("%q", n.Value)), nil
+		}
 		return constNode(n.Value), nil
 
 	case *ir.BlockNode:
 		return b.buildBlock(n)
 
 	default:
-		return nil, fmt.Errorf("unknown node: %T", n)
+		return nil, n.Pos().Error("unknown node: %T", n)
 	}
 }
