@@ -11,7 +11,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/Nv7-Github/bsharp/backends/bsp"
+	"github.com/Nv7-Github/bsharp/backends/bstar"
 	"github.com/Nv7-Github/bsharp/backends/cgen"
 	"github.com/Nv7-Github/bsharp/backends/interpreter"
 	"github.com/Nv7-Github/bsharp/ir"
@@ -34,10 +34,16 @@ type BSPGen struct {
 	Output string   `arg:"required,-o,--output" help:"output B# file"`
 }
 
+type BStarGen struct {
+	Files  []string `arg:"positional,-i,--input" help:"input B# program"`
+	Output string   `arg:"required,-o,--output" help:"output B# file"`
+}
+
 type Args struct {
-	Run    *Run    `arg:"subcommand:run" help:"run a B# program"`
-	Build  *Build  `arg:"subcommand:build" help:"compile a B# program"`
-	BSPGen *BSPGen `arg:"subcommand:ir" help:"view the IR in B# form"`
+	Run      *Run      `arg:"subcommand:run" help:"run a B# program"`
+	Build    *Build    `arg:"subcommand:build" help:"compile a B# program"`
+	BSPGen   *BSPGen   `arg:"subcommand:ir" help:"view the IR in B# form"`
+	BStarGen *BStarGen `arg:"subcommand:bstar" help:"compile the B# program to B*"`
 
 	Time bool `help:"print timing for each stage" arg:"-t"`
 }
@@ -50,45 +56,51 @@ var exts = []*ir.Extension{
 	},
 }
 
+func build(args []string, ti bool, p *arg.Parser) *ir.IR {
+	start := time.Now()
+	files := make(map[string]struct{}, len(args))
+	for _, f := range args {
+		files[f] = struct{}{}
+	}
+
+	// Build
+	fs := &dirFS{files}
+	v, err := fs.Parse(args[0])
+	if err != nil {
+		p.Fail(err.Error())
+	}
+	ir := ir.NewBuilder()
+	for _, ext := range exts {
+		ir.AddExtension(ext)
+	}
+	err = ir.Build(v, fs)
+	if err != nil {
+		if len(ir.Errors) > 0 {
+			for _, err := range ir.Errors {
+				fmt.Println(err.Pos.Error("%s", err.Message))
+			}
+		}
+		p.Fail(err.Error())
+	}
+
+	if ti {
+		fmt.Println("Built in", time.Since(start))
+	}
+
+	return ir.IR()
+}
+
 func main() {
 	args := Args{}
 	p := arg.MustParse(&args)
 
 	switch {
 	case args.Run != nil:
-		start := time.Now()
-		files := make(map[string]struct{}, len(args.Run.Files))
-		for _, f := range args.Run.Files {
-			files[f] = struct{}{}
-		}
-
-		// Build
-		fs := &dirFS{files}
-		v, err := fs.Parse(args.Run.Files[0])
-		if err != nil {
-			p.Fail(err.Error())
-		}
-		ir := ir.NewBuilder()
-		for _, ext := range exts {
-			ir.AddExtension(ext)
-		}
-		err = ir.Build(v, fs)
-		if err != nil {
-			if len(ir.Errors) > 0 {
-				for _, err := range ir.Errors {
-					fmt.Println(err.Pos.Error("%s", err.Message))
-				}
-			}
-			p.Fail(err.Error())
-		}
-
-		if args.Time {
-			fmt.Println("Built in", time.Since(start))
-		}
+		ir := build(args.Run.Files, args.Time, p)
 
 		// Run
-		start = time.Now()
-		interp := interpreter.NewInterpreter(ir.IR(), os.Stdout)
+		start := time.Now()
+		interp := interpreter.NewInterpreter(ir, os.Stdout)
 		reader := bufio.NewReader(os.Stdin)
 		interp.AddExtension(interpreter.NewExtension("INPUT", func(v []any) (any, error) {
 			fmt.Print(v[0].(string))
@@ -106,7 +118,7 @@ func main() {
 			interp.Stop("interrupted")
 		}()
 
-		err = interp.Run()
+		err := interp.Run()
 		if err != nil {
 			p.Fail(err.Error())
 		}
@@ -115,39 +127,11 @@ func main() {
 		}
 
 	case args.Build != nil:
-		start := time.Now()
-		files := make(map[string]struct{}, len(args.Build.Files))
-		for _, f := range args.Build.Files {
-			files[f] = struct{}{}
-		}
-
-		// Build
-		fs := &dirFS{files}
-		v, err := fs.Parse(args.Build.Files[0])
-		if err != nil {
-			p.Fail(err.Error())
-		}
-		ir := ir.NewBuilder()
-		for _, ext := range exts {
-			ir.AddExtension(ext)
-		}
-		err = ir.Build(v, fs)
-		if err != nil {
-			if len(ir.Errors) > 0 {
-				for _, err := range ir.Errors {
-					fmt.Println(err.Pos.Error("%s", err.Message))
-				}
-			}
-			p.Fail(err.Error())
-		}
-
-		if args.Time {
-			fmt.Println("Built in", time.Since(start))
-		}
+		ir := build(args.Build.Files, args.Time, p)
 
 		// CGen
-		start = time.Now()
-		cgen := cgen.NewCGen(ir.IR())
+		start := time.Now()
+		cgen := cgen.NewCGen(ir)
 		code, err := cgen.Build()
 		if err != nil {
 			p.Fail(err.Error())
@@ -193,36 +177,11 @@ func main() {
 		}
 
 	case args.BSPGen != nil:
-		start := time.Now()
-		files := make(map[string]struct{}, len(args.BSPGen.Files))
-		for _, f := range args.BSPGen.Files {
-			files[f] = struct{}{}
-		}
-
-		// Build
-		fs := &dirFS{files}
-		v, err := fs.Parse(args.BSPGen.Files[0])
-		if err != nil {
-			p.Fail(err.Error())
-		}
-		ir := ir.NewBuilder()
-		err = ir.Build(v, fs)
-		if err != nil {
-			if len(ir.Errors) > 0 {
-				for _, err := range ir.Errors {
-					fmt.Println(err.Pos.Error("%s", err.Message))
-				}
-			}
-			p.Fail(err.Error())
-		}
-
-		if args.Time {
-			fmt.Println("Built in", time.Since(start))
-		}
+		ir := build(args.BSPGen.Files, args.Time, p)
 
 		// Make B#
-		start = time.Now()
-		gen := bsp.NewBSP(ir.IR())
+		start := time.Now()
+		gen := bstar.NewBStar(ir)
 		out, err := gen.Build()
 		if err != nil {
 			p.Fail(err.Error())
@@ -232,7 +191,39 @@ func main() {
 		}
 
 		// Save
-		err = os.WriteFile(args.BSPGen.Output, []byte(out), os.ModePerm)
+		code := &strings.Builder{}
+		conf := &bstar.BStarConfig{Seperator: " "}
+		for _, line := range out {
+			code.WriteString(line.Code(conf))
+			code.WriteString("\n")
+		}
+		err = os.WriteFile(args.BSPGen.Output, []byte(code.String()), os.ModePerm)
+		if err != nil {
+			p.Fail(err.Error())
+		}
+
+	case args.BStarGen != nil:
+		ir := build(args.BStarGen.Files, args.Time, p)
+
+		// Make B#
+		start := time.Now()
+		gen := bstar.NewBStar(ir)
+		out, err := gen.Build()
+		if err != nil {
+			p.Fail(err.Error())
+		}
+		if args.Time {
+			fmt.Println("Generated B# in", time.Since(start))
+		}
+
+		// Save
+		code := &strings.Builder{}
+		conf := &bstar.BStarConfig{Seperator: " "}
+		for _, line := range out {
+			code.WriteString(line.Code(conf))
+			code.WriteString("\n")
+		}
+		err = os.WriteFile(args.BSPGen.Output, []byte(code.String()), os.ModePerm)
 		if err != nil {
 			p.Fail(err.Error())
 		}

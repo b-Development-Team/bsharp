@@ -20,6 +20,7 @@ a.c
 testdata/*
 .vscode/*
 a.txt
+a.bsp
 
 # Secret!
 bot/test/token.txt
