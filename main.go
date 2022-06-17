@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Nv7-Github/bsharp/backends/bsp"
 	"github.com/Nv7-Github/bsharp/backends/bstar"
 	"github.com/Nv7-Github/bsharp/backends/cgen"
 	"github.com/Nv7-Github/bsharp/backends/interpreter"
@@ -181,7 +182,7 @@ func main() {
 
 		// Make B#
 		start := time.Now()
-		gen := bstar.NewBStar(ir)
+		gen := bsp.NewBSP(ir)
 		out, err := gen.Build()
 		if err != nil {
 			p.Fail(err.Error())
@@ -191,13 +192,7 @@ func main() {
 		}
 
 		// Save
-		code := &strings.Builder{}
-		conf := &bstar.BStarConfig{Seperator: " "}
-		for _, line := range out {
-			code.WriteString(line.Code(conf))
-			code.WriteString("\n")
-		}
-		err = os.WriteFile(args.BSPGen.Output, []byte(code.String()), os.ModePerm)
+		err = os.WriteFile(args.BSPGen.Output, []byte(out), os.ModePerm)
 		if err != nil {
 			p.Fail(err.Error())
 		}
@@ -217,13 +212,9 @@ func main() {
 		}
 
 		// Save
-		code := &strings.Builder{}
 		conf := &bstar.BStarConfig{Seperator: " "}
-		for _, line := range out {
-			code.WriteString(line.Code(conf))
-			code.WriteString(" ")
-		}
-		err = os.WriteFile(args.BStarGen.Output, []byte(code.String()), os.ModePerm)
+		code := out.Code(conf)
+		err = os.WriteFile(args.BStarGen.Output, []byte(code), os.ModePerm)
 		if err != nil {
 			p.Fail(err.Error())
 		}

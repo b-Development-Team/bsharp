@@ -48,27 +48,19 @@ func constNode(v any) Node {
 }
 
 func blockNode(doesPrint bool, body ...Node) Node {
-	return &BlockNode{Body: body}
+	return &BlockNode{Body: body, DoesPrint: doesPrint}
 }
 
 func NewBStar(i *ir.IR) *BStar {
 	return &BStar{i}
 }
 
-func (b *BStar) Build() ([]Node, error) {
-	out := make([]Node, 0)
-	for _, n := range b.ir.Body {
-		node, err := b.buildNode(n)
-		if err != nil {
-			return nil, err
-		}
-		_, ok := node.(*BlockNode)
-		if ok && node.(*BlockNode).DoesPrint {
-			node = b.noPrint(node)
-		}
-		out = append(out, node)
+func (b *BStar) Build() (Node, error) {
+	out, err := b.buildNodes(b.ir.Body)
+	if err != nil {
+		return nil, err
 	}
-	return out, nil
+	return blockNode(false, append([]Node{constNode("BLOCK")}, append(out, b.noPrintNode())...)...), nil
 }
 
 func (b *BStar) noPrint(node Node) Node {

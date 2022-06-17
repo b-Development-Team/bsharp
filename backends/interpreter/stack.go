@@ -1,7 +1,5 @@
 package interpreter
 
-import "fmt"
-
 type scope struct {
 	vals map[int]*Value
 }
@@ -32,7 +30,6 @@ func (s *stack) Set(id int, val *Value, redefine bool) {
 		}
 
 		// Not found, put in current scope
-		fmt.Println("oopsie")
 		s.vals[len(s.vals)-1].vals[id] = val
 	}
 }
