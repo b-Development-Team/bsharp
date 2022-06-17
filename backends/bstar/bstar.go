@@ -16,8 +16,8 @@ type Node interface {
 }
 
 type BlockNode struct {
-	Body    []Node
-	NoPrint bool
+	Body      []Node
+	DoesPrint bool
 }
 
 type BStarConfig struct {
@@ -47,7 +47,7 @@ func constNode(v any) Node {
 	return ConstNode{v}
 }
 
-func blockNode(body ...Node) Node {
+func blockNode(doesPrint bool, body ...Node) Node {
 	return &BlockNode{Body: body}
 }
 
@@ -62,7 +62,15 @@ func (b *BStar) Build() ([]Node, error) {
 		if err != nil {
 			return nil, err
 		}
+		_, ok := node.(*BlockNode)
+		if ok {
+			node = b.noPrint(node)
+		}
 		out = append(out, node)
 	}
 	return out, nil
+}
+
+func (b *BStar) noPrint(node Node) Node {
+	return blockNode(false, constNode("DEFINE"), constNode("noprint"), node)
 }
