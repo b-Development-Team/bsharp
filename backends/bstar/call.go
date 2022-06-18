@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/Nv7-Github/bsharp/ir"
+	"github.com/Nv7-Github/bsharp/tokens"
 	"github.com/Nv7-Github/bsharp/types"
 )
 
@@ -85,14 +86,7 @@ func (b *BStar) buildCall(n *ir.CallNode) (Node, error) {
 		return blockNode(false, constNode("DEFINE"), constNode(fmt.Sprintf("%s%d", va.Name, va.ID)), blockNode(true, constNode("CONCAT"), args[0], blockNode(true, constNode("ARRAY"), args[1]))), nil
 
 	case *ir.MakeNode:
-		switch c.Type().BasicType() {
-		case types.ARRAY:
-			return blockNode(true, constNode("ARRAY")), nil
-
-		case types.MAP:
-			return blockNode(true, constNode("ARRAY"), blockNode(true, constNode("ARRAY")), blockNode(true, constNode("ARRAY"))), nil
-		}
-		return nil, n.Pos().Error("invalid MAKE type")
+		return b.makeVal(n.Pos(), c.Type())
 
 	case *ir.SetIndexNode:
 		cv, ok := c.Array.(*ir.CallNode)
@@ -117,6 +111,21 @@ func (b *BStar) buildCall(n *ir.CallNode) (Node, error) {
 		}
 		va := b.ir.Variables[v.ID]
 		return blockNode(false, constNode("DEFINE"), constNode(fmt.Sprintf("%s%d", va.Name, va.ID)), blockNode(true, constNode("MAP_SET"), args[0], args[1], args[2])), nil
+
+	case *ir.SetStructNode:
+		cv, ok := c.Struct.(*ir.CallNode)
+		if !ok {
+			return nil, n.Pos().Error("SET must be called on a VAR node in the B* backend")
+		}
+		v, ok := cv.Call.(*ir.VarNode)
+		if !ok {
+			return nil, n.Pos().Error("SET must be called on a VAR node in the B* backend")
+		}
+		va := b.ir.Variables[v.ID]
+		return blockNode(false, constNode("DEFINE"), constNode(fmt.Sprintf("%s%d", va.Name, va.ID)), blockNode(true, constNode("SETINDEX"), args[0], constNode(c.Field), args[2])), nil
+
+	case *ir.GetStructNode:
+		return blockNode(true, constNode("INDEX"), args[0], constNode(c.Field)), nil
 
 	case *ir.GetNode:
 		return blockNode(true, constNode("MAP_GET"), args[0], args[1]), nil
@@ -150,4 +159,42 @@ func (b *BStar) addCast(c *ir.CastNode) (Node, error) {
 	}
 
 	return v, nil
+}
+
+func (b *BStar) makeVal(pos *tokens.Pos, t types.Type) (Node, error) {
+	switch t.BasicType() {
+	case types.INT:
+		return constNode(0), nil
+
+	case types.FLOAT:
+		return constNode(0.0), nil
+
+	case types.STRING:
+		return constNode(`""`), nil
+
+	case types.BOOL:
+		return constNode(0), nil
+
+	case types.ARRAY:
+		return blockNode(true, constNode("ARRAY")), nil
+
+	case types.MAP:
+		return blockNode(true, constNode("ARRAY"), blockNode(true, constNode("ARRAY")), blockNode(true, constNode("ARRAY"))), nil
+
+	case types.STRUCT:
+		t := t.(*types.StructType)
+		vals := make([]Node, len(t.Fields)+1)
+		vals[0] = constNode("ARRAY")
+		var err error
+		for i, f := range t.Fields {
+			vals[i+1], err = b.makeVal(pos, f.Type)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return blockNode(true, vals...), err
+
+	default:
+		return nil, pos.Error("invalid MAKE type")
+	}
 }
