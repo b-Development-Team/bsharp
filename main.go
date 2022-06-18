@@ -198,6 +198,11 @@ func main() {
 		}
 
 	case args.BStarGen != nil:
+		exts[0] = &ir.Extension{
+			Name:    "ARGS",
+			Params:  []types.Type{types.INT},
+			RetType: types.STRING,
+		}
 		ir := build(args.BStarGen.Files, args.Time, p)
 
 		// Make B#

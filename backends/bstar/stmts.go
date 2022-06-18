@@ -27,6 +27,19 @@ func (b *BStar) buildNode(node ir.Node) (Node, error) {
 	case *ir.FnCallNode:
 		return b.buildFnCall(n)
 
+	case *ir.ExtensionCall:
+		switch n.Name {
+		case "ARGS":
+			ind, err := b.buildNode(n.Args[0])
+			if err != nil {
+				return nil, err
+			}
+			return blockNode(true, constNode("ARGS"), ind), nil
+
+		default:
+			return nil, n.Pos().Error("unknown extension call: %s", n.Name)
+		}
+
 	default:
 		return nil, n.Pos().Error("unknown node: %T", n)
 	}

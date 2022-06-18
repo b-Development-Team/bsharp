@@ -136,6 +136,17 @@ func (b *BStar) buildCall(n *ir.CallNode) (Node, error) {
 	case *ir.FnNode:
 		return constNode(fmt.Sprintf("%q", c.Name)), nil
 
+	case *ir.ExistsNode:
+		// [COMPARE [FIND [INDEX [VAR x] 0] [VAR val]] != -1]
+		return blockNode(true, constNode("COMPARE"),
+			blockNode(true, constNode("FIND"), blockNode(true, constNode("INDEX"), args[0], constNode(0)), args[1]),
+			constNode("!="),
+			constNode(-1),
+		), nil
+
+	case *ir.CanCastNode:
+		return blockNode(true, constNode("COMPARE"), blockNode(true, constNode("INDEX"), args[0], constNode(0)), constNode("=="), constNode(fmt.Sprintf("%q", c.Typ.String()))), nil
+
 	default:
 		return nil, n.Pos().Error("unknown call: %T", c)
 	}
@@ -147,6 +158,10 @@ func (b *BStar) addCast(c *ir.CastNode) (Node, error) {
 		return nil, err
 	}
 
+	if types.ANY.Equal(c.Value.Type()) {
+		return blockNode(true, constNode("INDEX"), v, constNode(1)), nil
+	}
+
 	switch c.Type() {
 	case types.INT:
 		return blockNode(true, constNode("INT"), v), nil
@@ -156,6 +171,9 @@ func (b *BStar) addCast(c *ir.CastNode) (Node, error) {
 
 	case types.STRING:
 		return blockNode(true, constNode("STR"), v), nil
+
+	case types.ANY:
+		return blockNode(true, constNode("ARRAY"), constNode(fmt.Sprintf("%q", c.Value.Type().String())), v), nil
 	}
 
 	return v, nil
@@ -193,6 +211,9 @@ func (b *BStar) makeVal(pos *tokens.Pos, t types.Type) (Node, error) {
 			}
 		}
 		return blockNode(true, vals...), err
+
+	case types.ANY:
+		return blockNode(true, constNode("ARRAY"), constNode("ANY"), constNode(-1)), nil
 
 	default:
 		return nil, pos.Error("invalid MAKE type")
