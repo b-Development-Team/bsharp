@@ -71,7 +71,9 @@ func (b *BStar) Build() (Node, error) {
 		return nil, err
 	}
 	body := []Node{constNode("BLOCK")}
+	body = append(body, b.mapSetFunc(), b.mapGetFunc())
 	body = append(body, funcs...)
+	body = append(body, b.buildFnMap())
 	body = append(body, out...)
 	body = append(body, b.noPrintNode())
 	return blockNode(false, body...), nil

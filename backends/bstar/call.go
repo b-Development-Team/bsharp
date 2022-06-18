@@ -1,6 +1,7 @@
 package bstar
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/Nv7-Github/bsharp/ir"
@@ -70,6 +71,61 @@ func (b *BStar) buildCall(n *ir.CallNode) (Node, error) {
 
 	case *ir.ArrayNode:
 		return blockNode(false, append([]Node{constNode("ARRAY")}, args...)...), nil
+
+	case *ir.AppendNode:
+		cv, ok := c.Array.(*ir.CallNode)
+		if !ok {
+			return nil, n.Pos().Error("APPEND must be called on a VAR node in the B* backend")
+		}
+		v, ok := cv.Call.(*ir.VarNode)
+		if !ok {
+			return nil, n.Pos().Error("APPEND must be called on a VAR node in the B* backend")
+		}
+		va := b.ir.Variables[v.ID]
+		return blockNode(false, constNode("DEFINE"), constNode(fmt.Sprintf("%s%d", va.Name, va.ID)), blockNode(true, constNode("CONCAT"), args[0], blockNode(true, constNode("ARRAY"), args[1]))), nil
+
+	case *ir.MakeNode:
+		switch c.Type().BasicType() {
+		case types.ARRAY:
+			return blockNode(true, constNode("ARRAY")), nil
+
+		case types.MAP:
+			return blockNode(true, constNode("ARRAY"), blockNode(true, constNode("ARRAY")), blockNode(true, constNode("ARRAY"))), nil
+		}
+		return nil, n.Pos().Error("invalid MAKE type")
+
+	case *ir.SetIndexNode:
+		cv, ok := c.Array.(*ir.CallNode)
+		if !ok {
+			return nil, n.Pos().Error("SET must be called on a VAR node in the B* backend")
+		}
+		v, ok := cv.Call.(*ir.VarNode)
+		if !ok {
+			return nil, n.Pos().Error("SET must be called on a VAR node in the B* backend")
+		}
+		va := b.ir.Variables[v.ID]
+		return blockNode(false, constNode("DEFINE"), constNode(fmt.Sprintf("%s%d", va.Name, va.ID)), blockNode(true, constNode("SETINDEX"), args[0], args[1], args[2])), nil
+
+	case *ir.SetNode:
+		cv, ok := c.Map.(*ir.CallNode)
+		if !ok {
+			return nil, n.Pos().Error("SET must be called on a VAR node in the B* backend")
+		}
+		v, ok := cv.Call.(*ir.VarNode)
+		if !ok {
+			return nil, n.Pos().Error("SET must be called on a VAR node in the B* backend")
+		}
+		va := b.ir.Variables[v.ID]
+		return blockNode(false, constNode("DEFINE"), constNode(fmt.Sprintf("%s%d", va.Name, va.ID)), blockNode(true, constNode("MAP_SET"), args[0], args[1], args[2])), nil
+
+	case *ir.GetNode:
+		return blockNode(true, constNode("MAP_GET"), args[0], args[1]), nil
+
+	case *ir.FnCallNode:
+		return b.buildFnCall(c)
+
+	case *ir.FnNode:
+		return constNode(fmt.Sprintf("%q", c.Name)), nil
 
 	default:
 		return nil, n.Pos().Error("unknown call: %T", c)

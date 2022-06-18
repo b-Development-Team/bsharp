@@ -24,6 +24,25 @@ func (b *BStar) buildFn(fn *ir.Function) (Node, error) {
 	return blockNode(false, args...), nil
 }
 
+func (b *BStar) buildFnMap() Node {
+	bod := make([]Node, len(b.ir.Funcs))
+	i := 0
+	for _, fn := range b.ir.Funcs {
+		call := make([]Node, len(fn.Params)+1)
+		call[0] = constNode(fn.Name)
+		for j := range fn.Params {
+			call[j+1] = blockNode(true, constNode("INDEX"), blockNode(true, constNode("VAR"), constNode("args")), constNode(j))
+		}
+		bod[i] = blockNode(false, constNode("IF"),
+			blockNode(true, constNode("COMPARE"), blockNode(true, constNode("VAR"), constNode("name")), constNode("=="), constNode(fmt.Sprintf("%q", fn.Name))),
+			blockNode(false, constNode("RETURN"), blockNode(false, call...)),
+			b.noPrintNode(),
+		)
+		i++
+	}
+	return blockNode(false, constNode("FUNC"), constNode("CALL"), blockNode(true, constNode("ARRAY"), constNode(`"name"`), constNode(`"args"`)), blockNode(false, append([]Node{constNode("BLOCK")}, bod...)...))
+}
+
 func (b *BStar) buildFnCall(n *ir.FnCallNode) (Node, error) {
 	v, ok := n.Fn.(*ir.CallNode)
 	var c *ir.FnNode
@@ -43,5 +62,18 @@ func (b *BStar) buildFnCall(n *ir.FnCallNode) (Node, error) {
 		return blockNode(true, append([]Node{constNode(c.Name)}, args...)...), nil
 	}
 
-	return nil, n.Pos().Error("first-class functions not implemented yet")
+	fn, err := b.buildNode(n.Fn)
+	if err != nil {
+		return nil, err
+	}
+	args := make([]Node, len(n.Params)+1)
+	args[0] = constNode("ARRAY")
+	for i, arg := range n.Params {
+		args[i+1], err = b.buildNode(arg)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return blockNode(true, constNode("CALL"), fn, blockNode(true, args...)), nil
 }
