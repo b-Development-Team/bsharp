@@ -56,11 +56,25 @@ func NewBStar(i *ir.IR) *BStar {
 }
 
 func (b *BStar) Build() (Node, error) {
+	// Build funcs
+	funcs := make([]Node, 0, len(b.ir.Funcs))
+	for _, fn := range b.ir.Funcs {
+		v, err := b.buildFn(fn)
+		if err != nil {
+			return nil, err
+		}
+		funcs = append(funcs, v)
+	}
+
 	out, err := b.buildNodes(b.ir.Body)
 	if err != nil {
 		return nil, err
 	}
-	return blockNode(false, append([]Node{constNode("BLOCK")}, append(out, b.noPrintNode())...)...), nil
+	body := []Node{constNode("BLOCK")}
+	body = append(body, funcs...)
+	body = append(body, out...)
+	body = append(body, b.noPrintNode())
+	return blockNode(false, body...), nil
 }
 
 func (b *BStar) noPrint(node Node) Node {

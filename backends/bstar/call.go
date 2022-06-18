@@ -44,17 +44,7 @@ func (b *BStar) buildCall(n *ir.CallNode) (Node, error) {
 		return blockNode(true, constNode("VAR"), constNode(v.Name+strconv.Itoa(v.ID))), nil
 
 	case *ir.CastNode:
-		switch c.Type() {
-		case types.INT:
-			return blockNode(true, constNode("INT"), args[0]), nil
-
-		case types.FLOAT:
-			return blockNode(true, constNode("FLOAT"), args[0]), nil
-
-		case types.STRING:
-			return blockNode(true, constNode("STR"), args[0]), nil
-		}
-		return args[0], nil
+		return b.addCast(c)
 
 	case *ir.PrintNode:
 		return blockNode(false, constNode("CONCAT"), args[0], constNode(`"\n"`)), nil
@@ -75,7 +65,30 @@ func (b *BStar) buildCall(n *ir.CallNode) (Node, error) {
 		}
 		return blockNode(true, constNode("COMPARE"), args[0], constNode(op), args[2]), nil
 
+	case *ir.ReturnNode:
+		return blockNode(false, constNode("RETURN"), args[0]), nil
+
 	default:
 		return nil, n.Pos().Error("unknown call: %T", c)
 	}
+}
+
+func (b *BStar) addCast(c *ir.CastNode) (Node, error) {
+	v, err := b.buildNode(c.Value)
+	if err != nil {
+		return nil, err
+	}
+
+	switch c.Type() {
+	case types.INT:
+		return blockNode(true, constNode("INT"), v), nil
+
+	case types.FLOAT:
+		return blockNode(true, constNode("FLOAT"), v), nil
+
+	case types.STRING:
+		return blockNode(true, constNode("STR"), v), nil
+	}
+
+	return v, nil
 }
