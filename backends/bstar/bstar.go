@@ -40,6 +40,13 @@ func (n *BlockNode) Code(opts *BStarConfig) string {
 type ConstNode struct{ any }
 
 func (c ConstNode) Code(opts *BStarConfig) string {
+	switch v := c.any.(type) {
+	case int:
+		return fmt.Sprintf("%d", v)
+
+	case float64:
+		return fmt.Sprintf("%f", v)
+	}
 	return fmt.Sprintf("%v", c.any)
 }
 
@@ -84,5 +91,5 @@ func (b *BStar) noPrint(node Node) Node {
 }
 
 func (b *BStar) noPrintNode() Node {
-	return blockNode(false, constNode("DEFINE"), constNode("noprint"), constNode("NOPRINT"))
+	return constNode(`""`)
 }
