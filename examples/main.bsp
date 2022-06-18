@@ -66,3 +66,10 @@ ELSE
 [DEFINE fns [MAKE MAP{STRING,FUNC{}NIL}]] # Make a dictionary of functions
 [SET [VAR fns] "hello" [FN HELLO]]
 [CALL [GET [VAR fns] "hello"] ""] # Call function from dictionary
+
+# Structs
+[DEFINE s [MAKE STRUCT{a:INT, b: INT}]]
+[SET [VAR s] a 0]
+[SET [VAR s] b 1]
+[PRINT [STRING [GET [VAR s] a]]]
+[PRINT [STRING [GET [VAR s] b]]]
