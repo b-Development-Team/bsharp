@@ -147,6 +147,21 @@ func (b *BStar) buildCall(n *ir.CallNode) (Node, error) {
 	case *ir.CanCastNode:
 		return blockNode(true, constNode("COMPARE"), blockNode(true, constNode("INDEX"), args[0], constNode(0)), constNode("=="), constNode(fmt.Sprintf("%q", c.Typ.String()))), nil
 
+	case *ir.LogicalOpNode:
+		switch c.Op { // 0 is False, 1 is True
+		case ir.LogicalOpAnd:
+			return blockNode(true, constNode("COMPARE"), blockNode(true, constNode("MATH"), args[0], constNode("+"), args[1]), constNode("=="), constNode(2)), nil // x + y == 2
+
+		case ir.LogicalOpOr:
+			return blockNode(true, constNode("COMPARE"), blockNode(true, constNode("MATH"), args[0], constNode("+"), args[1]), constNode(">"), constNode(0)), nil // x + y > 0
+
+		case ir.LogicalOpNot:
+			return blockNode(true, constNode("MATH"), constNode(1), constNode("-"), args[0]), nil // 1 - x
+
+		default:
+			return nil, n.Pos().Error("unsupported logical operator")
+		}
+
 	default:
 		return nil, n.Pos().Error("unknown call: %T", c)
 	}
