@@ -68,6 +68,9 @@ func (b *BStar) buildCall(n *ir.CallNode) (Node, error) {
 	case *ir.ReturnNode:
 		return blockNode(false, constNode("RETURN"), args[0]), nil
 
+	case *ir.ArrayNode:
+		return blockNode(false, append([]Node{constNode("ARRAY")}, args...)...), nil
+
 	default:
 		return nil, n.Pos().Error("unknown call: %T", c)
 	}
