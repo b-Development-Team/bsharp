@@ -112,6 +112,22 @@ func (b *BStar) buildCall(n *ir.CallNode) (Node, error) {
 		va := b.ir.Variables[v.ID]
 		return blockNode(false, constNode("DEFINE"), constNode(fmt.Sprintf("%s%d", va.Name, va.ID)), blockNode(true, constNode("MAP_SET"), args[0], args[1], args[2])), nil
 
+	case *ir.SliceNode:
+		if types.STRING.Equal(c.Value.Type()) {
+			return blockNode(true, constNode("SLICE"), args[0], args[1], args[2]), nil
+		}
+
+		cv, ok := c.Value.(*ir.CallNode)
+		if !ok {
+			return nil, n.Pos().Error("SLICE must be called on a VAR node in the B* backend")
+		}
+		v, ok := cv.Call.(*ir.VarNode)
+		if !ok {
+			return nil, n.Pos().Error("SLICE must be called on a VAR node in the B* backend")
+		}
+		va := b.ir.Variables[v.ID]
+		return blockNode(false, constNode("DEFINE"), constNode(fmt.Sprintf("%s%d", va.Name, va.ID)), blockNode(true, constNode("SLICE"), args[0], args[1], args[2])), nil
+
 	case *ir.SetStructNode:
 		cv, ok := c.Struct.(*ir.CallNode)
 		if !ok {
@@ -146,6 +162,9 @@ func (b *BStar) buildCall(n *ir.CallNode) (Node, error) {
 
 	case *ir.CanCastNode:
 		return blockNode(true, constNode("COMPARE"), blockNode(true, constNode("INDEX"), args[0], constNode(0)), constNode("=="), constNode(fmt.Sprintf("%q", c.Typ.String()))), nil
+
+	case *ir.PanicNode:
+		return blockNode(false, constNode("RAISE"), args[0]), nil
 
 	case *ir.LogicalOpNode:
 		switch c.Op { // 0 is False, 1 is True

@@ -46,6 +46,15 @@ func (c ConstNode) Code(opts *BStarConfig) string {
 
 	case float64:
 		return fmt.Sprintf("%f", v)
+
+	case byte:
+		return fmt.Sprintf("%q", string(v))
+
+	case bool:
+		if v {
+			return "1"
+		}
+		return "0"
 	}
 	return fmt.Sprintf("%v", c.any)
 }
