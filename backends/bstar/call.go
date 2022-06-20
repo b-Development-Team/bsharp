@@ -228,10 +228,10 @@ func (b *BStar) makeVal(pos *tokens.Pos, t types.Type) (Node, error) {
 		return constNode(0), nil
 
 	case types.ARRAY:
-		return blockNode(true, constNode("ARRAY")), nil
+		return constNode("{}"), nil
 
 	case types.MAP:
-		return blockNode(true, constNode("ARRAY"), blockNode(true, constNode("ARRAY")), blockNode(true, constNode("ARRAY"))), nil
+		return blockNode(true, constNode("ARRAY"), constNode("{}"), constNode("{}")), nil
 
 	case types.STRUCT:
 		t := t.(*types.StructType)

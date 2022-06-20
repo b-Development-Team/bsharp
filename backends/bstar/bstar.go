@@ -1,11 +1,15 @@
 package bstar
 
 import (
+	"encoding/base32"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/Nv7-Github/bsharp/ir"
 )
+
+var enc = base32.NewEncoding("abcdefghijklmnopqrstuvwxyzABCDEF")
 
 type BStar struct {
 	ir *ir.IR
@@ -55,6 +59,15 @@ func (c ConstNode) Code(opts *BStarConfig) string {
 			return "1"
 		}
 		return "0"
+
+	case string:
+		if v[0] != '"' {
+			for i := 0; i < 10; i++ { // if contains number, base32 encode because numbers not allowed in idents
+				if strings.Contains(v, strconv.Itoa(i)) {
+					return formatName(v)
+				}
+			}
+		}
 	}
 	return fmt.Sprintf("%v", c.any)
 }
@@ -101,4 +114,8 @@ func (b *BStar) noPrint(node Node) Node {
 
 func (b *BStar) noPrintNode() Node {
 	return constNode(`""`)
+}
+
+func formatName(name string) string {
+	return strings.TrimRight(enc.EncodeToString([]byte(name)), "=")
 }

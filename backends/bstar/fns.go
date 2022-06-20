@@ -10,7 +10,7 @@ func (b *BStar) buildFn(fn *ir.Function) (Node, error) {
 	args := []Node{constNode("FUNC"), constNode(fn.Name)}
 	pars := make([]Node, len(fn.Params))
 	for i, arg := range fn.Params {
-		pars[i] = constNode(fmt.Sprintf("\"%s%d\"", arg.Name, arg.ID))
+		pars[i] = constNode(`"` + formatName(fmt.Sprintf("%s%d", arg.Name, arg.ID)) + `"`)
 	}
 	args = append(args, blockNode(true, append([]Node{constNode("ARRAY")}, pars...)...))
 	body, err := b.buildNodes(fn.Body)
