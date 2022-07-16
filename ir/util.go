@@ -18,9 +18,11 @@ func (b *Builder) MatchTypes(pos *tokens.Pos, args []Node, typs []types.Type) bo
 
 		hasErr := false
 		for i, v := range args {
-			if i < len(typs)-2 && !typs[i].Equal(v.Type()) && !types.INVALID.Equal(v.Type()) {
-				b.Error(ErrorLevelError, v.Pos(), "wrong argument type: expected %s, got %s", typs[i], args[i].Type())
-				hasErr = true
+			if i < len(typs)-2 {
+				if !typs[i].Equal(v.Type()) && !types.INVALID.Equal(v.Type()) {
+					b.Error(ErrorLevelError, v.Pos(), "wrong argument type: expected %s, got %s", typs[i], args[i].Type())
+					hasErr = true
+				}
 			} else if !typs[len(typs)-2].Equal(v.Type()) && !types.INVALID.Equal(v.Type()) {
 				b.Error(ErrorLevelError, v.Pos(), "wrong variadic argument type: expected %s, got %s", typs[len(typs)-2], args[i].Type())
 				hasErr = true
