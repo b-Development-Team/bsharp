@@ -24,6 +24,9 @@
 - [Imports](#imports)
 - [Standard Library](#standard-library)
   - [Math](#math)
+  - [Strings](#strings)
+  - [Errors](#errors)
+  - [JSON](#json)
 - [Other Functions](#other-functions)
 
 ## Introduction
@@ -402,6 +405,44 @@ Functions:
 | - | - |
 | `[JOIN vals joiner]` | Joins vals (an array of strings) with the joiner in between |
 | `[SPLIT str sep]` | Splits the string into an array of strings using `sep` as a seperator |
+| `[TOUPPER str]` | Returns an all-uppercase version of `str` |
+| `[TOLOWER str]` | Returns an all-lowercase version of `str` |
+
+### Errors
+:warning: TODO
+
+### JSON
+Import with
+```scala
+[IMPORT "json.bsp"]
+```
+
+Types Supported:
+- `ARRAY{ANY}`
+- `MAP{STRING, ANY}`
+- `STRING`
+- `INT`
+- `FLOAT`
+
+Example:
+```scala
+[IMPORT "json.bsp"]
+
+[DEFINE a [MAKE MAP{STRING, ANY}]]
+[SET [VAR a] "a" [ANY 10]]
+[SET [VAR a] "b" [ANY "hi"]]
+[DEFINE c [MAKE MAP{STRING, ANY}]]
+[SET [VAR c] "hi" [ANY "hello"]]
+[SET [VAR a] "c" [ANY [VAR c]]]
+[SET [VAR a] "d" [ANY [ARRAY [ANY 1] [ANY "2"] [ANY 3]]]]
+[SET [VAR a] "e" [ANY 7.49]]
+
+[PRINT [ENCODE [ANY [VAR a]]]]
+```
+Output:
+```json
+{"e":7.49,"a":10,"b":"hi","c":{"hi":"hello"},"d":[1,"2",3]}
+```
 
 ## Other Functions
 | Name | Description |
