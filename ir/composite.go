@@ -337,6 +337,10 @@ func init() {
 	nodeBuilders["GET"] = nodeBuilder{
 		ArgTypes: []types.Type{types.NewMulType(types.MAP, types.STRUCT), types.NewMulType(hashable, types.IDENT)},
 		Build: func(b *Builder, pos *tokens.Pos, args []Node) (Call, error) {
+			if types.INVALID.Equal(args[0].Type()) {
+				return NewTypedValue(types.INVALID), nil
+			}
+
 			// If map type
 			if types.MAP.Equal(args[0].Type()) {
 				// Check types

@@ -60,7 +60,7 @@ func (b *Builder) FixTypes(args *[]Node, typs []types.Type, pos *tokens.Pos) {
 		} else {
 			typ = typs[i]
 		}
-		if !v.Type().Equal(typ) && !types.INVALID.Equal(v.Type()) {
+		if !typ.Equal(v.Type()) && !types.INVALID.Equal(v.Type()) {
 			(*args)[i] = NewTypedNode(typs[i], v.Pos())
 		}
 	}
