@@ -1,13 +1,5 @@
 [IMPORT "strings.bsp"]
 
-[PRINT "What do you want to do?```"]
-[DEFINE mode [BUTTONS [ARRAY [ARRAY
-  [BUTTON "Combine Elements" "combo"]
-  [BUTTON "View Inventory" "inv"]
-  [BUTTON "Suggest" "suggest"]
-  [BUTTON "Element Info" "info"]
-]]]]
-
 [TYPEDEF element STRUCT{name: STRING, id: INT, creator: STRING, createdon: INT}]
 
 [FUNC encode_element [PARAM elem element] [RETURNS STRING]
@@ -26,8 +18,8 @@
 
 # Set up DB
 [IF [COMPARE [DB EXISTS "elements"] == "false"]
-  [DB SET "elements" "1_Air_567132457820749842_0|2_Earth_567132457820749842_0|3_Fire_567132457820749842_0|4_Water_567132457820749842_0"]
-  [DB SET "combos" ""]
+  [DB SET "elements" "1_Air_567132457820749842_0|2_Earth_567132457820749842_0|3_Fire_567132457820749842_0|4_Water_567132457820749842_0|5_Wind_567132457820749842_1658117951"]
+  [DB SET "combos" "1+1+5"]
 ]
 [IF [COMPARE [DB EXISTS [USERID]] == "false"]
   [DB SET [USERID] "1|2|3|4"]
@@ -44,6 +36,15 @@
   [SET [VAR name_map] [TOLOWER [GET [VAR el] name]] [GET [VAR el] id]]
   [DEFINE i [MATH [VAR i] + 1]]
 ]
+
+# Input
+[PRINT "What do you want to do?```"]
+[DEFINE mode [BUTTONS [ARRAY [ARRAY
+  [BUTTON "Combine Elements" "combo"]
+  [BUTTON "View Inventory" "inv"]
+  [BUTTON "Suggest" "suggest"]
+  [BUTTON "Element Info" "info"]
+]]]]
 
 # Parse combos
 [DEFINE combos [MAKE ARRAY{ARRAY{INT}}]]
@@ -70,6 +71,7 @@
     [IF [COMPARE [INDEX [VAR inv] [VAR i]] == [VAR elem]]
       [RETURN TRUE]
     ]
+    [DEFINE i [MATH [VAR i] + 1]]
   ]
   [RETURN FALSE]
 ]
@@ -119,8 +121,9 @@
   [DEFINE new ""]
   [IF [has_elem [VAR result]]
     [DEFINE new ", but you already had it"]
+  ELSE
+    [DB SET [USERID] [CONCAT [DB GET [USERID]] "|" [STRING [VAR result]]]]
   ]
-  [DB SET [USERID] [CONCAT [DB GET [USERID]] "|" [STRING [VAR result]]]]
   [PRINT [CONCAT "You made **" [GET [INDEX [VAR elements] [MATH [VAR result] - 1]] name] "**" [VAR new] "!"]]
 ]
 
@@ -217,15 +220,18 @@
     # Save
     [DB SET "elements" [CONCAT [DB GET "elements"] "|" [encode_element [VAR elem]]]]
   ELSE
-    [DEFINE element [INDEX [VAR elements] [MATH [GET [VAR name_map] [TOLOWER [VAR name]]] - 1]]]
+    [DEFINE elem [INDEX [VAR elements] [MATH [GET [VAR name_map] [TOLOWER [VAR name]]] - 1]]]
   ]
 
   # Save
   [DB SET "combos" [CONCAT [DB GET "combos"] "|" [STRING [VAR firstid]] "+" [STRING [VAR secondid]] "+" [STRING [GET [VAR elem] id]]]]
-  [DB SET [USERID] [CONCAT [DB GET [USERID]] "|" [STRING [GET [VAR elem] id]]]] # Add to inv
+
+  [IF [NOT [has_elem [GET [VAR elem] id]]]
+    [DB SET [USERID] [CONCAT [DB GET [USERID]] "|" [STRING [GET [VAR elem] id]]]] # Add to inv
+  ]
 
   # Done!
-  [PRINT [CONCAT "Created **" [VAR name] "**!"]]
+  [PRINT [CONCAT "Created **" [GET [VAR elem] name] "**!"]]
 ]
 
 [FUNC INFO
@@ -242,7 +248,7 @@
   [IF [has_elem [GET [VAR el] id]]
     [PRINT "**You have this.**"]
   ELSE
-    [PRINT "**You don't have this."]
+    [PRINT "**You don't have this.**"]
   ]
 ]
 
