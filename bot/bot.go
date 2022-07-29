@@ -47,9 +47,15 @@ func NewBot(path string, token string) (*Bot, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// Commands
 	c.HandleSlashCommand(BuildCmd(b))
 	c.HandleSlashCommand(CreateCmd(b))
 	c.HandleSlashCommand(EditCmd(b))
+	c.HandleSlashCommand(DescriptionCmd(b))
+	c.HandleSlashCommand(ImageCmd(b))
+	c.HandleSlashCommand(InfoCmd(b))
+	c.HandleSlashCommand(SourceCmd(b))
 	c.Start()
 	return b, nil
 }
