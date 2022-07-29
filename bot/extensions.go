@@ -10,6 +10,7 @@ import (
 	"github.com/Nv7-Github/bsharp/bot/db"
 	"github.com/Nv7-Github/bsharp/ir"
 	"github.com/Nv7-Github/bsharp/types"
+	"github.com/Nv7-Github/sevcord"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -24,7 +25,7 @@ type extensionCtx struct {
 	Multiplayer bool
 }
 
-func NewExtensionCtx(id string, dat *db.Data, ctx *Ctx) *extensionCtx {
+func NewExtensionCtx(id string, dat *db.Data, ctx sevcord.Ctx) *extensionCtx {
 	extCtx := &extensionCtx{
 		Dat:    dat,
 		Tag:    id,
@@ -170,7 +171,7 @@ func getExtensions(c *extensionCtx) []*interpreter.Extension {
 					},
 				},
 			})
-			c.Stdout.BtnHandler(func(data discordgo.MessageComponentInteractionData, ctx *Ctx) {
+			c.Stdout.BtnHandler(func(data discordgo.MessageComponentInteractionData, ctx sevcord.Ctx) {
 				if !c.Multiplayer && ctx.i.Member.User.ID != c.Stdout.i.Member.User.ID {
 					return
 				}
@@ -192,7 +193,7 @@ func getExtensions(c *extensionCtx) []*interpreter.Extension {
 							},
 						},
 					},
-				}, func(dat discordgo.ModalSubmitInteractionData, ctx *Ctx) {
+				}, func(dat discordgo.ModalSubmitInteractionData, ctx sevcord.Ctx) {
 					v := dat.Components[0].(*discordgo.ActionsRow).Components[0].(*discordgo.TextInput).Value
 					c.Stdout.i = ctx.i
 					c.Stdout.isButton = true
@@ -298,7 +299,7 @@ func getExtensions(c *extensionCtx) []*interpreter.Extension {
 			}
 
 			out := make(chan string)
-			c.Stdout.BtnHandler(func(data discordgo.MessageComponentInteractionData, ctx *Ctx) {
+			c.Stdout.BtnHandler(func(data discordgo.MessageComponentInteractionData, ctx sevcord.Ctx) {
 				if !c.Multiplayer && ctx.i.Member.User.ID != c.Stdout.i.Member.User.ID {
 					return
 				}

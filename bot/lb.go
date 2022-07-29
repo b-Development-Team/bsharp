@@ -5,6 +5,7 @@ import (
 	"sort"
 
 	"github.com/Nv7-Github/bsharp/bot/db"
+	"github.com/Nv7-Github/sevcord"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -31,13 +32,13 @@ var btnRow = discordgo.ActionsRow{
 	},
 }
 
-func (b *Bot) LbUsedCmd(ctx *Ctx) {
+func (b *Bot) LbUsedCmd(ctx sevcord.Ctx) {
 	dat, err := b.Get(ctx.Guild())
-	if ctx.Error(err) {
+	if Error(ctx, err) {
 		return
 	}
 
-	ctx.Followup()
+	ctx.Acknowledge()
 
 	// Load progs
 	progs := make([]*db.Program, len(dat.Programs))
@@ -88,7 +89,7 @@ func (b *Bot) LbUsedCmd(ctx *Ctx) {
 
 	// Send
 	ctx.Embed(buildEmb(), btnRow)
-	ctx.BtnHandler(func(data discordgo.MessageComponentInteractionData, ctx *Ctx) {
+	ctx.BtnHandler(func(data discordgo.MessageComponentInteractionData, ctx sevcord.Ctx) {
 		switch data.CustomID {
 		case "prev":
 			page--

@@ -48,6 +48,8 @@ func NewBot(path string, token string) (*Bot, error) {
 		return nil, err
 	}
 	c.HandleSlashCommand(BuildCmd(b))
+	c.HandleSlashCommand(CreateCmd(b))
+	c.HandleSlashCommand(EditCmd(b))
 	c.Start()
 	return b, nil
 }

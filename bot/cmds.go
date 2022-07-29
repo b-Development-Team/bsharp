@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/Nv7-Github/bsharp/bot/db"
+	"github.com/Nv7-Github/sevcord"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -253,7 +254,7 @@ var (
 	}
 
 	handlers = map[string]func(*Ctx, discordgo.ApplicationCommandInteractionData, *Bot){
-		"run": func(ctx *Ctx, dat discordgo.ApplicationCommandInteractionData, b *Bot) {
+		"run": func(ctx sevcord.Ctx, dat discordgo.ApplicationCommandInteractionData, b *Bot) {
 			data := dat.Options[0]
 			switch data.Name {
 			case "code":
@@ -268,7 +269,7 @@ var (
 				b.RunFileCmd(att.URL, ctx)
 			}
 		},
-		"build": func(ctx *Ctx, dat discordgo.ApplicationCommandInteractionData, b *Bot) {
+		"build": func(ctx sevcord.Ctx, dat discordgo.ApplicationCommandInteractionData, b *Bot) {
 			data := dat.Options[0]
 			switch data.Name {
 			case "code":
@@ -283,7 +284,7 @@ var (
 				b.BuildFileCmd(att.URL, ctx)
 			}
 		},
-		"create": func(ctx *Ctx, dat discordgo.ApplicationCommandInteractionData, b *Bot) {
+		"create": func(ctx sevcord.Ctx, dat discordgo.ApplicationCommandInteractionData, b *Bot) {
 			data := dat.Options[0]
 			switch data.Name {
 			case "tag":
@@ -311,7 +312,7 @@ var (
 				b.CreateFileCmd(id, name, url, ctx)
 			}
 		},
-		"edit": func(ctx *Ctx, dat discordgo.ApplicationCommandInteractionData, b *Bot) {
+		"edit": func(ctx sevcord.Ctx, dat discordgo.ApplicationCommandInteractionData, b *Bot) {
 			data := dat.Options[0]
 			switch data.Name {
 			case "tag":
@@ -335,10 +336,10 @@ var (
 				b.EditFileCmd(id, url, ctx)
 			}
 		},
-		"description": func(ctx *Ctx, dat discordgo.ApplicationCommandInteractionData, b *Bot) {
+		"description": func(ctx sevcord.Ctx, dat discordgo.ApplicationCommandInteractionData, b *Bot) {
 			b.DescriptionCmd(dat.Options[0].StringValue(), ctx)
 		},
-		"image": func(ctx *Ctx, dat discordgo.ApplicationCommandInteractionData, b *Bot) {
+		"image": func(ctx sevcord.Ctx, dat discordgo.ApplicationCommandInteractionData, b *Bot) {
 			var url string
 			var id string
 			for _, opt := range dat.Options {
@@ -350,7 +351,7 @@ var (
 					id := opt.Value.(string)
 					attachment := dat.Resolved.Attachments[id]
 					if !strings.HasPrefix(attachment.ContentType, "image/") {
-						ctx.ErrorMessage("Invalid image!")
+						ErrorMessage(ctx, "Invalid image!")
 						return
 					}
 					url = attachment.URL
@@ -358,13 +359,13 @@ var (
 			}
 			b.ImageCmd(id, url, ctx)
 		},
-		"info": func(ctx *Ctx, dat discordgo.ApplicationCommandInteractionData, b *Bot) {
+		"info": func(ctx sevcord.Ctx, dat discordgo.ApplicationCommandInteractionData, b *Bot) {
 			b.InfoCmd(dat.Options[0].StringValue(), ctx)
 		},
-		"source": func(ctx *Ctx, dat discordgo.ApplicationCommandInteractionData, b *Bot) {
+		"source": func(ctx sevcord.Ctx, dat discordgo.ApplicationCommandInteractionData, b *Bot) {
 			b.SourceCmd(dat.Options[0].StringValue(), ctx)
 		},
-		"lb": func(ctx *Ctx, dat discordgo.ApplicationCommandInteractionData, b *Bot) {
+		"lb": func(ctx sevcord.Ctx, dat discordgo.ApplicationCommandInteractionData, b *Bot) {
 			typ := "uses"
 			if len(dat.Options) > 0 {
 				typ = dat.Options[0].StringValue()

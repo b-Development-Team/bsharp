@@ -5,150 +5,117 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/bwmarrin/discordgo"
+	"github.com/Nv7-Github/sevcord"
 )
 
-func (b *Bot) EditCmd(src string, id string, ctx *Ctx) {
+func EditCmd(b *Bot) sevcord.SlashCommandObject {
+	return &sevcord.SlashCommandGroup{
+		Name:        "edit",
+		Description: "Edit a B# tag!",
+		Children: []sevcord.SlashCommandObject{
+			&sevcord.SlashCommand{
+				Name:        "tag",
+				Description: "Edit a B# tag from the source code of a B# program!",
+				Options: []sevcord.Option{
+					{
+						Name:         "id",
+						Description:  "The ID of the tag to edit!",
+						Required:     true,
+						Autocomplete: b.Autocomplete,
+						Kind:         sevcord.OptionKindString,
+					},
+				},
+				Handler: b.EditCodeCmd,
+			},
+			&sevcord.SlashCommand{
+				Name:        "file",
+				Description: "Edit a B# tag from a file!",
+				Options: []sevcord.Option{
+					{
+						Name:         "id",
+						Description:  "The ID of the tag to edit!",
+						Required:     true,
+						Autocomplete: b.Autocomplete,
+						Kind:         sevcord.OptionKindString,
+					},
+					{
+						Name:        "file",
+						Description: "The file to edit the tag from!",
+						Required:    true,
+						Kind:        sevcord.OptionKindAttachment,
+					},
+				},
+				Handler: b.EditFileCmd,
+			},
+		},
+	}
+}
+
+func (b *Bot) EditCmd(ctx sevcord.Ctx, src string, id string) {
 	dat, err := b.Get(ctx.Guild())
-	if ctx.Error(err) {
+	if Error(ctx, err) {
 		return
 	}
-	ctx.Followup()
+	ctx.Acknowledge()
 
 	// Create
 	prog, rsp := dat.GetProgram(id)
 	if !rsp.Suc {
-		ctx.ErrorMessage(rsp.Msg)
+		ErrorMessage(ctx, rsp.Msg)
 		return
 	}
 
 	// Attempt to build
 	_, err = b.BuildCode(prog.ID+".bsp", src, ctx)
-	if ctx.Error(err) {
+	if Error(ctx, err) {
 		return
 	}
 
 	// Save
 	err = dat.SaveSource(prog.ID, src)
-	if ctx.Error(err) {
+	if Error(ctx, err) {
 		return
 	}
-	ctx.Message(fmt.Sprintf("📝 Edited tag **%s**!", prog.Name))
+	ctx.Respond(sevcord.MessageResponse(fmt.Sprintf("📝 Edited tag **%s**!", prog.Name)))
 }
 
-func (b *Bot) EditCodeCmd(id string, ctx *Ctx) {
-	err := ctx.Modal(&discordgo.InteractionResponseData{
+func (b *Bot) EditCodeCmd(ctx sevcord.Ctx, args []any) {
+	ctx.Modal(&sevcord.Modal{
 		Title: "Edit Code",
-		Components: []discordgo.MessageComponent{
-			discordgo.ActionsRow{
-				Components: []discordgo.MessageComponent{
-					discordgo.TextInput{
-						CustomID:    "code",
-						Label:       "New Code",
-						Style:       discordgo.TextInputParagraph,
-						Placeholder: `[PRINT "Hello, World!"]`,
-						Required:    true,
-						MaxLength:   4000,
-						MinLength:   1,
-					},
-				},
+		Inputs: []sevcord.ModalInput{
+			{
+				Label:       "New Code",
+				Style:       sevcord.ModalInputStyleParagraph,
+				Placeholder: `[PRINT "Hello, World!"]`,
+				Required:    true,
+				MaxLength:   4000,
+				MinLength:   1,
 			},
 		},
-	}, func(dat discordgo.ModalSubmitInteractionData, ctx *Ctx) {
-		ctx.Followup()
+		Handler: func(ctx sevcord.Ctx, vals []string) {
+			ctx.Acknowledge()
 
-		src := dat.Components[0].(*discordgo.ActionsRow).Components[0].(*discordgo.TextInput).Value
-		b.EditCmd(src, id, ctx)
+			b.EditCmd(ctx, vals[0], args[0].(string))
+		},
 	})
-	ctx.Error(err)
 }
 
-func (b *Bot) EditFileCmd(id, url string, ctx *Ctx) {
-	ctx.Followup()
+func (b *Bot) EditFileCmd(ctx sevcord.Ctx, args []any) {
+	ctx.Acknowledge()
 
-	resp, err := http.Get(url)
-	if ctx.Error(err) {
+	resp, err := http.Get(args[1].(*sevcord.SlashCommandAttachment).URL)
+	if Error(ctx, err) {
 		return
 	}
 	defer resp.Body.Close()
 	dat, err := io.ReadAll(resp.Body)
-	if ctx.Error(err) {
+	if Error(ctx, err) {
 		return
 	}
 	if len(dat) > 1048576 {
-		ctx.ErrorMessage("The maximum program size is **1MB**!")
+		ErrorMessage(ctx, "The maximum program size is **1MB**!")
 		return
 	}
 
-	b.EditCmd(string(dat), id, ctx)
-}
-
-func (b *Bot) DescriptionCmd(id string, ctx *Ctx) {
-	err := ctx.Modal(&discordgo.InteractionResponseData{
-		Title: "Describe Tag",
-		Components: []discordgo.MessageComponent{
-			discordgo.ActionsRow{
-				Components: []discordgo.MessageComponent{
-					discordgo.TextInput{
-						CustomID:    "description",
-						Label:       "New Description",
-						Style:       discordgo.TextInputParagraph,
-						Placeholder: `Description...`,
-						Required:    true,
-						MaxLength:   2048,
-						MinLength:   1,
-					},
-				},
-			},
-		},
-	}, func(dat discordgo.ModalSubmitInteractionData, ctx *Ctx) {
-		ctx.Followup()
-
-		// Actually run code
-		desc := dat.Components[0].(*discordgo.ActionsRow).Components[0].(*discordgo.TextInput).Value
-		data, err := b.Get(ctx.Guild())
-		if ctx.Error(err) {
-			return
-		}
-		prog, rsp := data.GetProgram(id)
-		if !rsp.Suc {
-			ctx.ErrorMessage(rsp.Msg)
-			return
-		}
-		if ctx.Author() != prog.Creator {
-			ctx.ErrorMessage("Only the creator can change the description of their tag!")
-			return
-		}
-		prog.Description = desc
-		err = data.SaveProgram(prog)
-		if ctx.Error(err) {
-			return
-		}
-		ctx.Message(fmt.Sprintf("📝 Edited tag **%s**!", prog.Name))
-	})
-	ctx.Error(err)
-}
-
-func (b *Bot) ImageCmd(id, url string, ctx *Ctx) {
-	ctx.Followup()
-
-	data, err := b.Get(ctx.Guild())
-	if ctx.Error(err) {
-		return
-	}
-	prog, rsp := data.GetProgram(id)
-	if !rsp.Suc {
-		ctx.ErrorMessage(rsp.Msg)
-		return
-	}
-	if ctx.Author() != prog.Creator {
-		ctx.ErrorMessage("Only the creator can change the image of their tag!")
-		return
-	}
-	prog.Image = url
-	err = data.SaveProgram(prog)
-	if ctx.Error(err) {
-		return
-	}
-	ctx.Message(fmt.Sprintf("📝 Edited tag **%s**!", prog.Name))
+	b.EditCmd(ctx, string(dat), args[0].(string))
 }

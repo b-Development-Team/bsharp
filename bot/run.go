@@ -10,6 +10,7 @@ import (
 	"github.com/Nv7-Github/bsharp/ir"
 	"github.com/Nv7-Github/bsharp/parser"
 	"github.com/Nv7-Github/bsharp/tokens"
+	"github.com/Nv7-Github/sevcord"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -51,7 +52,7 @@ type ctxWriter struct {
 	cmps     []discordgo.MessageComponent
 }
 
-func newCtxWriter(ctx *Ctx) *ctxWriter {
+func newCtxWriter(ctx sevcord.Ctx) *ctxWriter {
 	return &ctxWriter{Ctx: ctx}
 }
 
@@ -81,7 +82,7 @@ var runCmpEnd = []discordgo.MessageComponent{
 }
 
 func (c *ctxWriter) AddBtnHandler() {
-	c.BtnHandler(func(data discordgo.MessageComponentInteractionData, ctx *Ctx) {
+	c.BtnHandler(func(data discordgo.MessageComponentInteractionData, ctx sevcord.Ctx) {
 		if ctx.i.Member.User.ID != c.i.Member.User.ID {
 			return
 		}
@@ -159,7 +160,7 @@ func (c *ctxWriter) Error(err error) error {
 	}, c.cmps...)
 }
 
-func (b *Bot) BuildCode(filename string, src string, ctx *Ctx) (*ir.IR, error) {
+func (b *Bot) BuildCode(filename string, src string, ctx sevcord.Ctx) (*ir.IR, error) {
 	stream := tokens.NewStream(filename, src)
 	tok := tokens.NewTokenizer(stream)
 	err := tok.Tokenize()
@@ -190,7 +191,7 @@ func (b *Bot) BuildCode(filename string, src string, ctx *Ctx) (*ir.IR, error) {
 	return bld.IR(), nil
 }
 
-func (b *Bot) CompileCode(filename, src string, ctx *Ctx) (string, error) {
+func (b *Bot) CompileCode(filename, src string, ctx sevcord.Ctx) (string, error) {
 	ir, err := b.BuildCode(filename, src, ctx)
 	if err != nil {
 		return "", err
@@ -201,7 +202,7 @@ func (b *Bot) CompileCode(filename, src string, ctx *Ctx) (string, error) {
 
 const MaxTime = time.Second * 150
 
-func (b *Bot) RunCode(filename string, src string, ctx *Ctx, extensionCtx *extensionCtx) error {
+func (b *Bot) RunCode(filename string, src string, ctx sevcord.Ctx, extensionCtx *extensionCtx) error {
 	ir, err := b.BuildCode(filename, src, ctx)
 	if err != nil {
 		return err

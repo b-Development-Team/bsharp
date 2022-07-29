@@ -4,19 +4,20 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/Nv7-Github/sevcord"
 	"github.com/bwmarrin/discordgo"
 )
 
-func (b *Bot) InfoCmd(id string, ctx *Ctx) {
-	ctx.Followup()
+func (b *Bot) InfoCmd(id string, ctx sevcord.Ctx) {
+	ctx.Acknowledge()
 
 	data, err := b.Get(ctx.Guild())
-	if ctx.Error(err) {
+	if Error(ctx, err) {
 		return
 	}
 	prog, rsp := data.GetProgram(id)
 	if !rsp.Suc {
-		ctx.ErrorMessage(rsp.Msg)
+		ErrorMessage(ctx, rsp.Msg)
 		return
 	}
 
@@ -55,21 +56,21 @@ func (b *Bot) InfoCmd(id string, ctx *Ctx) {
 	})
 }
 
-func (b *Bot) SourceCmd(id string, ctx *Ctx) {
-	ctx.Followup()
+func (b *Bot) SourceCmd(id string, ctx sevcord.Ctx) {
+	ctx.Acknowledge()
 
 	data, err := b.Get(ctx.Guild())
-	if ctx.Error(err) {
+	if Error(ctx, err) {
 		return
 	}
 	prog, rsp := data.GetProgram(id)
 	if !rsp.Suc {
-		ctx.ErrorMessage(rsp.Msg)
+		ErrorMessage(ctx, rsp.Msg)
 		return
 	}
 	src, rsp := data.GetSource(id)
 	if !rsp.Suc {
-		ctx.ErrorMessage(rsp.Msg)
+		ErrorMessage(ctx, rsp.Msg)
 		return
 	}
 
