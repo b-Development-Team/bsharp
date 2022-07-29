@@ -5,113 +5,132 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/bwmarrin/discordgo"
+	"github.com/Nv7-Github/sevcord"
 )
 
-func (b *Bot) CreateCmd(src string, id, name string, ctx *Ctx) {
+func CreateCmd(b *Bot) sevcord.SlashCommandObject {
+	return &sevcord.SlashCommandGroup{
+		Name:        "create",
+		Description: "Create a tag!",
+		Children: []sevcord.SlashCommandObject{
+			&sevcord.SlashCommand{
+				Name:        "tag",
+				Description: "Create a tag from the source code of a B# program!",
+				Options:     []sevcord.Option{},
+				Handler:     b.CreateCodeCmd,
+			},
+			&sevcord.SlashCommand{
+				Name:        "file",
+				Description: "Create a tag from a file!",
+				Options: []sevcord.Option{
+					{
+						Name:        "id",
+						Description: "The ID of the tag to create!",
+						Kind:        sevcord.OptionKindString,
+						Required:    true,
+					},
+					{
+						Name:        "name",
+						Description: "The name of the tag to create!",
+						Kind:        sevcord.OptionKindString,
+						Required:    true,
+					},
+					{
+						Name:        "file",
+						Description: "The source code of the tag!",
+						Kind:        sevcord.OptionKindAttachment,
+						Required:    true,
+					},
+				},
+				Handler: b.CreateFileCmd,
+			},
+		},
+	}
+}
+
+func (b *Bot) CreateCmd(src string, id, name string, ctx sevcord.Ctx) {
 	dat, err := b.Get(ctx.Guild())
-	if ctx.Error(err) {
+	if Error(ctx, err) {
 		return
 	}
-	ctx.Followup()
+	ctx.Acknowledge()
 
 	// Create
-	prog, rsp := dat.NewProgram(id, name, ctx.Author())
+	prog, rsp := dat.NewProgram(id, name, ctx.User().ID)
 	if !rsp.Suc {
-		ctx.ErrorMessage(rsp.Msg)
+		ErrorMessage(ctx, rsp.Msg)
 		return
 	}
 
 	// Attempt to build
 	_, err = b.BuildCode(prog.ID+".bsp", src, ctx)
-	if ctx.Error(err) {
+	if Error(ctx, err) {
 		return
 	}
 
 	// Save
 	err = dat.SaveProgram(prog)
-	if ctx.Error(err) {
+	if Error(ctx, err) {
 		return
 	}
 	err = dat.SaveSource(prog.ID, src)
-	if ctx.Error(err) {
+	if Error(ctx, err) {
 		return
 	}
-	ctx.Message(fmt.Sprintf("🆕 Created new tag **%s**!", prog.Name))
+	ctx.Respond(sevcord.MessageResponse(fmt.Sprintf("🆕 Created new tag **%s**!", prog.Name)))
 }
 
-func (b *Bot) CreateCodeCmd(ctx *Ctx) {
-	err := ctx.Modal(&discordgo.InteractionResponseData{
-		Title: "Create Program",
-		Components: []discordgo.MessageComponent{
-			discordgo.ActionsRow{
-				Components: []discordgo.MessageComponent{
-					discordgo.TextInput{
-						CustomID:    "id",
-						Label:       "Program ID",
-						Style:       discordgo.TextInputShort,
-						Placeholder: `my-program`,
-						Required:    true,
-						MaxLength:   256,
-						MinLength:   1,
-					},
-				},
+func (b *Bot) CreateCodeCmd(ctx sevcord.Ctx, args []any) {
+	ctx.Modal(&sevcord.Modal{
+		Title: "Create Tag",
+		Inputs: []sevcord.ModalInput{
+			{
+				Label:       "Program ID",
+				Style:       sevcord.ModalInputStyleSentence,
+				Placeholder: "my-program",
+				Required:    true,
+				MinLength:   1,
+				MaxLength:   256,
 			},
-			discordgo.ActionsRow{
-				Components: []discordgo.MessageComponent{
-					discordgo.TextInput{
-						CustomID:    "name",
-						Label:       "Program Name",
-						Style:       discordgo.TextInputShort,
-						Placeholder: `My Program`,
-						Required:    true,
-						MaxLength:   256,
-						MinLength:   1,
-					},
-				},
+			{
+				Label:       "Program Name",
+				Style:       sevcord.ModalInputStyleSentence,
+				Placeholder: "My Program",
+				Required:    true,
+				MinLength:   1,
+				MaxLength:   256,
 			},
-			discordgo.ActionsRow{
-				Components: []discordgo.MessageComponent{
-					discordgo.TextInput{
-						CustomID:    "code",
-						Label:       "Program Code",
-						Style:       discordgo.TextInputParagraph,
-						Placeholder: `[PRINT "Hello, World!"]`,
-						Required:    true,
-						MaxLength:   4000,
-						MinLength:   1,
-					},
-				},
+			{
+				Label:       "Source Code",
+				Style:       sevcord.ModalInputStyleParagraph,
+				Placeholder: `[PRINT "Hello, World!"]`,
+				Required:    true,
+				MinLength:   1,
+				MaxLength:   1048576,
 			},
 		},
-	}, func(dat discordgo.ModalSubmitInteractionData, ctx *Ctx) {
-		ctx.Followup()
-
-		// Actually run code
-		id := dat.Components[0].(*discordgo.ActionsRow).Components[0].(*discordgo.TextInput).Value
-		name := dat.Components[1].(*discordgo.ActionsRow).Components[0].(*discordgo.TextInput).Value
-		src := dat.Components[2].(*discordgo.ActionsRow).Components[0].(*discordgo.TextInput).Value
-		b.CreateCmd(src, id, name, ctx)
+		Handler: func(ctx sevcord.Ctx, args []string) {
+			b.CreateCmd(args[2], args[0], args[1], ctx)
+		},
 	})
-	ctx.Error(err)
 }
 
-func (b *Bot) CreateFileCmd(id, name string, url string, ctx *Ctx) {
-	ctx.Followup()
+func (b *Bot) CreateFileCmd(ctx sevcord.Ctx, args []any) {
+	ctx.Acknowledge()
 
-	resp, err := http.Get(url)
-	if ctx.Error(err) {
+	resp, err := http.Get(args[2].(*sevcord.SlashCommandAttachment).URL)
+	if Error(ctx, err) {
 		return
 	}
 	defer resp.Body.Close()
 	dat, err := io.ReadAll(resp.Body)
-	if ctx.Error(err) {
+	if Error(ctx, err) {
 		return
 	}
 	if len(dat) > 1048576 {
-		ctx.ErrorMessage("The maximum program size is **1MB**!")
+		ErrorMessage(ctx, "The maximum program size is **1MB**!")
 		return
 	}
 
-	b.CreateCmd(string(dat), id, name, ctx)
+	b.CreateCmd(string(dat), args[0].(string), args[1].(string), ctx)
 }

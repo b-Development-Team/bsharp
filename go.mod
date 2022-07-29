@@ -3,6 +3,7 @@ module github.com/Nv7-Github/bsharp
 go 1.18
 
 require (
+	github.com/Nv7-Github/sevcord v0.0.0-20220729210826-33bd6842e742
 	github.com/alexflint/go-arg v1.4.3
 	github.com/bwmarrin/discordgo v0.23.3-0.20220428212307-9e0783c37f5d
 	github.com/davecgh/go-spew v1.1.1

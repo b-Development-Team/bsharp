@@ -1,3 +1,5 @@
+github.com/Nv7-Github/sevcord v0.0.0-20220729210826-33bd6842e742 h1:c6fGCpIoyz4U0+u8/+acC072o1Pav9snl8uybHs7khI=
+github.com/Nv7-Github/sevcord v0.0.0-20220729210826-33bd6842e742/go.mod h1:f0ewFvUHuft3bgp7NsubbW80ESvlS8BZGnhsUVOp8XY=
 github.com/alexflint/go-arg v1.4.3 h1:9rwwEBpMXfKQKceuZfYcwuc/7YY7tWJbFsgG5cAU/uo=
 github.com/alexflint/go-arg v1.4.3/go.mod h1:3PZ/wp/8HuqRZMUUgu7I+e1qcpUbvmS258mRXkFH4IA=
 github.com/alexflint/go-scalar v1.1.0 h1:aaAouLLzI9TChcPXotr6gUhq+Scr8rl0P9P4PnltbhM=
