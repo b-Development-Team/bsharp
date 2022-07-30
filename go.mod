@@ -10,6 +10,8 @@ require (
 	github.com/tliron/kutil v0.1.57
 )
 
+replace github.com/Nv7-Github/sevcord => ../sevcord
+
 require (
 	github.com/alexflint/go-scalar v1.1.0 // indirect
 	github.com/bwmarrin/discordgo v0.23.3-0.20220428212307-9e0783c37f5d // indirect

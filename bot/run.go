@@ -56,8 +56,6 @@ func newCtxWriter(ctx sevcord.Ctx) *ctxWriter {
 }
 
 func (c *ctxWriter) Setup() {
-	c.Acknowledge()
-
 	emb := sevcord.NewEmbedBuilder("Program Output").Color(3447003).Description("Running...")
 	rsp := sevcord.EmbedResponse(emb)
 	for _, cmp := range c.cmps {
@@ -82,7 +80,7 @@ func (c *ctxWriter) Flush() error {
 		rsp.ComponentRow(cmp...)
 	}
 
-	c.Respond(rsp)
+	c.Edit(rsp)
 	c.lastSent = time.Now()
 	return err
 }
@@ -108,7 +106,7 @@ func (c *ctxWriter) Error(err error) {
 		rsp.ComponentRow(cmp...)
 	}
 
-	c.Respond(rsp)
+	c.Edit(rsp)
 }
 
 func (b *Bot) BuildCode(filename string, src string, ctx sevcord.Ctx) (*ir.IR, error) {
