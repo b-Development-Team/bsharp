@@ -3,14 +3,12 @@ module github.com/Nv7-Github/bsharp
 go 1.18
 
 require (
-	github.com/Nv7-Github/sevcord v0.0.0-20220730042344-22dbc6c90852
+	github.com/Nv7-Github/sevcord v0.0.0-20220730050849-c1404889e919
 	github.com/alexflint/go-arg v1.4.3
 	github.com/davecgh/go-spew v1.1.1
 	github.com/tliron/glsp v0.1.1
 	github.com/tliron/kutil v0.1.57
 )
-
-replace github.com/Nv7-Github/sevcord => ../sevcord
 
 require (
 	github.com/alexflint/go-scalar v1.1.0 // indirect
