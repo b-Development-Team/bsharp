@@ -10,7 +10,7 @@ import (
 	"github.com/Nv7-Github/bsharp/bot/db"
 	"github.com/Nv7-Github/bsharp/ir"
 	"github.com/Nv7-Github/bsharp/types"
-	"github.com/bwmarrin/discordgo"
+	"github.com/Nv7-Github/sevcord"
 )
 
 type extensionCtx struct {
@@ -24,12 +24,12 @@ type extensionCtx struct {
 	Multiplayer bool
 }
 
-func NewExtensionCtx(id string, dat *db.Data, ctx *Ctx) *extensionCtx {
+func NewExtensionCtx(id string, dat *db.Data, ctx sevcord.Ctx) *extensionCtx {
 	extCtx := &extensionCtx{
 		Dat:    dat,
 		Tag:    id,
 		CurrDB: id,
-		Author: ctx.Author(),
+		Author: ctx.User().ID,
 	}
 	return extCtx
 }
@@ -157,49 +157,35 @@ func getExtensions(c *extensionCtx) []*interpreter.Extension {
 			if len(prompt) > 45 {
 				return nil, errors.New("input: prompt must be 45 or fewer characters")
 			}
-			c.Stdout.Embed(&discordgo.MessageEmbed{
-				Title:       prompt,
-				Description: "Press the button below to respond.",
-				Color:       16776960, // Yellow
-			}, discordgo.ActionsRow{
-				Components: []discordgo.MessageComponent{
-					discordgo.Button{
-						Label:    "Respond",
-						Style:    discordgo.SuccessButton,
-						CustomID: "rsp",
-					},
-				},
-			})
-			c.Stdout.BtnHandler(func(data discordgo.MessageComponentInteractionData, ctx *Ctx) {
-				if !c.Multiplayer && ctx.i.Member.User.ID != c.Stdout.i.Member.User.ID {
-					return
-				}
+			emb := sevcord.NewEmbedBuilder(prompt).Description("Press the button bellow to respond.").Color(16776960)
+			c.Stdout.Edit(sevcord.EmbedResponse(emb).ComponentRow(&sevcord.Button{
+				Label: "Respond",
+				Style: sevcord.ButtonStyleSuccess,
+				Handler: func(ctx sevcord.Ctx) {
+					if !c.Multiplayer && ctx.User().ID != c.Stdout.User().ID {
+						return
+					}
 
-				ctx.Modal(&discordgo.InteractionResponseData{
-					Title: "Respond",
-					Components: []discordgo.MessageComponent{
-						discordgo.ActionsRow{
-							Components: []discordgo.MessageComponent{
-								discordgo.TextInput{
-									CustomID:    "rsp",
-									Label:       prompt,
-									Style:       discordgo.TextInputParagraph,
-									Placeholder: `Your response...`,
-									Required:    true,
-									MaxLength:   4000,
-									MinLength:   1,
-								},
+					ctx.Modal(&sevcord.Modal{
+						Title: "Respond",
+						Inputs: []sevcord.ModalInput{
+							{
+								Label:       prompt,
+								Style:       sevcord.ModalInputStyleParagraph,
+								Placeholder: `Your response...`,
+								Required:    true,
+								MaxLength:   4000,
+								MinLength:   1,
 							},
 						},
-					},
-				}, func(dat discordgo.ModalSubmitInteractionData, ctx *Ctx) {
-					v := dat.Components[0].(*discordgo.ActionsRow).Components[0].(*discordgo.TextInput).Value
-					c.Stdout.i = ctx.i
-					c.Stdout.isButton = true
-					c.Stdout.AddBtnHandler()
-					out <- v
-				})
-			})
+						Handler: func(ctx sevcord.Ctx, args []string) {
+							v := args[0]
+							c.Stdout.Ctx = ctx
+							out <- v
+						},
+					})
+				},
+			}))
 
 			select {
 			case rsp := <-out:
@@ -242,17 +228,19 @@ func getExtensions(c *extensionCtx) []*interpreter.Extension {
 		interpreter.NewExtension("BUTTONS", func(pars []any) (any, error) {
 			// Build actions row
 			r := *(pars[0].(*[]any))
-			rows := make([]discordgo.MessageComponent, len(r))
+			rows := make([][]sevcord.Component, len(r))
 
-			var cols = map[string]discordgo.ButtonStyle{
-				"Primary":   discordgo.PrimaryButton,
-				"Secondary": discordgo.SecondaryButton,
-				"Danger":    discordgo.DangerButton,
-				"Success":   discordgo.SuccessButton,
+			var cols = map[string]sevcord.ButtonStyle{
+				"Primary":   sevcord.ButtonStylePrimary,
+				"Secondary": sevcord.ButtonStyleSecondary,
+				"Danger":    sevcord.ButtonStyleDanger,
+				"Success":   sevcord.ButtonStyleSuccess,
 			}
+
+			out := make(chan string)
 			for i, val := range r {
 				v := *val.(*[]any)
-				r := make([]discordgo.MessageComponent, len(v))
+				r := make([]sevcord.Component, len(v))
 				for j, btn := range v {
 					b := btn.(map[string]any)
 					col, ok := b["col"].(string)
@@ -264,52 +252,44 @@ func getExtensions(c *extensionCtx) []*interpreter.Extension {
 						return nil, errors.New("invalid color")
 					}
 
+					val := b["id"].(string)
+					handler := func(ctx sevcord.Ctx) {
+						if !c.Multiplayer && ctx.User().ID != c.Stdout.User().ID {
+							return
+						}
+
+						c.Stdout.Ctx = ctx
+						c.Stdout.Flush()
+						out <- val
+					}
+
 					txt := b["txt"].(string)
 					if len([]rune(txt)) == 1 && []rune(txt)[0] > unicode.MaxASCII {
-						r[j] = discordgo.Button{
-							Emoji: discordgo.ComponentEmoji{
-								Name: txt,
-							},
-							CustomID: b["id"].(string),
+						r[j] = &sevcord.Button{
+							Emoji:    sevcord.ComponentEmojiDefault([]rune(txt)[0]),
 							Style:    s,
 							Disabled: b["dis"] == "true",
+							Handler:  handler,
 						}
 					} else {
-						r[j] = discordgo.Button{
+						r[j] = &sevcord.Button{
 							Label:    txt,
-							CustomID: b["id"].(string),
 							Style:    s,
 							Disabled: b["dis"] == "true",
+							Handler:  handler,
 						}
 					}
 				}
 
-				rows[i] = discordgo.ActionsRow{
-					Components: r,
-				}
+				rows[i] = r
 			}
 
 			// Send
-			cmp := c.Stdout.cmps
 			c.Stdout.cmps = rows
 			err := c.Stdout.Flush()
 			if err != nil {
 				return nil, err
 			}
-
-			out := make(chan string)
-			c.Stdout.BtnHandler(func(data discordgo.MessageComponentInteractionData, ctx *Ctx) {
-				if !c.Multiplayer && ctx.i.Member.User.ID != c.Stdout.i.Member.User.ID {
-					return
-				}
-
-				c.Stdout.i = ctx.i
-				c.Stdout.isButton = true
-				c.Stdout.cmps = cmp
-				c.Stdout.Flush()
-				c.Stdout.AddBtnHandler()
-				out <- data.CustomID
-			})
 
 			select {
 			case rsp := <-out:

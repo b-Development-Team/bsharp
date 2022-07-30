@@ -4,12 +4,12 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/bwmarrin/discordgo"
+	"github.com/Nv7-Github/sevcord"
 )
 
 const maxResults = 25
 
-func (d *Data) Autocomplete(query string) []*discordgo.ApplicationCommandOptionChoice {
+func (d *Data) Autocomplete(query string) []sevcord.Choice {
 	type searchResult struct {
 		priority int
 		uses     int
@@ -53,9 +53,9 @@ func (d *Data) Autocomplete(query string) []*discordgo.ApplicationCommandOptionC
 	})
 
 	// Return
-	out := make([]*discordgo.ApplicationCommandOptionChoice, len(results))
+	out := make([]sevcord.Choice, len(results))
 	for i, res := range results {
-		out[i] = &discordgo.ApplicationCommandOptionChoice{
+		out[i] = sevcord.Choice{
 			Name:  res.name,
 			Value: res.id,
 		}

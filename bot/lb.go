@@ -5,39 +5,27 @@ import (
 	"sort"
 
 	"github.com/Nv7-Github/bsharp/bot/db"
-	"github.com/bwmarrin/discordgo"
+	"github.com/Nv7-Github/sevcord"
 )
 
 const ItemsPerPage = 10
 
-var btnRow = discordgo.ActionsRow{
-	Components: []discordgo.MessageComponent{
-		discordgo.Button{
-			Emoji: discordgo.ComponentEmoji{
-				Name:     "leftarrow",
-				ID:       "861722690813165598",
-				Animated: false,
-			},
-			CustomID: "prev",
-		},
-		discordgo.Button{
-			Emoji: discordgo.ComponentEmoji{
-				Name:     "rightarrow",
-				ID:       "861722690926936084",
-				Animated: false,
-			},
-			CustomID: "next",
-		},
-	},
+func LbCmd(b *Bot) sevcord.SlashCommandObject {
+	return &sevcord.SlashCommand{
+		Name:        "lb",
+		Description: "View the most used tags!",
+		Options:     []sevcord.Option{},
+		Handler:     b.LbUsedCmd,
+	}
 }
 
-func (b *Bot) LbUsedCmd(ctx *Ctx) {
+func (b *Bot) LbUsedCmd(ctx sevcord.Ctx, args []any) {
 	dat, err := b.Get(ctx.Guild())
-	if ctx.Error(err) {
+	if Error(ctx, err) {
 		return
 	}
 
-	ctx.Followup()
+	ctx.Acknowledge()
 
 	// Load progs
 	progs := make([]*db.Program, len(dat.Programs))
@@ -62,15 +50,9 @@ func (b *Bot) LbUsedCmd(ctx *Ctx) {
 	page := 0
 
 	// Send
-	buildEmb := func() *discordgo.MessageEmbed {
-		emb := &discordgo.MessageEmbed{
-			Title:       "Most Used Tags",
-			Color:       15844367, // Gold
-			Description: "",
-			Footer: &discordgo.MessageEmbedFooter{
-				Text: fmt.Sprintf("Page %d/%d", page+1, pages),
-			},
-		}
+	buildEmb := func() *sevcord.Response {
+		desc := ""
+
 		for i := 0; i < ItemsPerPage; i++ {
 			ind := i + page*ItemsPerPage
 			if ind >= len(progs) {
@@ -81,27 +63,42 @@ func (b *Bot) LbUsedCmd(ctx *Ctx) {
 			if uses == 1 {
 				s = ""
 			}
-			emb.Description += fmt.Sprintf("%d. **%s** - %d Use%s\n", i+1, progs[ind].Name, uses, s)
+			desc += fmt.Sprintf("%d. **%s** - %d Use%s\n", i+1, progs[ind].Name, uses, s)
 		}
-		return emb
+
+		return sevcord.EmbedResponse(sevcord.NewEmbedBuilder("Most Used Tags").
+			Color(15844367).
+			Footer(fmt.Sprintf("Page %d/%d", page+1, pages), "").
+			Description(desc))
+	}
+
+	// Buttons
+	var btns []sevcord.Component
+	btns = []sevcord.Component{
+		&sevcord.Button{
+			Emoji: sevcord.ComponentEmojiCustom("leftarrow", "861722690813165598", false),
+			Style: sevcord.ButtonStylePrimary,
+			Handler: func(ctx sevcord.Ctx) {
+				page--
+				if page < 0 {
+					page = pages - 1
+				}
+				ctx.Respond(buildEmb().ComponentRow(btns...))
+			},
+		},
+		&sevcord.Button{
+			Emoji: sevcord.ComponentEmojiCustom("rightarrow", "861722690926936084", false),
+			Style: sevcord.ButtonStylePrimary,
+			Handler: func(ctx sevcord.Ctx) {
+				page++
+				if page >= pages {
+					page = 0
+				}
+				ctx.Respond(buildEmb().ComponentRow(btns...))
+			},
+		},
 	}
 
 	// Send
-	ctx.Embed(buildEmb(), btnRow)
-	ctx.BtnHandler(func(data discordgo.MessageComponentInteractionData, ctx *Ctx) {
-		switch data.CustomID {
-		case "prev":
-			page--
-			if page < 0 {
-				page = pages - 1
-			}
-			ctx.Embed(buildEmb(), btnRow)
-		case "next":
-			page++
-			if page >= pages {
-				page = 0
-			}
-			ctx.Embed(buildEmb(), btnRow)
-		}
-	})
+	ctx.Respond(buildEmb().ComponentRow(btns...))
 }

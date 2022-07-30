@@ -10,7 +10,7 @@ import (
 	"github.com/Nv7-Github/bsharp/ir"
 	"github.com/Nv7-Github/bsharp/parser"
 	"github.com/Nv7-Github/bsharp/tokens"
-	"github.com/bwmarrin/discordgo"
+	"github.com/Nv7-Github/sevcord"
 )
 
 type fs struct {
@@ -44,80 +44,43 @@ func (f *fs) Parse(file string) (*parser.Parser, error) {
 
 // ctxWriter is an io.Writer implementation around *Ctx
 type ctxWriter struct {
-	*Ctx
+	sevcord.Ctx
 	lastSent time.Time
 	data     *strings.Builder
 	prog     *interpreter.Interpreter
-	cmps     []discordgo.MessageComponent
+	cmps     [][]sevcord.Component
 }
 
-func newCtxWriter(ctx *Ctx) *ctxWriter {
+func newCtxWriter(ctx sevcord.Ctx) *ctxWriter {
 	return &ctxWriter{Ctx: ctx}
 }
 
-var runCmp = []discordgo.MessageComponent{
-	discordgo.ActionsRow{
-		Components: []discordgo.MessageComponent{
-			discordgo.Button{
-				Label:    "Stop",
-				Style:    discordgo.DangerButton,
-				CustomID: "stop",
-			},
-		},
-	},
-}
-
-var runCmpEnd = []discordgo.MessageComponent{
-	discordgo.ActionsRow{
-		Components: []discordgo.MessageComponent{
-			discordgo.Button{
-				Label:    "Stop",
-				Style:    discordgo.DangerButton,
-				CustomID: "stop",
-				Disabled: true,
-			},
-		},
-	},
-}
-
-func (c *ctxWriter) AddBtnHandler() {
-	c.BtnHandler(func(data discordgo.MessageComponentInteractionData, ctx *Ctx) {
-		if ctx.i.Member.User.ID != c.i.Member.User.ID {
-			return
-		}
-		c.prog.Stop("program stopped by user")
-		c.i = ctx.i
-		c.isButton = true
-	})
-}
-
 func (c *ctxWriter) Setup() {
-	c.Followup()
+	emb := sevcord.NewEmbedBuilder("Program Output").Color(3447003).Description("Running...")
+	rsp := sevcord.EmbedResponse(emb)
+	for _, cmp := range c.cmps {
+		rsp.ComponentRow(cmp...)
+	}
+
 	c.data = &strings.Builder{}
-	c.Embed(&discordgo.MessageEmbed{
-		Title:       "Program Output",
-		Color:       3447003, // Blue
-		Description: "Running...",
-	}, c.cmps...)
-	c.AddBtnHandler()
+	c.Respond(rsp)
 	c.lastSent = time.Now()
 }
 
 func (c *ctxWriter) Flush() error {
 	var err error
+	var emb *sevcord.EmbedBuilder
 	if len(c.data.String()) == 0 {
-		err = c.Embed(&discordgo.MessageEmbed{
-			Title:       "Program Successful",
-			Color:       5763719, // Green
-			Description: "⚠️ **WARNING**: No program output!",
-		}, c.cmps...)
+		emb = sevcord.NewEmbedBuilder("Program Successful").Color(5763719).Description("⚠️ **WARNING**: No program output!")
 	} else {
-		err = c.Embed(&discordgo.MessageEmbed{
-			Title:       "Program Output",
-			Color:       5763719, // Green
-			Description: "```" + c.data.String() + "```",
-		}, c.cmps...)
+		emb = sevcord.NewEmbedBuilder("Program Output").Color(5763719).Description("```" + c.data.String() + "```")
 	}
+	rsp := sevcord.EmbedResponse(emb)
+	for _, cmp := range c.cmps {
+		rsp.ComponentRow(cmp...)
+	}
+
+	c.Edit(rsp)
 	c.lastSent = time.Now()
 	return err
 }
@@ -130,36 +93,23 @@ func (c *ctxWriter) Write(b []byte) (int, error) {
 	return n, err
 }
 
-func (c *ctxWriter) Error(err error) error {
+func (c *ctxWriter) Error(err error) {
+	var emb *sevcord.EmbedBuilder
 	if len(c.data.String()) == 0 {
-		return c.Embed(&discordgo.MessageEmbed{
-			Title: "Runtime Error",
-			Color: 15548997, // Red
-			Fields: []*discordgo.MessageEmbedField{
-				{
-					Name:  "Error",
-					Value: "```" + err.Error() + "```",
-				},
-			},
-		}, c.cmps...)
+		emb = sevcord.NewEmbedBuilder("Runtime Error").Color(15548997).Field("Error", "```"+err.Error()+"```", false)
+	} else {
+		emb = sevcord.NewEmbedBuilder("Runtime Error").Color(15548997).Field("Output", "```"+c.data.String()+"```", false).Field("Error", "```"+err.Error()+"```", false)
 	}
-	return c.Embed(&discordgo.MessageEmbed{
-		Title: "Runtime Error",
-		Color: 15548997, // Red
-		Fields: []*discordgo.MessageEmbedField{
-			{
-				Name:  "Output",
-				Value: "```" + c.data.String() + "```",
-			},
-			{
-				Name:  "Error",
-				Value: "```" + err.Error() + "```",
-			},
-		},
-	}, c.cmps...)
+
+	rsp := sevcord.EmbedResponse(emb)
+	for _, cmp := range c.cmps {
+		rsp.ComponentRow(cmp...)
+	}
+
+	c.Edit(rsp)
 }
 
-func (b *Bot) BuildCode(filename string, src string, ctx *Ctx) (*ir.IR, error) {
+func (b *Bot) BuildCode(filename string, src string, ctx sevcord.Ctx) (*ir.IR, error) {
 	stream := tokens.NewStream(filename, src)
 	tok := tokens.NewTokenizer(stream)
 	err := tok.Tokenize()
@@ -190,7 +140,7 @@ func (b *Bot) BuildCode(filename string, src string, ctx *Ctx) (*ir.IR, error) {
 	return bld.IR(), nil
 }
 
-func (b *Bot) CompileCode(filename, src string, ctx *Ctx) (string, error) {
+func (b *Bot) CompileCode(filename, src string, ctx sevcord.Ctx) (string, error) {
 	ir, err := b.BuildCode(filename, src, ctx)
 	if err != nil {
 		return "", err
@@ -201,13 +151,29 @@ func (b *Bot) CompileCode(filename, src string, ctx *Ctx) (string, error) {
 
 const MaxTime = time.Second * 150
 
-func (b *Bot) RunCode(filename string, src string, ctx *Ctx, extensionCtx *extensionCtx) error {
+func (c *ctxWriter) UpdateCmps() {
+	c.cmps = [][]sevcord.Component{{
+		&sevcord.Button{
+			Label: "Stop",
+			Style: sevcord.ButtonStyleDanger,
+			Handler: func(ctx sevcord.Ctx) {
+				if ctx.User().ID != c.User().ID {
+					return
+				}
+				c.prog.Stop("program stopped by user")
+				c.Ctx = ctx
+			},
+		},
+	}}
+}
+
+func (b *Bot) RunCode(filename string, src string, ctx sevcord.Ctx, extensionCtx *extensionCtx) error {
 	ir, err := b.BuildCode(filename, src, ctx)
 	if err != nil {
 		return err
 	}
 	stdout := newCtxWriter(ctx)
-	stdout.cmps = runCmp
+	stdout.UpdateCmps()
 	stdout.Setup()
 	extensionCtx.Stdout = stdout
 	interp := interpreter.NewInterpreter(ir, stdout)
@@ -228,14 +194,18 @@ func (b *Bot) RunCode(filename string, src string, ctx *Ctx, extensionCtx *exten
 	}()
 
 	err = interp.Run()
-	stdout.cmps = runCmpEnd
+	stdout.cmps = [][]sevcord.Component{{
+		&sevcord.Button{
+			Label:    "Stop",
+			Style:    sevcord.ButtonStyleDanger,
+			Disabled: true,
+		},
+	}}
 	done = true
 	flusherr := stdout.Flush()
 	if err != nil {
-		err = stdout.Error(err)
-		if err != nil {
-			return err
-		}
+		stdout.Error(err)
+		return nil
 	}
 	return flusherr
 }

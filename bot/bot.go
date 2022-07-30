@@ -1,62 +1,68 @@
 package bot
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/Nv7-Github/bsharp/bot/db"
-	"github.com/bwmarrin/discordgo"
+	"github.com/Nv7-Github/sevcord"
 )
 
 type Bot struct {
 	*sync.RWMutex
 	*db.DB
 
-	dg     *discordgo.Session // use Ctx.DG whenever possible
-	modals map[string]func(discordgo.ModalSubmitInteractionData, *Ctx)
-	btns   map[string]func(discordgo.MessageComponentInteractionData, *Ctx)
-	appID  string
-
-	debug bool
+	c *sevcord.Client
 }
 
-func NewBot(path string, token string, appID string, guild string) (*Bot, error) {
+func ErrorMessage(ctx sevcord.Ctx, msg string) {
+	ctx.Respond(sevcord.EmbedResponse(sevcord.NewEmbedBuilder("Error").Color(15548997).Description(msg)))
+}
+
+func Error(ctx sevcord.Ctx, err error) bool {
+	if err != nil {
+		ErrorMessage(ctx, err.Error())
+		return true
+	}
+	return false
+}
+
+func (b *Bot) Autocomplete(ctx sevcord.Ctx, val any) []sevcord.Choice {
+	db, err := b.Get(ctx.Guild())
+	if err != nil {
+		return nil
+	}
+	return db.Autocomplete(val.(string))
+}
+
+func NewBot(path string, token string) (*Bot, error) {
 	b := &Bot{
 		RWMutex: &sync.RWMutex{},
-		appID:   appID,
-		modals:  make(map[string]func(discordgo.ModalSubmitInteractionData, *Ctx)),
-		btns:    make(map[string]func(discordgo.MessageComponentInteractionData, *Ctx)),
 	}
 	d, err := db.NewDB(path)
 	if err != nil {
 		return nil, err
 	}
 	b.DB = d
-	err = b.initDG(token, appID, guild)
+	c, err := sevcord.NewClient(token)
 	if err != nil {
 		return nil, err
 	}
+
+	// Commands
+	c.HandleSlashCommand(BuildCmd(b))
+	c.HandleSlashCommand(CreateCmd(b))
+	c.HandleSlashCommand(EditCmd(b))
+	c.HandleSlashCommand(DescriptionCmd(b))
+	c.HandleSlashCommand(ImageCmd(b))
+	c.HandleSlashCommand(InfoCmd(b))
+	c.HandleSlashCommand(SourceCmd(b))
+	c.HandleSlashCommand(RunCmd(b))
+	c.HandleSlashCommand(LbCmd(b))
+	c.Start()
 	return b, nil
 }
 
 func (b *Bot) Close() {
 	b.DB.Close()
-	b.dg.Close()
-}
-
-func (b *Bot) DeleteCmds(guild string) error {
-	cmds, err := b.dg.ApplicationCommands(b.appID, guild)
-	if err != nil {
-		return err
-	}
-	for _, cmd := range cmds {
-		fmt.Printf("Deleting command: %s\n", cmd.Name)
-		err = b.dg.ApplicationCommandDelete(b.appID, guild, cmd.ID)
-		if err != nil {
-			return err
-		}
-	}
-	fmt.Println("Deleted!")
-
-	return nil
+	b.c.Close()
 }
