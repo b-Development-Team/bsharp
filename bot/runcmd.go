@@ -54,7 +54,7 @@ func (b *Bot) RunCodeCmd(ctx sevcord.Ctx, args []any) {
 	ctx.Modal(&sevcord.Modal{
 		Title: "Run Code",
 		Inputs: []sevcord.ModalInput{
-			sevcord.ModalInput{
+			{
 				Label:       "Code to Run",
 				Style:       sevcord.ModalInputStyleParagraph,
 				Placeholder: `[PRINT "Hello, World!"]`,
