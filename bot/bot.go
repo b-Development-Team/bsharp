@@ -56,6 +56,8 @@ func NewBot(path string, token string) (*Bot, error) {
 	c.HandleSlashCommand(ImageCmd(b))
 	c.HandleSlashCommand(InfoCmd(b))
 	c.HandleSlashCommand(SourceCmd(b))
+	c.HandleSlashCommand(RunCmd(b))
+	c.HandleSlashCommand(LbCmd(b))
 	c.Start()
 	return b, nil
 }
