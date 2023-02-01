@@ -1,4 +1,0 @@
-[IMPORT "bpp/funcs/vars.bsp"]
-[IMPORT "bpp/funcs/math.bsp"]
-[IMPORT "bpp/funcs/ops.bsp"]
-[IMPORT "bpp/funcs/blks.bsp"]
