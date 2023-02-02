@@ -1,6 +1,11 @@
 use tokens;
 
 const SOURCE: &'static str = r#"
+"Hello\n \"World\""
+1
+1.3
+'1'
+'\''
 [PRINT "Hello, World!"]
 "#;
 

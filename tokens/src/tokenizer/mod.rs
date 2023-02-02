@@ -21,7 +21,9 @@ impl Tokenizer {
     pub fn tokenize(&mut self) -> Result<(), TokenizeError> {
         while !self.stream.eof() {
             let next = self.next_token()?;
-            self.tokens.push(next);
+            if let Some(tok) = next {
+                self.tokens.push(tok)
+            }
         }
         Ok(())
     }

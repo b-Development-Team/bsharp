@@ -43,8 +43,22 @@ impl Stream {
     pub fn pos(&self) -> Pos {
         Pos {
             file: self.file,
-            line: self.line,
-            col: self.col,
+            start_line: self.line,
+            start_col: self.col,
+            end_line: self.line,
+            end_col: self.col,
+        }
+    }
+}
+
+impl Pos {
+    pub fn extend(&self, new: Pos) -> Pos {
+        Pos {
+            file: self.file,
+            start_line: self.start_line,
+            start_col: self.start_col,
+            end_line: new.start_line,
+            end_col: new.start_col,
         }
     }
 }

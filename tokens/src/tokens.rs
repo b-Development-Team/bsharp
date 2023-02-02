@@ -7,11 +7,23 @@ pub struct Token {
 #[derive(Clone, Copy, Debug)]
 pub struct Pos {
     pub file: usize,
-    pub line: usize,
-    pub col: usize,
+
+    pub start_line: usize,
+    pub start_col: usize,
+
+    pub end_line: usize,
+    pub end_col: usize,
 }
 
 #[derive(Clone, Debug)]
 pub enum TokenData {
     IDENT(String),
+    STRING(String),
+    INTEGER(i64),
+    FLOAT(f64),
+    STMT {
+        func: String,
+        func_pos: Pos,
+        params: Vec<Token>,
+    },
 }
