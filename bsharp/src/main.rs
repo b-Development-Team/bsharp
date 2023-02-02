@@ -5,7 +5,7 @@ const SOURCE: &'static str = r#"
 "#;
 
 fn main() {
-    let mut tok = tokens::Tokenizer::new(SOURCE.to_string());
+    let mut tok = tokens::Tokenizer::new(SOURCE.to_string(), 0);
     tok.tokenize().unwrap();
     println!("{:?}", tok.tokens);
 }

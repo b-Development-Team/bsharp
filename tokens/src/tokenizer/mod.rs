@@ -10,9 +10,9 @@ pub struct Tokenizer {
 }
 
 impl Tokenizer {
-    pub fn new(source: String) -> Tokenizer {
+    pub fn new(source: String, file: usize) -> Tokenizer {
         Tokenizer {
-            stream: Stream::new(source),
+            stream: Stream::new(source, file),
             tokens: Vec::new(),
             index: 0,
         }
@@ -20,7 +20,7 @@ impl Tokenizer {
 
     pub fn tokenize(&mut self) -> Result<(), TokenizeError> {
         while !self.stream.eof() {
-            let next = self.next_token();
+            let next = self.next_token()?;
             self.tokens.push(next);
         }
         Ok(())
