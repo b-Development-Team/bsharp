@@ -1,11 +1,11 @@
-use std::mem::Discriminant;
 use super::*;
+use std::mem::Discriminant;
 
 #[derive(Debug)]
 pub enum TokenizeError {
-  UnexpectedToken{
-    got: Token,
-    expected: Discriminant<TokenData>,
-  },
-  EOF,
+    UnexpectedToken {
+        got: Token,
+        expected: Discriminant<TokenData>,
+    },
+    EOF,
 }
