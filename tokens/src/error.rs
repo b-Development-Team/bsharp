@@ -8,5 +8,8 @@ pub enum TokenizeError {
         expected: Discriminant<TokenData>,
     },
     UnexpectedChar(char, Pos),
+    InvalidEscapeCode(char, Pos),
+    InvalidInt(String, Pos),
+    InvalidFloat(String, Pos),
     EOF,
 }

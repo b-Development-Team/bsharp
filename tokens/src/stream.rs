@@ -31,7 +31,11 @@ impl Stream {
             if v == '\n' {
                 self.line += 1;
                 self.col = 0;
+            } else {
+                self.col += 1;
             }
+        } else {
+            self.col += 1;
         }
         next
     }
@@ -45,6 +49,17 @@ impl Stream {
             file: self.file,
             start_line: self.line,
             start_col: self.col,
+            end_line: self.line,
+            end_col: self.col,
+        }
+    }
+
+    pub fn last_char(&self) -> Pos {
+        println!("{:?}", self.pos());
+        Pos {
+            file: self.file,
+            start_line: self.line,
+            start_col: self.col - 1,
             end_line: self.line,
             end_col: self.col,
         }
