@@ -6,7 +6,13 @@ const SOURCE: &'static str = r#"
 1.3
 '1'
 '\''
+IDENT
+# Block comment
+# Small comment #
 [PRINT "Hello, World!"]
+
+# Block
+[[PRINT "Hello, World!"] [PRINT "World"]]
 "#;
 
 fn main() {

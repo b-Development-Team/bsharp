@@ -11,8 +11,59 @@ impl super::Tokenizer {
                     Ok(Some(self.parse_num(c)?))
                 }
                 '\'' => Ok(Some(self.parse_char()?)),
+                'A' ..= 'Z' | 'a' ..= 'z' | '_' => Ok(Some(self.parse_ident(c)?)),
+                '[' => Ok(Some(Token{
+                    data: TokenData::OPENBRACK,
+                    pos: self.stream.last_char(),
+                })),
+                ']' => Ok(Some(Token{
+                    data: TokenData::CLOSEBRACK,
+                    pos: self.stream.last_char(),
+                })),
+                '#' => Ok(Some(self.parse_comment()?)),
                 _ => Err(TokenizeError::UnexpectedChar(c, self.stream.pos())),
             },
+        }
+    }
+
+    fn parse_comment(&mut self) -> Result<Token, TokenizeError> {
+        let mut val = String::new();
+        let pos = self.stream.last_char();
+        loop {
+            let next = self.stream.peek();
+            match next {
+                None => return Err(TokenizeError::EOF),
+                Some('\n') | Some('#') => {
+                    self.stream.eat();
+                    return Ok(Token {
+                        data: TokenData::COMMENT(val),
+                        pos: pos.extend(self.stream.pos()),
+                    });
+                },
+                Some(_) => {
+                    val.push(self.stream.eat().unwrap());
+                }
+            }
+        }
+    }
+
+    fn parse_ident(&mut self, start: char) -> Result<Token, TokenizeError> {
+        let mut val = start.to_string();
+        let post = self.stream.last_char();
+        loop {
+            let next = self.stream.peek();
+            match next {
+                None => return Err(TokenizeError::EOF),
+                Some('A' ..= 'Z') | Some('a' ..= 'z') | Some('0' ..= '9') | Some('_') => {
+                    val.push(self.stream.eat().unwrap())
+                },
+                Some(_) => {
+                    return Ok(Token {
+                        data: TokenData::IDENT(val),
+                        pos: post.extend(self.stream.pos()),
+                    });
+                }
+            }
         }
     }
 

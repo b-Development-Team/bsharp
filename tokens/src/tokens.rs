@@ -27,4 +27,7 @@ pub enum TokenData {
         params: Vec<Token>,
     },
     CHAR(char),
+    OPENBRACK,
+    CLOSEBRACK,
+    COMMENT(String),
 }
