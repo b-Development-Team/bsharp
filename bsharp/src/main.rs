@@ -1,18 +1,13 @@
 use tokens;
 
 const SOURCE: &'static str = r#"
-"Hello\n \"World\""
-1
-1.3
-'1'
-'\''
-IDENT
 # Block comment
 # Small comment #
 [PRINT "Hello, World!"]
 
 # Block
 [[PRINT "Hello, World!"] [PRINT "World"]]
+[+ 1 [- 2 1] [% 1 2]]
 "#;
 
 fn main() {

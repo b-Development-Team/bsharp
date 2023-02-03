@@ -11,7 +11,7 @@ impl super::Tokenizer {
                     Ok(Some(self.parse_num(c)?))
                 }
                 '\'' => Ok(Some(self.parse_char()?)),
-                'A' ..= 'Z' | 'a' ..= 'z' | '_' => Ok(Some(self.parse_ident(c)?)),
+                'A' ..= 'Z' | 'a' ..= 'z' | '_' | '+' | '*' | '/' | '%' => Ok(Some(self.parse_ident(c)?)),
                 '[' => Ok(Some(Token{
                     data: TokenData::OPENBRACK,
                     pos: self.stream.last_char(),
@@ -146,6 +146,13 @@ impl super::Tokenizer {
                         val.push(self.stream.eat().unwrap());
                     }
                     _ => {
+                        if val == "-" { // - by itself is an IDENT
+                            return Ok(Token {
+                                data: TokenData::IDENT(val),
+                                pos,
+                            });
+                        }
+
                         pos = pos.extend(self.stream.pos());
                         let dat = if int {
                             let res = val.parse::<i64>();
