@@ -26,4 +26,5 @@ pub enum TokenData {
         func_pos: Pos,
         params: Vec<Token>,
     },
+    CHAR(char),
 }

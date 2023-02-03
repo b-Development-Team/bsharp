@@ -10,9 +10,37 @@ impl super::Tokenizer {
                 '-' | '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' => {
                     Ok(Some(self.parse_num(c)?))
                 }
+                '\'' => Ok(Some(self.parse_char()?)),
                 _ => Err(TokenizeError::UnexpectedChar(c, self.stream.pos())),
             },
         }
+    }
+
+    fn parse_char(&mut self) -> Result<Token, TokenizeError> {
+        let pos = self.stream.last_char();
+        let val = match self.stream.eat() {
+            None => return Err(TokenizeError::EOF),
+            Some('\\') => match self.stream.eat() {
+                None => return Err(TokenizeError::EOF),
+                Some('n') => '\n',
+                Some('t') => '\t',
+                Some('\'') => '\'',
+                Some('\\') => '\\',
+                Some(v) => {
+                    return Err(TokenizeError::InvalidEscapeCode(v, self.stream.last_char()))
+                }
+            },
+            Some(v) => v,
+        };
+        match self.stream.eat() {
+            Some('\'') => {}
+            Some(v) => return Err(TokenizeError::UnexpectedChar(v, self.stream.last_char())),
+            None => return Err(TokenizeError::EOF),
+        }
+        return Ok(Token {
+            data: TokenData::CHAR(val),
+            pos: pos.extend(self.stream.pos()),
+        });
     }
 
     fn parse_string(&mut self) -> Result<Token, TokenizeError> {

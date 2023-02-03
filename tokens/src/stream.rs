@@ -55,7 +55,6 @@ impl Stream {
     }
 
     pub fn last_char(&self) -> Pos {
-        println!("{:?}", self.pos());
         Pos {
             file: self.file,
             start_line: self.line,
