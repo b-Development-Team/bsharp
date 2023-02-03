@@ -6,6 +6,8 @@ const SOURCE: &'static str = r#"
 [PRINT "Hello, World!"]
 [+ 1 [- 2 1] [% 1 2]]
 
+[TYPE $STRING [ARRAY [CHAR]]]
+
 # Block
 [[PRINT "Hello, World!"] [PRINT "World"]]
 "#;
@@ -16,5 +18,5 @@ fn main() {
         .add_file_source("main.bsp".to_string(), SOURCE.to_string())
         .unwrap();
     let f = fset.get_file(ind).unwrap();
-    println!("{:#?}",f.ast.ast);
+    println!("{:#?}", f.ast.ast);
 }

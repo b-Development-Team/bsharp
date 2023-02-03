@@ -43,6 +43,23 @@ impl super::Parser {
                     pos: tok.pos,
                 })
             }
+            TokenData::TYPE(v) => {
+                self.tok.eat().unwrap();
+                Ok(Node {
+                    data: NodeData::Type(v),
+                    pos: tok.pos,
+                })
+            }
+            TokenData::IDENT(v) => match v.as_str() {
+                "TRUE" | "FALSE" => {
+                    self.tok.eat().unwrap();
+                    Ok(Node {
+                        data: NodeData::Bool(v == "TRUE"),
+                        pos: tok.pos,
+                    })
+                }
+                _ => Err(ParseError::UnexpectedToken(self.tok.eat().unwrap())),
+            },
             TokenData::CHAR(v) => {
                 self.tok.eat().unwrap();
                 Ok(Node {

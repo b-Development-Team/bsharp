@@ -19,6 +19,7 @@ pub struct Pos {
 pub enum TokenData {
     IDENT(String),
     STRING(String),
+    TYPE(String),
     INTEGER(i64),
     FLOAT(f64),
     CHAR(char),

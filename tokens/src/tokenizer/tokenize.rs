@@ -11,16 +11,19 @@ impl super::Tokenizer {
                     Ok(Some(self.parse_num(c)?))
                 }
                 '\'' => Ok(Some(self.parse_char()?)),
-                'A' ..= 'Z' | 'a' ..= 'z' | '_' | '+' | '*' | '/' | '%' => Ok(Some(self.parse_ident(c)?)),
-                '[' => Ok(Some(Token{
+                'A'..='Z' | 'a'..='z' | '_' | '+' | '*' | '/' | '%' => {
+                    Ok(Some(self.parse_ident(c)?))
+                }
+                '[' => Ok(Some(Token {
                     data: TokenData::OPENBRACK,
                     pos: self.stream.last_char(),
                 })),
-                ']' => Ok(Some(Token{
+                ']' => Ok(Some(Token {
                     data: TokenData::CLOSEBRACK,
                     pos: self.stream.last_char(),
                 })),
                 '#' => Ok(Some(self.parse_comment()?)),
+                '$' => Ok(Some(self.parse_type()?)),
                 _ => Err(TokenizeError::UnexpectedChar(c, self.stream.pos())),
             },
         }
@@ -39,7 +42,7 @@ impl super::Tokenizer {
                         data: TokenData::COMMENT(val),
                         pos: pos.extend(self.stream.pos()),
                     });
-                },
+                }
                 Some(_) => {
                     val.push(self.stream.eat().unwrap());
                 }
@@ -47,20 +50,38 @@ impl super::Tokenizer {
         }
     }
 
-    fn parse_ident(&mut self, start: char) -> Result<Token, TokenizeError> {
-        let mut val = start.to_string();
-        let post = self.stream.last_char();
+    fn parse_type(&mut self) -> Result<Token, TokenizeError> {
+        let pos = self.stream.last_char();
+        let mut val = String::new();
         loop {
             let next = self.stream.peek();
             match next {
                 None => return Err(TokenizeError::EOF),
-                Some('A' ..= 'Z') | Some('a' ..= 'z') | Some('0' ..= '9') | Some('_') => {
+                Some('A'..='Z') | Some('_') => val.push(self.stream.eat().unwrap()),
+                Some(_) => {
+                    return Ok(Token {
+                        data: TokenData::TYPE(val),
+                        pos: pos.extend(self.stream.pos()),
+                    });
+                }
+            }
+        }
+    }
+
+    fn parse_ident(&mut self, start: char) -> Result<Token, TokenizeError> {
+        let mut val = start.to_string();
+        let pos = self.stream.last_char();
+        loop {
+            let next = self.stream.peek();
+            match next {
+                None => return Err(TokenizeError::EOF),
+                Some('A'..='Z') | Some('a'..='z') | Some('0'..='9') | Some('_') => {
                     val.push(self.stream.eat().unwrap())
-                },
+                }
                 Some(_) => {
                     return Ok(Token {
                         data: TokenData::IDENT(val),
-                        pos: post.extend(self.stream.pos()),
+                        pos: pos.extend(self.stream.pos()),
                     });
                 }
             }
@@ -146,7 +167,8 @@ impl super::Tokenizer {
                         val.push(self.stream.eat().unwrap());
                     }
                     _ => {
-                        if val == "-" { // - by itself is an IDENT
+                        if val == "-" {
+                            // - by itself is an IDENT
                             return Ok(Token {
                                 data: TokenData::IDENT(val),
                                 pos,

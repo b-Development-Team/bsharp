@@ -14,6 +14,7 @@ pub enum NodeData {
     Char(char),
     Bool(bool),
     Comment(String),
+    Type(String),
     Stmt {
         name: String,
         name_pos: Pos,
