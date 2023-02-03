@@ -1,9 +1,10 @@
 use tokens::{Pos, Token, TokenData, TokenizeError, Tokenizer};
 mod ast;
-use ast::*;
 mod error;
 mod parse;
-use error::ParseError;
+
+pub use ast::*;
+pub use error::ParseError;
 
 pub struct Parser {
     tok: Tokenizer,

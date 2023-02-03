@@ -1,5 +1,4 @@
-use parser;
-use tokens;
+use fset::FSet;
 
 const SOURCE: &'static str = r#"
 # Block comment
@@ -12,9 +11,10 @@ const SOURCE: &'static str = r#"
 "#;
 
 fn main() {
-    let mut tok = tokens::Tokenizer::new(SOURCE.to_string(), 0);
-    tok.tokenize().unwrap();
-    let mut p = parser::Parser::new(tok);
-    p.parse().unwrap();
-    println!("{:#?}", p.ast);
+    let mut fset = FSet::new();
+    let ind = fset
+        .add_file_source("main.bsp".to_string(), SOURCE.to_string())
+        .unwrap();
+    let f = fset.get_file(ind).unwrap();
+    println!("{:#?}",f.ast.ast);
 }
