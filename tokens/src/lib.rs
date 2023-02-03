@@ -1,8 +1,10 @@
 mod stream;
 use stream::Stream;
-mod tokens;
-use tokens::*;
+
 mod error;
 mod tokenizer;
-use error::TokenizeError;
+mod tokens;
+
+pub use error::TokenizeError;
 pub use tokenizer::Tokenizer;
+pub use tokens::*;

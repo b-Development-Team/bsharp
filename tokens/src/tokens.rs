@@ -15,17 +15,12 @@ pub struct Pos {
     pub end_col: usize,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum TokenData {
     IDENT(String),
     STRING(String),
     INTEGER(i64),
     FLOAT(f64),
-    STMT {
-        func: String,
-        func_pos: Pos,
-        params: Vec<Token>,
-    },
     CHAR(char),
     OPENBRACK,
     CLOSEBRACK,

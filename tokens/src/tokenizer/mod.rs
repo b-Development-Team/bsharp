@@ -4,7 +4,7 @@ use super::*;
 mod tokenize;
 
 pub struct Tokenizer {
-    pub tokens: Vec<Token>,
+    tokens: Vec<Token>,
     stream: Stream,
     index: usize,
 }
@@ -38,12 +38,20 @@ impl Tokenizer {
         }
     }
 
-    fn next(&mut self) -> Option<Token> {
-        self.tokens.get(self.index).cloned()
+    pub fn peek(&self) -> Result<Token, TokenizeError> {
+        if let Some(v) = self.tokens.get(self.index) {
+            Ok(v.clone())
+        } else {
+            Err(TokenizeError::EOF)
+        }
+    }
+
+    pub fn has_next(&mut self) -> bool {
+        self.tokens.get(self.index).is_some()
     }
 
     pub fn expect(&mut self, kind: Discriminant<TokenData>) -> Result<Token, TokenizeError> {
-        if let Some(next) = self.next() {
+        if let Ok(next) = self.peek() {
             if std::mem::discriminant(&next.data) == kind {
                 self.index += 1;
                 Ok(next)
