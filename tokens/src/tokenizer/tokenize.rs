@@ -23,7 +23,27 @@ impl super::Tokenizer {
                     pos: self.stream.last_char(),
                 })),
                 '#' => Ok(Some(self.parse_comment()?)),
-                '$' => Ok(Some(self.parse_type()?)),
+                '$' => {
+                    let v = self.parse_next_ident('$')?;
+                    Ok(Some(Token {
+                        data: TokenData::TYPE(v.0),
+                        pos: v.1,
+                    }))
+                }
+                '@' => {
+                    let v = self.parse_next_ident('@')?;
+                    Ok(Some(Token {
+                        data: TokenData::FUNCTION(v.0),
+                        pos: v.1,
+                    }))
+                }
+                '!' => {
+                    let v = self.parse_next_ident('!')?;
+                    Ok(Some(Token {
+                        data: TokenData::VARIABLE(v.0),
+                        pos: v.1,
+                    }))
+                }
                 _ => Err(TokenizeError::UnexpectedChar(c, self.stream.pos())),
             },
         }
@@ -50,19 +70,18 @@ impl super::Tokenizer {
         }
     }
 
-    fn parse_type(&mut self) -> Result<Token, TokenizeError> {
+    fn parse_next_ident(&mut self, start: char) -> Result<(String, Pos), TokenizeError> {
         let pos = self.stream.last_char();
-        let mut val = String::new();
+        let mut val = start.to_string();
         loop {
             let next = self.stream.peek();
             match next {
                 None => return Err(TokenizeError::EOF),
-                Some('A'..='Z') | Some('_') => val.push(self.stream.eat().unwrap()),
+                Some('a'..='z') | Some('A'..='Z') | Some('_') => {
+                    val.push(self.stream.eat().unwrap())
+                }
                 Some(_) => {
-                    return Ok(Token {
-                        data: TokenData::TYPE(val),
-                        pos: pos.extend(self.stream.pos()),
-                    });
+                    return Ok((val, pos.extend(self.stream.pos())));
                 }
             }
         }

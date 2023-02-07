@@ -20,6 +20,8 @@ pub enum TokenData {
     IDENT(String),
     STRING(String),
     TYPE(String),
+    FUNCTION(String),
+    VARIABLE(String),
     INTEGER(i64),
     FLOAT(f64),
     CHAR(char),

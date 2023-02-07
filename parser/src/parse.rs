@@ -50,6 +50,20 @@ impl super::Parser {
                     pos: tok.pos,
                 })
             }
+            TokenData::VARIABLE(v) => {
+                self.tok.eat().unwrap();
+                Ok(Node {
+                    data: NodeData::Variable(v),
+                    pos: tok.pos,
+                })
+            }
+            TokenData::FUNCTION(v) => {
+                self.tok.eat().unwrap();
+                Ok(Node {
+                    data: NodeData::Function(v),
+                    pos: tok.pos,
+                })
+            }
             TokenData::IDENT(v) => match v.as_str() {
                 "TRUE" | "FALSE" => {
                     self.tok.eat().unwrap();

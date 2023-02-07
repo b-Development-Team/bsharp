@@ -10,6 +10,13 @@ const SOURCE: &'static str = r#"
 
 # Block
 [[PRINT "Hello, World!"] [PRINT "World"]]
+
+[DEFINE !a "Hello"]
+[PRINT !a]
+
+[FUNC @hello [
+    [PRINT "Hello, World!"]
+]]
 "#;
 
 fn main() {
