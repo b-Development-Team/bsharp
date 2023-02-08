@@ -11,6 +11,7 @@ pub enum Type {
     INTERFACE(Vec<Type>),
 
     INVALID,
+    TYPE,
 }
 
 pub struct Field {
