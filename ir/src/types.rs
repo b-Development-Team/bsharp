@@ -1,17 +1,41 @@
-pub enum Type {
+pub struct Type {
+    pub data: TypeData,
+    pub name: Option<String>,
+}
+
+pub enum TypeData {
     INT,
     FLOAT,
     CHAR,
     BOOL,
     BOX,
     ARRAY(Box<Type>),
-    STRUCT(Vec<Field>),
-    TUPLE(Vec<Type>),
-    ENUM(Vec<Type>),
-    INTERFACE(Vec<Type>),
+    STRUCT {
+        params: Vec<Generic>,
+        fields: Vec<Field>,
+    },
+    TUPLE {
+        params: Vec<Generic>,
+        body: Vec<Type>,
+    },
+    ENUM {
+        params: Vec<Generic>,
+        body: Vec<Type>,
+    },
+    INTERFACE {
+        params: Vec<Generic>,
+        body: Vec<Type>,
+    },
 
+    // Special types
     INVALID,
     TYPE,
+    VOID,
+}
+
+pub struct Generic {
+    pub name: String,
+    pub typ: Type, // INTERFACE
 }
 
 pub struct Field {

@@ -1,6 +1,8 @@
 use tokens::Tokenizer;
 mod error;
 use error::FSetError;
+pub use parser::*;
+pub use tokens::*;
 
 pub struct File {
     pub name: String,
