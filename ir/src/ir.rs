@@ -1,10 +1,18 @@
 use super::*;
 
+#[derive(Debug)]
 pub struct IRNode {
     pub data: IRNodeData,
     pub pos: Pos,
 }
 
+impl IRNode {
+    pub fn new(data: IRNodeData, pos: Pos) -> Self {
+        Self { data, pos }
+    }
+}
+
+#[derive(Debug)]
 pub enum IRNodeData {
     Block {
         scope: usize,
@@ -46,6 +54,7 @@ pub enum IRNodeData {
         els: Box<IRNode>,
         ret_typ: Type,
     },
+    Void,
 
     // Composite type ops
     Len(Box<IRNode>),
@@ -104,6 +113,7 @@ pub enum IRNodeData {
     Cast(Box<IRNode>, Type),
 }
 
+#[derive(Debug)]
 pub enum MathOperator {
     ADD,
     SUBTRACT,
@@ -112,6 +122,7 @@ pub enum MathOperator {
     MODULO,
 }
 
+#[derive(Debug)]
 pub enum ComparisonOperator {
     GREATER,
     LESS,
@@ -119,6 +130,7 @@ pub enum ComparisonOperator {
     LESSEQUAL,
 }
 
+#[derive(Debug)]
 pub enum BooleanOperator {
     AND,
     OR,

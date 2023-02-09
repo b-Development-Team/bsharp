@@ -1,13 +1,13 @@
 use super::*;
 
-#[derive(Debug)]
-pub struct Node {
-    pub data: NodeData,
+#[derive(Debug, Clone)]
+pub struct ASTNode {
+    pub data: ASTNodeData,
     pub pos: Pos,
 }
 
-#[derive(Debug)]
-pub enum NodeData {
+#[derive(Debug, Clone)]
+pub enum ASTNodeData {
     String(String),
     Integer(i64),
     Float(f64),
@@ -20,7 +20,7 @@ pub enum NodeData {
     Stmt {
         name: String,
         name_pos: Pos,
-        args: Vec<Node>,
+        args: Vec<ASTNode>,
     },
-    Block(Vec<Node>),
+    Block(Vec<ASTNode>),
 }

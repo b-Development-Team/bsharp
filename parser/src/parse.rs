@@ -11,64 +11,64 @@ impl super::Parser {
         Ok(())
     }
 
-    fn parse_node(&mut self) -> Result<Node, ParseError> {
+    fn parse_node(&mut self) -> Result<ASTNode, ParseError> {
         let tok = self.tok.peek().unwrap();
         match tok.data {
             TokenData::COMMENT(v) => {
                 self.tok.eat().unwrap();
-                Ok(Node {
-                    data: NodeData::Comment(v),
+                Ok(ASTNode {
+                    data: ASTNodeData::Comment(v),
                     pos: tok.pos,
                 })
             }
             TokenData::OPENBRACK => self.parse_stmt(),
             TokenData::STRING(v) => {
                 self.tok.eat().unwrap();
-                Ok(Node {
-                    data: NodeData::String(v),
+                Ok(ASTNode {
+                    data: ASTNodeData::String(v),
                     pos: tok.pos,
                 })
             }
             TokenData::INTEGER(v) => {
                 self.tok.eat().unwrap();
-                Ok(Node {
-                    data: NodeData::Integer(v),
+                Ok(ASTNode {
+                    data: ASTNodeData::Integer(v),
                     pos: tok.pos,
                 })
             }
             TokenData::FLOAT(v) => {
                 self.tok.eat().unwrap();
-                Ok(Node {
-                    data: NodeData::Float(v),
+                Ok(ASTNode {
+                    data: ASTNodeData::Float(v),
                     pos: tok.pos,
                 })
             }
             TokenData::TYPE(v) => {
                 self.tok.eat().unwrap();
-                Ok(Node {
-                    data: NodeData::Type(v),
+                Ok(ASTNode {
+                    data: ASTNodeData::Type(v),
                     pos: tok.pos,
                 })
             }
             TokenData::VARIABLE(v) => {
                 self.tok.eat().unwrap();
-                Ok(Node {
-                    data: NodeData::Variable(v),
+                Ok(ASTNode {
+                    data: ASTNodeData::Variable(v),
                     pos: tok.pos,
                 })
             }
             TokenData::FUNCTION(v) => {
                 self.tok.eat().unwrap();
-                Ok(Node {
-                    data: NodeData::Function(v),
+                Ok(ASTNode {
+                    data: ASTNodeData::Function(v),
                     pos: tok.pos,
                 })
             }
             TokenData::IDENT(v) => match v.as_str() {
                 "TRUE" | "FALSE" => {
                     self.tok.eat().unwrap();
-                    Ok(Node {
-                        data: NodeData::Bool(v == "TRUE"),
+                    Ok(ASTNode {
+                        data: ASTNodeData::Bool(v == "TRUE"),
                         pos: tok.pos,
                     })
                 }
@@ -76,8 +76,8 @@ impl super::Parser {
             },
             TokenData::CHAR(v) => {
                 self.tok.eat().unwrap();
-                Ok(Node {
-                    data: NodeData::Char(v),
+                Ok(ASTNode {
+                    data: ASTNodeData::Char(v),
                     pos: tok.pos,
                 })
             }
@@ -85,7 +85,7 @@ impl super::Parser {
         }
     }
 
-    fn parse_stmt(&mut self) -> Result<Node, ParseError> {
+    fn parse_stmt(&mut self) -> Result<ASTNode, ParseError> {
         let mut pos = self.tok.eat().unwrap().pos; // Get [
 
         let name = match self
@@ -101,8 +101,8 @@ impl super::Parser {
                     nodes.push(n);
                 }
                 pos.extend(self.tok.eat().unwrap().pos); // Eat ]
-                return Ok(Node {
-                    data: NodeData::Block(nodes),
+                return Ok(ASTNode {
+                    data: ASTNodeData::Block(nodes),
                     pos,
                 });
             }
@@ -115,8 +115,8 @@ impl super::Parser {
         }
 
         pos = pos.extend(self.tok.eat()?.pos); // Eat ]
-        Ok(Node {
-            data: NodeData::Stmt {
+        Ok(ASTNode {
+            data: ASTNodeData::Stmt {
                 name: match name.data {
                     TokenData::IDENT(v) => v,
                     _ => unreachable!(),

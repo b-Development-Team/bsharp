@@ -1,8 +1,10 @@
+#[derive(Debug)]
 pub struct Type {
     pub data: TypeData,
     pub name: Option<String>,
 }
 
+#[derive(Debug)]
 pub enum TypeData {
     INT,
     FLOAT,
@@ -33,11 +35,13 @@ pub enum TypeData {
     VOID,
 }
 
+#[derive(Debug)]
 pub struct Generic {
     pub name: String,
     pub typ: Type, // INTERFACE
 }
 
+#[derive(Debug)]
 pub struct Field {
     pub name: String,
     pub typ: Type,
