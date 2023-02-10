@@ -13,5 +13,5 @@ keywords = ["language", "compiler"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tokens = { path = "../tokens", package = "bsharp_tokens" }
-parser = { path = "../parser", package = "bsharp_parser" }
+tokens = { path = "../tokens", package = "bsharp_tokens", version = "0.1.0" }
+parser = { path = "../parser", package = "bsharp_parser", version = "0.1.0" }
