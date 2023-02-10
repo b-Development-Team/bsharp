@@ -11,5 +11,5 @@ keywords = ["language", "compiler"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-fset = { path = "../fset" }
-ir = { path = "../ir" }
+fset = { path = "../fset", package = "bsharp_fset" }
+ir = { path = "../ir", package = "bsharp_ir" }
