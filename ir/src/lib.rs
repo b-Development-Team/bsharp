@@ -10,6 +10,9 @@ pub use ir::*;
 mod errors;
 mod stmts;
 use errors::*;
+mod defpass;
+mod typecheck;
+use typecheck::*;
 
 pub struct IR {
     pub scopes: Vec<Scope>,
@@ -42,17 +45,5 @@ impl IR {
             stack: vec![0],
             funcs: Vec::new(),
         }
-    }
-
-    pub fn build_file(&mut self, pos: usize) -> Result<(), IRError> {
-        let ast = self.fset.get_file(pos).unwrap().ast.ast.clone(); // TODO: Don't have to clone
-        for node in ast.iter() {
-            let n = self.build_node(node)?;
-            match n.data {
-                IRNodeData::Void => {}
-                _ => return Err(IRError::InvalidGlobalDef(n)),
-            }
-        }
-        Ok(())
     }
 }

@@ -4,6 +4,15 @@ pub struct Type {
     pub name: Option<String>,
 }
 
+impl Type {
+    pub fn void() -> Self {
+        Self {
+            data: TypeData::VOID,
+            name: None,
+        }
+    }
+}
+
 #[derive(Debug)]
 pub enum TypeData {
     INT,

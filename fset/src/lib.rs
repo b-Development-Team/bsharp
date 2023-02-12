@@ -1,6 +1,6 @@
 use tokens::Tokenizer;
 mod error;
-use error::FSetError;
+pub use error::FSetError;
 pub use parser::*;
 pub use tokens::*;
 
@@ -10,7 +10,7 @@ pub struct File {
 }
 
 pub struct FSet {
-    files: Vec<File>,
+    pub files: Vec<File>,
 }
 
 impl FSet {
@@ -18,7 +18,7 @@ impl FSet {
         FSet { files: Vec::new() }
     }
 
-    pub fn add_file_source(&mut self, name: String, source: String) -> Result<usize, FSetError> {
+    pub fn add_file_source(&mut self, name: String, source: String) -> Result<(), FSetError> {
         let ind = self.files.len();
         let mut tok = Tokenizer::new(source, ind);
         tok.tokenize()?;
@@ -28,10 +28,10 @@ impl FSet {
 
         self.files.push(File { name, ast: p });
 
-        Ok(ind)
+        Ok(())
     }
 
-    pub fn get_file(&self, ind: usize) -> Option<&File> {
-        self.files.get(ind)
+    pub fn import(&mut self, dir: &String) -> Result<(), FSetError> {
+        panic!("unimplemented")
     }
 }

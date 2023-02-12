@@ -7,6 +7,15 @@ pub struct IRNode {
 }
 
 impl IRNode {
+    pub fn void() -> Self {
+        Self {
+            data: IRNodeData::Void,
+            pos: Pos::default(),
+        }
+    }
+}
+
+impl IRNode {
     pub fn new(data: IRNodeData, pos: Pos) -> Self {
         Self { data, pos }
     }

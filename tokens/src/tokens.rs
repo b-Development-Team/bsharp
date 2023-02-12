@@ -4,7 +4,7 @@ pub struct Token {
     pub pos: Pos,
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Default)]
 pub struct Pos {
     pub file: usize,
 

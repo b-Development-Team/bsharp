@@ -1,3 +1,5 @@
+use std::mem::Discriminant;
+
 use super::*;
 
 #[derive(Debug, Clone)]
@@ -23,4 +25,37 @@ pub enum ASTNodeData {
         args: Vec<ASTNode>,
     },
     Block(Vec<ASTNode>),
+}
+
+impl ASTNodeData {
+    pub fn typ(&self) -> ASTNodeDataType {
+        match self {
+            Self::String(_) => ASTNodeDataType::String,
+            Self::Integer(_) => ASTNodeDataType::Integer,
+            Self::Float(_) => ASTNodeDataType::Float,
+            Self::Char(_) => ASTNodeDataType::Char,
+            Self::Bool(_) => ASTNodeDataType::Bool,
+            Self::Comment(_) => ASTNodeDataType::Comment,
+            Self::Type(_) => ASTNodeDataType::Type,
+            Self::Function(_) => ASTNodeDataType::Function,
+            Self::Variable(_) => ASTNodeDataType::Variable,
+            Self::Stmt { .. } => ASTNodeDataType::Stmt,
+            Self::Block(_) => ASTNodeDataType::Block,
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub enum ASTNodeDataType {
+    String,
+    Integer,
+    Float,
+    Char,
+    Bool,
+    Comment,
+    Type,
+    Function,
+    Variable,
+    Stmt,
+    Block,
 }
