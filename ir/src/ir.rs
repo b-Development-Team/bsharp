@@ -7,17 +7,61 @@ pub struct IRNode {
 }
 
 impl IRNode {
+    pub fn new(data: IRNodeData, pos: Pos) -> Self {
+        Self { data, pos }
+    }
+
     pub fn void() -> Self {
         Self {
             data: IRNodeData::Void,
             pos: Pos::default(),
         }
     }
-}
 
-impl IRNode {
-    pub fn new(data: IRNodeData, pos: Pos) -> Self {
-        Self { data, pos }
+    pub fn typ(&self) -> Type {
+        match &self.data {
+            IRNodeData::Math(v, _, _) => v.typ(),
+            IRNodeData::Comparison(_, _, _)
+            | IRNodeData::Boolean(_, _, _)
+            | IRNodeData::Peek { .. } => Type::from(TypeData::BOOL),
+            IRNodeData::Block { .. }
+            | IRNodeData::Define { .. }
+            | IRNodeData::Print(_)
+            | IRNodeData::Import(_)
+            | IRNodeData::While { .. }
+            | IRNodeData::TypeCase { .. }
+            | IRNodeData::Case { .. }
+            | IRNodeData::TypeMatch { .. }
+            | IRNodeData::Match { .. }
+            | IRNodeData::If { .. }
+            | IRNodeData::Void
+            | IRNodeData::Append { .. }
+            | IRNodeData::StructOp { .. }
+            | IRNodeData::SetStruct { .. } => Type::void(),
+            IRNodeData::Len(_) => Type::from(TypeData::INT),
+            IRNodeData::GetEnum { typ, .. } => typ.clone(),
+            IRNodeData::GetStruct { strct, field } => {
+                if let TypeData::STRUCT { fields, .. } = &strct.typ().data {
+                    for f in fields {
+                        if f.name == *field {
+                            return f.typ.clone();
+                        }
+                    }
+                }
+                unreachable!()
+            }
+            IRNodeData::Unbox { typ, .. } => typ.clone(),
+            IRNodeData::NewArray(typ, _) => Type::from(TypeData::ARRAY(Box::new(typ.clone()))),
+            IRNodeData::NewEnum(_, enm) => enm.clone(),
+            IRNodeData::NewBox(_) => Type::from(TypeData::BOX),
+            IRNodeData::NewStruct(typ, _) => typ.clone(),
+            IRNodeData::Param { .. }
+            | IRNodeData::Returns(_)
+            | IRNodeData::Type(_)
+            | IRNodeData::Generic { .. }
+            | IRNodeData::TypeInstantiate { .. } => Type::from(TypeData::TYPE),
+            IRNodeData::Cast(_, typ) => typ.clone(),
+        }
     }
 }
 
@@ -98,7 +142,7 @@ pub enum IRNodeData {
 
     // Allocating
     NewArray(Type, Option<usize>), // optional: capacity
-    NewEnum(Box<IRNode>),
+    NewEnum(Box<IRNode>, Type),
     NewBox(Box<IRNode>),          // [BOX]
     NewStruct(Type, Vec<IRNode>), // [:] statements
 

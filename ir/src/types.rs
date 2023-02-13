@@ -1,7 +1,19 @@
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Type {
     pub data: TypeData,
     pub name: Option<String>,
+}
+
+impl PartialEq for Type {
+    fn eq(&self, other: &Self) -> bool {
+        self.data == other.data
+    }
+}
+
+impl From<TypeData> for Type {
+    fn from(data: TypeData) -> Self {
+        Self { data, name: None }
+    }
 }
 
 impl Type {
@@ -13,7 +25,7 @@ impl Type {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum TypeData {
     INT,
     FLOAT,
@@ -44,13 +56,13 @@ pub enum TypeData {
     VOID,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Generic {
     pub name: String,
     pub typ: Type, // INTERFACE
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Field {
     pub name: String,
     pub typ: Type,

@@ -20,6 +20,8 @@ pub struct IR {
     pub types: Vec<TypeDef>,
     pub funcs: Vec<Function>,
 
+    pub errors: Vec<IRError>,
+
     fset: FSet,
     stack: Vec<usize>,
 }
@@ -44,6 +46,7 @@ impl IR {
             }],
             stack: vec![0],
             funcs: Vec::new(),
+            errors: Vec::new(),
         }
     }
 }
