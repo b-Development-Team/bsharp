@@ -1,6 +1,6 @@
 use super::*;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct IRNode {
     pub data: IRNodeData,
     pub range: Pos,
@@ -15,6 +15,14 @@ impl IRNode {
     pub fn void() -> Self {
         Self {
             data: IRNodeData::Void,
+            range: Pos::default(),
+            pos: Pos::default(),
+        }
+    }
+
+    pub fn invalid() -> Self {
+        Self {
+            data: IRNodeData::Invalid,
             range: Pos::default(),
             pos: Pos::default(),
         }
@@ -57,17 +65,16 @@ impl IRNode {
             IRNodeData::NewEnum(_, enm) => enm.clone(),
             IRNodeData::NewBox(_) => Type::from(TypeData::BOX),
             IRNodeData::NewStruct(typ, _) => typ.clone(),
-            IRNodeData::Param { .. }
-            | IRNodeData::Returns(_)
-            | IRNodeData::Generic { .. }
-            | IRNodeData::TypeInstantiate { .. } => Type::from(TypeData::PARAM),
-            IRNodeData::Type(_) => Type::from(TypeData::TYPE),
+            IRNodeData::Param { .. } | IRNodeData::Returns(_) => Type::from(TypeData::PARAM),
+            IRNodeData::Field { .. } | IRNodeData::Generic { .. } => Type::from(TypeData::FIELD),
+            IRNodeData::Type(_) | IRNodeData::TypeInstantiate { .. } => Type::from(TypeData::TYPE),
             IRNodeData::Cast(_, typ) => typ.clone(),
+            IRNodeData::Invalid => Type::from(TypeData::INVALID),
         }
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum IRNodeData {
     Block {
         scope: usize,
@@ -110,6 +117,7 @@ pub enum IRNodeData {
         ret_typ: Type,
     },
     Void,
+    Invalid,
 
     // Composite type ops
     Len(Box<IRNode>),
@@ -132,6 +140,10 @@ pub enum IRNodeData {
     SetStruct {
         strct: Box<IRNode>,
         vals: Box<IRNode>,
+    },
+    Field {
+        name: String,
+        typ: Type,
     },
     Peek {
         bx: Box<IRNode>,
@@ -168,7 +180,7 @@ pub enum IRNodeData {
     Cast(Box<IRNode>, Type),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum MathOperator {
     ADD,
     SUBTRACT,
@@ -177,7 +189,7 @@ pub enum MathOperator {
     MODULO,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum ComparisonOperator {
     GREATER,
     LESS,
@@ -185,7 +197,7 @@ pub enum ComparisonOperator {
     LESSEQUAL,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum BooleanOperator {
     AND,
     OR,

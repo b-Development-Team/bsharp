@@ -1,6 +1,5 @@
+mod fns;
 mod types;
-use std::collections::HashMap;
-
 use fset::*;
 pub use types::*;
 mod stack;
@@ -32,28 +31,21 @@ impl IR {
             fset,
             variables: Vec::new(),
             types: Vec::new(),
-            scopes: vec![Scope {
-                kind: ScopeKind::Global,
-                vars: HashMap::new(),
-                types: HashMap::new(),
-                pos: Pos {
-                    file: usize::MAX,
-                    start_line: 0,
-                    start_col: 0,
-                    end_line: 0,
-                    end_col: 0,
-                },
-            }],
+            scopes: vec![Scope::new(ScopeKind::Global, Pos::default())],
             stack: vec![0],
             funcs: Vec::new(),
             errors: Vec::new(),
         }
     }
 
+    fn save_error(&mut self, err: IRError) {
+        self.errors.push(err);
+    }
+
     pub fn build(&mut self) -> Result<(), IRError> {
         self.defpass()?;
         for i in 0..self.types.len() {
-            self.build_typ(i)?;
+            self.build_typ(i);
         }
         Ok(())
     }

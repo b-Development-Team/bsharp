@@ -17,6 +17,7 @@ pub enum ASTNodeData {
     Type(String),
     Function(String),
     Variable(String),
+    Field(String),
     Stmt {
         name: String,
         name_pos: Pos,
@@ -39,6 +40,7 @@ impl ASTNodeData {
             Self::Variable(_) => ASTNodeDataType::Variable,
             Self::Stmt { .. } => ASTNodeDataType::Stmt,
             Self::Block(_) => ASTNodeDataType::Block,
+            Self::Field(_) => ASTNodeDataType::Field,
         }
     }
 }
@@ -56,4 +58,7 @@ pub enum ASTNodeDataType {
     Variable,
     Stmt,
     Block,
+    Field,
+
+    Any,
 }

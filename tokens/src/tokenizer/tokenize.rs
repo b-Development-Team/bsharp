@@ -37,6 +37,13 @@ impl super::Tokenizer {
                         pos: v.1,
                     }))
                 }
+                '.' => {
+                    let v = self.parse_next_ident('.')?;
+                    Ok(Some(Token {
+                        data: TokenData::FIELD(v.0),
+                        pos: v.1,
+                    }))
+                }
                 '!' => {
                     let v = self.parse_next_ident('!')?;
                     Ok(Some(Token {

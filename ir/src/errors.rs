@@ -3,6 +3,10 @@ use super::*;
 #[derive(Debug)]
 pub enum IRError {
     UnexpectedNode(ASTNode),
+    UnknownFunction {
+        pos: Pos,
+        name: String,
+    },
     InvalidGlobalDef(IRNode),
     InvalidArgumentCount {
         pos: Pos,
@@ -12,6 +16,10 @@ pub enum IRError {
     InvalidASTArgument {
         expected: ASTNodeDataType,
         got: ASTNode,
+    },
+    InvalidArgument {
+        expected: TypeData,
+        got: IRNode,
     },
     FSetError(FSetError),
     InvalidType {

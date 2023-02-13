@@ -19,6 +19,10 @@ impl From<TypeData> for Type {
 }
 
 impl Type {
+    pub fn new(data: TypeData, name: Option<String>) -> Self {
+        Self { data, name }
+    }
+
     pub fn void() -> Self {
         Self {
             data: TypeData::VOID,
@@ -67,6 +71,7 @@ pub enum TypeData {
     // Special types
     INVALID,
     PARAM,
+    FIELD,
     TYPE,
     VOID,
 }

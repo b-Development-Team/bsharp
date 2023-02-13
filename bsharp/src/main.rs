@@ -5,6 +5,24 @@ const SOURCE: &'static str = r#"
 # Block comment
 # Small comment #
 [TYPE $STRING [ARRAY [CHAR]]]
+[TYPE $A [TUPLE $STRING $STRING]]
+[TYPE $B [STRUCT
+  [FIELD .a $STRING]
+  [FIELD .b $STRING]
+]]
+[TYPE $ENUM [ENUM 
+  [FIELD .a $A]
+  [FIELD .b $B]
+]]
+[TYPE $NONE [STRUCT]]
+
+[TYPE $OPTION_A [ENUM $NONE $A]]
+[TYPE $ANY [INTERFACE]]
+[TYPE $B [STRUCT 
+  [GENERIC $T $ANY]
+  [FIELD .a $T]
+]]
+
 
 [FUNC @hello [] [
     [PRINT "Hello, World!"]
@@ -21,4 +39,8 @@ fn main() {
         .unwrap();
     let mut ir = IR::new(fset);
     ir.build().unwrap();
+
+    for err in ir.errors {
+        println!("{:?}\n", err);
+    }
 }

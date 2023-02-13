@@ -81,6 +81,13 @@ impl super::Parser {
                     pos: tok.pos,
                 })
             }
+            TokenData::FIELD(v) => {
+                self.tok.eat().unwrap();
+                Ok(ASTNode {
+                    data: ASTNodeData::Field(v),
+                    pos: tok.pos,
+                })
+            }
             _ => Err(ParseError::UnexpectedToken(tok)),
         }
     }

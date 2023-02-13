@@ -9,6 +9,17 @@ pub struct Scope {
     pub pos: Pos,
 }
 
+impl Scope {
+    pub fn new(kind: ScopeKind, pos: Pos) -> Self {
+        Self {
+            kind,
+            vars: HashMap::new(),
+            types: HashMap::new(),
+            pos,
+        }
+    }
+}
+
 pub struct Variable {
     pub name: String,
     pub typ: Type,
@@ -19,7 +30,7 @@ pub struct Variable {
 pub struct TypeDef {
     pub scope: usize,
     pub name: String,
-    pub definition: Pos,
+    pub pos: Pos,
 
     pub ast: Option<ASTNode>, // If Some, needs building
     pub typ: Type,
