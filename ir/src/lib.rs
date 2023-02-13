@@ -49,4 +49,12 @@ impl IR {
             errors: Vec::new(),
         }
     }
+
+    pub fn build(&mut self) -> Result<(), IRError> {
+        self.defpass()?;
+        for i in 0..self.types.len() {
+            self.build_typ(i)?;
+        }
+        Ok(())
+    }
 }

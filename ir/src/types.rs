@@ -1,3 +1,5 @@
+use super::*;
+
 #[derive(Debug, Clone)]
 pub struct Type {
     pub data: TypeData,
@@ -21,6 +23,18 @@ impl Type {
         Self {
             data: TypeData::VOID,
             name: None,
+        }
+    }
+
+    pub fn expect(&self, pos: Pos, expected: &Type) -> Result<(), IRError> {
+        if self == expected {
+            Ok(())
+        } else {
+            Err(IRError::InvalidType {
+                pos,
+                expected: expected.clone(),
+                got: self.clone(),
+            })
         }
     }
 }
@@ -52,6 +66,7 @@ pub enum TypeData {
 
     // Special types
     INVALID,
+    PARAM,
     TYPE,
     VOID,
 }

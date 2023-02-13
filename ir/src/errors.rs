@@ -14,6 +14,11 @@ pub enum IRError {
         got: ASTNode,
     },
     FSetError(FSetError),
+    InvalidType {
+        pos: Pos,
+        expected: Type,
+        got: Type,
+    },
 }
 
 impl From<FSetError> for IRError {

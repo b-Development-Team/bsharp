@@ -3,17 +3,19 @@ use super::*;
 #[derive(Debug)]
 pub struct IRNode {
     pub data: IRNodeData,
+    pub range: Pos,
     pub pos: Pos,
 }
 
 impl IRNode {
-    pub fn new(data: IRNodeData, pos: Pos) -> Self {
-        Self { data, pos }
+    pub fn new(data: IRNodeData, range: Pos, pos: Pos) -> Self {
+        Self { data, range, pos }
     }
 
     pub fn void() -> Self {
         Self {
             data: IRNodeData::Void,
+            range: Pos::default(),
             pos: Pos::default(),
         }
     }
@@ -57,9 +59,9 @@ impl IRNode {
             IRNodeData::NewStruct(typ, _) => typ.clone(),
             IRNodeData::Param { .. }
             | IRNodeData::Returns(_)
-            | IRNodeData::Type(_)
             | IRNodeData::Generic { .. }
-            | IRNodeData::TypeInstantiate { .. } => Type::from(TypeData::TYPE),
+            | IRNodeData::TypeInstantiate { .. } => Type::from(TypeData::PARAM),
+            IRNodeData::Type(_) => Type::from(TypeData::TYPE),
             IRNodeData::Cast(_, typ) => typ.clone(),
         }
     }
