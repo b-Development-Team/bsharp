@@ -45,8 +45,8 @@ impl IR {
         for (i, node) in params.iter().enumerate() {
             let v = self.build_node(node);
             if v.typ().data != typs[i] {
-                return Err(IRError::InvalidArgument {
-                    got: v,
+                self.save_error(IRError::InvalidArgument {
+                    got: v.clone(),
                     expected: typs[i].clone(),
                 });
             }

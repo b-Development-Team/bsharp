@@ -32,7 +32,7 @@ impl IR {
                 IRNodeData::Generic { name, typ } => params.push(Generic { name, typ }),
                 _ => {
                     return Err(IRError::InvalidArgument {
-                        expected: TypeData::PARAM,
+                        expected: TypeData::FIELD,
                         got: field,
                     })
                 }
@@ -53,7 +53,10 @@ impl IR {
         range: Pos,
         args: &Vec<ASTNode>,
     ) -> Result<IRNode, IRError> {
-        self.typecheck(pos, args, &Vec::new())?;
+        match self.typecheck(pos, args, &Vec::new()) {
+            Ok(_) => (),
+            Err(e) => self.save_error(e),
+        };
         let t = match name.as_str() {
             "CHAR" => TypeData::CHAR,
             "INT" => TypeData::INT,
