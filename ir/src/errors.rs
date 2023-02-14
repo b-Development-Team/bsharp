@@ -3,7 +3,7 @@ use super::*;
 #[derive(Debug)]
 pub enum IRError {
     UnexpectedNode(ASTNode),
-    UnknownFunction {
+    UnknownStmt {
         pos: Pos,
         name: String,
     },
@@ -26,6 +26,10 @@ pub enum IRError {
         pos: Pos,
         expected: Type,
         got: Type,
+    },
+    UnknownType {
+        pos: Pos,
+        name: String,
     },
 }
 

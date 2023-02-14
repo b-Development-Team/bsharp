@@ -33,11 +33,13 @@ impl IR {
                 "ARRAY" => self.build_array(*name_pos, v.pos, args),
                 "STRUCT" => self.build_struct(*name_pos, v.pos, args),
                 "CHAR" | "INT" | "FLOAT" | "BOOL" => self.build_prim(name, *name_pos, v.pos, args),
-                _ => Err(IRError::UnknownFunction {
+                "FIELD" => self.build_field(*name_pos, v.pos, args),
+                _ => Err(IRError::UnknownStmt {
                     pos: *name_pos,
                     name: name.clone(),
                 }),
             },
+            ASTNodeData::Type(name) => self.build_typeval(v.pos, name.clone()),
             _ => Err(IRError::UnexpectedNode(v.clone())),
         } {
             Ok(res) => res,

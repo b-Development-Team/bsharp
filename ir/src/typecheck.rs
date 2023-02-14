@@ -44,7 +44,7 @@ impl IR {
         let mut res = Vec::new();
         for (i, node) in params.iter().enumerate() {
             let v = self.build_node(node);
-            if v.typ().data != typs[i] {
+            if v.typ().data != typs[i] && v.typ().data != TypeData::INVALID {
                 self.save_error(IRError::InvalidArgument {
                     got: v.clone(),
                     expected: typs[i].clone(),
@@ -76,14 +76,14 @@ impl IR {
         for (i, node) in params.iter().enumerate() {
             let v = self.build_node(node);
             if i >= typs.len() {
-                if v.typ().data != end {
+                if v.typ().data != end && v.typ().data != TypeData::INVALID {
                     return Err(IRError::InvalidArgument {
                         got: v,
                         expected: end.clone(),
                     });
                 }
             } else {
-                if v.typ().data != typs[i] {
+                if v.typ().data != typs[i] && v.typ().data != TypeData::INVALID {
                     return Err(IRError::InvalidArgument {
                         got: v,
                         expected: typs[i].clone(),

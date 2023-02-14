@@ -30,12 +30,7 @@ impl IR {
             match field.data {
                 IRNodeData::Field { name, typ } => fields.push(Field { name, typ }),
                 IRNodeData::Generic { name, typ } => params.push(Generic { name, typ }),
-                _ => {
-                    return Err(IRError::InvalidArgument {
-                        expected: TypeData::FIELD,
-                        got: field,
-                    })
-                }
+                _ => continue,
             }
         }
 
@@ -87,9 +82,23 @@ impl IR {
         };
         let t = match typ.data {
             IRNodeData::Type(t) => t,
+            IRNodeData::Invalid => Type::from(TypeData::INVALID),
             _ => unreachable!(),
         };
 
         Ok(IRNode::new(IRNodeData::Field { name, typ: t }, range, pos))
+    }
+
+    pub fn build_typeval(&mut self, pos: Pos, val: String) -> Result<IRNode, IRError> {
+        for scope in self.stack.iter().rev() {
+            if let Some(typ) = self.scopes[*scope].types.get(&val) {
+                return Ok(IRNode::new(
+                    IRNodeData::Type(self.types[*typ].typ.clone()),
+                    pos,
+                    pos,
+                ));
+            }
+        }
+        Err(IRError::UnknownType { pos, name: val })
     }
 }

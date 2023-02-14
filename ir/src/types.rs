@@ -31,7 +31,7 @@ impl Type {
     }
 
     pub fn expect(&self, pos: Pos, expected: &Type) -> Result<(), IRError> {
-        if self == expected {
+        if self == expected || self.data == TypeData::INVALID {
             Ok(())
         } else {
             Err(IRError::InvalidType {
