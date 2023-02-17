@@ -50,7 +50,7 @@ pub enum TypeData {
     CHAR,
     BOOL,
     BOX,
-    ARRAY(Box<Type>),
+    ARRAY(Option<Box<Generic>>, Box<Type>),
     STRUCT {
         params: Vec<Generic>,
         fields: Vec<Field>,

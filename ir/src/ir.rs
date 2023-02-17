@@ -61,7 +61,7 @@ impl IRNode {
                 unreachable!()
             }
             IRNodeData::Unbox { typ, .. } => typ.clone(),
-            IRNodeData::NewArray(typ, _) => Type::from(TypeData::ARRAY(Box::new(typ.clone()))),
+            IRNodeData::NewArray(typ, _) => typ.clone(),
             IRNodeData::NewEnum(_, enm) => enm.clone(),
             IRNodeData::NewBox(_) => Type::from(TypeData::BOX),
             IRNodeData::NewStruct(typ, _) => typ.clone(),

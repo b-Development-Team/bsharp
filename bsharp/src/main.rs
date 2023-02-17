@@ -10,6 +10,8 @@ const SOURCE: &'static str = r#"
   [FIELD .a $STRING]
   [FIELD .b $STRING]
 ]]
+[TYPE $C [TUPLE [GENERIC $T $ANY] [G $B $T] $NONE]]
+[TYPE $D [ARRAY [GENERIC $T $ANY]]]
 [TYPE $ENUM [ENUM 
   [FIELD .a $A]
   [FIELD .b $B]

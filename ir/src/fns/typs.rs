@@ -7,14 +7,47 @@ impl IR {
         range: Pos,
         args: &Vec<ASTNode>,
     ) -> Result<IRNode, IRError> {
-        let pars = self.typecheck(pos, args, &vec![TypeData::TYPE])?;
-        let typ = pars[0].typ().clone();
+        let dat = if args.len() != 1 {
+            self.save_error(IRError::InvalidArgumentCount {
+                pos,
+                expected: 1,
+                got: args.len(),
+            });
+            IRNodeData::Type(Type::from(TypeData::ARRAY(
+                None,
+                Box::new(Type::from(TypeData::INVALID)),
+            )))
+        } else {
+            let v = self.build_node(&args[0]);
+            match v.data {
+                IRNodeData::Type(t) => {
+                    IRNodeData::Type(Type::from(TypeData::ARRAY(None, Box::new(t))))
+                }
+                IRNodeData::Generic { typ, name } => IRNodeData::Type(Type::from(TypeData::ARRAY(
+                    Some(Box::new(Generic {
+                        typ: typ.clone(),
+                        name: name.clone(),
+                    })),
+                    Box::new(Type::new(typ.data, Some(name))),
+                ))),
+                IRNodeData::Invalid => IRNodeData::Type(Type::from(TypeData::ARRAY(
+                    None,
+                    Box::new(Type::from(TypeData::INVALID)),
+                ))),
+                _ => {
+                    self.save_error(IRError::InvalidArgument {
+                        expected: TypeData::TYPE,
+                        got: v,
+                    });
+                    IRNodeData::Type(Type::from(TypeData::ARRAY(
+                        None,
+                        Box::new(Type::from(TypeData::INVALID)),
+                    )))
+                }
+            }
+        };
 
-        Ok(IRNode::new(
-            IRNodeData::Type(Type::from(TypeData::ARRAY(Box::new(typ)))),
-            range,
-            pos,
-        ))
+        Ok(IRNode::new(dat, range, pos))
     }
 
     pub fn build_struct(
@@ -55,6 +88,7 @@ impl IR {
             match v.data {
                 IRNodeData::Generic { name, typ } => params.push(Generic { name, typ }),
                 IRNodeData::Type(t) => fields.push(t),
+                IRNodeData::Invalid => {}
                 _ => self.save_error(IRError::InvalidArgument {
                     expected: TypeData::FIELD,
                     got: v,
