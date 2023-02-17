@@ -32,6 +32,7 @@ impl IR {
             } => match name.as_str() {
                 "ARRAY" => self.build_array(*name_pos, v.pos, args),
                 "STRUCT" => self.build_struct(*name_pos, v.pos, args),
+                "TUPLE" => self.build_tuple(*name_pos, v.pos, args),
                 "CHAR" | "INT" | "FLOAT" | "BOOL" => self.build_prim(name, *name_pos, v.pos, args),
                 "FIELD" => self.build_field(*name_pos, v.pos, args),
                 _ => Err(IRError::UnknownStmt {
