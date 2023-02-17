@@ -13,8 +13,8 @@ const SOURCE: &'static str = r#"
 [TYPE $C [TUPLE [GENERIC $T $ANY] [G $B $T] $NONE]]
 [TYPE $D [ARRAY [GENERIC $T $ANY]]]
 [TYPE $ENUM [ENUM 
-  [FIELD .a $A]
-  [FIELD .b $B]
+  $A
+  $B
 ]]
 [TYPE $NONE [STRUCT]]
 

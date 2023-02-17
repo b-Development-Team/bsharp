@@ -90,7 +90,7 @@ impl IR {
                 IRNodeData::Type(t) => fields.push(t),
                 IRNodeData::Invalid => {}
                 _ => self.save_error(IRError::InvalidArgument {
-                    expected: TypeData::FIELD,
+                    expected: TypeData::TYPE,
                     got: v,
                 }),
             }
@@ -98,6 +98,38 @@ impl IR {
 
         Ok(IRNode::new(
             IRNodeData::Type(Type::from(TypeData::TUPLE {
+                params,
+                body: fields,
+            })),
+            range,
+            pos,
+        ))
+    }
+
+    pub fn build_enum(
+        &mut self,
+        pos: Pos,
+        range: Pos,
+        args: &Vec<ASTNode>,
+    ) -> Result<IRNode, IRError> {
+        let mut fields = Vec::new();
+        let mut params = Vec::new();
+
+        for par in args.iter() {
+            let v = self.build_node(par);
+            match v.data {
+                IRNodeData::Generic { name, typ } => params.push(Generic { name, typ }),
+                IRNodeData::Type(t) => fields.push(t),
+                IRNodeData::Invalid => {}
+                _ => self.save_error(IRError::InvalidArgument {
+                    expected: TypeData::TYPE,
+                    got: v,
+                }),
+            }
+        }
+
+        Ok(IRNode::new(
+            IRNodeData::Type(Type::from(TypeData::ENUM {
                 params,
                 body: fields,
             })),
