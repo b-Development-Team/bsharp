@@ -4,7 +4,7 @@ pub fn typecheck_ast(
     pos: Pos,
     params: &Vec<ASTNode>,
     typs: &Vec<ASTNodeDataType>,
-) -> Result<(), IRError> {
+) -> Result<Vec<ASTNode>, IRError> {
     if params.len() != typs.len() {
         return Err(IRError::InvalidArgumentCount {
             pos,
@@ -12,8 +12,13 @@ pub fn typecheck_ast(
             got: params.len(),
         });
     }
+    let mut res = Vec::new();
     for (i, typ) in typs.iter().enumerate() {
         if *typ == ASTNodeDataType::Any {
+            res.push(params[i].clone());
+            continue;
+        }
+        if params[i].data.typ() == ASTNodeDataType::Comment {
             continue;
         }
         if params[i].data.typ() != *typ {
@@ -22,8 +27,9 @@ pub fn typecheck_ast(
                 got: params[i].clone(),
             });
         }
+        res.push(params[i].clone());
     }
-    Ok(())
+    Ok(res)
 }
 
 impl IR {
@@ -44,6 +50,9 @@ impl IR {
         let mut res = Vec::new();
         for (i, node) in params.iter().enumerate() {
             let v = self.build_node(node);
+            if v.typ().data == TypeData::VOID {
+                continue;
+            }
             if v.typ().data != typs[i] && v.typ().data != TypeData::INVALID {
                 self.save_error(IRError::InvalidArgument {
                     got: v.clone(),
@@ -75,6 +84,9 @@ impl IR {
         let mut res = Vec::new();
         for (i, node) in params.iter().enumerate() {
             let v = self.build_node(node);
+            if v.typ().data == TypeData::VOID {
+                continue;
+            }
             if i >= typs.len() {
                 if v.typ().data != end && v.typ().data != TypeData::INVALID {
                     return Err(IRError::InvalidArgument {

@@ -25,6 +25,14 @@ const SOURCE: &'static str = r#"
   [FIELD .a $T]
 ]]
 
+[TYPE $A [INTERFACE
+  [INT] # Can be an int
+  [FLOAT] # Can be a float
+  [TUPLE $STRING [INT]] # Can be a tuple that starts w/ a string and INT
+  [ENUM $B $C] # Can be an enum that contains types B and C (but can contain more)
+  [STRUCT [FIELD .a $STRING]] # Can be a struct that contains field a
+]]
+
 
 [FUNC @hello [] [
     [PRINT "Hello, World!"]

@@ -21,12 +21,12 @@ impl IR {
                     args,
                 } => match name.as_str() {
                     "TYPE" => {
-                        match typecheck_ast(
+                        let args = match typecheck_ast(
                             *name_pos,
                             args,
                             &vec![ASTNodeDataType::Type, ASTNodeDataType::Stmt],
                         ) {
-                            Ok(_) => {}
+                            Ok(v) => v,
                             Err(err) => {
                                 self.save_error(err);
                                 continue;
@@ -51,7 +51,7 @@ impl IR {
                         })
                     }
                     "FUNC" => {
-                        match typecheck_ast(
+                        let args = match typecheck_ast(
                             *name_pos,
                             args,
                             &vec![
@@ -60,12 +60,12 @@ impl IR {
                                 ASTNodeDataType::Block,
                             ],
                         ) {
-                            Ok(_) => {}
+                            Ok(v) => v,
                             Err(err) => {
                                 self.save_error(err);
                                 continue;
                             }
-                        }
+                        };
 
                         let name = match &args[0].data {
                             ASTNodeData::Function(name) => name.clone(),
@@ -86,13 +86,14 @@ impl IR {
                         })
                     }
                     "IMPORT" => {
-                        match typecheck_ast(*name_pos, args, &vec![ASTNodeDataType::String]) {
-                            Ok(_) => {}
-                            Err(err) => {
-                                self.save_error(err);
-                                continue;
-                            }
-                        };
+                        let args =
+                            match typecheck_ast(*name_pos, args, &vec![ASTNodeDataType::String]) {
+                                Ok(v) => v,
+                                Err(err) => {
+                                    self.save_error(err);
+                                    continue;
+                                }
+                            };
                         let name = match &args[0].data {
                             ASTNodeData::String(name) => name.clone(),
                             _ => unreachable!(),
