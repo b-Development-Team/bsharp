@@ -7,47 +7,32 @@ impl IR {
         range: Pos,
         args: &Vec<ASTNode>,
     ) -> Result<IRNode, IRError> {
-        let dat = if args.len() != 1 {
-            self.save_error(IRError::InvalidArgumentCount {
-                pos,
-                expected: 1,
-                got: args.len(),
-            });
-            IRNodeData::Type(Type::from(TypeData::ARRAY(
+        let args = typecheck_ast(pos, args, &vec![ASTNodeDataType::Any])?;
+        let v = self.build_node(&args[0]);
+        let dat = match v.data {
+            IRNodeData::Type(t) => IRNodeData::Type(Type::from(TypeData::ARRAY(None, Box::new(t)))),
+            IRNodeData::Generic { typ, name } => IRNodeData::Type(Type::from(TypeData::ARRAY(
+                Some(Box::new(Generic {
+                    typ: typ.clone(),
+                    name: name.clone(),
+                })),
+                Box::new(Type::new(typ.data, Some(name))),
+            ))),
+            IRNodeData::Invalid => IRNodeData::Type(Type::from(TypeData::ARRAY(
                 None,
                 Box::new(Type::from(TypeData::INVALID)),
-            )))
-        } else {
-            // TODO: Support comments in ARRAY
-            let v = self.build_node(&args[0]);
-            match v.data {
-                IRNodeData::Type(t) => {
-                    IRNodeData::Type(Type::from(TypeData::ARRAY(None, Box::new(t))))
-                }
-                IRNodeData::Generic { typ, name } => IRNodeData::Type(Type::from(TypeData::ARRAY(
-                    Some(Box::new(Generic {
-                        typ: typ.clone(),
-                        name: name.clone(),
-                    })),
-                    Box::new(Type::new(typ.data, Some(name))),
-                ))),
-                IRNodeData::Invalid => IRNodeData::Type(Type::from(TypeData::ARRAY(
+            ))),
+            _ => {
+                self.save_error(IRError::InvalidArgument {
+                    expected: TypeData::TYPE,
+                    got: v,
+                });
+                IRNodeData::Type(Type::from(TypeData::ARRAY(
                     None,
                     Box::new(Type::from(TypeData::INVALID)),
-                ))),
-                _ => {
-                    self.save_error(IRError::InvalidArgument {
-                        expected: TypeData::TYPE,
-                        got: v,
-                    });
-                    IRNodeData::Type(Type::from(TypeData::ARRAY(
-                        None,
-                        Box::new(Type::from(TypeData::INVALID)),
-                    )))
-                }
+                )))
             }
         };
-
         Ok(IRNode::new(dat, range, pos))
     }
 
