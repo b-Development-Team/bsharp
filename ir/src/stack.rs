@@ -36,6 +36,7 @@ pub struct TypeDef {
     pub typ: Type,
 }
 
+#[derive(PartialEq)]
 pub enum ScopeKind {
     Global,
     Type,
@@ -46,7 +47,7 @@ pub enum ScopeKind {
 pub struct Function {
     pub definition: Pos,
     pub name: String,
-    pub generic_params: Vec<Generic>,
+    pub generic_params: Vec<usize>,
     pub params: Vec<FunctionParam>,
 
     pub ret_typ: Type,

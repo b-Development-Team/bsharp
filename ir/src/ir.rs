@@ -168,11 +168,8 @@ pub enum IRNodeData {
     Returns(Type),
 
     // Types
-    Type(Type), // [INT], [STRUCT], etc.
-    Generic {
-        name: String,
-        typ: Type,
-    }, // Type parameters
+    Type(Type),     // [INT], [STRUCT], etc.
+    Generic(usize), // Type parameters
     TypeInstantiate {
         typ: Type,
         params: Vec<Type>,

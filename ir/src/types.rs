@@ -3,7 +3,6 @@ use super::*;
 #[derive(Debug, Clone)]
 pub struct Type {
     pub data: TypeData,
-    pub name: Option<String>,
 }
 
 impl PartialEq for Type {
@@ -14,19 +13,23 @@ impl PartialEq for Type {
 
 impl From<TypeData> for Type {
     fn from(data: TypeData) -> Self {
-        Self { data, name: None }
+        Self { data }
+    }
+}
+
+impl TypeData {
+    pub fn concrete(&self, ir: &IR) -> Self {
+        match self {
+            TypeData::DEF(v) => ir.types[*v].typ.data.clone(),
+            _ => self.clone(),
+        }
     }
 }
 
 impl Type {
-    pub fn new(data: TypeData, name: Option<String>) -> Self {
-        Self { data, name }
-    }
-
     pub fn void() -> Self {
         Self {
             data: TypeData::VOID,
-            name: None,
         }
     }
 
@@ -50,23 +53,32 @@ pub enum TypeData {
     CHAR,
     BOOL,
     BOX,
-    ARRAY(Option<Box<Generic>>, Box<Type>),
+    ARRAY {
+        param: Option<usize>,
+        body: Box<Type>,
+        scope: usize,
+    }, // First param is generic
     STRUCT {
-        params: Vec<Generic>,
+        params: Vec<usize>,
         fields: Vec<Field>,
+        scope: usize,
     },
     TUPLE {
-        params: Vec<Generic>,
+        params: Vec<usize>,
         body: Vec<Type>,
+        scope: usize,
     },
     ENUM {
-        params: Vec<Generic>,
+        params: Vec<usize>,
         body: Vec<Type>,
+        scope: usize,
     },
     INTERFACE {
-        params: Vec<Generic>,
+        params: Vec<usize>,
         body: Vec<Type>,
+        scope: usize,
     },
+    DEF(usize), // Points to typedef
 
     // Special types
     INVALID,
@@ -74,12 +86,6 @@ pub enum TypeData {
     FIELD,
     TYPE,
     VOID,
-}
-
-#[derive(Debug, PartialEq, Clone)]
-pub struct Generic {
-    pub name: String,
-    pub typ: Type, // INTERFACE
 }
 
 #[derive(Debug, PartialEq, Clone)]

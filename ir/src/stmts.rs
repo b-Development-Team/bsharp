@@ -9,14 +9,7 @@ impl IR {
                 .push(Scope::new(ScopeKind::Type, self.types[id].pos));
 
             // Check if within another type
-            let old = if self.stack.len() > 2 {
-                let v = self.stack[1];
-                self.stack[1] = self.scopes.len() - 1;
-                Some(v)
-            } else {
-                self.stack.push(self.scopes.len() - 1);
-                None
-            };
+            self.stack.push(self.scopes.len() - 1);
 
             // Build
             let res = self.build_node(ast);
@@ -32,15 +25,7 @@ impl IR {
                 IRNodeData::Type(v) => v,
                 _ => unreachable!(),
             };
-            self.types[id].typ.name = Some(self.types[id].name.clone());
-            let ind = if let Some(v) = old {
-                let val = self.stack[1];
-                self.stack[1] = v;
-                val
-            } else {
-                self.stack.pop().unwrap()
-            };
-            self.types[id].scope = ind;
+            self.types[id].scope = self.stack.pop().unwrap();
         }
     }
 
@@ -58,20 +43,21 @@ impl IR {
             let mut ret = None;
             let mut ret_def = Some(ast.pos);
 
+            // Add type scope
+            self.scopes.push(Scope::new(ScopeKind::Type, ast.pos));
+            self.stack.push(self.scopes.len() - 1);
+
             for par in pars.iter() {
                 let n = self.build_node(par);
                 match n.data {
-                    IRNodeData::Generic { ref name, ref typ } => {
+                    IRNodeData::Generic(v) => {
                         if params.len() > 0 {
                             self.save_error(IRError::InvalidArgument {
                                 expected: TypeData::PARAM,
                                 got: n.clone(),
                             });
                         }
-                        generics.push(Generic {
-                            name: name.clone(),
-                            typ: typ.clone(),
-                        });
+                        generics.push(v);
                     }
                     IRNodeData::Param { name, typ } => {
                         params.push(FunctionParam {
@@ -97,6 +83,7 @@ impl IR {
                     }),
                 }
             }
+            self.stack.pop().unwrap();
 
             self.funcs[id].params_ast = None;
             self.funcs[id].params = params;
@@ -126,6 +113,8 @@ impl IR {
                 "FIELD" => self.build_field(*name_pos, v.pos, args),
                 "GENERIC" => self.build_generic(*name_pos, v.pos, args),
                 "CHAR" | "INT" | "FLOAT" | "BOOL" => self.build_prim(name, *name_pos, v.pos, args),
+                "PARAM" => self.build_param(*name_pos, v.pos, args),
+                "RETURNS" => self.build_returns(*name_pos, v.pos, args),
                 _ => Err(IRError::UnknownStmt {
                     pos: *name_pos,
                     name: name.clone(),

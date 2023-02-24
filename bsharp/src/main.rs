@@ -26,6 +26,7 @@ const SOURCE: &'static str = r#"
 ]]
 
 [TYPE $A [INTERFACE
+  [GENERIC $T $ANY]
   [INT] # Can be an int
   [FLOAT] # Can be a float
   [TUPLE $STRING [INT]] # Can be a tuple that starts w/ a string and INT
