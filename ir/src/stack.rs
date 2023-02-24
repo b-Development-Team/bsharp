@@ -48,7 +48,7 @@ pub struct Function {
     pub definition: Pos,
     pub name: String,
     pub generic_params: Vec<usize>,
-    pub params: Vec<FunctionParam>,
+    pub params: Vec<usize>,
 
     pub ret_typ: Type,
     pub ret_typ_definition: Pos,
@@ -57,10 +57,5 @@ pub struct Function {
     pub body_ast: Option<ASTNode>,   // If Some, body still needs building
 
     pub body: IRNode, // If it has type then use that as return, otherwise use [RETURN]
-}
-
-pub struct FunctionParam {
-    pub definition: Pos,
-    pub name: String,
-    pub typ: Type,
+    pub scope: usize,
 }

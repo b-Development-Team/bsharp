@@ -205,13 +205,17 @@ impl IR {
     }
 
     pub fn build_typeval(&mut self, pos: Pos, val: String) -> Result<IRNode, IRError> {
+        let mut has_typscope = false;
         for scope in self.stack.iter().rev() {
-            if self.scopes[*scope].kind != ScopeKind::Type {
+            if self.scopes[*scope].kind == ScopeKind::Type && has_typscope {
                 continue;
             }
             let typ = match self.scopes[*scope].types.get(&val) {
                 Some(t) => *t,
-                None => break,
+                None => {
+                    has_typscope = true;
+                    continue;
+                }
             };
             self.build_typ(typ);
             return Ok(IRNode::new(
@@ -220,17 +224,8 @@ impl IR {
                 pos,
             ));
         }
-        // Check global scope
-        let typ = match self.scopes[0].types.get(&val) {
-            Some(t) => *t,
-            None => return Err(IRError::UnknownType { pos, name: val }),
-        };
-        self.build_typ(typ);
-        Ok(IRNode::new(
-            IRNodeData::Type(Type::from(TypeData::DEF(typ))),
-            pos,
-            pos,
-        ))
+
+        Err(IRError::UnknownType { pos, name: val })
     }
 
     pub fn build_interface(

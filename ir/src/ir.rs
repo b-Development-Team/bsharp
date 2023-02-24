@@ -161,10 +161,7 @@ pub enum IRNodeData {
     NewStruct(Type, Vec<IRNode>), // [:] statements
 
     // Functions
-    Param {
-        name: String,
-        typ: Type,
-    },
+    Param(usize),
     Returns(Type),
 
     // Types

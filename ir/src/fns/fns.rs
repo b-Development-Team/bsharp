@@ -22,7 +22,19 @@ impl IR {
             _ => unreachable!(),
         };
 
-        Ok(IRNode::new(IRNodeData::Param { name, typ }, range, pos))
+        // Add variable
+        self.variables.push(Variable {
+            name: name.clone(),
+            typ: typ.clone(),
+            scope: 0,
+            definition: pos,
+        });
+
+        Ok(IRNode::new(
+            IRNodeData::Param(self.variables.len() - 1),
+            range,
+            pos,
+        ))
     }
 
     pub fn build_returns(
@@ -38,5 +50,26 @@ impl IR {
             _ => unreachable!(),
         };
         Ok(IRNode::new(IRNodeData::Returns(typ), range, pos))
+    }
+
+    pub fn build_block(&mut self, pos: Pos, args: &Vec<ASTNode>) -> Result<IRNode, IRError> {
+        let mut body = Vec::new();
+        self.scopes.push(Scope::new(ScopeKind::Block, pos));
+        self.stack.push(self.scopes.len() - 1);
+        for arg in args.iter() {
+            let n = self.build_node(arg);
+            match n.data {
+                IRNodeData::Invalid | IRNodeData::Void => {}
+                _ => body.push(n),
+            }
+        }
+        Ok(IRNode::new(
+            IRNodeData::Block {
+                scope: self.stack.pop().unwrap(),
+                body,
+            },
+            pos,
+            pos,
+        ))
     }
 }

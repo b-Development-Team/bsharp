@@ -59,12 +59,8 @@ impl IR {
                         }
                         generics.push(v);
                     }
-                    IRNodeData::Param { name, typ } => {
-                        params.push(FunctionParam {
-                            name,
-                            typ,
-                            definition: n.pos,
-                        });
+                    IRNodeData::Param(ind) => {
+                        params.push(ind);
                     }
                     IRNodeData::Returns(ref t) => {
                         if ret.is_some() {
@@ -95,6 +91,28 @@ impl IR {
             }
             self.funcs[id].ret_typ_definition = ret_def.unwrap();
         }
+
+        if let Some(ast) = &self.funcs[id].body_ast {
+            // Add params
+            let mut sc = Scope::new(ScopeKind::Function, ast.pos);
+            for par in self.funcs[id].params.iter() {
+                self.variables[*par].scope = self.scopes.len();
+                sc.vars.insert(self.variables[*par].name.clone(), *par);
+            }
+            for gen in self.funcs[id].generic_params.iter() {
+                sc.types.insert(self.types[*gen].name.clone(), *gen);
+            }
+
+            // Add scope
+            self.scopes.push(sc);
+            self.stack.push(self.scopes.len() - 1);
+
+            // Build
+            let res = self.build_node(&ast.clone());
+            self.funcs[id].body_ast = None;
+            self.funcs[id].body = res;
+            self.funcs[id].scope = self.stack.pop().unwrap();
+        }
     }
 
     pub fn build_node(&mut self, v: &ASTNode) -> IRNode {
@@ -121,6 +139,7 @@ impl IR {
                 }),
             },
             ASTNodeData::Type(name) => self.build_typeval(v.pos, name.clone()),
+            ASTNodeData::Block(pars) => self.build_block(v.pos, pars),
             _ => Err(IRError::UnexpectedNode(v.clone())),
         } {
             Ok(res) => res,

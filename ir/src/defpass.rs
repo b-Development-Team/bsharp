@@ -84,6 +84,7 @@ impl IR {
 
                             params_ast: Some(args[1].clone()),
                             body_ast: Some(args[2].clone()),
+                            scope: 0,
                         })
                     }
                     "IMPORT" => {

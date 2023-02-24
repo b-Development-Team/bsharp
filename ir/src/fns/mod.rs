@@ -1,4 +1,4 @@
 use super::*;
 
-mod params;
+mod fns;
 mod typs;
