@@ -94,7 +94,7 @@ impl IR {
 
         if let Some(ast) = &self.funcs[id].body_ast {
             // Add params
-            let mut sc = Scope::new(ScopeKind::Function, ast.pos);
+            let mut sc = Scope::new(ScopeKind::Function(id), ast.pos);
             for par in self.funcs[id].params.iter() {
                 self.variables[*par].scope = self.scopes.len();
                 sc.vars.insert(self.variables[*par].name.clone(), *par);
@@ -133,6 +133,7 @@ impl IR {
                 "CHAR" | "INT" | "FLOAT" | "BOOL" => self.build_prim(name, *name_pos, v.pos, args),
                 "PARAM" => self.build_param(*name_pos, v.pos, args),
                 "RETURNS" => self.build_returns(*name_pos, v.pos, args),
+                "RETURN" => self.build_return(*name_pos, v.pos, args),
                 _ => Err(IRError::UnknownStmt {
                     pos: *name_pos,
                     name: name.clone(),

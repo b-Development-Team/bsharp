@@ -40,7 +40,7 @@ pub struct TypeDef {
 pub enum ScopeKind {
     Global,
     Type,
-    Function,
+    Function(usize),
     Block,
 }
 

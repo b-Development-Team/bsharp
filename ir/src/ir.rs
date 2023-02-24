@@ -47,7 +47,8 @@ impl IRNode {
             | IRNodeData::Void
             | IRNodeData::Append { .. }
             | IRNodeData::StructOp { .. }
-            | IRNodeData::SetStruct { .. } => Type::void(),
+            | IRNodeData::SetStruct { .. }
+            | IRNodeData::Return(_) => Type::void(),
             IRNodeData::Len(_) => Type::from(TypeData::INT),
             IRNodeData::GetEnum { typ, .. } => typ.clone(),
             IRNodeData::GetStruct { strct, field } => {
@@ -70,6 +71,7 @@ impl IRNode {
             IRNodeData::Type(_) | IRNodeData::TypeInstantiate { .. } => Type::from(TypeData::TYPE),
             IRNodeData::Cast(_, typ) => typ.clone(),
             IRNodeData::Invalid => Type::from(TypeData::INVALID),
+            IRNodeData::FnCall { ret_typ, .. } => ret_typ.clone(),
         }
     }
 }
@@ -116,6 +118,12 @@ pub enum IRNodeData {
         els: Box<IRNode>,
         ret_typ: Type,
     },
+    FnCall {
+        func: usize,
+        args: Vec<IRNode>,
+        ret_typ: Type,
+    },
+    Return(Option<Box<IRNode>>),
     Void,
     Invalid,
 

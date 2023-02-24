@@ -31,6 +31,7 @@ pub enum IRError {
         pos: Pos,
         name: String,
     },
+    ReturnStatementOutsideFunction(Pos),
 }
 
 impl From<FSetError> for IRError {

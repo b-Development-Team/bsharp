@@ -72,4 +72,42 @@ impl IR {
             pos,
         ))
     }
+
+    pub fn build_return(
+        &mut self,
+        pos: Pos,
+        range: Pos,
+        args: &Vec<ASTNode>,
+    ) -> Result<IRNode, IRError> {
+        // Get ret type
+        let mut id = usize::MAX;
+        for sc in self.stack.iter().rev() {
+            if let ScopeKind::Function(ind) = &self.scopes[*sc].kind {
+                id = *ind;
+                break;
+            }
+        }
+        if id == usize::MAX {
+            return Err(IRError::ReturnStatementOutsideFunction(pos));
+        }
+        let ret_typ = self.funcs[id].ret_typ.clone();
+
+        // Typecheck
+        let expected_typ = if ret_typ.data == TypeData::VOID {
+            vec![]
+        } else {
+            vec![ret_typ.data]
+        };
+        let par = self.typecheck(pos, args, &expected_typ)?;
+
+        if expected_typ.len() == 0 {
+            return Ok(IRNode::new(IRNodeData::Return(None), range, pos));
+        }
+
+        Ok(IRNode::new(
+            IRNodeData::Return(Some(Box::new(par[0].clone()))),
+            range,
+            pos,
+        ))
+    }
 }
