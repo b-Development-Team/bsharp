@@ -47,6 +47,9 @@ impl IR {
         for i in 0..self.types.len() {
             self.build_typ(i);
         }
+        for i in 0..self.funcs.len() {
+            self.build_fn(i);
+        }
         Ok(())
     }
 }

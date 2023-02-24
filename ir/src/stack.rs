@@ -46,6 +46,7 @@ pub enum ScopeKind {
 pub struct Function {
     pub definition: Pos,
     pub name: String,
+    pub generic_params: Vec<Generic>,
     pub params: Vec<FunctionParam>,
 
     pub ret_typ: Type,

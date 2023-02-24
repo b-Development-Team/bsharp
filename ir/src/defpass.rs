@@ -77,6 +77,7 @@ impl IR {
                             name,
 
                             params: Vec::new(),
+                            generic_params: Vec::new(),
                             ret_typ: Type::void(),
                             ret_typ_definition: Pos::default(),
                             body: IRNode::void(),

@@ -44,6 +44,72 @@ impl IR {
         }
     }
 
+    pub fn build_fn(&mut self, id: usize) {
+        // Build params
+        if let Some(ast) = &self.funcs[id].params_ast {
+            let pars = match &ast.data {
+                ASTNodeData::Block(v) => v,
+                _ => unreachable!(),
+            }
+            .clone();
+
+            let mut generics = Vec::new();
+            let mut params = Vec::new();
+            let mut ret = None;
+            let mut ret_def = Some(ast.pos);
+
+            for par in pars.iter() {
+                let n = self.build_node(par);
+                match n.data {
+                    IRNodeData::Generic { ref name, ref typ } => {
+                        if params.len() > 0 {
+                            self.save_error(IRError::InvalidArgument {
+                                expected: TypeData::PARAM,
+                                got: n.clone(),
+                            });
+                        }
+                        generics.push(Generic {
+                            name: name.clone(),
+                            typ: typ.clone(),
+                        });
+                    }
+                    IRNodeData::Param { name, typ } => {
+                        params.push(FunctionParam {
+                            name,
+                            typ,
+                            definition: n.pos,
+                        });
+                    }
+                    IRNodeData::Returns(ref t) => {
+                        if ret.is_some() {
+                            self.save_error(IRError::InvalidArgument {
+                                expected: TypeData::PARAM,
+                                got: n.clone(),
+                            });
+                        }
+                        ret = Some(t.clone());
+                        ret_def = Some(n.pos);
+                    }
+                    IRNodeData::Invalid | IRNodeData::Void => {}
+                    _ => self.save_error(IRError::InvalidArgument {
+                        expected: TypeData::PARAM,
+                        got: n,
+                    }),
+                }
+            }
+
+            self.funcs[id].params_ast = None;
+            self.funcs[id].params = params;
+            self.funcs[id].generic_params = generics;
+            if let Some(_) = ret {
+                self.funcs[id].ret_typ = ret.unwrap();
+            } else {
+                self.funcs[id].ret_typ = Type::from(TypeData::VOID);
+            }
+            self.funcs[id].ret_typ_definition = ret_def.unwrap();
+        }
+    }
+
     pub fn build_node(&mut self, v: &ASTNode) -> IRNode {
         match match &v.data {
             ASTNodeData::Comment(_) => Ok(IRNode::new(IRNodeData::Void, v.pos, v.pos)),
