@@ -31,6 +31,10 @@ pub enum IRError {
         pos: Pos,
         name: String,
     },
+    UnknownVariable {
+        pos: Pos,
+        name: String,
+    },
     ReturnStatementOutsideFunction(Pos),
 }
 

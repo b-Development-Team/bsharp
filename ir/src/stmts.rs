@@ -134,12 +134,18 @@ impl IR {
                 "PARAM" => self.build_param(*name_pos, v.pos, args),
                 "RETURNS" => self.build_returns(*name_pos, v.pos, args),
                 "RETURN" => self.build_return(*name_pos, v.pos, args),
+                "+" => self.build_mathop(*name_pos, v.pos, args, MathOperator::ADD),
+                "-" => self.build_mathop(*name_pos, v.pos, args, MathOperator::SUBTRACT),
+                "/" => self.build_mathop(*name_pos, v.pos, args, MathOperator::DIVIDE),
+                "*" => self.build_mathop(*name_pos, v.pos, args, MathOperator::MULTIPLY),
+                "%" => self.build_mathop(*name_pos, v.pos, args, MathOperator::MODULO),
                 _ => Err(IRError::UnknownStmt {
                     pos: *name_pos,
                     name: name.clone(),
                 }),
             },
             ASTNodeData::Type(name) => self.build_typeval(v.pos, name.clone()),
+            ASTNodeData::Variable(name) => self.build_var(v.pos, name.clone()),
             ASTNodeData::Block(pars) => self.build_block(v.pos, pars),
             _ => Err(IRError::UnexpectedNode(v.clone())),
         } {

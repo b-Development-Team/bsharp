@@ -72,6 +72,7 @@ impl IRNode {
             IRNodeData::Cast(_, typ) => typ.clone(),
             IRNodeData::Invalid => Type::from(TypeData::INVALID),
             IRNodeData::FnCall { ret_typ, .. } => ret_typ.clone(),
+            IRNodeData::Variable(_, typ) => typ.clone(),
         }
     }
 }
@@ -91,6 +92,7 @@ pub enum IRNodeData {
         val: Box<IRNode>,
         edit: bool, // Whether making variable or just changing value
     },
+    Variable(usize, Type), // Gets value of variable
     Import(String),
     While {
         cond: Box<IRNode>,
