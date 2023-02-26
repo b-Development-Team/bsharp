@@ -40,6 +40,12 @@ impl IR {
 
                         let scopeind = *self.stack.last().unwrap();
                         let scope = &mut self.scopes[scopeind];
+                        // Check if exists
+                        if let Some(ind) = scope.types.get(&name) {
+                            let ind = *ind;
+                            self.save_error(IRError::DuplicateType(*name_pos, ind));
+                            continue;
+                        }
                         scope.types.insert(name.clone(), self.types.len());
 
                         self.types.push(TypeDef {
@@ -71,6 +77,14 @@ impl IR {
                             ASTNodeData::Function(name) => name.clone(),
                             _ => unreachable!(),
                         };
+
+                        // Check if exists
+                        for i in 0..self.funcs.len() {
+                            if self.funcs[i].name == name {
+                                self.save_error(IRError::DuplicateFunction(*name_pos, i));
+                                continue;
+                            }
+                        }
 
                         self.funcs.push(Function {
                             definition: *name_pos,

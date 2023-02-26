@@ -36,6 +36,8 @@ pub enum IRError {
         name: String,
     },
     ReturnStatementOutsideFunction(Pos),
+    DuplicateType(Pos, usize),     // Usize has original type index
+    DuplicateFunction(Pos, usize), // Usize has original function index
 }
 
 impl From<FSetError> for IRError {

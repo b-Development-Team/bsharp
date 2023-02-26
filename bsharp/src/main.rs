@@ -20,12 +20,12 @@ const SOURCE: &'static str = r#"
 
 [TYPE $OPTION_A [ENUM $NONE $A]]
 [TYPE $ANY [INTERFACE]]
-[TYPE $B [STRUCT 
+[TYPE $E [STRUCT 
   [GENERIC $T $ANY]
   [FIELD .a $T]
 ]]
 
-[TYPE $A [INTERFACE
+[TYPE $F [INTERFACE
   [GENERIC $T $ANY]
   [INT] # Can be an int
   [FLOAT] # Can be a float
@@ -41,6 +41,31 @@ const SOURCE: &'static str = r#"
 
 [FUNC @add [[PARAM !a [INT]] [PARAM !b [INT]] [RETURNS [INT]]] [
     [RETURN [+ !a !b]]
+]]
+
+[FUNC @concat [[PARAM !pars [ARRAY $STRING]] [RETURNS $STRING]] [
+  [DEFINE !len 0]
+  [DEFINE !i 0]
+  [WHILE [< !i [LEN !pars]] [
+    [DEFINE !len [+ !len [LEN [GET !pars !i]]]]
+    [DEFINE !i [+ !i 1]]
+  ]]
+  [DEFINE !out [NEW $STRING !len]]
+  [DEFINE !i 0]
+  [WHILE [< !i [LEN !pars]] [
+    [DEFINE !j 0]
+    [DEFINE !par [GET !pars !i]]
+    [WHILE [< !j [LEN !par]] [
+      [APPEND !out [GET !par !j]]
+    ]]
+    [DEFINE !i [+ !i 1]]
+  ]]
+  [RETURN !out]
+]]
+
+[FUNC @slice [[GENERIC $T $ANY] [PARAM !arr [G [ARRAY [GEERIC $T $ANY]] $T]] [PARAM !start [INT]] [PARAM !end [INT]] [RETURNS [G [ARRAY [GENERIC $T $ANY]] $T]]] [
+  [DEFINE !out [NEW [G [ARRAY [GENERIC $T $ANY]] $T] [- !end !start]]]
+  # the rest of the code
 ]]
 "#;
 

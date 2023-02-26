@@ -7,8 +7,6 @@ impl IR {
             // Add scope
             self.scopes
                 .push(Scope::new(ScopeKind::Type, self.types[id].pos));
-
-            // Check if within another type
             self.stack.push(self.scopes.len() - 1);
 
             // Build

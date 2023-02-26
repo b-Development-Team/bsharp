@@ -11,7 +11,7 @@ impl super::Tokenizer {
                     Ok(Some(self.parse_num(c)?))
                 }
                 '\'' => Ok(Some(self.parse_char()?)),
-                'A'..='Z' | 'a'..='z' | '_' | '+' | '*' | '/' | '%' => {
+                'A'..='Z' | 'a'..='z' | '_' | '+' | '*' | '/' | '%' | '<' | '>' | '=' => {
                     Ok(Some(self.parse_ident(c)?))
                 }
                 '[' => Ok(Some(Token {
