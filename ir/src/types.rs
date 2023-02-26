@@ -20,8 +20,31 @@ impl From<TypeData> for Type {
 impl TypeData {
     pub fn concrete(&self, ir: &IR) -> Self {
         match self {
-            TypeData::DEF(v) => ir.types[*v].typ.data.clone(),
+            TypeData::DEF(v) => ir.types[*v].typ.data.concrete(ir),
             _ => self.clone(),
+        }
+    }
+
+    pub fn matches(&self, typs: &Vec<TypeData>, ir: &IR) -> bool {
+        match self.concrete(ir) {
+            TypeData::INTERFACE { body, .. } => {
+                for typ in typs {
+                    for v in body.iter() {
+                        if std::mem::discriminant(&v.data) == std::mem::discriminant(&typ) {
+                            return true;
+                        }
+                    }
+                }
+                false
+            }
+            _ => {
+                for t in typs {
+                    if std::mem::discriminant(t) == std::mem::discriminant(self) {
+                        return true;
+                    }
+                }
+                false
+            }
         }
     }
 }

@@ -39,10 +39,6 @@ const SOURCE: &'static str = r#"
     [PRINT "Hello, World!"]
 ]]
 
-[FUNC @add [[PARAM !a [INT]] [PARAM !b [INT]] [RETURNS [INT]]] [
-    [RETURN [+ !a !b]]
-]]
-
 [FUNC @concat [[PARAM !pars [ARRAY $STRING]] [RETURNS $STRING]] [
   [DEFINE !len 0]
   [DEFINE !i 0]
@@ -61,6 +57,11 @@ const SOURCE: &'static str = r#"
     [DEFINE !i [+ !i 1]]
   ]]
   [RETURN !out]
+]]
+
+[TYPE $NUM [INTERFACE [INT] [FLOAT]]]
+[FUNC @add [[GENERIC $T $NUM] [PARAM !a $T] [PARAM !b $T] [RETURNS $T]] [
+  [RETURN [+ !a !b]]
 ]]
 
 [FUNC @slice [[GENERIC $T $ANY] [PARAM !arr [G [ARRAY [GEERIC $T $ANY]] $T]] [PARAM !start [INT]] [PARAM !end [INT]] [RETURNS [G [ARRAY [GENERIC $T $ANY]] $T]]] [

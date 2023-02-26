@@ -27,6 +27,7 @@ pub struct Variable {
     pub definition: Pos,
 }
 
+#[derive(Debug)]
 pub struct TypeDef {
     pub scope: usize,
     pub name: String,
