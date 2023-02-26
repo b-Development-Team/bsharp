@@ -137,6 +137,7 @@ impl IR {
                 "/" => self.build_mathop(*name_pos, v.pos, args, MathOperator::DIVIDE),
                 "*" => self.build_mathop(*name_pos, v.pos, args, MathOperator::MULTIPLY),
                 "%" => self.build_mathop(*name_pos, v.pos, args, MathOperator::MODULO),
+                "DEFINE" => self.build_define(*name_pos, v.pos, args),
                 _ => Err(IRError::UnknownStmt {
                     pos: *name_pos,
                     name: name.clone(),
@@ -145,6 +146,7 @@ impl IR {
             ASTNodeData::Type(name) => self.build_typeval(v.pos, name.clone()),
             ASTNodeData::Variable(name) => self.build_var(v.pos, name.clone()),
             ASTNodeData::Block(pars) => self.build_block(v.pos, pars),
+            ASTNodeData::Integer(val) => Ok(IRNode::new(IRNodeData::Int(*val), v.pos, v.pos)),
             _ => Err(IRError::UnexpectedNode(v.clone())),
         } {
             Ok(res) => res,

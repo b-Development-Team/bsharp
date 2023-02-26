@@ -73,6 +73,8 @@ impl IRNode {
             IRNodeData::Invalid => Type::from(TypeData::INVALID),
             IRNodeData::FnCall { ret_typ, .. } => ret_typ.clone(),
             IRNodeData::Variable(_, typ) => typ.clone(),
+            IRNodeData::Int(_) => Type::from(TypeData::INT),
+            IRNodeData::Float(_) => Type::from(TypeData::FLOAT),
         }
     }
 }
@@ -163,6 +165,10 @@ pub enum IRNodeData {
         bx: Box<IRNode>,
         typ: Type,
     },
+
+    // Literals
+    Int(i64),
+    Float(f64),
 
     // Allocating
     NewArray(Type, Option<usize>), // optional: capacity
