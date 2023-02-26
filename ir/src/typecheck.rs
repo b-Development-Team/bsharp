@@ -49,10 +49,11 @@ impl IR {
 
         let mut res = Vec::new();
         for (i, node) in params.iter().enumerate() {
-            let v = self.build_node(node);
-            if v.typ().data == TypeData::VOID {
+            if node.data.typ() == ASTNodeDataType::Comment {
                 continue;
             }
+
+            let v = self.build_node(node);
             if v.typ().data != typs[i] && v.typ().data != TypeData::INVALID {
                 self.save_error(IRError::InvalidArgument {
                     got: v.clone(),
@@ -62,6 +63,15 @@ impl IR {
 
             res.push(v);
         }
+
+        if res.len() != typs.len() {
+            return Err(IRError::InvalidArgumentCount {
+                pos,
+                expected: typs.len(),
+                got: res.len(),
+            });
+        }
+
         Ok(res)
     }
 

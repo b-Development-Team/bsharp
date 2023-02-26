@@ -138,6 +138,7 @@ impl IR {
                 "*" => self.build_mathop(*name_pos, v.pos, args, MathOperator::MULTIPLY),
                 "%" => self.build_mathop(*name_pos, v.pos, args, MathOperator::MODULO),
                 "DEFINE" => self.build_define(*name_pos, v.pos, args),
+                "WHILE" => self.build_while(*name_pos, v.pos, args),
                 _ => Err(IRError::UnknownStmt {
                     pos: *name_pos,
                     name: name.clone(),
@@ -152,7 +153,7 @@ impl IR {
             Ok(res) => res,
             Err(err) => {
                 self.save_error(err);
-                IRNode::invalid()
+                IRNode::invalid(v.pos)
             }
         }
     }

@@ -20,11 +20,11 @@ impl IRNode {
         }
     }
 
-    pub fn invalid() -> Self {
+    pub fn invalid(pos: Pos) -> Self {
         Self {
             data: IRNodeData::Invalid,
-            range: Pos::default(),
-            pos: Pos::default(),
+            range: pos,
+            pos,
         }
     }
 
