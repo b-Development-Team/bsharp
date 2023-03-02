@@ -205,6 +205,8 @@ pub enum ComparisonOperator {
     LESS,
     GREATEREQUAL,
     LESSEQUAL,
+    EQUAL,
+    NOTEQUAL,
 }
 
 #[derive(Debug, Clone)]

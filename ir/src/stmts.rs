@@ -137,6 +137,12 @@ impl IR {
                 "/" => self.build_mathop(*name_pos, v.pos, args, MathOperator::DIVIDE),
                 "*" => self.build_mathop(*name_pos, v.pos, args, MathOperator::MULTIPLY),
                 "%" => self.build_mathop(*name_pos, v.pos, args, MathOperator::MODULO),
+                ">" => self.build_compop(*name_pos, v.pos, args, ComparisonOperator::GREATER),
+                ">=" => self.build_compop(*name_pos, v.pos, args, ComparisonOperator::GREATEREQUAL),
+                "<" => self.build_compop(*name_pos, v.pos, args, ComparisonOperator::LESS),
+                "<=" => self.build_compop(*name_pos, v.pos, args, ComparisonOperator::LESSEQUAL),
+                "=" => self.build_compop(*name_pos, v.pos, args, ComparisonOperator::EQUAL),
+                "NEQ" => self.build_compop(*name_pos, v.pos, args, ComparisonOperator::NOTEQUAL), // TODO: Figure out a better name for this
                 "DEFINE" => self.build_define(*name_pos, v.pos, args),
                 "WHILE" => self.build_while(*name_pos, v.pos, args),
                 _ => Err(IRError::UnknownStmt {
