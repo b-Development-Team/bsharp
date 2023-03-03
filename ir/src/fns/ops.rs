@@ -1,3 +1,5 @@
+use std::mem::discriminant;
+
 use super::*;
 
 impl IR {
@@ -21,11 +23,14 @@ impl IR {
             | (TypeData::FLOAT, TypeData::FLOAT)
             | (TypeData::CHAR, TypeData::CHAR) => {}
             (TypeData::INTERFACE { .. }, TypeData::INTERFACE { .. }) => {
-                let ok = if left
-                    .typ()
-                    .data
-                    .matches(&vec![TypeData::INT, TypeData::FLOAT, TypeData::CHAR], self)
-                {
+                let ok = if left.typ().data.matches(
+                    &vec![
+                        discriminant(&TypeData::INT),
+                        discriminant(&TypeData::FLOAT),
+                        discriminant(&TypeData::CHAR),
+                    ],
+                    self,
+                ) {
                     match (left.typ().data, right.typ().data) {
                         (TypeData::DEF(a), TypeData::DEF(b)) => a == b,
                         _ => false,
@@ -79,10 +84,10 @@ impl IR {
             (TypeData::INTERFACE { .. }, TypeData::INTERFACE { .. }) => {
                 let ok = if left.typ().data.matches(
                     &vec![
-                        TypeData::INT,
-                        TypeData::FLOAT,
-                        TypeData::CHAR,
-                        TypeData::BOOL,
+                        discriminant(&TypeData::INT),
+                        discriminant(&TypeData::FLOAT),
+                        discriminant(&TypeData::CHAR),
+                        discriminant(&TypeData::BOOL),
                     ],
                     self,
                 ) {

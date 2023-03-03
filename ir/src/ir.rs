@@ -171,7 +171,7 @@ pub enum IRNodeData {
     Float(f64),
 
     // Allocating
-    NewArray(Type, Option<usize>), // optional: capacity
+    NewArray(Type, Option<Box<IRNode>>), // optional: capacity
     NewEnum(Box<IRNode>, Type),
     NewBox(Box<IRNode>),          // [BOX]
     NewStruct(Type, Vec<IRNode>), // [:] statements

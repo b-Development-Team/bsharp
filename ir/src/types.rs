@@ -1,3 +1,5 @@
+use std::mem::Discriminant;
+
 use super::*;
 
 #[derive(Debug, Clone)]
@@ -25,12 +27,12 @@ impl TypeData {
         }
     }
 
-    pub fn matches(&self, typs: &Vec<TypeData>, ir: &IR) -> bool {
+    pub fn matches(&self, typs: &Vec<Discriminant<TypeData>>, ir: &IR) -> bool {
         match self.concrete(ir) {
             TypeData::INTERFACE { body, .. } => {
                 for typ in typs {
                     for v in body.iter() {
-                        if std::mem::discriminant(&v.data) == std::mem::discriminant(&typ) {
+                        if std::mem::discriminant(&v.data) == *typ {
                             return true;
                         }
                     }
@@ -39,7 +41,7 @@ impl TypeData {
             }
             _ => {
                 for t in typs {
-                    if std::mem::discriminant(t) == std::mem::discriminant(self) {
+                    if *t == std::mem::discriminant(self) {
                         return true;
                     }
                 }

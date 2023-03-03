@@ -146,6 +146,8 @@ impl IR {
                 "DEFINE" => self.build_define(*name_pos, v.pos, args),
                 "WHILE" => self.build_while(*name_pos, v.pos, args),
                 "LEN" => self.build_len(*name_pos, v.pos, args),
+                "APPEND" => self.build_append(*name_pos, v.pos, args),
+                "NEW" => self.build_new(*name_pos, v.pos, args),
                 _ => Err(IRError::UnknownStmt {
                     pos: *name_pos,
                     name: name.clone(),
