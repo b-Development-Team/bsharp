@@ -3,7 +3,7 @@ use super::*;
 impl IR {
     fn check_array_par(&mut self, par: &IRNode) -> Result<(), IRError> {
         match par.typ().data.concrete(self) {
-            TypeData::ARRAY { .. } => {}
+            TypeData::ARRAY { .. } | TypeData::INVALID => {}
             TypeData::INTERFACE { body, .. } => {
                 let mut found = false;
                 for t in body {

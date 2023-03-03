@@ -1,6 +1,6 @@
 use super::*;
 
-mod arrays;
+mod composite;
 mod control;
 mod fns;
 mod ops;
