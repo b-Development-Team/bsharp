@@ -145,6 +145,7 @@ impl IR {
                 "NEQ" => self.build_compop(*name_pos, v.pos, args, ComparisonOperator::NOTEQUAL), // TODO: Figure out a better name for this
                 "DEFINE" => self.build_define(*name_pos, v.pos, args),
                 "WHILE" => self.build_while(*name_pos, v.pos, args),
+                "LEN" => self.build_len(*name_pos, v.pos, args),
                 _ => Err(IRError::UnknownStmt {
                     pos: *name_pos,
                     name: name.clone(),
