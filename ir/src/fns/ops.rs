@@ -1,5 +1,3 @@
-use std::mem::discriminant;
-
 use super::*;
 
 impl IR {
@@ -22,29 +20,6 @@ impl IR {
             (TypeData::INT, TypeData::INT)
             | (TypeData::FLOAT, TypeData::FLOAT)
             | (TypeData::CHAR, TypeData::CHAR) => {}
-            (TypeData::INTERFACE { .. }, TypeData::INTERFACE { .. }) => {
-                let ok = if left.typ().data.matches(
-                    &vec![
-                        discriminant(&TypeData::INT),
-                        discriminant(&TypeData::FLOAT),
-                        discriminant(&TypeData::CHAR),
-                    ],
-                    self,
-                ) {
-                    match (left.typ().data, right.typ().data) {
-                        (TypeData::DEF(a), TypeData::DEF(b)) => a == b,
-                        _ => false,
-                    }
-                } else {
-                    false
-                };
-                if !ok {
-                    return Err(IRError::InvalidArgument {
-                        expected: TypeData::FLOAT,
-                        got: left,
-                    });
-                }
-            }
             (TypeData::INVALID, _) | (_, TypeData::INVALID) => {}
             _ => {
                 return Err(IRError::InvalidArgument {
@@ -81,30 +56,6 @@ impl IR {
             | (TypeData::FLOAT, TypeData::FLOAT)
             | (TypeData::CHAR, TypeData::CHAR)
             | (TypeData::BOOL, TypeData::BOOL) => {}
-            (TypeData::INTERFACE { .. }, TypeData::INTERFACE { .. }) => {
-                let ok = if left.typ().data.matches(
-                    &vec![
-                        discriminant(&TypeData::INT),
-                        discriminant(&TypeData::FLOAT),
-                        discriminant(&TypeData::CHAR),
-                        discriminant(&TypeData::BOOL),
-                    ],
-                    self,
-                ) {
-                    match (left.typ().data, right.typ().data) {
-                        (TypeData::DEF(a), TypeData::DEF(b)) => a == b,
-                        _ => false,
-                    }
-                } else {
-                    false
-                };
-                if !ok {
-                    return Err(IRError::InvalidArgument {
-                        expected: TypeData::FLOAT,
-                        got: left,
-                    });
-                }
-            }
             (TypeData::INVALID, _) | (_, TypeData::INVALID) => {}
             _ => {
                 return Err(IRError::InvalidArgument {

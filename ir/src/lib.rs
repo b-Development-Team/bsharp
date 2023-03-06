@@ -1,6 +1,7 @@
 mod fns;
 mod types;
 use fset::*;
+use std::collections::HashMap;
 pub use types::*;
 mod stack;
 use stack::*;
@@ -19,6 +20,8 @@ pub struct IR {
     pub types: Vec<TypeDef>,
     pub funcs: Vec<Function>,
 
+    pub typemap: HashMap<String, usize>,
+
     pub errors: Vec<IRError>,
 
     fset: FSet,
@@ -35,6 +38,7 @@ impl IR {
             stack: vec![0],
             funcs: Vec::new(),
             errors: Vec::new(),
+            typemap: HashMap::new(),
         }
     }
 

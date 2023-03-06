@@ -1,5 +1,3 @@
-use std::mem::Discriminant;
-
 use super::*;
 
 #[derive(Debug, Clone)]
@@ -24,29 +22,6 @@ impl TypeData {
         match self {
             TypeData::DEF(v) => ir.types[*v].typ.data.concrete(ir),
             _ => self.clone(),
-        }
-    }
-
-    pub fn matches(&self, typs: &Vec<Discriminant<TypeData>>, ir: &IR) -> bool {
-        match self.concrete(ir) {
-            TypeData::INTERFACE { body, .. } => {
-                for typ in typs {
-                    for v in body.iter() {
-                        if std::mem::discriminant(&v.data) == *typ {
-                            return true;
-                        }
-                    }
-                }
-                false
-            }
-            _ => {
-                for t in typs {
-                    if *t == std::mem::discriminant(self) {
-                        return true;
-                    }
-                }
-                false
-            }
         }
     }
 }
@@ -78,32 +53,14 @@ pub enum TypeData {
     CHAR,
     BOOL,
     BOX,
-    ARRAY {
-        param: Option<usize>,
-        body: Box<Type>,
-        scope: usize,
-    }, // First param is generic
-    STRUCT {
-        params: Vec<usize>,
-        fields: Vec<Field>,
-        scope: usize,
-    },
-    TUPLE {
-        params: Vec<usize>,
-        body: Vec<Type>,
-        scope: usize,
-    },
-    ENUM {
-        params: Vec<usize>,
-        body: Vec<Type>,
-        scope: usize,
-    },
-    INTERFACE {
-        params: Vec<usize>,
-        body: Vec<Type>,
-        scope: usize,
-    },
+    ARRAY(Box<Type>),
+    STRUCT(Vec<Field>),
+    TUPLE(Vec<Type>),
+    ENUM(Vec<Type>),
     DEF(usize), // Points to typedef
+
+    // Macros
+    CONSTRAINT(Vec<Type>),
 
     // Special types
     INVALID,

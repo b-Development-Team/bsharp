@@ -1,38 +1,6 @@
 use super::*;
 
 impl IR {
-    fn check_array_par(&mut self, par: &IRNode) -> Result<Type, IRError> {
-        match par.typ().data.concrete(self) {
-            TypeData::ARRAY { body, .. } => Ok(*body),
-            TypeData::INVALID => Ok(Type::from(TypeData::INVALID)),
-            TypeData::INTERFACE { body, .. } => {
-                for t in body {
-                    match t.data.concrete(self) {
-                        TypeData::ARRAY { body, .. } => return Ok(*body),
-                        _ => {}
-                    }
-                }
-
-                Err(IRError::InvalidArgument {
-                    expected: TypeData::ARRAY {
-                        param: None,
-                        body: Box::new(Type::void()),
-                        scope: 0,
-                    },
-                    got: par.clone(),
-                })
-            }
-            _ => Err(IRError::InvalidArgument {
-                expected: TypeData::ARRAY {
-                    param: None,
-                    body: Box::new(Type::void()),
-                    scope: 0,
-                },
-                got: par.clone(),
-            }),
-        }
-    }
-
     pub fn build_len(
         &mut self,
         pos: Pos,
@@ -41,7 +9,16 @@ impl IR {
     ) -> Result<IRNode, IRError> {
         let val = typecheck_ast(pos, args, &vec![ASTNodeDataType::Any])?;
         let par = self.build_node(&val[0]);
-        self.check_array_par(&par)?;
+        match par.typ().data.concrete(self) {
+            TypeData::ARRAY(_) => {}
+            TypeData::INVALID => {}
+            _ => {
+                return Err(IRError::InvalidArgument {
+                    expected: TypeData::ARRAY(Box::new(Type::void())),
+                    got: par,
+                })
+            }
+        }
         Ok(IRNode::new(IRNodeData::Len(Box::new(par)), range, pos))
     }
 
@@ -53,8 +30,18 @@ impl IR {
     ) -> Result<IRNode, IRError> {
         let val = typecheck_ast(pos, args, &vec![ASTNodeDataType::Any, ASTNodeDataType::Any])?;
         let arr = self.build_node(&val[0]);
-        let body_typ = self.check_array_par(&arr)?;
+        let body_typ = match arr.typ().data.concrete(self) {
+            TypeData::ARRAY(body) => *body,
+            TypeData::INVALID => Type::from(TypeData::INVALID),
+            _ => {
+                return Err(IRError::InvalidArgument {
+                    expected: TypeData::ARRAY(Box::new(Type::void())),
+                    got: arr,
+                });
+            }
+        };
         let val = self.build_node(&val[1]);
+
         if val.typ().data.concrete(self) != body_typ.data.concrete(self)
             && val.typ().data.concrete(self) != TypeData::INVALID
         {

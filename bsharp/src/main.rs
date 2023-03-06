@@ -10,8 +10,6 @@ const SOURCE: &'static str = r#"
   [FIELD .a $STRING]
   [FIELD .b $STRING]
 ]]
-[TYPE $C [TUPLE [GENERIC $T $ANY] [G $B $T] $NONE]]
-[TYPE $D [ARRAY [GENERIC $T $ANY]]]
 [TYPE $ENUM [ENUM 
   $A
   $B
@@ -19,21 +17,6 @@ const SOURCE: &'static str = r#"
 [TYPE $NONE [STRUCT]]
 
 [TYPE $OPTION_A [ENUM $NONE $A]]
-[TYPE $ANY [INTERFACE]]
-[TYPE $E [STRUCT 
-  [GENERIC $T $ANY]
-  [FIELD .a $T]
-]]
-
-[TYPE $F [INTERFACE
-  [GENERIC $T $ANY]
-  [INT] # Can be an int
-  [FLOAT] # Can be a float
-  [TUPLE $STRING [INT]] # Can be a tuple that starts w/ a string and INT
-  [ENUM $B $C] # Can be an enum that contains types B and C (but can contain more)
-  [STRUCT [FIELD .a $STRING]] # Can be a struct that contains field a
-]]
-
 
 [FUNC @hello [] [
     [PRINT "Hello, World!"]
@@ -57,16 +40,6 @@ const SOURCE: &'static str = r#"
     [DEFINE !i [+ !i 1]]
   ]]
   [RETURN !out]
-]]
-
-[TYPE $NUM [INTERFACE [INT] [FLOAT]]]
-[FUNC @add [[GENERIC $T $NUM] [PARAM !a $T] [PARAM !b $T] [RETURNS $T]] [
-  [RETURN [+ !a !b]]
-]]
-
-[FUNC @slice [[GENERIC $T $ANY] [PARAM !arr [G [ARRAY [GEERIC $T $ANY]] $T]] [PARAM !start [INT]] [PARAM !end [INT]] [RETURNS [G [ARRAY [GENERIC $T $ANY]] $T]]] [
-  [DEFINE !out [NEW [G [ARRAY [GENERIC $T $ANY]] $T] [- !end !start]]]
-  # the rest of the code
 ]]
 "#;
 

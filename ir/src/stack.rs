@@ -5,7 +5,6 @@ use super::*;
 pub struct Scope {
     pub kind: ScopeKind,
     pub vars: HashMap<String, usize>,
-    pub types: HashMap<String, usize>,
     pub pos: Pos,
 }
 
@@ -14,7 +13,6 @@ impl Scope {
         Self {
             kind,
             vars: HashMap::new(),
-            types: HashMap::new(),
             pos,
         }
     }
@@ -29,7 +27,6 @@ pub struct Variable {
 
 #[derive(Debug)]
 pub struct TypeDef {
-    pub scope: usize,
     pub name: String,
     pub pos: Pos,
 
@@ -48,7 +45,6 @@ pub enum ScopeKind {
 pub struct Function {
     pub definition: Pos,
     pub name: String,
-    pub generic_params: Vec<usize>,
     pub params: Vec<usize>,
 
     pub ret_typ: Type,

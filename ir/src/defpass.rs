@@ -38,23 +38,13 @@ impl IR {
                             _ => unreachable!(),
                         };
 
-                        let scopeind = *self.stack.last().unwrap();
-                        let scope = &mut self.scopes[scopeind];
-                        // Check if exists
-                        if let Some(ind) = scope.types.get(&name) {
-                            let ind = *ind;
-                            self.save_error(IRError::DuplicateType(*name_pos, ind));
-                            continue;
-                        }
-                        scope.types.insert(name.clone(), self.types.len());
-
+                        self.typemap.insert(name.clone(), self.types.len());
                         self.types.push(TypeDef {
-                            scope: scopeind,
                             name,
                             pos: *name_pos,
                             ast: Some(args[1].clone()),
                             typ: Type::void(),
-                        })
+                        });
                     }
                     "FUNC" => {
                         let args = match typecheck_ast(
@@ -91,7 +81,6 @@ impl IR {
                             name,
 
                             params: Vec::new(),
-                            generic_params: Vec::new(),
                             ret_typ: Type::void(),
                             ret_typ_definition: Pos::default(),
                             body: IRNode::void(),

@@ -52,7 +52,7 @@ impl IRNode {
             IRNodeData::Len(_) => Type::from(TypeData::INT),
             IRNodeData::GetEnum { typ, .. } => typ.clone(),
             IRNodeData::GetStruct { strct, field } => {
-                if let TypeData::STRUCT { fields, .. } = &strct.typ().data {
+                if let TypeData::STRUCT(fields) = &strct.typ().data {
                     for f in fields {
                         if f.name == *field {
                             return f.typ.clone();
@@ -67,7 +67,7 @@ impl IRNode {
             IRNodeData::NewBox(_) => Type::from(TypeData::BOX),
             IRNodeData::NewStruct(typ, _) => typ.clone(),
             IRNodeData::Param { .. } | IRNodeData::Returns(_) => Type::from(TypeData::PARAM),
-            IRNodeData::Field { .. } | IRNodeData::Generic { .. } => Type::from(TypeData::FIELD),
+            IRNodeData::Field { .. } => Type::from(TypeData::FIELD),
             IRNodeData::Type(_) | IRNodeData::TypeInstantiate { .. } => Type::from(TypeData::TYPE),
             IRNodeData::Cast(_, typ) => typ.clone(),
             IRNodeData::Invalid => Type::from(TypeData::INVALID),
@@ -181,8 +181,7 @@ pub enum IRNodeData {
     Returns(Type),
 
     // Types
-    Type(Type),     // [INT], [STRUCT], etc.
-    Generic(usize), // Type parameters
+    Type(Type), // [INT], [STRUCT], etc.
     TypeInstantiate {
         typ: Type,
         params: Vec<Type>,

@@ -21,9 +21,9 @@ impl IR {
             self.types[id].ast = None;
             self.types[id].typ = match res.data {
                 IRNodeData::Type(v) => v,
+                IRNodeData::Invalid => Type::from(TypeData::INVALID),
                 _ => unreachable!(),
             };
-            self.types[id].scope = self.stack.pop().unwrap();
         }
     }
 
@@ -36,7 +36,6 @@ impl IR {
             }
             .clone();
 
-            let mut generics = Vec::new();
             let mut params = Vec::new();
             let mut ret = None;
             let mut ret_def = Some(ast.pos);
@@ -48,15 +47,6 @@ impl IR {
             for par in pars.iter() {
                 let n = self.build_node(par);
                 match n.data {
-                    IRNodeData::Generic(v) => {
-                        if params.len() > 0 {
-                            self.save_error(IRError::InvalidArgument {
-                                expected: TypeData::PARAM,
-                                got: n.clone(),
-                            });
-                        }
-                        generics.push(v);
-                    }
                     IRNodeData::Param(ind) => {
                         params.push(ind);
                     }
@@ -81,7 +71,6 @@ impl IR {
 
             self.funcs[id].params_ast = None;
             self.funcs[id].params = params;
-            self.funcs[id].generic_params = generics;
             if let Some(_) = ret {
                 self.funcs[id].ret_typ = ret.unwrap();
             } else {
@@ -96,9 +85,6 @@ impl IR {
             for par in self.funcs[id].params.iter() {
                 self.variables[*par].scope = self.scopes.len();
                 sc.vars.insert(self.variables[*par].name.clone(), *par);
-            }
-            for gen in self.funcs[id].generic_params.iter() {
-                sc.types.insert(self.types[*gen].name.clone(), *gen);
             }
 
             // Add scope
@@ -125,9 +111,7 @@ impl IR {
                 "STRUCT" => self.build_struct(*name_pos, v.pos, args),
                 "TUPLE" => self.build_tuple(*name_pos, v.pos, args),
                 "ENUM" => self.build_enum(*name_pos, v.pos, args),
-                "INTERFACE" => self.build_interface(*name_pos, v.pos, args),
                 "FIELD" => self.build_field(*name_pos, v.pos, args),
-                "GENERIC" => self.build_generic(*name_pos, v.pos, args),
                 "CHAR" | "INT" | "FLOAT" | "BOOL" => self.build_prim(name, *name_pos, v.pos, args),
                 "PARAM" => self.build_param(*name_pos, v.pos, args),
                 "RETURNS" => self.build_returns(*name_pos, v.pos, args),
