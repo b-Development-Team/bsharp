@@ -38,7 +38,7 @@ impl IR {
 
         // Check if name is already on stack
         if let Some(ind) = self.scopes[*self.stack.last().unwrap()].vars.get(&name) {
-            if self.variables[*ind].typ.data == value.typ().data {
+            if self.variables[*ind].typ.data == value.typ(self).data {
                 return Ok(IRNode::new(
                     IRNodeData::Define {
                         var: *ind,
@@ -55,7 +55,7 @@ impl IR {
 
         self.variables.push(Variable {
             name: name.clone(),
-            typ: value.typ().clone(),
+            typ: value.typ(self).clone(),
             scope: *self.stack.last().unwrap(),
             definition: pos,
         });

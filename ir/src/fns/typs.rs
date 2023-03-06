@@ -121,7 +121,7 @@ impl IR {
             &vec![ASTNodeDataType::Field, ASTNodeDataType::Any],
         )?;
         let typ = self.build_node(&args[1]);
-        typ.typ().expect(typ.pos, &Type::from(TypeData::TYPE))?;
+        typ.typ(self).expect(typ.pos, &Type::from(TypeData::TYPE))?;
 
         let name = match &args[0].data {
             ASTNodeData::Field(value) => value.clone(),

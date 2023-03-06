@@ -11,7 +11,7 @@ impl IR {
 
             // Build
             let res = self.build_node(ast);
-            match res.typ().expect(res.pos, &Type::from(TypeData::TYPE)) {
+            match res.typ(self).expect(res.pos, &Type::from(TypeData::TYPE)) {
                 Err(err) => {
                     self.save_error(err);
                     return;
@@ -116,6 +116,7 @@ impl IR {
                 "PARAM" => self.build_param(*name_pos, v.pos, args),
                 "RETURNS" => self.build_returns(*name_pos, v.pos, args),
                 "RETURN" => self.build_return(*name_pos, v.pos, args),
+                "ARR" => self.build_arr(*name_pos, v.pos, args),
                 "+" => self.build_mathop(*name_pos, v.pos, args, MathOperator::ADD),
                 "-" => self.build_mathop(*name_pos, v.pos, args, MathOperator::SUBTRACT),
                 "/" => self.build_mathop(*name_pos, v.pos, args, MathOperator::DIVIDE),
@@ -131,7 +132,9 @@ impl IR {
                 "WHILE" => self.build_while(*name_pos, v.pos, args),
                 "LEN" => self.build_len(*name_pos, v.pos, args),
                 "APPEND" => self.build_append(*name_pos, v.pos, args),
+                "GET" => self.build_get(*name_pos, v.pos, args),
                 "NEW" => self.build_new(*name_pos, v.pos, args),
+                "PRINT" => self.build_print(*name_pos, v.pos, args),
                 _ => Err(IRError::UnknownStmt {
                     pos: *name_pos,
                     name: name.clone(),

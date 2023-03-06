@@ -28,9 +28,9 @@ impl IRNode {
         }
     }
 
-    pub fn typ(&self) -> Type {
+    pub fn typ(&self, ir: &IR) -> Type {
         match &self.data {
-            IRNodeData::Math(v, _, _) => v.typ(),
+            IRNodeData::Math(v, _, _) => v.typ(ir),
             IRNodeData::Comparison(_, _, _)
             | IRNodeData::Boolean(_, _, _)
             | IRNodeData::Peek { .. } => Type::from(TypeData::BOOL),
@@ -52,7 +52,7 @@ impl IRNode {
             IRNodeData::Len(_) => Type::from(TypeData::INT),
             IRNodeData::GetEnum { typ, .. } => typ.clone(),
             IRNodeData::GetStruct { strct, field } => {
-                if let TypeData::STRUCT(fields) = &strct.typ().data {
+                if let TypeData::STRUCT(fields) = &strct.typ(ir).data.concrete(ir) {
                     for f in fields {
                         if f.name == *field {
                             return f.typ.clone();
@@ -62,7 +62,7 @@ impl IRNode {
                 unreachable!()
             }
             IRNodeData::Unbox { typ, .. } => typ.clone(),
-            IRNodeData::NewArray(typ, _) => typ.clone(),
+            IRNodeData::NewArray(typ, _) | IRNodeData::NewArrayLiteral(typ, _) => typ.clone(),
             IRNodeData::NewEnum(_, enm) => enm.clone(),
             IRNodeData::NewBox(_) => Type::from(TypeData::BOX),
             IRNodeData::NewStruct(typ, _) => typ.clone(),
@@ -75,6 +75,10 @@ impl IRNode {
             IRNodeData::Variable(_, typ) => typ.clone(),
             IRNodeData::Int(_) => Type::from(TypeData::INT),
             IRNodeData::Float(_) => Type::from(TypeData::FLOAT),
+            IRNodeData::GetArr { arr, .. } => match arr.typ(ir).data.concrete(ir) {
+                TypeData::ARRAY(body) => *body,
+                _ => unreachable!(),
+            },
         }
     }
 }
@@ -85,7 +89,7 @@ pub enum IRNodeData {
         scope: usize,
         body: Vec<IRNode>,
     },
-    Print(Vec<IRNode>),
+    Print(Box<IRNode>),
     Math(Box<IRNode>, MathOperator, Box<IRNode>),
     Comparison(Box<IRNode>, ComparisonOperator, Box<IRNode>),
     Boolean(Box<IRNode>, BooleanOperator, Box<IRNode>),
@@ -145,6 +149,10 @@ pub enum IRNodeData {
         strct: Box<IRNode>,
         field: String,
     },
+    GetArr {
+        arr: Box<IRNode>,
+        ind: Box<IRNode>,
+    },
     StructOp {
         field: String,
         val: Box<IRNode>,
@@ -172,6 +180,7 @@ pub enum IRNodeData {
 
     // Allocating
     NewArray(Type, Option<Box<IRNode>>), // optional: capacity
+    NewArrayLiteral(Type, Vec<IRNode>),
     NewEnum(Box<IRNode>, Type),
     NewBox(Box<IRNode>),          // [BOX]
     NewStruct(Type, Vec<IRNode>), // [:] statements

@@ -14,8 +14,8 @@ impl IR {
 
         // Check types
         match (
-            left.typ().data.concrete(self),
-            right.typ().data.concrete(self),
+            left.typ(self).data.concrete(self),
+            right.typ(self).data.concrete(self),
         ) {
             (TypeData::INT, TypeData::INT)
             | (TypeData::FLOAT, TypeData::FLOAT)
@@ -49,8 +49,8 @@ impl IR {
 
         // Check types
         match (
-            left.typ().data.concrete(self),
-            right.typ().data.concrete(self),
+            left.typ(self).data.concrete(self),
+            right.typ(self).data.concrete(self),
         ) {
             (TypeData::INT, TypeData::INT)
             | (TypeData::FLOAT, TypeData::FLOAT)

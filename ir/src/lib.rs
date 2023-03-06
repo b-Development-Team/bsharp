@@ -33,7 +33,12 @@ impl IR {
         Self {
             fset,
             variables: Vec::new(),
-            types: Vec::new(),
+            types: vec![TypeDef {
+                name: "$STRING".to_string(),
+                pos: Pos::default(),
+                ast: None,
+                typ: Type::from(TypeData::ARRAY(Box::new(Type::from(TypeData::CHAR)))),
+            }],
             scopes: vec![Scope::new(ScopeKind::Global, Pos::default())],
             stack: vec![0],
             funcs: Vec::new(),
