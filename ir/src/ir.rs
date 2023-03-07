@@ -75,6 +75,7 @@ impl IRNode {
             IRNodeData::Variable(_, typ) => typ.clone(),
             IRNodeData::Int(_) => Type::from(TypeData::INT),
             IRNodeData::Float(_) => Type::from(TypeData::FLOAT),
+            IRNodeData::Char(_) => Type::from(TypeData::CHAR),
             IRNodeData::GetArr { arr, .. } => match arr.typ(ir).data.concrete(ir) {
                 TypeData::ARRAY(body) => *body,
                 _ => unreachable!(),
@@ -177,6 +178,7 @@ pub enum IRNodeData {
     // Literals
     Int(i64),
     Float(f64),
+    Char(u8),
 
     // Allocating
     NewArray(Type, Option<Box<IRNode>>), // optional: capacity
