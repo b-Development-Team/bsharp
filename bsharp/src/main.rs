@@ -41,6 +41,51 @@ const SOURCE: &'static str = r#"
   ]]
   [RETURN !out]
 ]]
+
+[FUNC @PRINTBOOL [[PARAM !a [BOOL]]] [
+  [IF !a [
+    [PRINT "true"]
+  ] [
+    [PRINT "false"]
+  ]]
+]]
+
+[FUNC @main [] [
+  [@PRINTBOOL [NOT [& [> 1 1] [| [< 1 1] [> 1 1]]]]]
+  [DEFINE !enum [NEW $OPTION_A [NEW $NONE]]]
+  [DEFINE !v [GET !enum $NONE]]
+  [DEFINE !b [NEW $B [: .a "Hello"] [: .b "World"]]]
+  [PRINT [GET !b .a]]
+
+  [MATCH !enum [
+    [CASE !val $NONE [
+      [PRINT "IT'S NONE"]
+    ]]
+    [CASE !val $A] [
+      [PRINT "IT'S A"]
+      [PRINT [CONCAT [ARRAY "VAL 1 is" [GET !val 0]]]]
+      [PRINT [CONCAT [ARRAY "VAL 2 is" [GET !val 1]]]]
+    ]
+  ]]
+
+  [DEFINE !enum [NEW $OPTION_A [NEW $A "Hello" "World"]]]
+
+  [MATCH "HELLO"
+    [CASE "HELLO" [
+      [PRINT "HI"]
+    ]]
+  ]
+
+  [MATCH 'H' 
+    [CASE 'H' [
+      [PRINT "HI"]
+    ]]
+  ]
+
+  [DEFINE !box [BOX "HELLO"]]
+  [@PRINTBOOL [PEEK !box $STRING]]
+  [PRINT [UNBOX !box $STRING]]
+]]
 "#;
 
 fn main() {

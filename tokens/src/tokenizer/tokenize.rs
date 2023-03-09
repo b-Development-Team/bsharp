@@ -11,9 +11,19 @@ impl super::Tokenizer {
                     Ok(Some(self.parse_num(c)?))
                 }
                 '\'' => Ok(Some(self.parse_char()?)),
-                'A'..='Z' | 'a'..='z' | '_' | '+' | '*' | '/' | '%' | '<' | '>' | '=' => {
-                    Ok(Some(self.parse_ident(c)?))
-                }
+                'A'..='Z'
+                | 'a'..='z'
+                | '_'
+                | '+'
+                | '*'
+                | '/'
+                | '%'
+                | '<'
+                | '>'
+                | '='
+                | '&'
+                | '|'
+                | ':' => Ok(Some(self.parse_ident(c)?)),
                 '[' => Ok(Some(Token {
                     data: TokenData::OPENBRACK,
                     pos: self.stream.last_char(),
