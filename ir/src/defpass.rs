@@ -38,6 +38,10 @@ impl IR {
                             _ => unreachable!(),
                         };
 
+                        if let Some(i) = self.typemap.get(&name) {
+                            self.save_error(IRError::DuplicateType(*name_pos, *i));
+                            continue;
+                        }
                         self.typemap.insert(name.clone(), self.types.len());
                         self.types.push(TypeDef {
                             name,
@@ -69,11 +73,9 @@ impl IR {
                         };
 
                         // Check if exists
-                        for i in 0..self.funcs.len() {
-                            if self.funcs[i].name == name {
-                                self.save_error(IRError::DuplicateFunction(*name_pos, i));
-                                continue;
-                            }
+                        if let Some(i) = self.funcs.iter().position(|v| v.name == name) {
+                            self.save_error(IRError::DuplicateFunction(*name_pos, i));
+                            continue;
                         }
 
                         self.funcs.push(Function {

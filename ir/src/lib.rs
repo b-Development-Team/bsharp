@@ -43,7 +43,7 @@ impl IR {
             stack: vec![0],
             funcs: Vec::new(),
             errors: Vec::new(),
-            typemap: HashMap::new(),
+            typemap: HashMap::from([("$STRING".to_string(), 0)]),
         }
     }
 

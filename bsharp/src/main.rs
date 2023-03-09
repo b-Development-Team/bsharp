@@ -4,7 +4,6 @@ use ir::IR;
 const SOURCE: &'static str = r#"
 # Block comment
 # Small comment #
-[TYPE $STRING [ARRAY [CHAR]]]
 [TYPE $A [TUPLE $STRING $STRING]]
 [TYPE $B [STRUCT
   [FIELD .a $STRING]
