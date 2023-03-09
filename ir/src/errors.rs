@@ -35,6 +35,10 @@ pub enum IRError {
         pos: Pos,
         name: String,
     },
+    UnknownFunction {
+        pos: Pos,
+        name: String,
+    },
     ReturnStatementOutsideFunction(Pos),
     DuplicateType(Pos, usize),     // Usize has original type index
     DuplicateFunction(Pos, usize), // Usize has original function index

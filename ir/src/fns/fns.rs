@@ -53,6 +53,10 @@ impl IR {
     }
 
     pub fn build_block(&mut self, pos: Pos, args: &Vec<ASTNode>) -> Result<IRNode, IRError> {
+        if let ASTNodeData::Function(name) = &args[0].data {
+            return self.build_fncall(args[0].pos, pos, name, &args[1..].to_vec());
+        }
+
         let mut body = Vec::new();
         self.scopes.push(Scope::new(ScopeKind::Block, pos));
         self.stack.push(self.scopes.len() - 1);
@@ -106,6 +110,39 @@ impl IR {
 
         Ok(IRNode::new(
             IRNodeData::Return(Some(Box::new(par[0].clone()))),
+            range,
+            pos,
+        ))
+    }
+
+    pub fn build_fncall(
+        &mut self,
+        pos: Pos,
+        range: Pos,
+        fun_name: &String,
+        args: &Vec<ASTNode>,
+    ) -> Result<IRNode, IRError> {
+        let ind = self.funcs.iter().position(|x| x.name == *fun_name);
+        if let None = ind {
+            return Err(IRError::UnknownFunction {
+                pos,
+                name: fun_name.clone(),
+            });
+        }
+
+        // Check args
+        let pars: Vec<_> = self.funcs[ind.unwrap()]
+            .params
+            .iter()
+            .map(|v| self.variables[*v].typ.data.clone())
+            .collect();
+        let args = self.typecheck(pos, args, &pars)?;
+        Ok(IRNode::new(
+            IRNodeData::FnCall {
+                func: ind.unwrap(),
+                args,
+                ret_typ: self.funcs[ind.unwrap()].ret_typ.clone(),
+            },
             range,
             pos,
         ))
