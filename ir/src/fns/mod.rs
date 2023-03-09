@@ -1,5 +1,6 @@
 use super::*;
 
+mod boxes;
 mod composite;
 mod control;
 mod fns;

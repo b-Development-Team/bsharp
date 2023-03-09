@@ -139,6 +139,9 @@ impl IR {
                 "NEW" => self.build_new(*name_pos, v.pos, args),
                 "PRINT" => self.build_print(*name_pos, v.pos, args),
                 "IF" => self.build_if(*name_pos, v.pos, args),
+                "BOX" => self.build_box(*name_pos, v.pos, args),
+                "PEEK" => self.build_peek(*name_pos, v.pos, args),
+                "UNBOX" => self.build_unbox(*name_pos, v.pos, args),
                 _ => Err(IRError::UnknownStmt {
                     pos: *name_pos,
                     name: name.clone(),
