@@ -128,6 +128,9 @@ impl IR {
                 "<=" => self.build_compop(*name_pos, v.pos, args, ComparisonOperator::LESSEQUAL),
                 "=" => self.build_compop(*name_pos, v.pos, args, ComparisonOperator::EQUAL),
                 "NEQ" => self.build_compop(*name_pos, v.pos, args, ComparisonOperator::NOTEQUAL), // TODO: Figure out a better name for this
+                "NOT" => self.build_boolop(*name_pos, v.pos, args, BooleanOperator::NOT), // TODO: figure out better name for this
+                "&" => self.build_boolop(*name_pos, v.pos, args, BooleanOperator::AND),
+                "|" => self.build_boolop(*name_pos, v.pos, args, BooleanOperator::OR),
                 "DEFINE" => self.build_define(*name_pos, v.pos, args),
                 "WHILE" => self.build_while(*name_pos, v.pos, args),
                 "LEN" => self.build_len(*name_pos, v.pos, args),
@@ -135,6 +138,7 @@ impl IR {
                 "GET" => self.build_get(*name_pos, v.pos, args),
                 "NEW" => self.build_new(*name_pos, v.pos, args),
                 "PRINT" => self.build_print(*name_pos, v.pos, args),
+                "IF" => self.build_if(*name_pos, v.pos, args),
                 _ => Err(IRError::UnknownStmt {
                     pos: *name_pos,
                     name: name.clone(),

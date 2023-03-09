@@ -71,4 +71,32 @@ impl IR {
             pos,
         ))
     }
+
+    pub fn build_boolop(
+        &mut self,
+        pos: Pos,
+        range: Pos,
+        args: &Vec<ASTNode>,
+        op: BooleanOperator,
+    ) -> Result<IRNode, IRError> {
+        if op == BooleanOperator::NOT {
+            let args = self.typecheck(pos, args, &vec![TypeData::BOOL])?;
+            return Ok(IRNode::new(
+                IRNodeData::Boolean(Box::new(args[0].clone()), op, None),
+                range,
+                pos,
+            ));
+        }
+
+        let args = self.typecheck(pos, args, &vec![TypeData::BOOL, TypeData::BOOL])?;
+        Ok(IRNode::new(
+            IRNodeData::Boolean(
+                Box::new(args[0].clone()),
+                op,
+                Some(Box::new(args[1].clone())),
+            ),
+            range,
+            pos,
+        ))
+    }
 }

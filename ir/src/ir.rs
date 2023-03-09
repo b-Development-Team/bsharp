@@ -93,7 +93,7 @@ pub enum IRNodeData {
     Print(Box<IRNode>),
     Math(Box<IRNode>, MathOperator, Box<IRNode>),
     Comparison(Box<IRNode>, ComparisonOperator, Box<IRNode>),
-    Boolean(Box<IRNode>, BooleanOperator, Box<IRNode>),
+    Boolean(Box<IRNode>, BooleanOperator, Option<Box<IRNode>>),
     Define {
         var: usize,
         val: Box<IRNode>,
@@ -125,7 +125,7 @@ pub enum IRNodeData {
         cond: Box<IRNode>,
         body: Box<IRNode>, // Doesn't have to be block, can be used as ternary op
         els: Box<IRNode>,
-        ret_typ: Type,
+        ret_typ: Option<Type>,
     },
     FnCall {
         func: usize,
@@ -200,7 +200,7 @@ pub enum IRNodeData {
     Cast(Box<IRNode>, Type),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum MathOperator {
     ADD,
     SUBTRACT,
@@ -209,7 +209,7 @@ pub enum MathOperator {
     MODULO,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum ComparisonOperator {
     GREATER,
     LESS,
@@ -219,8 +219,9 @@ pub enum ComparisonOperator {
     NOTEQUAL,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum BooleanOperator {
     AND,
     OR,
+    NOT,
 }
