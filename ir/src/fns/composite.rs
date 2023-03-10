@@ -1,5 +1,13 @@
 use super::*;
 
+fn expectedargcount(cnt: usize, pos: Pos, got: usize) -> IRError {
+    IRError::InvalidArgumentCount {
+        pos,
+        expected: cnt,
+        got,
+    }
+}
+
 impl IR {
     pub fn build_len(
         &mut self,
@@ -76,6 +84,21 @@ impl IR {
 
         let dat = match typ.data.concrete(self) {
             TypeData::INVALID => IRNodeData::Invalid,
+            TypeData::ENUM(v) => {
+                if args.len() != 1 {
+                    return Err(expectedargcount(1, pos, args.len()));
+                }
+                let arg = self.build_node(&args[0]);
+                let ok = v.iter().any(|v| v.data == arg.typ(self).data)
+                    || arg.typ(self).data == TypeData::INVALID;
+                if !ok {
+                    return Err(IRError::InvalidArgument {
+                        expected: v[0].data.clone(),
+                        got: arg,
+                    });
+                }
+                IRNodeData::NewEnum(Box::new(arg), typ)
+            }
             TypeData::ARRAY { .. } => {
                 let pars = self.typecheck_variadic(pos, &args, &vec![], TypeData::INT, 1)?;
                 if pars.len() == 1 {
@@ -84,7 +107,26 @@ impl IR {
                     IRNodeData::NewArray(typ, None)
                 }
             }
-            // TODO: Structs, enums, etc.
+            TypeData::STRUCT(fields) => {
+                if args.len() != fields.len() {
+                    return Err(expectedargcount(fields.len(), pos, args.len()));
+                }
+                let args = self.typecheck_variadic(pos, &args, &vec![], TypeData::VOID, 0)?;
+                for arg in args.iter() {
+                    match &arg.data {
+                        IRNodeData::SetStruct { .. } => {}
+                        IRNodeData::Invalid => {}
+                        _ => {
+                            return Err(IRError::InvalidArgument {
+                                expected: TypeData::VOID,
+                                got: arg.clone(),
+                            })
+                        }
+                    }
+                }
+
+                IRNodeData::NewStruct(typ, args)
+            }
             _ => {
                 return Err(IRError::InvalidArgument {
                     expected: TypeData::TYPE,
