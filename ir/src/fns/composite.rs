@@ -111,7 +111,11 @@ impl IR {
                 if args.len() != fields.len() {
                     return Err(expectedargcount(fields.len(), pos, args.len()));
                 }
+                self.scopes
+                    .push(Scope::new(ScopeKind::Struct(fields), range));
+                self.stack.push(self.scopes.len() - 1);
                 let args = self.typecheck_variadic(pos, &args, &vec![], TypeData::VOID, 0)?;
+                self.stack.pop().unwrap();
                 for arg in args.iter() {
                     match &arg.data {
                         IRNodeData::SetStruct { .. } => {}
@@ -215,5 +219,51 @@ impl IR {
             }
         };
         Ok(IRNode::new(dat, range, pos))
+    }
+
+    pub fn build_structop(
+        &mut self,
+        pos: Pos,
+        range: Pos,
+        args: &Vec<ASTNode>,
+    ) -> Result<IRNode, IRError> {
+        let ind = *self.stack.last().unwrap();
+        let fields = match &self.scopes[ind].kind {
+            ScopeKind::Struct(fields) => fields.clone(),
+            _ => return Err(IRError::StructOpOutsideDef(pos)),
+        };
+        let args = typecheck_ast(
+            pos,
+            args,
+            &vec![ASTNodeDataType::Field, ASTNodeDataType::Any],
+        )?;
+        let name = match &args[0].data {
+            ASTNodeData::Field(name) => name,
+            _ => unreachable!(),
+        };
+        let field = fields.iter().position(|x| x.name == *name);
+        if !field.is_some() {
+            return Err(IRError::UnknownField {
+                pos,
+                name: name.clone(),
+            });
+        }
+        let arg = self.build_node(&args[1]);
+        if arg.typ(self).data != TypeData::INVALID
+            && arg.typ(self).data != fields[field.unwrap()].typ.data
+        {
+            return Err(IRError::InvalidArgument {
+                expected: fields[field.unwrap()].typ.data.clone(),
+                got: arg,
+            });
+        }
+        Ok(IRNode::new(
+            IRNodeData::StructOp {
+                field: name.clone(),
+                val: Box::new(arg),
+            },
+            range,
+            pos,
+        ))
     }
 }

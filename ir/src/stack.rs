@@ -40,6 +40,7 @@ pub enum ScopeKind {
     Type,
     Function(usize),
     Block,
+    Struct(Vec<Field>),
 }
 
 pub struct Function {

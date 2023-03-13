@@ -142,6 +142,7 @@ impl IR {
                 "BOX" => self.build_box(*name_pos, v.pos, args),
                 "PEEK" => self.build_peek(*name_pos, v.pos, args),
                 "UNBOX" => self.build_unbox(*name_pos, v.pos, args),
+                ":" => self.build_structop(*name_pos, v.pos, args),
                 _ => Err(IRError::UnknownStmt {
                     pos: *name_pos,
                     name: name.clone(),

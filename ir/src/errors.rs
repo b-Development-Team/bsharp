@@ -35,11 +35,16 @@ pub enum IRError {
         pos: Pos,
         name: String,
     },
+    UnknownField {
+        pos: Pos,
+        name: String,
+    },
     UnknownFunction {
         pos: Pos,
         name: String,
     },
     ReturnStatementOutsideFunction(Pos),
+    StructOpOutsideDef(Pos),
     DuplicateType(Pos, usize),     // Usize has original type index
     DuplicateFunction(Pos, usize), // Usize has original function index
     DuplicateVariable(Pos, usize), // Usize has original variable index
