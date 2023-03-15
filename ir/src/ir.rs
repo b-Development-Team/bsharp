@@ -65,6 +65,7 @@ impl IRNode {
             IRNodeData::NewEnum(_, enm) => enm.clone(),
             IRNodeData::NewBox(_) => Type::from(TypeData::BOX),
             IRNodeData::NewStruct(typ, _) => typ.clone(),
+            IRNodeData::NewTuple(typ, _) => typ.clone(),
             IRNodeData::Param { .. } | IRNodeData::Returns(_) => Type::from(TypeData::PARAM),
             IRNodeData::Field { .. } => Type::from(TypeData::FIELD),
             IRNodeData::Type(_) => Type::from(TypeData::TYPE),
@@ -184,6 +185,7 @@ pub enum IRNodeData {
     NewEnum(Box<IRNode>, Type),
     NewBox(Box<IRNode>),          // [BOX]
     NewStruct(Type, Vec<IRNode>), // [:] statements
+    NewTuple(Type, Vec<IRNode>),
 
     // Functions
     Param(usize),

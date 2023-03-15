@@ -107,6 +107,17 @@ impl IR {
                     IRNodeData::NewArray(typ, None)
                 }
             }
+            TypeData::TUPLE(typs) => {
+                let pars = self.typecheck(
+                    pos,
+                    &args,
+                    &typs
+                        .iter()
+                        .map(|v| v.data.clone())
+                        .collect::<Vec<TypeData>>(),
+                )?;
+                IRNodeData::NewTuple(typ, pars)
+            }
             TypeData::STRUCT(fields) => {
                 if args.len() != fields.len() {
                     return Err(expectedargcount(fields.len(), pos, args.len()));
