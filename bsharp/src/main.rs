@@ -55,6 +55,7 @@ const SOURCE: &'static str = r#"
   [DEFINE !v [GET !enum $NONE]]
   [DEFINE !b [NEW $B [: .a "Hello"] [: .b "World"]]]
   [PRINT [GET !b .a]]
+  [SET !b [: .a "Hi"]]
 
   [MATCH !enum [
     [CASE !val $NONE [

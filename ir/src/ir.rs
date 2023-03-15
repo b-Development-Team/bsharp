@@ -37,7 +37,6 @@ impl IRNode {
             IRNodeData::Block { .. }
             | IRNodeData::Define { .. }
             | IRNodeData::Print(_)
-            | IRNodeData::Import(_)
             | IRNodeData::While { .. }
             | IRNodeData::TypeCase { .. }
             | IRNodeData::Case { .. }
@@ -68,7 +67,7 @@ impl IRNode {
             IRNodeData::NewStruct(typ, _) => typ.clone(),
             IRNodeData::Param { .. } | IRNodeData::Returns(_) => Type::from(TypeData::PARAM),
             IRNodeData::Field { .. } => Type::from(TypeData::FIELD),
-            IRNodeData::Type(_) | IRNodeData::TypeInstantiate { .. } => Type::from(TypeData::TYPE),
+            IRNodeData::Type(_) => Type::from(TypeData::TYPE),
             IRNodeData::Cast(_, typ) => typ.clone(),
             IRNodeData::Invalid => Type::from(TypeData::INVALID),
             IRNodeData::FnCall { ret_typ, .. } => ret_typ.clone(),
@@ -100,7 +99,6 @@ pub enum IRNodeData {
         edit: bool, // Whether making variable or just changing value
     },
     Variable(usize, Type), // Gets value of variable
-    Import(String),
     While {
         cond: Box<IRNode>,
         body: Box<IRNode>,
@@ -160,7 +158,7 @@ pub enum IRNodeData {
     }, // [:]
     SetStruct {
         strct: Box<IRNode>,
-        vals: Box<IRNode>,
+        vals: Vec<IRNode>,
     },
     Field {
         name: String,
@@ -193,10 +191,6 @@ pub enum IRNodeData {
 
     // Types
     Type(Type), // [INT], [STRUCT], etc.
-    TypeInstantiate {
-        typ: Type,
-        params: Vec<Type>,
-    }, // [G <Type> <Params>]
     Cast(Box<IRNode>, Type),
 }
 
