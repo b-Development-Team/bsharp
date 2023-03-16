@@ -144,6 +144,7 @@ impl IR {
                 "UNBOX" => self.build_unbox(*name_pos, v.pos, args),
                 ":" => self.build_structop(*name_pos, v.pos, args),
                 "SET" => self.build_set(*name_pos, v.pos, args),
+                "MATCH" => self.build_match(*name_pos, v.pos, args),
                 _ => Err(IRError::UnknownStmt {
                     pos: *name_pos,
                     name: name.clone(),
@@ -154,6 +155,7 @@ impl IR {
             ASTNodeData::Block(pars) => self.build_block(v.pos, pars),
             ASTNodeData::Integer(val) => Ok(IRNode::new(IRNodeData::Int(*val), v.pos, v.pos)),
             ASTNodeData::Float(val) => Ok(IRNode::new(IRNodeData::Float(*val), v.pos, v.pos)),
+            ASTNodeData::Char(val) => Ok(IRNode::new(IRNodeData::Char(*val as u8), v.pos, v.pos)),
             ASTNodeData::String(val) => Ok(self.build_string(v.pos, val)),
             _ => Err(IRError::UnexpectedNode(v.clone())),
         } {

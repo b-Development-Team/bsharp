@@ -41,6 +41,8 @@ pub enum ScopeKind {
     Function(usize),
     Block,
     Struct(Vec<Field>),
+    TypeMatch(Vec<Type>),
+    Match(Type),
 }
 
 pub struct Function {

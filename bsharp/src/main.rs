@@ -57,16 +57,16 @@ const SOURCE: &'static str = r#"
   [PRINT [GET !b .a]]
   [SET !b [: .a "Hi"]]
 
-  [MATCH !enum [
+  [MATCH !enum 
     [CASE !val $NONE [
       [PRINT "IT'S NONE"]
     ]]
-    [CASE !val $A] [
+    [CASE !val $A [
       [PRINT "IT'S A"]
       [PRINT [CONCAT [ARRAY "VAL 1 is" [GET !val 0]]]]
       [PRINT [CONCAT [ARRAY "VAL 2 is" [GET !val 1]]]]
-    ]
-  ]]
+    ]]
+  ]
 
   [DEFINE !enum [NEW $OPTION_A [NEW $A "Hello" "World"]]]
 

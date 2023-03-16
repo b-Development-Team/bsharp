@@ -65,4 +65,79 @@ impl IR {
             pos,
         ))
     }
+
+    pub fn build_match(
+        &mut self,
+        pos: Pos,
+        range: Pos,
+        args: &Vec<ASTNode>,
+    ) -> Result<IRNode, IRError> {
+        if args.len() < 2 {
+            return Err(IRError::InvalidArgumentCount {
+                pos,
+                expected: 2,
+                got: args.len(),
+            });
+        }
+        let val = self.build_node(&args[0]);
+
+        let typecase = if let TypeData::ENUM(vals) = val.typ(self).data.concrete(self) {
+            self.scopes
+                .push(Scope::new(ScopeKind::TypeMatch(vals.clone()), pos));
+            true
+        } else {
+            let v = val.typ(self);
+            match v.data {
+                TypeData::INVALID
+                | TypeData::DEF(0)
+                | TypeData::CHAR
+                | TypeData::INT
+                | TypeData::FLOAT => {}
+                _ => {
+                    return Err(IRError::InvalidArgument {
+                        expected: TypeData::CHAR,
+                        got: val,
+                    })
+                }
+            };
+            self.scopes
+                .push(Scope::new(ScopeKind::Match(v.clone()), pos));
+            false
+        };
+        self.stack.push(self.scopes.len() - 1);
+
+        let mut cases = Vec::new();
+        for arg in args.iter().skip(1) {
+            let v = self.build_node(arg);
+            if !match v.data {
+                IRNodeData::Invalid => true,
+                IRNodeData::TypeCase { .. } => typecase,
+                IRNodeData::Case { .. } => !typecase,
+                _ => false,
+            } {
+                return Err(IRError::InvalidArgument {
+                    expected: TypeData::PARAM,
+                    got: v,
+                });
+            }
+            cases.push(v);
+        }
+        self.stack.pop().unwrap();
+
+        Ok(IRNode::new(
+            if typecase {
+                IRNodeData::TypeMatch {
+                    val: Box::new(val),
+                    body: cases,
+                }
+            } else {
+                IRNodeData::Match {
+                    val: Box::new(val),
+                    body: cases,
+                }
+            },
+            range,
+            pos,
+        ))
+    }
 }
