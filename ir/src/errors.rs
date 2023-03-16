@@ -45,6 +45,7 @@ pub enum IRError {
     },
     ReturnStatementOutsideFunction(Pos),
     StructOpOutsideDef(Pos),
+    CaseOutsideMatch(Pos),
     DuplicateType(Pos, usize),     // Usize has original type index
     DuplicateFunction(Pos, usize), // Usize has original function index
     DuplicateVariable(Pos, usize), // Usize has original variable index

@@ -111,6 +111,7 @@ pub enum IRNodeData {
     },
     Case {
         val: Box<IRNode>,
+        body: Box<IRNode>,
     },
     TypeMatch {
         val: Box<IRNode>,

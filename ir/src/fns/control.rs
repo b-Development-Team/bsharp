@@ -140,4 +140,111 @@ impl IR {
             pos,
         ))
     }
+
+    pub fn build_case(
+        &mut self,
+        pos: Pos,
+        range: Pos,
+        args: &Vec<ASTNode>,
+    ) -> Result<IRNode, IRError> {
+        // Get scope
+        let kind = match &self.scopes[*self.stack.last().unwrap()].kind {
+            ScopeKind::TypeMatch(vals) => ScopeKind::TypeMatch(vals.clone()),
+            ScopeKind::Match(val) => ScopeKind::Match(val.clone()),
+            _ => return Err(IRError::CaseOutsideMatch(range)),
+        };
+
+        // Build args
+        let typs = if let ScopeKind::TypeMatch(_) = kind {
+            vec![
+                ASTNodeDataType::Variable,
+                ASTNodeDataType::Any,
+                ASTNodeDataType::Block,
+            ]
+        } else {
+            vec![ASTNodeDataType::Any, ASTNodeDataType::Block]
+        };
+        let args = typecheck_ast(pos, &args, &typs)?;
+
+        // Create scope
+        let mut varind = None;
+        let mut arg = None;
+        let blkind = if let ScopeKind::TypeMatch(ref allowed) = kind {
+            let name = match &args[0].data {
+                ASTNodeData::Variable(name) => name.clone(),
+                _ => unreachable!(),
+            };
+            let t = self.build_node(&args[1]);
+            let typ = match &t.data {
+                IRNodeData::Invalid => Type::from(TypeData::INVALID),
+                IRNodeData::Type(t) => t.clone(),
+                _ => {
+                    return Err(IRError::InvalidArgument {
+                        expected: TypeData::TYPE,
+                        got: t,
+                    })
+                }
+            };
+            if !allowed.iter().any(|x| x.data == typ.data) {
+                return Err(IRError::InvalidArgument {
+                    expected: allowed[0].data.clone(),
+                    got: t,
+                });
+            }
+            self.variables.push(Variable {
+                name: name.clone(),
+                typ: typ.clone(),
+                scope: self.scopes.len(),
+                definition: args[0].pos,
+            });
+            varind = Some((self.variables.len() - 1, typ));
+            self.scopes.push(Scope::new(ScopeKind::Case, pos));
+            self.scopes
+                .last_mut()
+                .unwrap()
+                .vars
+                .insert(name, self.variables.len() - 1);
+            self.stack.push(self.scopes.len() - 1);
+
+            2
+        } else {
+            let par = self.build_node(&args[0]);
+            let ok = match &par.data {
+                IRNodeData::NewArrayLiteral(t, _) => t.data == TypeData::DEF(0),
+                IRNodeData::Invalid => true,
+                IRNodeData::Char(_) | IRNodeData::Int(_) | IRNodeData::Float(_) => true,
+                _ => false,
+            };
+            if !ok {
+                return Err(IRError::InvalidArgument {
+                    expected: TypeData::INT,
+                    got: par,
+                });
+            }
+            arg = Some(par);
+            self.scopes.push(Scope::new(ScopeKind::Case, pos));
+            self.stack.push(self.scopes.len() - 1);
+
+            1
+        };
+        let blk = self.build_node(&args[blkind]);
+
+        // Build node
+        let node = if let ScopeKind::TypeMatch(_) = kind {
+            IRNodeData::TypeCase {
+                var: varind.as_ref().unwrap().0.clone(),
+                typ: varind.as_ref().unwrap().1.clone(),
+                body: Box::new(blk),
+            }
+        } else {
+            IRNodeData::Case {
+                val: Box::new(arg.unwrap()),
+                body: Box::new(blk),
+            }
+        };
+
+        self.stack.pop().unwrap();
+
+        Ok(IRNode::new(node, range, pos))
+    }
 }

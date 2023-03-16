@@ -145,6 +145,7 @@ impl IR {
                 ":" => self.build_structop(*name_pos, v.pos, args),
                 "SET" => self.build_set(*name_pos, v.pos, args),
                 "MATCH" => self.build_match(*name_pos, v.pos, args),
+                "CASE" => self.build_case(*name_pos, v.pos, args),
                 _ => Err(IRError::UnknownStmt {
                     pos: *name_pos,
                     name: name.clone(),

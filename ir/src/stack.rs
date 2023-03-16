@@ -43,6 +43,7 @@ pub enum ScopeKind {
     Struct(Vec<Field>),
     TypeMatch(Vec<Type>),
     Match(Type),
+    Case,
 }
 
 pub struct Function {
