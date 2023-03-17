@@ -1,5 +1,5 @@
 [package]
-name = "bsharp"
+name = "bsharp_interp"
 version = "0.1.0"
 edition = "2021"
 
@@ -11,6 +11,4 @@ keywords = ["language", "compiler"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-fset = { path = "../fset", package = "bsharp_fset", version = "0.1.0" }
-ir = { path = "../ir", package = "bsharp_ir", version = "0.1.0" }
-interp = { path = "../interp", package = "bsharp_interp", version = "0.1.0" }
+fset = { path = "../ir", package = "bsharp_ir", version = "0.1.0" }
