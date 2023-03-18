@@ -1,4 +1,5 @@
 use fset::FSet;
+use interp::Interp;
 use ir::IR;
 
 const SOURCE: &'static str = r#"
@@ -89,13 +90,23 @@ const SOURCE: &'static str = r#"
 "#;
 
 fn main() {
+    // Fset
     let mut fset = FSet::new();
     fset.add_file_source("main.bsp".to_string(), SOURCE.to_string())
         .unwrap();
+
+    // IR
     let mut ir = IR::new(fset);
     ir.build().unwrap();
-
-    for err in ir.errors {
-        println!("{:?}\n", err);
+    if ir.errors.len() > 0 {
+        for err in ir.errors {
+            println!("{:?}\n", err);
+        }
+        return;
     }
+
+    // Run
+    let mut interp = Interp::new(ir);
+    let res = interp.run_fn(&"@main".to_string(), Vec::new()).unwrap();
+    println!("OUTPUT: {:?}", res);
 }
