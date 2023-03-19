@@ -10,4 +10,26 @@ impl Interp {
         }
         Ok(Value::Void)
     }
+    pub fn exec_if(
+        &mut self,
+        cond: &IRNode,
+        body: &IRNode,
+        els: &IRNode,
+        ret_typ: &Option<Type>,
+    ) -> Result<Value, InterpError> {
+        let cond = self.exec(cond)?;
+        let res = if let Value::Bool(cond) = cond {
+            if cond {
+                self.exec(body)?
+            } else {
+                self.exec(els)?
+            }
+        } else {
+            unreachable!();
+        };
+        if ret_typ.is_some() {
+            return Ok(res);
+        }
+        Ok(Value::Void)
+    }
 }

@@ -13,6 +13,13 @@ impl Interp {
             IRNodeData::Int(v) => Ok(Value::Int(*v)),
             IRNodeData::Float(v) => Ok(Value::Float(*v)),
             IRNodeData::Char(v) => Ok(Value::Char(*v)),
+            IRNodeData::If {
+                cond,
+                body,
+                els,
+                ret_typ,
+            } => self.exec_if(cond, body, els, ret_typ),
+            IRNodeData::Variable(ind, _) => self.exec_var(*ind),
             _ => Err(InterpError::UnknownNode(node.clone())),
         }
     }

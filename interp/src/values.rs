@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{cell::RefCell, collections::HashMap};
 
 use super::*;
 
@@ -9,9 +9,9 @@ pub enum Value {
     Char(u8),
     Bool(bool),
     Box(Box<Value>),
-    Array(Vec<Value>),
-    Struct(HashMap<String, Value>),
-    Tuple(Vec<Value>),
+    Array(RefCell<Vec<Value>>),
+    Struct(RefCell<HashMap<String, Value>>),
+    Tuple(RefCell<Vec<Value>>),
     Enum(Type, Box<Value>),
     Void,
 }
