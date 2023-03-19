@@ -23,6 +23,11 @@ impl Interp {
             IRNodeData::NewArrayLiteral(_, vals) => self.exec_arrlit(vals),
             IRNodeData::Print(v) => self.exec_print(v),
             IRNodeData::Define { var, val, .. } => self.exec_define(*var, val),
+            IRNodeData::NewEnum(val, ..) => self.exec_newenum(val),
+            IRNodeData::NewStruct(_, vals) => self.exec_newstruct(vals),
+            IRNodeData::GetEnum { enm, typ } => self.exec_getenum(enm, typ),
+            IRNodeData::GetStruct { strct, field } => self.exec_getstruct(strct, field),
+            IRNodeData::SetStruct { strct, vals } => self.exec_setstruct(strct, vals),
             _ => Err(InterpError::UnknownNode(node.clone())),
         }
     }

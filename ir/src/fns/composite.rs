@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use super::*;
 
 fn expectedargcount(cnt: usize, pos: Pos, got: usize) -> IRError {
@@ -123,24 +125,40 @@ impl IR {
                     return Err(expectedargcount(fields.len(), pos, args.len()));
                 }
                 self.scopes
-                    .push(Scope::new(ScopeKind::Struct(fields), range));
+                    .push(Scope::new(ScopeKind::Struct(fields.clone()), range));
                 self.stack.push(self.scopes.len() - 1);
-                let args = self.typecheck_variadic(pos, &args, &vec![], TypeData::VOID, 0)?;
-                self.stack.pop().unwrap();
+
+                let mut required_fields = fields
+                    .iter()
+                    .map(|v| v.name.clone())
+                    .collect::<HashSet<String>>();
+
+                let mut ops = Vec::new();
                 for arg in args.iter() {
-                    match &arg.data {
-                        IRNodeData::SetStruct { .. } => {}
-                        IRNodeData::Invalid => {}
+                    let arg = self.build_node(arg);
+                    let field = match &arg.data {
+                        IRNodeData::StructOp { field, .. } => field,
                         _ => {
-                            return Err(IRError::InvalidArgument {
-                                expected: TypeData::VOID,
-                                got: arg.clone(),
-                            })
+                            self.save_error(IRError::InvalidArgument {
+                                expected: TypeData::FIELD,
+                                got: arg,
+                            });
+                            continue;
                         }
-                    }
+                    };
+                    required_fields.remove(field);
+                    ops.push(arg);
+                }
+                self.stack.pop().unwrap();
+
+                if required_fields.len() > 0 {
+                    return Err(IRError::MissingStructFields {
+                        pos,
+                        missing: required_fields.into_iter().collect(),
+                    });
                 }
 
-                IRNodeData::NewStruct(typ, args)
+                IRNodeData::NewStruct(typ, ops)
             }
             _ => {
                 return Err(IRError::InvalidArgument {
@@ -205,28 +223,76 @@ impl IR {
                 got: 0,
             });
         }
-        let t = self.build_node(&args[0]);
-        let typ = match &t.data {
-            IRNodeData::Type(t) => t.clone(),
-            _ => Type::from(TypeData::INVALID),
-        };
+        let val = self.build_node(&args[0]);
         args.remove(0);
 
-        let dat = match typ.data.concrete(self) {
+        let dat = match val.typ(self).data.concrete(self) {
             TypeData::INVALID => IRNodeData::Invalid,
             TypeData::ARRAY { .. } => {
                 let pars = self.typecheck(pos, &args, &vec![TypeData::INT])?;
                 IRNodeData::GetArr {
-                    arr: Box::new(t),
+                    arr: Box::new(val),
                     ind: Box::new(pars[0].clone()),
                 }
             }
-            // TODO: Structs, enums, etc.
+            TypeData::ENUM(allowed) => {
+                let pars = self.typecheck(pos, &args, &vec![TypeData::TYPE])?;
+                let t = match &pars[0].data {
+                    IRNodeData::Type(t) => t.clone(),
+                    _ => return Ok(IRNode::invalid(pos)),
+                };
+                let ok = allowed.iter().any(|v| v.data == t.data);
+                if !ok {
+                    return Err(IRError::InvalidArgument {
+                        expected: allowed[0].data.clone(),
+                        got: pars[0].clone(),
+                    });
+                }
+                IRNodeData::GetEnum {
+                    enm: Box::new(val),
+                    typ: t,
+                }
+            }
+            TypeData::STRUCT(fields) => {
+                let pars = typecheck_ast(pos, &args, &vec![ASTNodeDataType::Field])?;
+                let name = match &pars[0].data {
+                    ASTNodeData::Field(name) => name.clone(),
+                    _ => return Ok(IRNode::invalid(pos)),
+                };
+                let ok = fields.iter().any(|v| v.name == name);
+                if !ok {
+                    return Err(IRError::InvalidASTArgument {
+                        expected: ASTNodeDataType::Field,
+                        got: pars[0].clone(),
+                    });
+                }
+                IRNodeData::GetStruct {
+                    strct: Box::new(val),
+                    field: name,
+                }
+            }
+            TypeData::TUPLE(typs) => {
+                let pars = typecheck_ast(pos, &args, &vec![ASTNodeDataType::Integer])?;
+                let ind = match &pars[0].data {
+                    ASTNodeData::Integer(i) => *i,
+                    _ => unreachable!(),
+                };
+                if ind >= typs.len() as i64 || ind < 0 {
+                    return Err(IRError::InvalidASTArgument {
+                        expected: ASTNodeDataType::Integer,
+                        got: pars[0].clone(),
+                    });
+                }
+                IRNodeData::GetTuple {
+                    tup: Box::new(val),
+                    ind: ind as usize,
+                }
+            }
             _ => {
                 return Err(IRError::InvalidArgument {
                     expected: TypeData::TYPE,
-                    got: t,
-                })
+                    got: val,
+                });
             }
         };
         Ok(IRNode::new(dat, range, pos))

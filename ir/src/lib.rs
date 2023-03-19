@@ -1,6 +1,6 @@
 mod fns;
 mod types;
-use fset::*;
+pub use fset::*;
 use std::collections::HashMap;
 pub use types::*;
 mod stack;

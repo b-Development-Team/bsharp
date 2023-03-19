@@ -43,6 +43,10 @@ pub enum IRError {
         pos: Pos,
         name: String,
     },
+    MissingStructFields {
+        pos: Pos,
+        missing: Vec<String>,
+    },
     ReturnStatementOutsideFunction(Pos),
     StructOpOutsideDef(Pos),
     CaseOutsideMatch(Pos),

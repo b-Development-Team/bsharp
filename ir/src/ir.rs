@@ -60,6 +60,10 @@ impl IRNode {
                 }
                 unreachable!()
             }
+            IRNodeData::GetTuple { tup, ind } => match tup.typ(ir).data.concrete(ir) {
+                TypeData::TUPLE(fields) => fields[*ind].clone(),
+                _ => unreachable!(),
+            },
             IRNodeData::Unbox { typ, .. } => typ.clone(),
             IRNodeData::NewArray(typ, _) | IRNodeData::NewArrayLiteral(typ, _) => typ.clone(),
             IRNodeData::NewEnum(_, enm) => enm.clone(),
@@ -153,6 +157,10 @@ pub enum IRNodeData {
     GetArr {
         arr: Box<IRNode>,
         ind: Box<IRNode>,
+    },
+    GetTuple {
+        tup: Box<IRNode>,
+        ind: usize,
     },
     StructOp {
         field: String,
