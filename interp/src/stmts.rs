@@ -20,6 +20,9 @@ impl Interp {
                 ret_typ,
             } => self.exec_if(cond, body, els, ret_typ),
             IRNodeData::Variable(ind, _) => self.exec_var(*ind),
+            IRNodeData::NewArrayLiteral(_, vals) => self.exec_arrlit(vals),
+            IRNodeData::Print(v) => self.exec_print(v),
+            IRNodeData::Define { var, val, .. } => self.exec_define(*var, val),
             _ => Err(InterpError::UnknownNode(node.clone())),
         }
     }

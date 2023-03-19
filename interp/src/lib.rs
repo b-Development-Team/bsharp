@@ -1,4 +1,5 @@
 use ir::*;
+use std::io::Write;
 
 mod values;
 use values::*;
@@ -12,13 +13,15 @@ mod stmts;
 pub struct Interp {
     pub stack: Vec<StackFrame>,
     pub ir: IR,
+    pub out: Box<dyn Write>,
 }
 
 impl Interp {
-    pub fn new(ir: IR) -> Self {
+    pub fn new(ir: IR, out: Box<dyn Write>) -> Self {
         Self {
             stack: Vec::new(),
             ir,
+            out,
         }
     }
 

@@ -106,7 +106,7 @@ fn main() {
     }
 
     // Run
-    let mut interp = Interp::new(ir);
+    let mut interp = Interp::new(ir, Box::new(std::io::stdout()));
     let mainind = interp
         .ir
         .funcs
