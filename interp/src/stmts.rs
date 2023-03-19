@@ -28,6 +28,7 @@ impl Interp {
             IRNodeData::GetEnum { enm, typ } => self.exec_getenum(enm, typ),
             IRNodeData::GetStruct { strct, field } => self.exec_getstruct(strct, field),
             IRNodeData::SetStruct { strct, vals } => self.exec_setstruct(strct, vals),
+            IRNodeData::TypeMatch { val, body } => self.exec_typematch(val, body),
             _ => Err(InterpError::UnknownNode(node.clone())),
         }
     }
