@@ -4,9 +4,9 @@ use super::*;
 
 #[derive(Clone, Debug)]
 pub enum Value {
-    Int(i32),
+    Int(i64),
     Float(f64),
-    Char(char),
+    Char(u8),
     Bool(bool),
     Box(Box<Value>),
     Array(Vec<Value>),

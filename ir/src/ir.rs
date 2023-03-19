@@ -197,7 +197,7 @@ pub enum IRNodeData {
     Cast(Box<IRNode>, Type),
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Copy)]
 pub enum MathOperator {
     ADD,
     SUBTRACT,
@@ -206,7 +206,7 @@ pub enum MathOperator {
     MODULO,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Copy)]
 pub enum ComparisonOperator {
     GREATER,
     LESS,
@@ -216,7 +216,7 @@ pub enum ComparisonOperator {
     NOTEQUAL,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Copy)]
 pub enum BooleanOperator {
     AND,
     OR,
