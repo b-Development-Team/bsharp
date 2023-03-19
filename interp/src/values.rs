@@ -13,6 +13,7 @@ pub enum Value {
     Struct(HashMap<String, Value>),
     Tuple(Vec<Value>),
     Enum(Type, Box<Value>),
+    Void,
 }
 
 #[derive(Default)]

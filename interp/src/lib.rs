@@ -6,6 +6,7 @@ use values::*;
 mod errors;
 use errors::*;
 
+mod fns;
 mod stmts;
 
 pub struct Interp {
@@ -21,29 +22,27 @@ impl Interp {
         }
     }
 
-    pub fn run_fn(
-        &mut self,
-        func: &String,
-        args: Vec<Value>,
-    ) -> Result<Option<Value>, InterpError> {
-        let funind = self.ir.funcs.iter().position(|x| x.name == *func).unwrap();
-
+    pub fn run_fn(&mut self, func: usize, args: Vec<Value>) -> Result<Value, InterpError> {
         // Put in params
         let mut frame = StackFrame::default();
         for (i, arg) in args.iter().enumerate() {
             frame
                 .vars
-                .insert(self.ir.funcs[funind].params[i], arg.clone());
+                .insert(self.ir.funcs[func].params[i], arg.clone());
         }
         self.stack.push(frame);
 
         // Run
-        self.exec(&self.ir.funcs[funind].body.clone())?;
+        self.exec(&self.ir.funcs[func].body.clone())?;
 
         // Get return
         let ret = self.stack.last().unwrap().ret.clone();
         self.stack.pop();
 
-        Ok(ret)
+        Ok(if let Some(ret) = ret {
+            ret
+        } else {
+            Value::Void
+        })
     }
 }

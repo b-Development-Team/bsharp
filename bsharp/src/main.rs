@@ -107,6 +107,12 @@ fn main() {
 
     // Run
     let mut interp = Interp::new(ir);
-    let res = interp.run_fn(&"@main".to_string(), Vec::new()).unwrap();
+    let mainind = interp
+        .ir
+        .funcs
+        .iter()
+        .position(|f| f.name == "@main")
+        .unwrap();
+    let res = interp.run_fn(mainind, Vec::new()).unwrap();
     println!("OUTPUT: {:?}", res);
 }
