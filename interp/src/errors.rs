@@ -7,6 +7,7 @@ pub enum InterpError {
     UnknownNode(IRNode),
     IOError(io::Error),
     InvalidEnumType { pos: Pos, expected: Type, got: Type },
+    InvalidBoxType { pos: Pos, expected: Type, got: Type },
 }
 
 impl From<io::Error> for InterpError {

@@ -61,4 +61,21 @@ impl Interp {
         }
         Ok(Value::Void)
     }
+
+    pub fn exec_match(&mut self, cond: &IRNode, cases: &Vec<IRNode>) -> Result<Value, InterpError> {
+        let cond = self.exec(cond)?;
+        for case in cases {
+            let (val, body) = match &case.data {
+                IRNodeData::Case { val, body } => (val, body),
+                _ => unreachable!(),
+            };
+
+            let val = self.exec(val)?;
+            if val == cond {
+                self.exec(body)?;
+                break;
+            }
+        }
+        Ok(Value::Void)
+    }
 }

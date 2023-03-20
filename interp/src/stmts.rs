@@ -29,6 +29,11 @@ impl Interp {
             IRNodeData::GetStruct { strct, field } => self.exec_getstruct(strct, field),
             IRNodeData::SetStruct { strct, vals } => self.exec_setstruct(strct, vals),
             IRNodeData::TypeMatch { val, body } => self.exec_typematch(val, body),
+            IRNodeData::Match { val, body } => self.exec_match(val, body),
+            IRNodeData::NewTuple(_, args) => self.exec_newtuple(args),
+            IRNodeData::NewBox(val) => self.exec_newbox(val),
+            IRNodeData::Peek { bx, typ } => self.exec_peek(bx, typ),
+            IRNodeData::Unbox { bx, typ } => self.exec_unbox(bx, typ),
             _ => Err(InterpError::UnknownNode(node.clone())),
         }
     }

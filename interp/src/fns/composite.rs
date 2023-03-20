@@ -27,6 +27,42 @@ impl Interp {
         Ok(Value::Enum(arg.typ(&self.ir), Box::new(val)))
     }
 
+    pub fn exec_newbox(&mut self, arg: &IRNode) -> Result<Value, InterpError> {
+        let val = self.exec(arg)?;
+        Ok(Value::Box(arg.typ(&self.ir), Box::new(val)))
+    }
+
+    pub fn exec_peek(&mut self, arg: &IRNode, t: &Type) -> Result<Value, InterpError> {
+        let val = self.exec(arg)?;
+        if let Value::Box(typ, _) = val {
+            Ok(Value::Bool(typ == *t))
+        } else {
+            unreachable!()
+        }
+    }
+
+    pub fn exec_unbox(&mut self, arg: &IRNode, t: &Type) -> Result<Value, InterpError> {
+        let val = self.exec(arg)?;
+        if let Value::Box(typ, val) = val {
+            if typ == *t {
+                Ok(*val)
+            } else {
+                Err(InterpError::InvalidBoxType {
+                    pos: arg.pos,
+                    expected: t.clone(),
+                    got: typ,
+                })
+            }
+        } else {
+            unreachable!()
+        }
+    }
+
+    pub fn exec_newtuple(&mut self, args: &Vec<IRNode>) -> Result<Value, InterpError> {
+        let vals = self.exec_args(args)?;
+        Ok(Value::Tuple(RefCell::new(vals)))
+    }
+
     pub fn exec_getenum(&mut self, arg: &IRNode, typ: &Type) -> Result<Value, InterpError> {
         let val = self.exec(arg)?;
         if let Value::Enum(t, v) = val {
