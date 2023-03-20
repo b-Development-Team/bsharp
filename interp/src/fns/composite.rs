@@ -117,4 +117,18 @@ impl Interp {
             unreachable!()
         }
     }
+
+    pub fn exec_gettuple(&mut self, arg: &IRNode, idx: &usize) -> Result<Value, InterpError> {
+        let val = self.exec(arg)?;
+        if let Value::Tuple(v) = val {
+            let v = v.borrow();
+            if let Some(val) = v.get(*idx) {
+                Ok(val.clone())
+            } else {
+                unreachable!()
+            }
+        } else {
+            unreachable!()
+        }
+    }
 }

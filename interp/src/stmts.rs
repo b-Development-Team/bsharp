@@ -34,6 +34,7 @@ impl Interp {
             IRNodeData::NewBox(val) => self.exec_newbox(val),
             IRNodeData::Peek { bx, typ } => self.exec_peek(bx, typ),
             IRNodeData::Unbox { bx, typ } => self.exec_unbox(bx, typ),
+            IRNodeData::GetTuple { tup, ind } => self.exec_gettuple(tup, ind),
             _ => Err(InterpError::UnknownNode(node.clone())),
         }
     }

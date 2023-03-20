@@ -22,6 +22,10 @@ const SOURCE: &'static str = r#"
     [PRINT "Hello, World!"]
 ]]
 
+[FUNC @add [[PARAM !a [INT]] [PARAM !b [INT]] [RETURNS [INT]]] [
+  [RETURN [+ !a !b]]
+]]
+
 [FUNC @concat [[PARAM !pars [ARRAY $STRING]] [RETURNS $STRING]] [
   [DEFINE !len 0]
   [DEFINE !i 0]
@@ -50,14 +54,7 @@ const SOURCE: &'static str = r#"
   ]]
 ]]
 
-[FUNC @main [] [
-  [@PRINTBOOL [NOT [& [> 1 1] [| [< 1 1] [> 1 1]]]]]
-  [DEFINE !enum [NEW $OPTION_A [NEW $NONE]]]
-  [DEFINE !v [GET !enum $NONE]]
-  [DEFINE !b [NEW $B [: .a "Hello"] [: .b "World"]]]
-  [PRINT [GET !b .a]]
-  [SET !b [: .a "Hi"]]
-
+[FUNC @testenum [[PARAM !enum $OPTION_A]] [
   [MATCH !enum 
     [CASE !val $NONE [
       [PRINT "IT'S NONE"]
@@ -68,8 +65,21 @@ const SOURCE: &'static str = r#"
       [PRINT [@concat [ARR "VAL 2 is" [GET !val 1]]]]
     ]]
   ]
+]]
+
+[FUNC @main [] [
+  [@PRINTBOOL [NOT [& [> 1 1] [| [< 1 1] [> 1 1]]]]]
+  [DEFINE !enum [NEW $OPTION_A [NEW $NONE]]]
+  [DEFINE !v [GET !enum $NONE]]
+  [DEFINE !b [NEW $B [: .a "Hello"] [: .b "World"]]]
+  [PRINT [GET !b .a]]
+  [SET !b [: .a "Hi"]]
+
+  [@testenum !enum]
 
   [DEFINE !enum [NEW $OPTION_A [NEW $A "Hello" "World"]]]
+
+  [@testenum !enum]
 
   [MATCH "HELLO"
     [CASE "HELLO" [
@@ -86,6 +96,9 @@ const SOURCE: &'static str = r#"
   [DEFINE !box [BOX "HELLO"]]
   [@PRINTBOOL [PEEK !box $STRING]]
   [PRINT [UNBOX !box $STRING]]
+
+  [PRINT "IS 1+1=2?"]
+  [@PRINTBOOL [= [@add 1 1] 2]]
 ]]
 "#;
 
