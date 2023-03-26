@@ -81,6 +81,7 @@ const SOURCE: &'static str = r#"
   [DEFINE !b [NEW $B [: .a "Hello"] [: .b "World"]]]
   [PRINT [GET !b .a]]
   [SET !b [: .a "Hi"]]
+  [PRINT [GET !b .a]]
 
   [@testenum !enum]
 
