@@ -8,6 +8,7 @@ pub enum InterpError {
     IOError(io::Error),
     InvalidEnumType { pos: Pos, expected: Type, got: Type },
     InvalidBoxType { pos: Pos, expected: Type, got: Type },
+    ArrayIndexOutOfBounds { pos: Pos, index: usize, len: usize },
 }
 
 impl From<io::Error> for InterpError {

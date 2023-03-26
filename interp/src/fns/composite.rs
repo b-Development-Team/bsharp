@@ -131,4 +131,64 @@ impl Interp {
             unreachable!()
         }
     }
+
+    pub fn exec_len(&mut self, arg: &IRNode) -> Result<Value, InterpError> {
+        let val = self.exec(arg)?;
+        if let Value::Array(v) = val {
+            let v = v.borrow();
+            Ok(Value::Int(v.len() as i64))
+        } else {
+            unreachable!()
+        }
+    }
+
+    pub fn exec_getarr(&mut self, arg: &IRNode, idx: &IRNode) -> Result<Value, InterpError> {
+        let val = self.exec(arg)?;
+        if let Value::Array(v) = val {
+            let idx = self.exec(idx)?;
+            if let Value::Int(idx) = idx {
+                let v = v.borrow();
+                if let Some(val) = v.get(idx as usize) {
+                    Ok(val.clone())
+                } else {
+                    Err(InterpError::ArrayIndexOutOfBounds {
+                        pos: arg.pos,
+                        len: v.len(),
+                        index: idx as usize,
+                    })
+                }
+            } else {
+                unreachable!()
+            }
+        } else {
+            unreachable!()
+        }
+    }
+
+    pub fn exec_newarr(&mut self, cap: &Option<Box<IRNode>>) -> Result<Value, InterpError> {
+        let cap = if let Some(n) = cap {
+            let n = self.exec(n)?;
+            if let Value::Int(n) = n {
+                n
+            } else {
+                unreachable!()
+            }
+        } else {
+            0
+        };
+
+        Ok(Value::Array(RefCell::new(Vec::with_capacity(cap as usize))))
+    }
+
+    pub fn exec_append(&mut self, arg: &IRNode, val: &IRNode) -> Result<Value, InterpError> {
+        let val = self.exec(val)?;
+        let arg = self.exec(arg)?;
+        if let Value::Array(v) = arg {
+            let mut v = v.borrow_mut();
+            v.push(val);
+            Ok(Value::Void)
+        } else {
+            unreachable!()
+        }
+    }
 }

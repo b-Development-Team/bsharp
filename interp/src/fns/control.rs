@@ -78,4 +78,27 @@ impl Interp {
         }
         Ok(Value::Void)
     }
+
+    pub fn exec_while(&mut self, cond: &IRNode, body: &IRNode) -> Result<Value, InterpError> {
+        let mut cont = self.exec(cond)?;
+        while let Value::Bool(val) = cont {
+            if val {
+                self.exec(body)?;
+                cont = self.exec(cond)?;
+            } else {
+                break;
+            }
+        }
+        Ok(Value::Void)
+    }
+
+    pub fn exec_ret(&mut self, val: &Option<Box<IRNode>>) -> Result<Value, InterpError> {
+        let val = if let Some(val) = val {
+            self.exec(val)?
+        } else {
+            Value::Void
+        };
+        self.stack.last_mut().unwrap().ret = Some(val.clone());
+        Ok(val)
+    }
 }

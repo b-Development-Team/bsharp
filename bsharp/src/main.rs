@@ -40,6 +40,7 @@ const SOURCE: &'static str = r#"
     [DEFINE !par [GET !pars !i]]
     [WHILE [< !j [LEN !par]] [
       [APPEND !out [GET !par !j]]
+      [DEFINE !j [+ !j 1]]
     ]]
     [DEFINE !i [+ !i 1]]
   ]]
@@ -68,6 +69,12 @@ const SOURCE: &'static str = r#"
 ]]
 
 [FUNC @main [] [
+  [DEFINE !i 0]
+  [WHILE [< !i 10] [
+    [DEFINE !i [+ !i 1]]
+    [PRINT "HI"]
+  ]]
+
   [@PRINTBOOL [NOT [& [> 1 1] [| [< 1 1] [> 1 1]]]]]
   [DEFINE !enum [NEW $OPTION_A [NEW $NONE]]]
   [DEFINE !v [GET !enum $NONE]]

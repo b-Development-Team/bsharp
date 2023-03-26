@@ -65,4 +65,31 @@ impl Interp {
             _ => unreachable!(),
         }
     }
+
+    pub fn exec_math(
+        &mut self,
+        op: MathOperator,
+        left: &IRNode,
+        right: &IRNode,
+    ) -> Result<Value, InterpError> {
+        let left = self.exec(left)?;
+        let right = self.exec(right)?;
+        match (left, right) {
+            (Value::Int(left), Value::Int(right)) => match op {
+                MathOperator::ADD => Ok(Value::Int(left + right)),
+                MathOperator::SUBTRACT => Ok(Value::Int(left - right)),
+                MathOperator::MULTIPLY => Ok(Value::Int(left * right)),
+                MathOperator::DIVIDE => Ok(Value::Int(left / right)),
+                MathOperator::MODULO => Ok(Value::Int(left % right)),
+            },
+            (Value::Float(left), Value::Float(right)) => match op {
+                MathOperator::ADD => Ok(Value::Float(left + right)),
+                MathOperator::SUBTRACT => Ok(Value::Float(left - right)),
+                MathOperator::MULTIPLY => Ok(Value::Float(left * right)),
+                MathOperator::DIVIDE => Ok(Value::Float(left / right)),
+                MathOperator::MODULO => Ok(Value::Float(left % right)),
+            },
+            _ => unreachable!(),
+        }
+    }
 }

@@ -60,7 +60,14 @@ impl IR {
                 got: val,
             });
         }
-        Ok(IRNode::new(IRNodeData::Len(Box::new(val)), range, pos))
+        Ok(IRNode::new(
+            IRNodeData::Append {
+                arr: Box::new(arr),
+                val: Box::new(val),
+            },
+            range,
+            pos,
+        ))
     }
 
     pub fn build_new(

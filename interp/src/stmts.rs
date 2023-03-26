@@ -35,6 +35,13 @@ impl Interp {
             IRNodeData::Peek { bx, typ } => self.exec_peek(bx, typ),
             IRNodeData::Unbox { bx, typ } => self.exec_unbox(bx, typ),
             IRNodeData::GetTuple { tup, ind } => self.exec_gettuple(tup, ind),
+            IRNodeData::While { cond, body } => self.exec_while(cond, body),
+            IRNodeData::Len(arr) => self.exec_len(arr),
+            IRNodeData::Math(left, op, right) => self.exec_math(*op, left, right),
+            IRNodeData::GetArr { arr, ind } => self.exec_getarr(arr, ind),
+            IRNodeData::NewArray(_, cap) => self.exec_newarr(cap),
+            IRNodeData::Append { arr, val } => self.exec_append(arr, val),
+            IRNodeData::Return(val) => self.exec_ret(val),
             _ => Err(InterpError::UnknownNode(node.clone())),
         }
     }

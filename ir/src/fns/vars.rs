@@ -38,18 +38,25 @@ impl IR {
 
         // Check if name is already on stack
         if let Some(ind) = self.scopes[*self.stack.last().unwrap()].vars.get(&name) {
-            if self.variables[*ind].typ.data == value.typ(self).data {
-                return Ok(IRNode::new(
-                    IRNodeData::Define {
-                        var: *ind,
-                        val: Box::new(value),
-                        edit: true,
-                    },
-                    range,
-                    pos,
-                ));
-            } else {
+            if self.variables[*ind].typ.data != value.typ(self).data {
                 return Err(IRError::DuplicateVariable(pos, *ind));
+            }
+        }
+
+        // Search for variable
+        for sc in self.stack.iter().rev() {
+            if let Some(ind) = self.scopes[*sc].vars.get(&name) {
+                if self.variables[*ind].typ.data == value.typ(self).data {
+                    return Ok(IRNode::new(
+                        IRNodeData::Define {
+                            var: *ind,
+                            val: Box::new(value),
+                            edit: true,
+                        },
+                        range,
+                        pos,
+                    ));
+                }
             }
         }
 
