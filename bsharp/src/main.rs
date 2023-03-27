@@ -45,6 +45,5 @@ fn main() {
     if mainind.is_none() {
         panic!("main func not found");
     }
-    let res = interp.run_fn(mainind.unwrap(), Vec::new()).unwrap();
-    println!("OUTPUT: {:?}", res);
+    interp.run_fn(mainind.unwrap(), Vec::new()).unwrap();
 }
