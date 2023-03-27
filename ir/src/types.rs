@@ -24,6 +24,50 @@ impl TypeData {
             _ => self.clone(),
         }
     }
+
+    pub fn fmt(&self, ir: &IR) -> String {
+        match self {
+            TypeData::DEF(v) => ir.types[*v].name.clone(),
+            TypeData::ARRAY(v) => format!("Array<{}>", v.data.fmt(ir)),
+            TypeData::STRUCT(v) => {
+                let mut s = String::new();
+                s.push_str("STRUCT<");
+                for f in v {
+                    s.push_str(&format!("{}: {}, ", f.name, f.typ.data.fmt(ir)));
+                }
+                s.push_str(">");
+                s
+            }
+            TypeData::TUPLE(v) => {
+                let mut s = String::new();
+                s.push_str("TUPLE<");
+                for f in v {
+                    s.push_str(&format!("{}, ", f.data.fmt(ir)));
+                }
+                s.push_str(">");
+                s
+            }
+            TypeData::ENUM(v) => {
+                let mut s = String::new();
+                s.push_str("ENUM<");
+                for f in v {
+                    s.push_str(&format!("{}, ", f.data.fmt(ir)));
+                }
+                s.push_str(">");
+                s
+            }
+            TypeData::INT => "INT".to_string(),
+            TypeData::FLOAT => "FLOAT".to_string(),
+            TypeData::CHAR => "CHAR".to_string(),
+            TypeData::BOOL => "BOOL".to_string(),
+            TypeData::BOX => "BOX".to_string(),
+            TypeData::INVALID => "INVALID".to_string(),
+            TypeData::PARAM => "PARAM".to_string(),
+            TypeData::FIELD => "FIELD".to_string(),
+            TypeData::TYPE => "TYPE".to_string(),
+            TypeData::VOID => "VOID".to_string(),
+        }
+    }
 }
 
 impl Type {
@@ -58,9 +102,6 @@ pub enum TypeData {
     TUPLE(Vec<Type>),
     ENUM(Vec<Type>),
     DEF(usize), // Points to typedef
-
-    // Macros
-    CONSTRAINT(Vec<Type>),
 
     // Special types
     INVALID,

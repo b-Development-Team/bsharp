@@ -212,8 +212,11 @@ pub enum MathOperator {
     MULTIPLY,
     DIVIDE,
     MODULO,
+
+    // Bitwise ops
     XOR,
     SHIFT,
+    BOR,
 }
 
 #[derive(Debug, Clone, PartialEq, Copy)]

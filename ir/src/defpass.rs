@@ -4,7 +4,7 @@ impl IR {
     pub fn defpass(&mut self) -> Result<(), IRError> {
         // Go through files
         for i in 0..self.fset.files.len() {
-            let f = self.fset.files[i].ast.ast.clone();
+            let f = self.fset.files[i].ast.as_ref().unwrap().ast.clone();
             self.defpass_file(f)?;
         }
 

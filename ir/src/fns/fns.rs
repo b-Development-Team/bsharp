@@ -53,8 +53,10 @@ impl IR {
     }
 
     pub fn build_block(&mut self, pos: Pos, args: &Vec<ASTNode>) -> Result<IRNode, IRError> {
-        if let ASTNodeData::Function(name) = &args[0].data {
-            return self.build_fncall(args[0].pos, pos, name, &args[1..].to_vec());
+        if args.len() > 0 {
+            if let ASTNodeData::Function(name) = &args[0].data {
+                return self.build_fncall(args[0].pos, pos, name, &args[1..].to_vec());
+            }
         }
 
         let mut body = Vec::new();

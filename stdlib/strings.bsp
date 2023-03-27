@@ -18,3 +18,32 @@
   ]]
   [RETURN !out]
 ]]
+
+[FUNC @REVERSE [[PARAM !v $STRING] [RETURNS $STRING]] [
+  #TODO
+  [RETURN !v]
+]]
+
+[FUNC @ITOA [[PARAM !v [INT]] [RETURNS $STRING]] [
+  [DEFINE !out [NEW $STRING]]
+
+  # Handle negatives
+  [DEFINE !negative [= 0 1]]
+  [IF [< !v 0] [
+    [DEFINE !negative [= 0 0]]
+    [DEFINE !v [* -1 !v]]
+  ] []]
+
+  # Go through digits
+  [WHILE [NEQ !v 0] [
+    [DEFINE !rem [% !v 10]]
+    # TODO: Char to int
+    [DEFINE !v [/ !v 10]]
+  ]]
+
+  [IF !negative [
+    [APPEND !out '-']
+  ] []]
+
+  [RETURN [@REVERSE !out]]
+]]

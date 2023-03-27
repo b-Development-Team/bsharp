@@ -7,7 +7,7 @@ pub use tokens::*;
 
 pub struct File {
     pub name: String,
-    pub ast: parser::Parser,
+    pub ast: Option<parser::Parser>,
 }
 
 pub struct FSet {
@@ -23,13 +23,17 @@ impl FSet {
 
     pub fn add_file_source(&mut self, name: String, source: String) -> Result<(), FSetError> {
         let ind = self.files.len();
+        self.files.push(File {
+            name: name.clone(),
+            ast: None,
+        });
+
         let mut tok = Tokenizer::new(source, ind);
         tok.tokenize()?;
-
         let mut p = parser::Parser::new(tok);
         p.parse()?;
 
-        self.files.push(File { name, ast: p });
+        self.files[ind].ast = Some(p);
 
         Ok(())
     }

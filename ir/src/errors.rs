@@ -88,10 +88,10 @@ impl IRError {
                 got.data.typ()
             ),
             IRError::InvalidArgument { expected, got } => format!(
-                "{}: invalid argument type, expected {:?}, got {:?}",
+                "{}: invalid argument type, expected {}, got {}",
                 ir.fset.display_pos(&got.pos),
-                expected,
-                got.typ(ir),
+                expected.fmt(ir),
+                got.typ(ir).data.fmt(ir),
             ),
             IRError::FSetError(e) => e.fmt(&ir.fset),
             IRError::InvalidType { pos, expected, got } => format!(
