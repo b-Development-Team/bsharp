@@ -1,4 +1,4 @@
-[FUNC @concat [[PARAM !pars [ARRAY $STRING]] [RETURNS $STRING]] [
+[FUNC @CONCAT [[PARAM !pars [ARRAY $STRING]] [RETURNS $STRING]] [
   [DEFINE !len 0]
   [DEFINE !i 0]
   [WHILE [< !i [LEN !pars]] [

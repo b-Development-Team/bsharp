@@ -1,3 +1,4 @@
 [FUNC @main [] [
-  [@test]
+  [PRINT [@HASH "H" 101 101]]
+  [PRINT [@HASH "HI" 101 101]]
 ]]

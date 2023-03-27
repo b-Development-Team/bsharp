@@ -81,6 +81,8 @@ impl Interp {
                 MathOperator::MULTIPLY => Ok(Value::Int(left * right)),
                 MathOperator::DIVIDE => Ok(Value::Int(left / right)),
                 MathOperator::MODULO => Ok(Value::Int(left % right)),
+                MathOperator::XOR => Ok(Value::Int(left ^ right)),
+                MathOperator::SHIFT => Ok(Value::Int(left << right)),
             },
             (Value::Float(left), Value::Float(right)) => match op {
                 MathOperator::ADD => Ok(Value::Float(left + right)),
@@ -88,6 +90,8 @@ impl Interp {
                 MathOperator::MULTIPLY => Ok(Value::Float(left * right)),
                 MathOperator::DIVIDE => Ok(Value::Float(left / right)),
                 MathOperator::MODULO => Ok(Value::Float(left % right)),
+                MathOperator::XOR => Ok(Value::Float((left as i64 ^ right as i64) as f64)),
+                MathOperator::SHIFT => Ok(Value::Float(((left as i64) << (right as i64)) as f64)),
             },
             _ => unreachable!(),
         }

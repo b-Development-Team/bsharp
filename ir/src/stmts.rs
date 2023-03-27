@@ -122,6 +122,8 @@ impl IR {
                 "/" => self.build_mathop(*name_pos, v.pos, args, MathOperator::DIVIDE),
                 "*" => self.build_mathop(*name_pos, v.pos, args, MathOperator::MULTIPLY),
                 "%" => self.build_mathop(*name_pos, v.pos, args, MathOperator::MODULO),
+                "XOR" => self.build_mathop(*name_pos, v.pos, args, MathOperator::XOR),
+                "SHIFT" => self.build_mathop(*name_pos, v.pos, args, MathOperator::SHIFT),
                 ">" => self.build_compop(*name_pos, v.pos, args, ComparisonOperator::GREATER),
                 ">=" => self.build_compop(*name_pos, v.pos, args, ComparisonOperator::GREATEREQUAL),
                 "<" => self.build_compop(*name_pos, v.pos, args, ComparisonOperator::LESS),
