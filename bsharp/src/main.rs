@@ -16,7 +16,7 @@ fn main() {
     // Fset
     let mut fset = FSet::new();
     if let Err(err) = fset.import(&args.dir) {
-        Args::command().error(ErrorKind::Io, err).exit();
+        Args::command().error(ErrorKind::Io, err.fmt(&fset)).exit();
     };
 
     // IR

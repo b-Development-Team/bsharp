@@ -93,7 +93,7 @@ impl IRError {
                 expected,
                 got.typ(ir),
             ),
-            IRError::FSetError(e) => format!("{}", e),
+            IRError::FSetError(e) => e.fmt(&ir.fset),
             IRError::InvalidType { pos, expected, got } => format!(
                 "{}: invalid type, expected {:?}, got {:?}",
                 ir.fset.display_pos(pos),

@@ -12,10 +12,10 @@ impl super::Parser {
     }
 
     fn parse_node(&mut self) -> Result<ASTNode, ParseError> {
-        let tok = self.tok.peek().unwrap();
+        let tok = self.tok.peek()?;
         match tok.data {
             TokenData::COMMENT(v) => {
-                self.tok.eat().unwrap();
+                self.tok.eat()?;
                 Ok(ASTNode {
                     data: ASTNodeData::Comment(v),
                     pos: tok.pos,
@@ -23,42 +23,42 @@ impl super::Parser {
             }
             TokenData::OPENBRACK => self.parse_stmt(),
             TokenData::STRING(v) => {
-                self.tok.eat().unwrap();
+                self.tok.eat()?;
                 Ok(ASTNode {
                     data: ASTNodeData::String(v),
                     pos: tok.pos,
                 })
             }
             TokenData::INTEGER(v) => {
-                self.tok.eat().unwrap();
+                self.tok.eat()?;
                 Ok(ASTNode {
                     data: ASTNodeData::Integer(v),
                     pos: tok.pos,
                 })
             }
             TokenData::FLOAT(v) => {
-                self.tok.eat().unwrap();
+                self.tok.eat()?;
                 Ok(ASTNode {
                     data: ASTNodeData::Float(v),
                     pos: tok.pos,
                 })
             }
             TokenData::TYPE(v) => {
-                self.tok.eat().unwrap();
+                self.tok.eat()?;
                 Ok(ASTNode {
                     data: ASTNodeData::Type(v),
                     pos: tok.pos,
                 })
             }
             TokenData::VARIABLE(v) => {
-                self.tok.eat().unwrap();
+                self.tok.eat()?;
                 Ok(ASTNode {
                     data: ASTNodeData::Variable(v),
                     pos: tok.pos,
                 })
             }
             TokenData::FUNCTION(v) => {
-                self.tok.eat().unwrap();
+                self.tok.eat()?;
                 Ok(ASTNode {
                     data: ASTNodeData::Function(v),
                     pos: tok.pos,
@@ -66,23 +66,23 @@ impl super::Parser {
             }
             TokenData::IDENT(v) => match v.as_str() {
                 "TRUE" | "FALSE" => {
-                    self.tok.eat().unwrap();
+                    self.tok.eat()?;
                     Ok(ASTNode {
                         data: ASTNodeData::Bool(v == "TRUE"),
                         pos: tok.pos,
                     })
                 }
-                _ => Err(ParseError::UnexpectedToken(self.tok.eat().unwrap())),
+                _ => Err(ParseError::UnexpectedToken(self.tok.eat()?)),
             },
             TokenData::CHAR(v) => {
-                self.tok.eat().unwrap();
+                self.tok.eat()?;
                 Ok(ASTNode {
                     data: ASTNodeData::Char(v),
                     pos: tok.pos,
                 })
             }
             TokenData::FIELD(v) => {
-                self.tok.eat().unwrap();
+                self.tok.eat()?;
                 Ok(ASTNode {
                     data: ASTNodeData::Field(v),
                     pos: tok.pos,
@@ -93,7 +93,7 @@ impl super::Parser {
     }
 
     fn parse_stmt(&mut self) -> Result<ASTNode, ParseError> {
-        let mut pos = self.tok.eat().unwrap().pos; // Get [
+        let mut pos = self.tok.eat()?.pos; // Get [
 
         let name = match self
             .tok
@@ -107,7 +107,7 @@ impl super::Parser {
                     let n = self.parse_node()?;
                     nodes.push(n);
                 }
-                pos.extend(self.tok.eat().unwrap().pos); // Eat ]
+                pos.extend(self.tok.eat()?.pos); // Eat ]
                 return Ok(ASTNode {
                     data: ASTNodeData::Block(nodes),
                     pos,

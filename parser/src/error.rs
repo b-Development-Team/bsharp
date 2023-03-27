@@ -1,6 +1,5 @@
 use super::*;
 
-#[derive(Debug)]
 pub enum ParseError {
     UnexpectedToken(Token),
     EOF,

@@ -1,7 +1,7 @@
+use super::*;
 use parser::ParseError;
 use tokens::TokenizeError;
 
-#[derive(Debug)]
 pub enum FSetError {
     ParseError(ParseError),
     TokenizeError(TokenizeError),
@@ -27,12 +27,34 @@ impl From<std::io::Error> for FSetError {
 }
 
 // Impl display for FSetError
-impl std::fmt::Display for FSetError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+impl FSetError {
+    pub fn fmt(&self, fset: &FSet) -> String {
         match self {
-            FSetError::ParseError(e) => write!(f, "{:?}", e),
-            FSetError::TokenizeError(e) => write!(f, "{:?}", e),
-            FSetError::IOError(e) => write!(f, "{}", e),
+            FSetError::ParseError(e) => match e {
+                ParseError::UnexpectedToken(t) => {
+                    format!("{}: unexpected token", fset.display_pos(&t.pos))
+                }
+                ParseError::EOF => format!("parse error: un-closed bracket"),
+            },
+            FSetError::TokenizeError(e) => match e {
+                TokenizeError::UnexpectedToken { got: t, .. } => {
+                    format!("{}: unexpected token", fset.display_pos(&t.pos))
+                }
+                TokenizeError::EOF => format!("tokenize error: unexpected EOF"),
+                TokenizeError::UnexpectedChar(c, pos) => {
+                    format!("{}: invalid character '{}'", fset.display_pos(&pos), c)
+                }
+                TokenizeError::InvalidEscapeCode(c, pos) => {
+                    format!("{}: invalid escape code '{}'", fset.display_pos(&pos), c)
+                }
+                TokenizeError::InvalidInt(val, pos) => {
+                    format!("{}: invalid integer '{}'", fset.display_pos(&pos), val)
+                }
+                TokenizeError::InvalidFloat(val, pos) => {
+                    format!("{}: invalid float '{}'", fset.display_pos(&pos), val)
+                }
+            },
+            FSetError::IOError(e) => e.to_string(),
         }
     }
 }
