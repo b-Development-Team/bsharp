@@ -42,6 +42,8 @@ impl Interp {
             IRNodeData::NewArray(_, cap) => self.exec_newarr(cap),
             IRNodeData::Append { arr, val } => self.exec_append(arr, val),
             IRNodeData::Return(val) => self.exec_ret(val),
+            IRNodeData::Cast(val, typ) => self.exec_cast(val, typ),
+            IRNodeData::SetArr { arr, ind, val } => self.exec_setarr(arr, ind, val),
             _ => Err(InterpError::UnknownNode(node.clone())),
         }
     }

@@ -95,6 +95,38 @@ impl Interp {
                 MathOperator::SHIFT => Ok(Value::Float(((left as i64) << (right as i64)) as f64)),
                 MathOperator::BOR => Ok(Value::Float((left as i64 | right as i64) as f64)),
             },
+            (Value::Char(left), Value::Char(right)) => match op {
+                MathOperator::ADD => Ok(Value::Char(left + right)),
+                MathOperator::SUBTRACT => Ok(Value::Char(left - right)),
+                MathOperator::MULTIPLY => Ok(Value::Char(left * right)),
+                MathOperator::DIVIDE => Ok(Value::Char(left / right)),
+                MathOperator::MODULO => Ok(Value::Char(left % right)),
+                MathOperator::XOR => Ok(Value::Char(left ^ right)),
+                MathOperator::SHIFT => Ok(Value::Char(left << right)),
+                MathOperator::BOR => Ok(Value::Char(left | right)),
+            },
+            _ => unreachable!(),
+        }
+    }
+
+    pub fn exec_cast(&mut self, arg: &IRNode, target: &Type) -> Result<Value, InterpError> {
+        let val = self.exec(arg)?;
+        match target.data.concrete(&self.ir) {
+            TypeData::CHAR => match val {
+                Value::Int(val) => Ok(Value::Char(val as u8)),
+                Value::Float(val) => Ok(Value::Char(val as u8)),
+                _ => unreachable!(),
+            },
+            TypeData::INT => match val {
+                Value::Char(val) => Ok(Value::Int(val as i64)),
+                Value::Float(val) => Ok(Value::Int(val as i64)),
+                _ => unreachable!(),
+            },
+            TypeData::FLOAT => match val {
+                Value::Char(val) => Ok(Value::Float(val as f64)),
+                Value::Int(val) => Ok(Value::Float(val as f64)),
+                _ => unreachable!(),
+            },
             _ => unreachable!(),
         }
     }

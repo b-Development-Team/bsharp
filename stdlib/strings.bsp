@@ -20,7 +20,18 @@
 ]]
 
 [FUNC @REVERSE [[PARAM !v $STRING] [RETURNS $STRING]] [
-  #TODO
+  [DEFINE !start 0]
+  [DEFINE !end [- [LEN !v] 1]]
+  [WHILE [< !start !end] [
+    # Swap
+    [DEFINE !buf [GET !v !start]]
+    [SET !v !start [GET !v !end]]
+    [SET !v !end !buf]
+
+    # Increment
+    [DEFINE !start [+ !start 1]]
+    [DEFINE !end [- !end 1]]
+  ]]
   [RETURN !v]
 ]]
 
@@ -37,7 +48,11 @@
   # Go through digits
   [WHILE [NEQ !v 0] [
     [DEFINE !rem [% !v 10]]
-    # TODO: Char to int
+    [IF [> !rem 9] [
+      [APPEND !out '0']
+    ] [
+      [APPEND !out [+ '0' [TOC !rem]]]
+    ]]
     [DEFINE !v [/ !v 10]]
   ]]
 

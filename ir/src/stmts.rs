@@ -149,6 +149,9 @@ impl IR {
                 "SET" => self.build_set(*name_pos, v.pos, args),
                 "MATCH" => self.build_match(*name_pos, v.pos, args),
                 "CASE" => self.build_case(*name_pos, v.pos, args),
+                "TOI" => self.build_cast_int(*name_pos, v.pos, args),
+                "TOF" => self.build_cast_float(*name_pos, v.pos, args),
+                "TOC" => self.build_cast_char(*name_pos, v.pos, args),
                 _ => Err(IRError::UnknownStmt {
                     pos: *name_pos,
                     name: name.clone(),

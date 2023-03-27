@@ -357,17 +357,54 @@ impl IR {
         range: Pos,
         args: &Vec<ASTNode>,
     ) -> Result<IRNode, IRError> {
-        if args.len() < 2 {
+        if args.len() < 1 {
+            return Err(IRError::InvalidArgumentCount {
+                pos,
+                expected: 1,
+                got: 0,
+            });
+        }
+        let val = self.build_node(&args[0]);
+        let mut args = args.clone();
+        args.remove(0);
+        match val.typ(self).data.concrete(self) {
+            TypeData::STRUCT(_) => self.build_setstruct(pos, range, val, &args),
+            TypeData::INVALID => Ok(IRNode::invalid(pos)),
+            TypeData::ARRAY(t) => {
+                let pars = self.typecheck(pos, &args, &vec![TypeData::INT, t.data])?;
+                Ok(IRNode::new(
+                    IRNodeData::SetArr {
+                        arr: Box::new(val),
+                        ind: Box::new(pars[0].clone()),
+                        val: Box::new(pars[1].clone()),
+                    },
+                    range,
+                    pos,
+                ))
+            }
+            _ => Err(IRError::InvalidArgument {
+                expected: TypeData::STRUCT(Vec::new()),
+                got: val,
+            }),
+        }
+    }
+
+    pub fn build_setstruct(
+        &mut self,
+        pos: Pos,
+        range: Pos,
+        str: IRNode,
+        args: &Vec<ASTNode>,
+    ) -> Result<IRNode, IRError> {
+        if args.len() < 1 {
             return Err(IRError::InvalidArgumentCount {
                 pos,
                 expected: 2,
                 got: args.len(),
             });
         }
-        let str = self.build_node(&args[0]);
         let typ = match str.typ(self).data.concrete(self) {
             TypeData::STRUCT(v) => v,
-            TypeData::INVALID => Vec::new(),
             _ => {
                 return Err(IRError::InvalidArgument {
                     expected: TypeData::STRUCT(Vec::new()),
@@ -378,7 +415,7 @@ impl IR {
         self.scopes.push(Scope::new(ScopeKind::Struct(typ), range));
         self.stack.push(self.scopes.len() - 1);
         let mut pars = Vec::new();
-        for v in args.iter().skip(1) {
+        for v in args.iter() {
             let val = self.build_node(v);
             match val.data {
                 IRNodeData::Invalid => continue,

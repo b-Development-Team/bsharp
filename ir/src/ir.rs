@@ -47,6 +47,7 @@ impl IRNode {
             | IRNodeData::Append { .. }
             | IRNodeData::StructOp { .. }
             | IRNodeData::SetStruct { .. }
+            | IRNodeData::SetArr { .. }
             | IRNodeData::Return(_) => Type::void(),
             IRNodeData::Len(_) => Type::from(TypeData::INT),
             IRNodeData::GetEnum { typ, .. } => typ.clone(),
@@ -157,6 +158,11 @@ pub enum IRNodeData {
     GetArr {
         arr: Box<IRNode>,
         ind: Box<IRNode>,
+    },
+    SetArr {
+        arr: Box<IRNode>,
+        ind: Box<IRNode>,
+        val: Box<IRNode>,
     },
     GetTuple {
         tup: Box<IRNode>,

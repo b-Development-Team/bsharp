@@ -193,4 +193,31 @@ impl Interp {
             unreachable!()
         }
     }
+
+    pub fn exec_setarr(
+        &mut self,
+        arg: &IRNode,
+        ind: &IRNode,
+        val: &IRNode,
+    ) -> Result<Value, InterpError> {
+        let v = self.exec(arg)?;
+        let ind = self.exec(ind)?;
+        let val = self.exec(val)?;
+        match (v, ind, val) {
+            (Value::Array(arr), Value::Int(ind), v) => {
+                let mut arr = arr.borrow_mut();
+                if let Some(val) = arr.get_mut(ind as usize) {
+                    *val = v;
+                    Ok(Value::Void)
+                } else {
+                    Err(InterpError::ArrayIndexOutOfBounds {
+                        pos: arg.pos,
+                        len: arr.len(),
+                        index: ind as usize,
+                    })
+                }
+            }
+            _ => unreachable!(),
+        }
+    }
 }

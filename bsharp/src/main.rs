@@ -45,5 +45,9 @@ fn main() {
     if mainind.is_none() {
         panic!("main func not found");
     }
-    interp.run_fn(mainind.unwrap(), Vec::new()).unwrap();
+    if let Err(err) = interp.run_fn(mainind.unwrap(), Vec::new()) {
+        Args::command()
+            .error(ErrorKind::InvalidValue, format!("{:?}", err)) // TODO: Interp error formatting
+            .exit();
+    };
 }
