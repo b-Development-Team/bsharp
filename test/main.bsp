@@ -21,27 +21,6 @@
   [RETURN [+ !a !b]]
 ]]
 
-[FUNC @concat [[PARAM !pars [ARRAY $STRING]] [RETURNS $STRING]] [
-  [DEFINE !len 0]
-  [DEFINE !i 0]
-  [WHILE [< !i [LEN !pars]] [
-    [DEFINE !len [+ !len [LEN [GET !pars !i]]]]
-    [DEFINE !i [+ !i 1]]
-  ]]
-  [DEFINE !out [NEW $STRING !len]]
-  [DEFINE !i 0]
-  [WHILE [< !i [LEN !pars]] [
-    [DEFINE !j 0]
-    [DEFINE !par [GET !pars !i]]
-    [WHILE [< !j [LEN !par]] [
-      [APPEND !out [GET !par !j]]
-      [DEFINE !j [+ !j 1]]
-    ]]
-    [DEFINE !i [+ !i 1]]
-  ]]
-  [RETURN !out]
-]]
-
 [FUNC @PRINTBOOL [[PARAM !a [BOOL]]] [
   [IF !a [
     [PRINT "true"]
@@ -102,7 +81,4 @@
 
   [PRINT "IS 1+1=2?"]
   [@PRINTBOOL [= [@add 1 1] 2]]
-
-  [A]
-  [B]
 ]]

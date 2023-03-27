@@ -1,5 +1,6 @@
 use tokens::Tokenizer;
 mod error;
+mod stdlib;
 pub use error::FSetError;
 pub use parser::*;
 pub use tokens::*;
@@ -15,10 +16,12 @@ pub struct FSet {
 
 impl FSet {
     pub fn new() -> FSet {
-        FSet { files: Vec::new() }
+        let mut f = FSet { files: Vec::new() };
+        f.include_stdlib();
+        f
     }
 
-    fn add_file_source(&mut self, name: String, source: String) -> Result<(), FSetError> {
+    pub fn add_file_source(&mut self, name: String, source: String) -> Result<(), FSetError> {
         let ind = self.files.len();
         let mut tok = Tokenizer::new(source, ind);
         tok.tokenize()?;

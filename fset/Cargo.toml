@@ -13,3 +13,4 @@ keywords = ["language", "compiler"]
 [dependencies]
 tokens = { path = "../tokens", package = "bsharp_tokens", version = "0.1.0" }
 parser = { path = "../parser", package = "bsharp_parser", version = "0.1.0" }
+include_dir = "0.7.3"
