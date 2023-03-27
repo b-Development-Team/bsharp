@@ -14,3 +14,4 @@ keywords = ["language", "compiler"]
 fset = { path = "../fset", package = "bsharp_fset", version = "0.1.0" }
 ir = { path = "../ir", package = "bsharp_ir", version = "0.1.0" }
 interp = { path = "../interp", package = "bsharp_interp", version = "0.1.0" }
+clap = {version = "4.1.13", features = ["derive"]}

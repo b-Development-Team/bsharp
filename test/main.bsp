@@ -102,4 +102,7 @@
 
   [PRINT "IS 1+1=2?"]
   [@PRINTBOOL [= [@add 1 1] 2]]
+
+  [A]
+  [B]
 ]]

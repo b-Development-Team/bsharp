@@ -44,4 +44,9 @@ impl FSet {
         }
         Ok(())
     }
+
+    pub fn display_pos(&self, pos: &Pos) -> String {
+        let file = &self.files[pos.file];
+        format!("{}:{}:{}", file.name, pos.start_line + 1, pos.start_col + 1)
+    }
 }

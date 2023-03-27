@@ -1,21 +1,42 @@
+use clap::{error::ErrorKind, CommandFactory, Parser};
 use fset::FSet;
 use interp::Interp;
 use ir::IR;
 
+#[derive(Parser)]
+#[command(name = "bsharp", about = "The B# programming language!")]
+struct Args {
+    #[arg(help = "the directory to import")]
+    dir: std::path::PathBuf,
+}
+
 fn main() {
+    let args = Args::parse();
+
     // Fset
     let mut fset = FSet::new();
-    fset.import(&std::path::Path::new(&"test".to_string()))
-        .unwrap();
+    if let Err(err) = fset.import(&args.dir) {
+        Args::command().error(ErrorKind::Io, err).exit();
+    };
 
     // IR
     let mut ir = IR::new(fset);
-    ir.build().unwrap();
+    if let Err(err) = ir.build() {
+        Args::command()
+            .error(ErrorKind::InvalidValue, err.fmt(&ir))
+            .exit();
+    };
     if ir.errors.len() > 0 {
-        for err in ir.errors {
-            println!("{:?}\n", err);
+        for err in ir.errors.iter() {
+            println!("{}", err.fmt(&ir));
         }
-        return;
+        println!("");
+        Args::command()
+            .error(
+                ErrorKind::ValueValidation,
+                format!("built with {} errors", ir.errors.len()),
+            )
+            .exit();
     }
 
     // Run

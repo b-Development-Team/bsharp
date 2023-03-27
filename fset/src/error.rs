@@ -25,3 +25,14 @@ impl From<std::io::Error> for FSetError {
         FSetError::IOError(e)
     }
 }
+
+// Impl display for FSetError
+impl std::fmt::Display for FSetError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            FSetError::ParseError(e) => write!(f, "{:?}", e),
+            FSetError::TokenizeError(e) => write!(f, "{:?}", e),
+            FSetError::IOError(e) => write!(f, "{}", e),
+        }
+    }
+}
