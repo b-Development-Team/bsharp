@@ -62,8 +62,8 @@ const SOURCE: &'static str = r#"
     ]]
     [CASE !val $A [
       [PRINT "IT'S A"]
-      [PRINT [@concat [ARR "VAL 1 is" [GET !val 0]]]]
-      [PRINT [@concat [ARR "VAL 2 is" [GET !val 1]]]]
+      [PRINT [@concat [ARR "VAL 1 is " [GET !val 0]]]]
+      [PRINT [@concat [ARR "VAL 2 is " [GET !val 1]]]]
     ]]
   ]
 ]]

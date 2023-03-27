@@ -1,11 +1,11 @@
-use std::{cell::RefCell, collections::HashMap};
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use super::*;
 
 impl Interp {
     pub fn exec_arrlit(&mut self, args: &Vec<IRNode>) -> Result<Value, InterpError> {
         let vals = self.exec_args(args)?;
-        Ok(Value::Array(RefCell::new(vals)))
+        Ok(Value::Array(Rc::new(RefCell::new(vals))))
     }
 
     pub fn exec_newstruct(&mut self, args: &Vec<IRNode>) -> Result<Value, InterpError> {
@@ -19,7 +19,7 @@ impl Interp {
                 _ => unreachable!(),
             }
         }
-        Ok(Value::Struct(RefCell::new(fields)))
+        Ok(Value::Struct(Rc::new(RefCell::new(fields))))
     }
 
     pub fn exec_newenum(&mut self, arg: &IRNode) -> Result<Value, InterpError> {
@@ -60,7 +60,7 @@ impl Interp {
 
     pub fn exec_newtuple(&mut self, args: &Vec<IRNode>) -> Result<Value, InterpError> {
         let vals = self.exec_args(args)?;
-        Ok(Value::Tuple(RefCell::new(vals)))
+        Ok(Value::Tuple(Rc::new(RefCell::new(vals))))
     }
 
     pub fn exec_getenum(&mut self, arg: &IRNode, typ: &Type) -> Result<Value, InterpError> {
@@ -177,7 +177,9 @@ impl Interp {
             0
         };
 
-        Ok(Value::Array(RefCell::new(Vec::with_capacity(cap as usize))))
+        Ok(Value::Array(Rc::new(RefCell::new(Vec::with_capacity(
+            cap as usize,
+        )))))
     }
 
     pub fn exec_append(&mut self, arg: &IRNode, val: &IRNode) -> Result<Value, InterpError> {
