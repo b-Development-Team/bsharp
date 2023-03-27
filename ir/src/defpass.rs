@@ -105,7 +105,7 @@ impl IR {
                             ASTNodeData::String(name) => name.clone(),
                             _ => unreachable!(),
                         };
-                        self.fset.import(&name)?;
+                        self.fset.import(&std::path::Path::new(&name))?;
                     }
                     _ => self.save_error(IRError::UnexpectedNode(node)),
                 },

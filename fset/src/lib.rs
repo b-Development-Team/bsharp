@@ -18,7 +18,7 @@ impl FSet {
         FSet { files: Vec::new() }
     }
 
-    pub fn add_file_source(&mut self, name: String, source: String) -> Result<(), FSetError> {
+    fn add_file_source(&mut self, name: String, source: String) -> Result<(), FSetError> {
         let ind = self.files.len();
         let mut tok = Tokenizer::new(source, ind);
         tok.tokenize()?;
@@ -31,7 +31,17 @@ impl FSet {
         Ok(())
     }
 
-    pub fn import(&mut self, dir: &String) -> Result<(), FSetError> {
-        panic!("unimplemented")
+    pub fn import(&mut self, dir: &std::path::Path) -> Result<(), FSetError> {
+        // Go through all files in the directory ending in .bsp
+        for entry in std::fs::read_dir(dir)? {
+            let entry = entry?;
+            let path = entry.path();
+            if path.extension().is_some() && path.extension().unwrap() == "bsp" {
+                let name = path.file_name().unwrap().to_str().unwrap().to_string();
+                let source = std::fs::read_to_string(path)?;
+                self.add_file_source(name, source)?;
+            }
+        }
+        Ok(())
     }
 }

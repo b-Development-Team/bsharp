@@ -5,6 +5,7 @@ use tokens::TokenizeError;
 pub enum FSetError {
     ParseError(ParseError),
     TokenizeError(TokenizeError),
+    IOError(std::io::Error),
 }
 
 impl From<ParseError> for FSetError {
@@ -16,5 +17,11 @@ impl From<ParseError> for FSetError {
 impl From<TokenizeError> for FSetError {
     fn from(e: TokenizeError) -> FSetError {
         FSetError::TokenizeError(e)
+    }
+}
+
+impl From<std::io::Error> for FSetError {
+    fn from(e: std::io::Error) -> FSetError {
+        FSetError::IOError(e)
     }
 }
