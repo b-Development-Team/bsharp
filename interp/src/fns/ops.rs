@@ -76,13 +76,13 @@ impl Interp {
         let right = self.exec(right)?;
         match (left, right) {
             (Value::Int(left), Value::Int(right)) => match op {
-                MathOperator::ADD => Ok(Value::Int(left + right)),
+                MathOperator::ADD => Ok(Value::Int(left.wrapping_add(right))),
                 MathOperator::SUBTRACT => Ok(Value::Int(left - right)),
-                MathOperator::MULTIPLY => Ok(Value::Int(left * right)),
+                MathOperator::MULTIPLY => Ok(Value::Int(left.wrapping_mul(right))),
                 MathOperator::DIVIDE => Ok(Value::Int(left / right)),
                 MathOperator::MODULO => Ok(Value::Int(left % right)),
                 MathOperator::XOR => Ok(Value::Int(left ^ right)),
-                MathOperator::SHIFT => Ok(Value::Int(left << right)),
+                MathOperator::SHIFT => Ok(Value::Int(left.wrapping_shl(right as u32))),
                 MathOperator::BOR => Ok(Value::Int(left | right)),
             },
             (Value::Float(left), Value::Float(right)) => match op {

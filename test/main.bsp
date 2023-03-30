@@ -1,5 +1,6 @@
 [FUNC @main [] [
   [PRINT [@ITOA -102]]
-  [PRINT [@ITOA [@HASH "HELLO WORLD" 101 101]]]
-  [PRINT [@ITOA [@HASH "HI" 101 101]]]
+  [PRINT [@ITOA [@HASH "HELLO WORLD"]]]
+  [PRINT [@ITOA [@HASH "HI"]]]
+   [PRINT [@ITOA [@HASH "HIII"]]]
 ]]

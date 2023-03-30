@@ -1,24 +1,12 @@
-[FUNC @HASH [[PARAM !m $STRING] [PARAM !kI [INT]] [PARAM !kII [INT]] [RETURNS [INT]]] [
-  # Initialize state
-  [DEFINE !vI [XOR !kI 8317987319222330741]]
-  [DEFINE !vII [XOR !kII 7237128888997146477]]
-  [DEFINE !vIII [XOR !kI 7816392313619706465]]
-  [DEFINE !vIIII [XOR !kII 8387220255154660723]]
-  [DEFINE !t [SHIFT [LEN !m] 56]]
-
-  # Hash
-  [DEFINE !done 0]
-  [WHILE [> [- [LEN !m] !done] 8] [
-    [DEFINE !p [BOR [BOR [BOR [BOR [BOR [BOR [BOR [TOI [GET !m !done]] [SHIFT [TOI [GET !m [+ !done 1]]] 8]] [SHIFT [TOI [GET !m [+ !done 2]]] 16]] [SHIFT [TOI [GET !m [+ !done 3]]] 24]] [SHIFT [TOI [GET !m [+ !done 4]]] 32]] [SHIFT [TOI [GET !m [+ !done 5]]] 40]] [SHIFT [TOI [GET !m [+ !done 6]]] 48]] [SHIFT [TOI [GET !m [+ !done 7]]] 56]]]
-    [DEFINE !vIIII [XOR !vIIII !p]]
-    
-    # Round 1
-    [DEFINE !vI [+ !vI !vII]]
-    [DEFINE !vII [BOR [SHIFT !vII 13] [SHIFT !vII [- 13 64]]]]
-    [DEFINE !vII [XOR !vII !vI]]
-    [DEFINE !vI [BOR [SHIFT !vI 32] [SHIFT !vI [- 32 64]]]]
-
-    [DEFINE !vIII [+ !vIII !vIIII]]
+# 64-bit murmur OOAT hash
+[FUNC @HASH [[PARAM !m $STRING] [RETURNS [INT]]] [
+  [DEFINE !h 525201411107845655]
+  [DEFINE !i 0]
+  [WHILE [< !i [LEN !m]] [
+    [DEFINE !h [XOR !h [TOI [GET !m !i]]]]
+    [DEFINE !h [* !h 6616326155283851669]]
+    [DEFINE !h [SHIFT !h -47]]
+    [DEFINE !i [+ !i 1]]
   ]]
-  [RETURN !vI]
+  [RETURN !h]
 ]]
