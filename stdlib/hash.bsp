@@ -21,22 +21,6 @@
   [RETURN [NEW $MAP_NODE [: .key [NEW $STRING]] [: .val [BOX [NEW $MAP_NONE]]] [: .psl 0]]]
 ]]
 
-[FUNC @PRINT_MAP_NODE [[PARAM !n $MAP_NODE]] [
-  # handle empty node
-  [IF [PEEK [GET !n .val] $MAP_NONE] [
-    [PRINT "EMPTY NODE\n"]
-    [RETURN]
-  ] []]
-
-  [PRINT "MAP_NODE: "]
-  [PRINT [GET !n .key]]
-  [PRINT " "]
-  [PRINT [UNBOX [GET !n .val] $STRING]]
-  [PRINT " "]
-  [PRINT [@ITOA [GET !n .psl]]]
-  [PRINT "\n"]
-]]
-
 [TYPE $MAP [STRUCT 
   [FIELD .buckets [ARRAY $MAP_NODE]]
   [FIELD .cnt [INT]]
@@ -77,7 +61,7 @@
   ]]
 ]]
 
-[FUNC @MAP_KEYIND [[PARAM !m $MAP] [PARAM !k $STRING] [RETURNS [INT]]] [
+[FUNC @MAP_KEYIND [[PARAM !m $MAP] [PARAM !k $STRING] [RETURNS [INT]]] [ # TODO: Perhaps in the future implement smart search? Unsure on performance gains, but relatively simple to implement
   [DEFINE !h [% [@HASH !k] [LEN [GET !m .buckets]]]]
   [DEFINE !psl 0]
   [WHILE [< !h [LEN [GET !m .buckets]]] [
@@ -105,9 +89,14 @@
 
 # Returns [BOX [NEW $MAP_NONE]] if key not found
 [TYPE $MAP_NONE [STRUCT]]
-[FUNC @MAP_GET [[PARAM !m $MAP] [PARAM !k $STRING] [RETURNS [BX]]] [ # TODO: Perhaps in the future implement smart search? Unsure on performance gains, but relatively simple to implement
+[FUNC @MAP_GET [[PARAM !m $MAP] [PARAM !k $STRING] [RETURNS [BX]]] [
   [DEFINE !ind [@MAP_KEYIND !m !k]]
   [IF [= !ind -1] [RETURN [BOX [NEW $MAP_NONE]]] [RETURN [GET [GET [GET !m .buckets] !ind] .val]]]
+]]
+
+[FUNC @MAP_CONTAINS [[PARAM !m $MAP] [PARAM !k $STRING] [RETURNS [BOOL]]] [
+  [DEFINE !ind [@MAP_KEYIND !m !k]]
+  [RETURN [NEQ !ind -1]]
 ]]
 
 [FUNC @MAP_DEL [[PARAM !m $MAP] [PARAM !k $STRING]] [

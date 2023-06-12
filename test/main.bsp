@@ -16,9 +16,9 @@
   
   [PRINT [UNBOX [@MAP_GET !m "HELLO"] $STRING]]
   [PRINT [UNBOX [@MAP_GET !m "WORLD"] $STRING]]
-  [PRINT [@BTOA [PEEK [@MAP_GET !m "HELLO"] $NONE]]] # Checks if key exists
+  [PRINT [@BTOA [@MAP_CONTAINS !m "HELLO"]]]
   [@MAP_DEL !m "HELLO"]
-  [PRINT [@BTOA [PEEK [@MAP_GET !m "HELLO"] $NONE]]]
+  [PRINT [@BTOA [@MAP_CONTAINS !m "HELLO"]]]
 
   [DEFINE !vals [@MAP_LIST !m]]
   [DEFINE !i 0]
