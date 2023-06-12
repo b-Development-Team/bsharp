@@ -21,6 +21,22 @@
   [RETURN [NEW $MAP_NODE [: .key [NEW $STRING]] [: .val [BOX [NEW $MAP_NONE]]] [: .psl 0]]]
 ]]
 
+[FUNC @PRINT_MAP_NODE [[PARAM !n $MAP_NODE]] [
+  # handle empty node
+  [IF [PEEK [GET !n .val] $MAP_NONE] [
+    [PRINT "EMPTY NODE\n"]
+    [RETURN]
+  ] []]
+
+  [PRINT "MAP_NODE: "]
+  [PRINT [GET !n .key]]
+  [PRINT " "]
+  [PRINT [UNBOX [GET !n .val] $STRING]]
+  [PRINT " "]
+  [PRINT [@ITOA [GET !n .psl]]]
+  [PRINT "\n"]
+]]
+
 [TYPE $MAP [STRUCT 
   [FIELD .buckets [ARRAY $MAP_NODE]]
   [FIELD .cnt [INT]]
@@ -40,6 +56,7 @@
   # Hash
   [DEFINE !h [% [@HASH !k] [LEN [GET !m .buckets]]]]
   [DEFINE !curr [NEW $MAP_NODE [: .key !k] [: .val !v] [: .psl 0]]]
+  
   # Loop until inserted
   [WHILE [= 1 1] [
     [IF [PEEK [GET [GET [GET !m .buckets] !h] .val] $MAP_NONE] [
@@ -60,36 +77,59 @@
   ]]
 ]]
 
-
-# Returns [BOX [NEW $MAP_NONE]] if key not found
-[TYPE $MAP_NONE [STRUCT]]
-[FUNC @MAP_GET [[PARAM !m $MAP] [PARAM !k $STRING] [RETURNS [BX]]] [ # TODO: Perhaps in the future implement smart search? Unsure on performance gains, but relatively simple to implement
+[FUNC @MAP_KEYIND [[PARAM !m $MAP] [PARAM !k $STRING] [RETURNS [INT]]] [
   [DEFINE !h [% [@HASH !k] [LEN [GET !m .buckets]]]]
   [DEFINE !psl 0]
   [WHILE [< !h [LEN [GET !m .buckets]]] [
     [DEFINE !n [GET [GET !m .buckets] !h]]
 
     [IF [@STREQ !k [GET !n .key]] [ # Found key, return
-      [RETURN [GET !n .val]]
+      [RETURN !h]
     ] []]
 
 
     [IF [PEEK [GET !n .val] $MAP_NONE] [ # If the value is empty, it is not in the map
-      [RETURN [BOX [NEW $MAP_NONE]]]
+      [RETURN -1]
     ] []]
 
     [IF [> [GET !n .psl] !psl] [ # If the PSL at the spot is greater than it would have been for the real key, it is not in the map
-      [RETURN [BOX [NEW $MAP_NONE]]]
+      [RETURN -1]
     ] []]
 
     [DEFINE !h [+ !h 1]]
     [DEFINE !psl [+ !psl 1]]
   ]]
-  [RETURN [BOX [NEW $NONE]]]
+  [RETURN -1]
+]]
+
+
+# Returns [BOX [NEW $MAP_NONE]] if key not found
+[TYPE $MAP_NONE [STRUCT]]
+[FUNC @MAP_GET [[PARAM !m $MAP] [PARAM !k $STRING] [RETURNS [BX]]] [ # TODO: Perhaps in the future implement smart search? Unsure on performance gains, but relatively simple to implement
+  [DEFINE !ind [@MAP_KEYIND !m !k]]
+  [IF [= !ind -1] [RETURN [BOX [NEW $MAP_NONE]]] [RETURN [GET [GET [GET !m .buckets] !ind] .val]]]
 ]]
 
 [FUNC @MAP_DEL [[PARAM !m $MAP] [PARAM !k $STRING]] [
-  [PRINT "TODO"]
+  [DEFINE !h [@MAP_KEYIND !m !k]]
+  [IF [= !h -1] [RETURN] []] # if not in map, return
+  
+  # Clear slot
+  [SET [GET !m .buckets] !h [@EMPTY_MAP_NODE]]
+
+  [PRINT "BACKSHIFTING||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"]
+
+  # Backshifting algorithm
+  [WHILE [& [< !h [- [LEN [GET !m .buckets]] 1]] [> [GET [GET [GET !m .buckets] [+ !h 1]] .psl] 0]] [ # Loop until PSL of key is 0 or out of range
+    # Backshift
+    [SET [GET !m .buckets] !h [GET [GET !m .buckets] [+ !h 1]]]
+    [SET [GET [GET !m .buckets] !h] [: .psl [- [GET [GET [GET !m .buckets] !h] .psl] 1]]] # Decrement PSL
+    [DEFINE !h [+ !h 1]]
+  ]]
+  [SET [GET !m .buckets] !h [@EMPTY_MAP_NODE]]
+
+  # Update count
+  [SET !m [: .cnt [- [GET !m .cnt] 1]]]
 ]]
 
 [FUNC @MAP_LIST [[PARAM !m $MAP] [RETURNS [ARRAY [TUPLE $STRING [BX]]]]] [
