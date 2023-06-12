@@ -68,6 +68,7 @@ impl Interp {
 
     pub fn exec_math(
         &mut self,
+        pos: Pos,
         op: MathOperator,
         left: &IRNode,
         right: &IRNode,
@@ -79,7 +80,12 @@ impl Interp {
                 MathOperator::ADD => Ok(Value::Int(left.wrapping_add(right))),
                 MathOperator::SUBTRACT => Ok(Value::Int(left - right)),
                 MathOperator::MULTIPLY => Ok(Value::Int(left.wrapping_mul(right))),
-                MathOperator::DIVIDE => Ok(Value::Int(left / right)),
+                MathOperator::DIVIDE => {
+                    if right == 0 {
+                        return Err(InterpError::DivideByZero(pos));
+                    }
+                    Ok(Value::Int(left / right))
+                }
                 MathOperator::MODULO => Ok(Value::Int(left % right)),
                 MathOperator::XOR => Ok(Value::Int(left ^ right)),
                 MathOperator::SHIFT => Ok(Value::Int(left.wrapping_shl(right as u32))),
@@ -89,7 +95,12 @@ impl Interp {
                 MathOperator::ADD => Ok(Value::Float(left + right)),
                 MathOperator::SUBTRACT => Ok(Value::Float(left - right)),
                 MathOperator::MULTIPLY => Ok(Value::Float(left * right)),
-                MathOperator::DIVIDE => Ok(Value::Float(left / right)),
+                MathOperator::DIVIDE => {
+                    if right == 0.0 {
+                        return Err(InterpError::DivideByZero(pos));
+                    }
+                    Ok(Value::Float(left / right))
+                }
                 MathOperator::MODULO => Ok(Value::Float(left % right)),
                 MathOperator::XOR => Ok(Value::Float((left as i64 ^ right as i64) as f64)),
                 MathOperator::SHIFT => Ok(Value::Float(((left as i64) << (right as i64)) as f64)),
@@ -99,7 +110,12 @@ impl Interp {
                 MathOperator::ADD => Ok(Value::Char(left + right)),
                 MathOperator::SUBTRACT => Ok(Value::Char(left - right)),
                 MathOperator::MULTIPLY => Ok(Value::Char(left * right)),
-                MathOperator::DIVIDE => Ok(Value::Char(left / right)),
+                MathOperator::DIVIDE => {
+                    if right == 0 {
+                        return Err(InterpError::DivideByZero(pos));
+                    }
+                    Ok(Value::Char(left / right))
+                }
                 MathOperator::MODULO => Ok(Value::Char(left % right)),
                 MathOperator::XOR => Ok(Value::Char(left ^ right)),
                 MathOperator::SHIFT => Ok(Value::Char(left << right)),

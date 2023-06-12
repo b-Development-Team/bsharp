@@ -132,6 +132,8 @@ impl IR {
             });
         }
 
+        self.build_fn(ind.unwrap(), true);
+
         // Check args
         let pars: Vec<_> = self.funcs[ind.unwrap()]
             .params

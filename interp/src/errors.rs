@@ -9,6 +9,7 @@ pub enum InterpError {
     InvalidEnumType { pos: Pos, expected: Type, got: Type },
     InvalidBoxType { pos: Pos, expected: Type, got: Type },
     ArrayIndexOutOfBounds { pos: Pos, index: usize, len: usize },
+    DivideByZero(Pos),
 }
 
 impl From<io::Error> for InterpError {
@@ -40,6 +41,9 @@ impl InterpError {
                 index,
                 len,
             ),
+            InterpError::DivideByZero(pos) => {
+                format!("{}: divide by zero", int.ir.fset.display_pos(pos),)
+            }
         }
     }
 }

@@ -27,7 +27,7 @@ impl IR {
         }
     }
 
-    pub fn build_fn(&mut self, id: usize) {
+    pub fn build_fn(&mut self, id: usize, sig: bool) {
         // Build params
         if let Some(ast) = &self.funcs[id].params_ast {
             let pars = match &ast.data {
@@ -79,23 +79,25 @@ impl IR {
             self.funcs[id].ret_typ_definition = ret_def.unwrap();
         }
 
-        if let Some(ast) = &self.funcs[id].body_ast {
-            // Add params
-            let mut sc = Scope::new(ScopeKind::Function(id), ast.pos);
-            for par in self.funcs[id].params.iter() {
-                self.variables[*par].scope = self.scopes.len();
-                sc.vars.insert(self.variables[*par].name.clone(), *par);
+        if !sig {
+            if let Some(ast) = &self.funcs[id].body_ast {
+                // Add params
+                let mut sc = Scope::new(ScopeKind::Function(id), ast.pos);
+                for par in self.funcs[id].params.iter() {
+                    self.variables[*par].scope = self.scopes.len();
+                    sc.vars.insert(self.variables[*par].name.clone(), *par);
+                }
+
+                // Add scope
+                self.scopes.push(sc);
+                self.stack.push(self.scopes.len() - 1);
+
+                // Build
+                let res = self.build_node(&ast.clone());
+                self.funcs[id].body_ast = None;
+                self.funcs[id].body = res;
+                self.funcs[id].scope = self.stack.pop().unwrap();
             }
-
-            // Add scope
-            self.scopes.push(sc);
-            self.stack.push(self.scopes.len() - 1);
-
-            // Build
-            let res = self.build_node(&ast.clone());
-            self.funcs[id].body_ast = None;
-            self.funcs[id].body = res;
-            self.funcs[id].scope = self.stack.pop().unwrap();
         }
     }
 

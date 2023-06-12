@@ -40,6 +40,7 @@ impl IR {
         typs: &Vec<TypeData>,
     ) -> Result<Vec<IRNode>, IRError> {
         if params.len() != typs.len() {
+            println!("{:?}", typs);
             return Err(IRError::InvalidArgumentCount {
                 pos,
                 expected: typs.len(),

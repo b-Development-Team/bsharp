@@ -36,6 +36,8 @@
 ]]
 
 [FUNC @ITOA [[PARAM !v [INT]] [RETURNS $STRING]] [
+  [IF [= !v 0] [RETURN "0"] []]
+
   [DEFINE !out [NEW $STRING]]
 
   # Handle negatives

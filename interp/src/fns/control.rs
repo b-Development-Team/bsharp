@@ -82,6 +82,10 @@ impl Interp {
     pub fn exec_while(&mut self, cond: &IRNode, body: &IRNode) -> Result<Value, InterpError> {
         let mut cont = self.exec(cond)?;
         while let Value::Bool(val) = cont {
+            if self.stack.last().unwrap().ret.is_some() {
+                break; // Return
+            }
+
             if val {
                 self.exec(body)?;
                 cont = self.exec(cond)?;

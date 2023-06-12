@@ -17,22 +17,52 @@
   [FIELD .psl [INT]]
 ]]
 
+[FUNC @EMPTY_MAP_NODE [[RETURNS $MAP_NODE]] [
+  [RETURN [NEW $MAP_NODE [: .key [NEW $STRING]] [: .val [BOX [NEW $MAP_NONE]]] [: .psl 0]]]
+]]
+
 [TYPE $MAP [STRUCT 
   [FIELD .buckets [ARRAY $MAP_NODE]]
   [FIELD .cnt [INT]]
 ]]
 
 [FUNC @MAP_NEW [[RETURNS $MAP]] [
-  [DEFINE !m [NEW $MAP [: .buckets [NEW [ARRAY $MAP_NODE]]] [: .cnt 0]]]
+  [DEFINE !m [NEW $MAP [: .buckets [ARR [@EMPTY_MAP_NODE]]] [: .cnt 0]]]
   [RETURN !m]
 ]]
 
 [FUNC @MAP_INSERT [[PARAM !m $MAP] [PARAM !k $STRING] [PARAM !v [BX]]] [
-  [PRINT "TODO"]
+  # MAX LOAD FACTOR: 0.9
+  [IF [> [/ [TOF [GET !m .cnt]] [TOF [LEN [GET !m .buckets]]]] 0.9] [
+    [@MAP_RESIZE !m]
+  ] []]
+
+  # Hash
+  [DEFINE !h [% [@HASH !k] [LEN [GET !m .buckets]]]]
+  [DEFINE !curr [NEW $MAP_NODE [: .key !k] [: .val !v] [: .psl 0]]]
+  # Loop until inserted
+  [WHILE [= 1 1] [
+    [IF [PEEK [GET [GET [GET !m .buckets] !h] .val] $MAP_NONE] [
+      # Insert, empty bucket
+      [SET [GET !m .buckets] !h !curr]
+      [SET !m [: .cnt [+ [GET !m .cnt] 1]]]
+      [RETURN]
+    ] []]
+
+    [IF [> [GET !curr .psl] [GET [GET [GET !m .buckets] !h] .psl]] [
+      # Swap, PSL greater
+      [DEFINE !tmp [GET [GET !m .buckets] !h]]
+      [SET [GET !m .buckets] !h !curr]
+    ] []]
+
+    [SET !curr [: .psl [+ [GET !curr .psl] 1]]] # Increment PSL
+    [DEFINE !h [+ !h 1]]
+  ]]
 ]]
 
 
-# Returns [BOX [NEW $NONE]] if key not found
+# Returns [BOX [NEW $MAP_NONE]] if key not found
+[TYPE $MAP_NONE [STRUCT]]
 [FUNC @MAP_GET [[PARAM !m $MAP] [PARAM !k $STRING] [RETURNS [BX]]] [
   [PRINT "TODO"]
   [RETURN [BOX [NEW $NONE]]]
@@ -45,4 +75,30 @@
 [FUNC @MAP_LIST [[PARAM !m $MAP] [RETURNS [ARRAY [BX]]]] [
   [PRINT "TODO"]
   [RETURN [NEW [ARRAY [BX]]]]
+]]
+
+[FUNC @MAP_RESIZE [[PARAM !m $MAP]] [
+  [DEFINE !old [GET !m .buckets]]
+  [SET !m [: .buckets [NEW [ARRAY $MAP_NODE] [* 2 [LEN !old]]]]]
+
+  # Fill with empty map nodes
+  [DEFINE !i 0]
+  [WHILE [< !i [* 2 [LEN !old]]] [
+    [APPEND [GET !m .buckets] [@EMPTY_MAP_NODE]]
+    [DEFINE !i [+ !i 1]]
+  ]]
+
+
+  [SET !m [: .cnt 0]]
+  [DEFINE !i 0]
+  [WHILE [< !i [LEN !old]] [
+    [DEFINE !n [GET !old !i]]
+    [IF [NOT [PEEK [GET !n .val] $MAP_NONE]] [
+      # Insert
+      [DEFINE !k [GET !n .key]]
+      [DEFINE !v [GET !n .val]]
+      [@MAP_INSERT !m !k !v]
+    ] []]
+    [DEFINE !i [+ !i 1]]
+  ]]
 ]]

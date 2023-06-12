@@ -58,7 +58,7 @@ impl IR {
             self.build_typ(i);
         }
         for i in 0..self.funcs.len() {
-            self.build_fn(i);
+            self.build_fn(i, false);
         }
         Ok(())
     }

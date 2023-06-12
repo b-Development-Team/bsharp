@@ -2,6 +2,11 @@ use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use super::*;
 
+struct StructOp {
+    field: String,
+    val: Value,
+}
+
 impl Interp {
     pub fn exec_arrlit(&mut self, args: &Vec<IRNode>) -> Result<Value, InterpError> {
         let vals = self.exec_args(args)?;
@@ -99,17 +104,27 @@ impl Interp {
         arg: &IRNode,
         ops: &Vec<IRNode>,
     ) -> Result<Value, InterpError> {
+        let mut calcops = Vec::with_capacity(ops.len());
+
+        // Calculate ops
+        for op in ops {
+            match &op.data {
+                IRNodeData::StructOp { field, val } => {
+                    let val = self.exec(val)?;
+                    calcops.push(StructOp {
+                        field: field.clone(),
+                        val,
+                    });
+                }
+                _ => unreachable!(),
+            }
+        }
+
         let val = self.exec(arg)?;
         if let Value::Struct(v) = val {
             let mut v = v.borrow_mut();
-            for op in ops {
-                match &op.data {
-                    IRNodeData::StructOp { field, val } => {
-                        let val = self.exec(val)?;
-                        v.insert(field.clone(), val);
-                    }
-                    _ => unreachable!(),
-                }
+            for op in calcops {
+                v.insert(op.field, op.val);
             }
 
             Ok(Value::Void)
