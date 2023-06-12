@@ -63,8 +63,28 @@
 
 # Returns [BOX [NEW $MAP_NONE]] if key not found
 [TYPE $MAP_NONE [STRUCT]]
-[FUNC @MAP_GET [[PARAM !m $MAP] [PARAM !k $STRING] [RETURNS [BX]]] [
-  [PRINT "TODO"]
+[FUNC @MAP_GET [[PARAM !m $MAP] [PARAM !k $STRING] [RETURNS [BX]]] [ # TODO: Perhaps in the future implement smart search? Unsure on performance gains, but relatively simple to implement
+  [DEFINE !h [% [@HASH !k] [LEN [GET !m .buckets]]]]
+  [DEFINE !psl 0]
+  [WHILE [< !h [LEN [GET !m .buckets]]] [
+    [DEFINE !n [GET [GET !m .buckets] !h]]
+
+    [IF [@STREQ !k [GET !n .key]] [ # Found key, return
+      [RETURN [GET !n .val]]
+    ] []]
+
+
+    [IF [PEEK [GET !n .val] $MAP_NONE] [ # If the value is empty, it is not in the map
+      [RETURN [BOX [NEW $MAP_NONE]]]
+    ] []]
+
+    [IF [> [GET !n .psl] !psl] [ # If the PSL at the spot is greater than it would have been for the real key, it is not in the map
+      [RETURN [BOX [NEW $MAP_NONE]]]
+    ] []]
+
+    [DEFINE !h [+ !h 1]]
+    [DEFINE !psl [+ !psl 1]]
+  ]]
   [RETURN [BOX [NEW $NONE]]]
 ]]
 
@@ -72,9 +92,19 @@
   [PRINT "TODO"]
 ]]
 
-[FUNC @MAP_LIST [[PARAM !m $MAP] [RETURNS [ARRAY [BX]]]] [
-  [PRINT "TODO"]
-  [RETURN [NEW [ARRAY [BX]]]]
+[FUNC @MAP_LIST [[PARAM !m $MAP] [RETURNS [ARRAY [TUPLE $STRING [BX]]]]] [
+  [DEFINE !out [NEW [ARRAY [TUPLE $STRING [BX]]] [GET !m .cnt]]]
+  [DEFINE !i 0]
+  [DEFINE !ins 0]
+  [WHILE [< !ins [GET !m .cnt]] [
+    [IF [NOT [PEEK [GET [GET [GET !m .buckets] !i] .val] $MAP_NONE]] [
+      [DEFINE !n [GET [GET !m .buckets] !i]]
+      [APPEND !out [NEW [TUPLE $STRING [BX]] [GET !n .key] [GET !n .val]]]
+      [DEFINE !ins [+ !ins 1]]
+    ] []]
+    [DEFINE !i [+ !i 1]]
+  ]]
+  [RETURN !out]
 ]]
 
 [FUNC @MAP_RESIZE [[PARAM !m $MAP]] [

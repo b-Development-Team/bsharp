@@ -72,3 +72,15 @@
     [RETURN "FALSE"]
   ]]
 ]]
+
+[FUNC @STREQ [[PARAM !l $STRING] [PARAM !r $STRING] [RETURNS [BOOL]]] [
+  [IF [NEQ [LEN !l] [LEN !r]] [[RETURN [= 0 1]]] []]
+  [DEFINE !i 0]
+  [WHILE [< !i [LEN !l]] [
+    [IF [NEQ [GET !l !i] [GET !r !i]] [
+      [RETURN [= 0 1]]
+    ] []]
+    [DEFINE !i [+ !i 1]]
+  ]]
+  [RETURN [= 0 0]]
+]]

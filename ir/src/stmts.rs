@@ -134,8 +134,8 @@ impl IR {
                 "<" => self.build_compop(*name_pos, v.pos, args, ComparisonOperator::LESS),
                 "<=" => self.build_compop(*name_pos, v.pos, args, ComparisonOperator::LESSEQUAL),
                 "=" => self.build_compop(*name_pos, v.pos, args, ComparisonOperator::EQUAL),
-                "NEQ" => self.build_compop(*name_pos, v.pos, args, ComparisonOperator::NOTEQUAL), // TODO: Figure out a better name for this
-                "NOT" => self.build_boolop(*name_pos, v.pos, args, BooleanOperator::NOT), // TODO: figure out better name for this
+                "NEQ" => self.build_compop(*name_pos, v.pos, args, ComparisonOperator::NOTEQUAL),
+                "NOT" => self.build_boolop(*name_pos, v.pos, args, BooleanOperator::NOT),
                 "&" => self.build_boolop(*name_pos, v.pos, args, BooleanOperator::AND),
                 "|" => self.build_boolop(*name_pos, v.pos, args, BooleanOperator::OR),
                 "DEFINE" => self.build_define(*name_pos, v.pos, args),

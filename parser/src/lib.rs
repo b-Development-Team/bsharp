@@ -8,7 +8,7 @@ pub use error::ParseError;
 
 pub struct Parser {
     tok: Tokenizer,
-    pub ast: Vec<ASTNode>, // TODO: Make private
+    pub ast: Vec<ASTNode>,
 }
 
 impl Parser {

@@ -1,15 +1,30 @@
+# Prints:
+# THIS IS THE FIRST
+# THIS IS THE SECOND
+# TRUE
+# FALSE
+# KEY: WORLD
+# VALUE: THIS IS THE SECOND
+# KEY: ABC
+# VALUE: THIS IS THE THIRD
+
 [FUNC @main [] [
   [DEFINE !m [@MAP_NEW]]
-  [@MAP_INSERT !m "HELLO" [BOX "HELLO"]]
-  [@MAP_INSERT !m "WORLD" [BOX "HELLO"]]
+  [@MAP_INSERT !m "HELLO" [BOX "THIS IS THE FIRST"]]
+  [@MAP_INSERT !m "WORLD" [BOX "THIS IS THE SECOND"]]
+  [@MAP_INSERT !m "ABC" [BOX "THIS IS THE THIRD"]]
+  
   [PRINT [UNBOX [@MAP_GET !m "HELLO"] $STRING]]
   [PRINT [UNBOX [@MAP_GET !m "WORLD"] $STRING]]
-  [PRINT [@BTOA [PEEK [@MAP_GET !m "I DONT EXIST"] $NONE]]]
+  [PRINT [@BTOA [PEEK [@MAP_GET !m "HELLO"] $NONE]]] # Checks if key exists
+  [@MAP_DEL !m "HELLO"]
+  [PRINT [@BTOA [PEEK [@MAP_GET !m "HELLO"] $NONE]]]
 
   [DEFINE !vals [@MAP_LIST !m]]
   [DEFINE !i 0]
   [WHILE [< !i [LEN !vals]] [
-    [PRINT [UNBOX [GET !vals !i] $STRING]]
+    [PRINT [@CONCAT [ARR "KEY: " [GET [GET !vals !i] 0]]]]
+    [PRINT [@CONCAT [ARR "VALUE: " [UNBOX [GET [GET !vals !i] 1] $STRING]]]]
     [DEFINE !i [+ !i 1]]
   ]]
 ]]
