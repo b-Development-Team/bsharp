@@ -56,7 +56,7 @@
   # Hash
   [DEFINE !h [% [@HASH !k] [LEN [GET !m .buckets]]]]
   [DEFINE !curr [NEW $MAP_NODE [: .key !k] [: .val !v] [: .psl 0]]]
-  
+
   # Loop until inserted
   [WHILE [= 1 1] [
     [IF [PEEK [GET [GET [GET !m .buckets] !h] .val] $MAP_NONE] [
@@ -116,8 +116,6 @@
   
   # Clear slot
   [SET [GET !m .buckets] !h [@EMPTY_MAP_NODE]]
-
-  [PRINT "BACKSHIFTING||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"]
 
   # Backshifting algorithm
   [WHILE [& [< !h [- [LEN [GET !m .buckets]] 1]] [> [GET [GET [GET !m .buckets] [+ !h 1]] .psl] 0]] [ # Loop until PSL of key is 0 or out of range
