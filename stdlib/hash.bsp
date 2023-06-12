@@ -10,3 +10,39 @@
   ]]
   [RETURN !h]
 ]]
+
+[TYPE $MAP_NODE [STRUCT 
+  [FIELD .key $STRING]
+  [FIELD .val [BX]]
+  [FIELD .psl [INT]]
+]]
+
+[TYPE $MAP [STRUCT 
+  [FIELD .buckets [ARRAY $MAP_NODE]]
+  [FIELD .cnt [INT]]
+]]
+
+[FUNC @MAP_NEW [[RETURNS $MAP]] [
+  [DEFINE !m [NEW $MAP [: .buckets [NEW [ARRAY $MAP_NODE]]] [: .cnt 0]]]
+  [RETURN !m]
+]]
+
+[FUNC @MAP_INSERT [[PARAM !m $MAP] [PARAM !k $STRING] [PARAM !v [BX]]] [
+  [PRINT "TODO"]
+]]
+
+
+# Returns [BOX [NEW $NONE]] if key not found
+[FUNC @MAP_GET [[PARAM !m $MAP] [PARAM !k $STRING] [RETURNS [BX]]] [
+  [PRINT "TODO"]
+  [RETURN [BOX [NEW $NONE]]]
+]]
+
+[FUNC @MAP_DEL [[PARAM !m $MAP] [PARAM !k $STRING]] [
+  [PRINT "TODO"]
+]]
+
+[FUNC @MAP_LIST [[PARAM !m $MAP] [RETURNS [ARRAY [BX]]]] [
+  [PRINT "TODO"]
+  [RETURN [NEW [ARRAY [BX]]]]
+]]

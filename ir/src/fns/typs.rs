@@ -104,6 +104,7 @@ impl IR {
             "INT" => TypeData::INT,
             "FLOAT" => TypeData::FLOAT,
             "BOOL" => TypeData::BOOL,
+            "BX" => TypeData::BOX,
             _ => unreachable!(),
         };
         Ok(IRNode::new(IRNodeData::Type(Type::from(t)), range, pos))

@@ -62,3 +62,11 @@
 
   [RETURN [@REVERSE !out]]
 ]]
+
+[FUNC @BTOA [[PARAM !v [BOOL]] [RETURNS $STRING]] [
+  [IF !v [
+    [RETURN "TRUE"]
+  ] [
+    [RETURN "FALSE"]
+  ]]
+]]

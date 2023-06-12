@@ -24,7 +24,8 @@ pub struct IR {
 
     pub errors: Vec<IRError>,
 
-    fset: FSet,
+    pub fset: FSet,
+
     stack: Vec<usize>,
 }
 

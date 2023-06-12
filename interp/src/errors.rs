@@ -16,3 +16,30 @@ impl From<io::Error> for InterpError {
         InterpError::IOError(v)
     }
 }
+
+impl InterpError {
+    pub fn fmt(&self, int: &Interp) -> String {
+        match self {
+            InterpError::UnknownNode(node) => format!("unknown node: {:?}", node),
+            InterpError::IOError(e) => format!("IO error: {}", e),
+            InterpError::InvalidEnumType { pos, expected, got } => format!(
+                "{}: invalid enum type, expected {}, got {}",
+                int.ir.fset.display_pos(pos),
+                expected.data.fmt(&int.ir),
+                got.data.fmt(&int.ir),
+            ),
+            InterpError::InvalidBoxType { pos, expected, got } => format!(
+                "{}: invalid box type, expected {}, got {}",
+                int.ir.fset.display_pos(pos),
+                expected.data.fmt(&int.ir),
+                got.data.fmt(&int.ir),
+            ),
+            InterpError::ArrayIndexOutOfBounds { pos, index, len } => format!(
+                "{}: array index out of bounds, index {} >= len {}",
+                int.ir.fset.display_pos(pos),
+                index,
+                len,
+            ),
+        }
+    }
+}

@@ -112,7 +112,9 @@ impl IR {
                 "TUPLE" => self.build_tuple(*name_pos, v.pos, args),
                 "ENUM" => self.build_enum(*name_pos, v.pos, args),
                 "FIELD" => self.build_field(*name_pos, v.pos, args),
-                "CHAR" | "INT" | "FLOAT" | "BOOL" => self.build_prim(name, *name_pos, v.pos, args),
+                "CHAR" | "INT" | "FLOAT" | "BOOL" | "BX" => {
+                    self.build_prim(name, *name_pos, v.pos, args)
+                }
                 "PARAM" => self.build_param(*name_pos, v.pos, args),
                 "RETURNS" => self.build_returns(*name_pos, v.pos, args),
                 "RETURN" => self.build_return(*name_pos, v.pos, args),

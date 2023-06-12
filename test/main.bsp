@@ -1,6 +1,15 @@
 [FUNC @main [] [
-  [PRINT [@ITOA -102]]
-  [PRINT [@ITOA [@HASH "HELLO WORLD"]]]
-  [PRINT [@ITOA [@HASH "HI"]]]
-   [PRINT [@ITOA [@HASH "HIII"]]]
+  [DEFINE !m [@MAP_NEW]]
+  [@MAP_INSERT !m "HELLO" [BOX "HELLO"]]
+  [@MAP_INSERT !m "WORLD" [BOX "HELLO"]]
+  [PRINT [UNBOX [@MAP_GET !m "HELLO"] $STRING]]
+  [PRINT [UNBOX [@MAP_GET !m "WORLD"] $STRING]]
+  [PRINT [@BTOA [PEEK [@MAP_GET !m "I DONT EXIST"] $NONE]]]
+
+  [DEFINE !vals [@MAP_LIST !m]]
+  [DEFINE !i 0]
+  [WHILE [< !i [LEN !vals]] [
+    [PRINT [UNBOX [GET !vals !i] $STRING]]
+    [DEFINE !i [+ !i 1]]
+  ]]
 ]]

@@ -47,7 +47,7 @@ fn main() {
     }
     if let Err(err) = interp.run_fn(mainind.unwrap(), Vec::new()) {
         Args::command()
-            .error(ErrorKind::InvalidValue, format!("{:?}", err)) // TODO: Interp error formatting
+            .error(ErrorKind::InvalidValue, err.fmt(&interp))
             .exit();
     };
 }
