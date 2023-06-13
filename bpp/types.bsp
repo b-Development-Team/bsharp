@@ -1,0 +1,26 @@
+[TYPE $NODE_STRING [TUPLE $STRING]]
+[TYPE $NODE_TAG [STRUCT
+    [FIELD .name $STRING]
+    [FIELD .values [ARRAY $NODE]]
+]]
+[TYPE $NODE_INT [INT]]
+[TYPE $NODE_FLOAT [FLOAT]]
+[TYPE $NODE_ARRAY [ARRAY $NODE]]
+[TYPE $NODE [ENUM
+    $NODE_STRING
+    $NODE_TAG
+    $NODE_INT
+    $NODE_FLOAT
+    $NODE_ARRAY
+    $NONE # For use with unimplemented things
+]]
+
+[FUNC @FMT_NODE [[PARAM !node $NODE] [RETURNS $STRING]] [
+    [MATCH !node
+        [CASE !s $NODE_STRING [
+            [RETURN [@CONCAT [ARR "\"" [GET !s 0] "\""]]]
+        ]]
+    ]
+
+    [RETURN "UNIMPLEMENTED"]
+]]

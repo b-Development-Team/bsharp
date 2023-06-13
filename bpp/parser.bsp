@@ -1,0 +1,15 @@
+[FUNC @PARSENODE [[PARAM !src $STRING] [RETURNS $NODE]] [
+    [MATCH [GET !src 0]
+        [CASE '"' [ # String
+            [DEFINE !res [NEW $STRING]]
+            [DEFINE !i 1]
+            [WHILE [NEQ '"' [GET !src !i]] [
+                [APPEND !res [GET !src !i]]
+                [DEFINE !i [+ !i 1]]
+            ]]
+            [RETURN [NEW $NODE [NEW $NODE_STRING !res]]]
+        ]]          
+    ]
+
+    [RETURN [NEW $NODE [NEW $NONE]]]
+]]

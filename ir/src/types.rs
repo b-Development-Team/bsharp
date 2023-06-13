@@ -41,8 +41,14 @@ impl TypeData {
             TypeData::TUPLE(v) => {
                 let mut s = String::new();
                 s.push_str("TUPLE<");
+                let mut first = true;
                 for f in v {
-                    s.push_str(&format!("{}, ", f.data.fmt(ir)));
+                    if !first {
+                        s.push_str(", ");
+                    } else {
+                        first = true;
+                    }
+                    s.push_str(&format!("{}", f.data.fmt(ir)));
                 }
                 s.push_str(">");
                 s
