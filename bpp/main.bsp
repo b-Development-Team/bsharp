@@ -1,0 +1,3 @@
+[FUNC @main [] [
+    [PRINT "Hello, World!"]
+]]

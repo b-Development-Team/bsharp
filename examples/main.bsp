@@ -9,6 +9,7 @@
 # VALUE: THIS IS THE THIRD
 
 [FUNC @main [] [
+  # Hashmap example
   [DEFINE !m [@MAP_NEW]]
   [@MAP_INSERT !m "HELLO" [BOX "THIS IS THE FIRST"]]
   [@MAP_INSERT !m "WORLD" [BOX "THIS IS THE SECOND"]]
