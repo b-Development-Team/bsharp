@@ -1,3 +1,4 @@
 [FUNC @main [] [
     [PRINT [@FMT_NODE [@PARSENODE "\"Hello, World!\""]]]
+    [PRINT [@ITOA [@ATOI "-11020130410920493"]]]
 ]]

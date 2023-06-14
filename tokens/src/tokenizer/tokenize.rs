@@ -23,6 +23,7 @@ impl super::Tokenizer {
                 | '='
                 | '&'
                 | '|'
+                | '^'
                 | ':' => Ok(Some(self.parse_ident(c)?)),
                 '[' => Ok(Some(Token {
                     data: TokenData::OPENBRACK,

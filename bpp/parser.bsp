@@ -8,7 +8,7 @@
                 [DEFINE !i [+ !i 1]]
             ]]
             [RETURN [NEW $NODE [NEW $NODE_STRING !res]]]
-        ]]          
+        ]]
     ]
 
     [RETURN [NEW $NODE [NEW $NONE]]]

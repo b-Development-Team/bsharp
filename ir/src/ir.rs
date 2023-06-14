@@ -218,6 +218,7 @@ pub enum MathOperator {
     MULTIPLY,
     DIVIDE,
     MODULO,
+    POW,
 
     // Bitwise ops
     XOR,
