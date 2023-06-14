@@ -1,13 +1,30 @@
-[FUNC @PARSENODE [[PARAM !src $STRING] [RETURNS $NODE]] [
-    [MATCH [GET !src 0]
+[TYPE $SRC [STRUCT
+    [FIELD .val $STRING]
+    [FIELD .pos [INT]]
+]]
+
+[FUNC @SRC_NEXT [[PARAM !s $SRC]] [
+    [SET !s [: .pos [+ [GET !s .pos] 1]]]
+]]
+
+[FUNC @SRC_PEEK [[PARAM !s $SRC] [RETURNS [CHAR]]] [
+    [RETURN [GET [GET !s .val] [GET !s .pos]]]
+]]
+
+[FUNC @PARSESTRING [[PARAM !src $SRC] [RETURNS $NODE]] [
+    [@SRC_NEXT !src]
+    [DEFINE !res [NEW $STRING]]
+    [WHILE [NEQ '"' [@SRC_PEEK !src]] [
+        [APPEND !res [@SRC_PEEK !src]]
+        [@SRC_NEXT !src]
+    ]]
+    [RETURN [NEW $NODE [NEW $NODE_STRING !res]]]
+]]
+
+[FUNC @PARSENODE [[PARAM !src $SRC] [RETURNS $NODE]] [
+    [MATCH [@SRC_PEEK !src]
         [CASE '"' [ # String
-            [DEFINE !res [NEW $STRING]]
-            [DEFINE !i 1]
-            [WHILE [NEQ '"' [GET !src !i]] [
-                [APPEND !res [GET !src !i]]
-                [DEFINE !i [+ !i 1]]
-            ]]
-            [RETURN [NEW $NODE [NEW $NODE_STRING !res]]]
+            [RETURN [@PARSESTRING !src]]
         ]]          
     ]
 
