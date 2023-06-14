@@ -1,0 +1,85 @@
+[FUNC @ATOI [[PARAM !v $STRING] [RETURNS [INT]]] [
+  [DEFINE !res 0]
+  [DEFINE !sign 1]
+  [DEFINE !i 0]
+  [IF [= [GET !v 0] '-'] [
+    [DEFINE !sign -1]
+    [DEFINE !i 1]
+  ] []]
+
+  [WHILE [< !i [LEN !v]] [
+    [DEFINE !res [+ [* !res 10] [TOI [- [GET !v !i] '0']]]]
+    [DEFINE !i [+ !i 1]]
+  ]]
+
+  [RETURN [* !sign !res]]
+]]
+
+# My own naive implementation, will probably have rounding errors. Feel free to improve!
+[FUNC @ATOF [[PARAM !v $STRING] [RETURNS [FLOAT]]] [
+  [DEFINE !res 0.0]
+  [DEFINE !sign 1.0]
+  [DEFINE !i 0]
+  [IF [= [GET !v 0] '-'] [
+    [DEFINE !sign -1.0]
+    [DEFINE !i 1]
+  ] []]
+
+  [DEFINE !dec [= 0 1]]
+  [DEFINE !deccnt 0]
+  [WHILE [< !i [LEN !v]] [
+    [IF [= [GET !v !i] '.'] [
+      [DEFINE !dec [= 0 0]]
+    ] [
+      [DEFINE !res [+ [* !res 10.0] [TOF [- [GET !v !i] '0']]]]
+      [IF !dec [
+        [DEFINE !deccnt [+ !deccnt 1]]
+    ] []]
+    ]]
+
+    [DEFINE !i [+ !i 1]]
+  ]]
+
+  [RETURN [* !sign [/ !res [TOF [^ 10 !deccnt]]]]]
+]]
+
+[FUNC @ISINT [[PARAM !v $STRING] [RETURNS [BOOL]]] [
+  [DEFINE !i 0]
+
+  [IF [= [GET !v 0] '-'] [
+    [DEFINE !i 1]
+  ] []]
+
+  [WHILE [< !i [LEN !v]] [
+    [IF [| [> [GET !v !i] '9'] [< [GET !v !i] '0']] [
+      [RETURN [= 0 1]]
+    ] []]
+    [DEFINE !i [+ !i 1]]
+  ]]
+  [RETURN [= 0 0]]
+]]
+
+[FUNC @ISFLOAT [[PARAM !v $STRING] [RETURNS [BOOL]]] [
+  [DEFINE !i 0]
+
+  [IF [= [GET !v 0] '-'] [
+    [DEFINE !i 1]
+  ] []]
+
+  [DEFINE !hasdec [= 0 0]]
+
+  [WHILE [< !i [LEN !v]] [
+    [IF [= [GET !v !i] '.'] [
+      [IF !hasdec [
+        [RETURN [= 0 1]]
+      ] [
+        [DEFINE !hasdec [= 0 1]]
+      ]]
+    ] []]
+    [IF [| [> [GET !v !i] '9'] [< [GET !v !i] '0']] [
+      [RETURN [= 0 1]]
+    ] []]
+    [DEFINE !i [+ !i 1]]
+  ]]
+  [RETURN [= 0 0]]
+]]

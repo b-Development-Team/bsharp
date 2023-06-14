@@ -1,0 +1,19 @@
+[FUNC @FLOOR [[PARAM !v [FLOAT]] [RETURNS [INT]]] [
+  [RETURN [TOI [- !v [% !v 1.0]]]]
+]]
+
+[FUNC @CEIL [[PARAM !v [FLOAT]] [RETURNS [INT]]] [
+  [RETURN [TOI [- !v [- 1.0 [% !v 1.0]]]]]
+]]
+
+[FUNC @ROUND [[PARAM !v [FLOAT]] [RETURNS [INT]]] [
+  [IF [> !v 0.0] [RETURN [@FLOOR [+ !v 0.5]]] [RETURN [@CEIL [- !v 0.5]]]]
+]]
+
+[FUNC @FABS [[PARAM !v [FLOAT]] [RETURNS [FLOAT]]] [
+  [IF [< !v 0.0] [RETURN [- 0.0 !v]] [RETURN !v]]
+]]
+
+[FUNC @ABS [[PARAM !v [INT]] [RETURNS [INT]]] [
+  [IF [< !v 0] [RETURN [- 0 !v]] [RETURN !v]]
+]]

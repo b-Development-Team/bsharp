@@ -65,6 +65,23 @@
   [RETURN [@REVERSE !out]]
 ]]
 
+# Adapted from https://stackoverflow.com/a/46678932/11388343, but wrong -- lots of trailing 0s and doesn't work with numbers with 0s after decimal (e.g. 123.000123)
+[FUNC @FTOA [[PARAM !v [FLOAT]] [RETURNS $STRING]] [
+  # Get leading
+  [DEFINE !start [@ITOA [@FLOOR !v]]]
+  
+  # Get trailing
+  [DEFINE !m [@FLOOR !v]]
+  [WHILE [NEQ [@FLOOR !v] [@CEIL !v]] [
+    [DEFINE !m [* !m 10]]
+    [DEFINE !v [* !v 10.0]]
+  ]]
+  [DEFINE !dec [- [@FLOOR !v] !m]]
+  [DEFINE !end [@ITOA [@ABS !dec]]]
+  
+  [RETURN [@CONCAT [ARR !start "." !end]]]
+]]
+
 [FUNC @BTOA [[PARAM !v [BOOL]] [RETURNS $STRING]] [
   [IF !v [
     [RETURN "TRUE"]
