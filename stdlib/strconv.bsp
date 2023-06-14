@@ -16,7 +16,7 @@
 ]]
 
 # My own naive implementation, will probably have rounding errors. Feel free to improve!
-[FUNC @ATOF [[PARAM !v $STRING] [RETURNS [INT]]] [
+[FUNC @ATOF [[PARAM !v $STRING] [RETURNS [FLOAT]]] [
   [DEFINE !res 0.0]
   [DEFINE !sign 1.0]
   [DEFINE !i 0]
@@ -31,14 +31,14 @@
     [IF [= [GET !v !i] '.'] [
       [DEFINE !dec [= 0 0]]
     ] [
-      [DEFINE !res [+ [* !res 10] [TOI [- [GET !v !i] '0']]]]
-      [DEFINE !i [+ !i 1]]
+      [DEFINE !res [+ [* !res 10.0] [TOF [- [GET !v !i] '0']]]]
+      [IF !dec [
+        [DEFINE !deccnt [+ !deccnt 1]]
+    ] []]
     ]]
 
-    [IF !dec [
-      [DEFINE !deccnt [+ !deccnt 1]]
-    ] []]
+    [DEFINE !i [+ !i 1]]
   ]]
 
-  [RETURN [* !sign [/ !res [^ 10 !deccnt]]]]
+  [RETURN [* !sign [/ !res [TOF [^ 10 !deccnt]]]]]
 ]]
