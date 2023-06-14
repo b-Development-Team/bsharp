@@ -42,3 +42,44 @@
 
   [RETURN [* !sign [/ !res [TOF [^ 10 !deccnt]]]]]
 ]]
+
+[FUNC @ISINT [[PARAM !v $STRING] [RETURNS [BOOL]]] [
+  [DEFINE !i 0]
+
+  [IF [= [GET !v 0] '-'] [
+    [DEFINE !i 1]
+  ] []]
+
+  [WHILE [< !i [LEN !v]] [
+    [IF [| [> [GET !v !i] '9'] [< [GET !v !i] '0']] [
+      [RETURN [= 0 1]]
+    ] []]
+    [DEFINE !i [+ !i 1]]
+  ]]
+  [RETURN [= 0 0]]
+]]
+
+[FUNC @ISFLOAT [[PARAM !v $STRING] [RETURNS [BOOL]]] [
+  [DEFINE !i 0]
+
+  [IF [= [GET !v 0] '-'] [
+    [DEFINE !i 1]
+  ] []]
+
+  [DEFINE !hasdec [= 0 0]]
+
+  [WHILE [< !i [LEN !v]] [
+    [IF [= [GET !v !i] '.'] [
+      [IF !hasdec [
+        [RETURN [= 0 1]]
+      ] [
+        [DEFINE !hasdec [= 0 1]]
+      ]]
+    ] []]
+    [IF [| [> [GET !v !i] '9'] [< [GET !v !i] '0']] [
+      [RETURN [= 0 1]]
+    ] []]
+    [DEFINE !i [+ !i 1]]
+  ]]
+  [RETURN [= 0 0]]
+]]
