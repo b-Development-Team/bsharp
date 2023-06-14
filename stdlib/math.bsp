@@ -17,3 +17,6 @@
 [FUNC @ABS [[PARAM !v [INT]] [RETURNS [INT]]] [
   [IF [< !v 0] [RETURN [- 0 !v]] [RETURN !v]]
 ]]
+
+[FUNC @TRUE [[RETURNS [BOOL]]] [[RETURN [= 0 0]]]]
+[FUNC @FALSE [[RETURNS [BOOL]]] [[RETURN [= 0 1]]]]

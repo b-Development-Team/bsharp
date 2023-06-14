@@ -42,7 +42,7 @@
   [DEFINE !curr [NEW $MAP_NODE [: .key !k] [: .val !v] [: .psl 0]]]
 
   # Loop until inserted
-  [WHILE [= 1 1] [
+  [WHILE [@TRUE] [
     [IF [PEEK [GET [GET [GET !m .buckets] !h] .val] $MAP_NONE] [
       # Insert, empty bucket
       [SET [GET !m .buckets] !h !curr]

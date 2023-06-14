@@ -25,11 +25,11 @@
     [DEFINE !i 1]
   ] []]
 
-  [DEFINE !dec [= 0 1]]
+  [DEFINE !dec [@FALSE]]
   [DEFINE !deccnt 0]
   [WHILE [< !i [LEN !v]] [
     [IF [= [GET !v !i] '.'] [
-      [DEFINE !dec [= 0 0]]
+      [DEFINE !dec [@TRUE]]
     ] [
       [DEFINE !res [+ [* !res 10.0] [TOF [- [GET !v !i] '0']]]]
       [IF !dec [
@@ -52,11 +52,11 @@
 
   [WHILE [< !i [LEN !v]] [
     [IF [| [> [GET !v !i] '9'] [< [GET !v !i] '0']] [
-      [RETURN [= 0 1]]
+      [RETURN [@FALSE]]
     ] []]
     [DEFINE !i [+ !i 1]]
   ]]
-  [RETURN [= 0 0]]
+  [RETURN [@TRUE]]
 ]]
 
 [FUNC @ISFLOAT [[PARAM !v $STRING] [RETURNS [BOOL]]] [
@@ -66,20 +66,20 @@
     [DEFINE !i 1]
   ] []]
 
-  [DEFINE !hasdec [= 0 0]]
+  [DEFINE !hasdec [@TRUE]]
 
   [WHILE [< !i [LEN !v]] [
     [IF [= [GET !v !i] '.'] [
       [IF !hasdec [
-        [RETURN [= 0 1]]
+        [RETURN [@FALSE]]
       ] [
-        [DEFINE !hasdec [= 0 1]]
+        [DEFINE !hasdec [@FALSE]]
       ]]
     ] []]
     [IF [| [> [GET !v !i] '9'] [< [GET !v !i] '0']] [
-      [RETURN [= 0 1]]
+      [RETURN [@FALSE]]
     ] []]
     [DEFINE !i [+ !i 1]]
   ]]
-  [RETURN [= 0 0]]
+  [RETURN [@TRUE]]
 ]]

@@ -1,4 +1,4 @@
 [FUNC @main [] [
-    [DEFINE !src [NEW $SRC [: .val "\"Hello, World!\""] [: .pos 0]]]
+    [DEFINE !src [NEW $SRC [: .val "0.123"] [: .pos 0]]]
     [PRINT [@FMT_NODE [@PARSENODE !src]]]
 ]]

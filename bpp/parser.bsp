@@ -11,21 +11,76 @@
     [RETURN [GET [GET !s .val] [GET !s .pos]]]
 ]]
 
+[FUNC @SRC_HASNEXT [[PARAM !s $SRC] [RETURNS [BOOL]]] [
+    [RETURN [< [GET !s .pos] [LEN [GET !s .val]]]]
+]]
+
 [FUNC @PARSESTRING [[PARAM !src $SRC] [RETURNS $NODE]] [
     [@SRC_NEXT !src]
     [DEFINE !res [NEW $STRING]]
-    [WHILE [NEQ '"' [@SRC_PEEK !src]] [
+    [WHILE [& [NEQ '"' [@SRC_PEEK !src]] [@SRC_HASNEXT !src]] [
         [APPEND !res [@SRC_PEEK !src]]
         [@SRC_NEXT !src]
     ]]
     [RETURN [NEW $NODE [NEW $NODE_STRING !res]]]
 ]]
 
+[FUNC @PARSENUM [[PARAM !src $SRC] [RETURNS $NODE]] [
+    [DEFINE !res [NEW $STRING]]
+    [DEFINE !flt [@FALSE]]
+    [WHILE [@SRC_HASNEXT !src] [
+        [DEFINE !c [@FALSE]]
+        [MATCH [@SRC_PEEK !src]
+            [CASE '0' [[DEFINE !c [@TRUE]]]]
+            [CASE '1' [[DEFINE !c [@TRUE]]]]
+            [CASE '2' [[DEFINE !c [@TRUE]]]]
+            [CASE '3' [[DEFINE !c [@TRUE]]]]
+            [CASE '4' [[DEFINE !c [@TRUE]]]]
+            [CASE '5' [[DEFINE !c [@TRUE]]]]
+            [CASE '6' [[DEFINE !c [@TRUE]]]]
+            [CASE '7' [[DEFINE !c [@TRUE]]]]
+            [CASE '8' [[DEFINE !c [@TRUE]]]]
+            [CASE '9' [[DEFINE !c [@TRUE]]]]
+            [CASE '-' [[DEFINE !c [@TRUE]]]]
+            [CASE '.' [[DEFINE !flt [@TRUE]] [DEFINE !c [@TRUE]]]]
+        ]
+
+        [IF [NOT !c] [
+            [IF !flt [
+                [RETURN [NEW $NODE [NEW $NODE_FLOAT [@ATOF !res]]]]
+            ] [
+                [RETURN [NEW $NODE [NEW $NODE_INT [@ATOI !res]]]]
+            ]]
+        ] []]
+
+        [APPEND !res [@SRC_PEEK !src]]
+        [@SRC_NEXT !src]
+    ]]
+    
+    [IF !flt [
+        [RETURN [NEW $NODE [NEW $NODE_FLOAT [@ATOF !res]]]]
+    ] [
+        [RETURN [NEW $NODE [NEW $NODE_INT [@ATOI !res]]]]
+    ]]
+]]
+
 [FUNC @PARSENODE [[PARAM !src $SRC] [RETURNS $NODE]] [
     [MATCH [@SRC_PEEK !src]
         [CASE '"' [ # String
             [RETURN [@PARSESTRING !src]]
-        ]]          
+        ]]
+        [CASE '0' [[RETURN [@PARSENUM !src]]]]
+        [CASE '1' [[RETURN [@PARSENUM !src]]]]
+        [CASE '2' [[RETURN [@PARSENUM !src]]]]
+        [CASE '3' [[RETURN [@PARSENUM !src]]]]
+        [CASE '4' [[RETURN [@PARSENUM !src]]]]
+        [CASE '5' [[RETURN [@PARSENUM !src]]]]
+        [CASE '6' [[RETURN [@PARSENUM !src]]]]
+        [CASE '7' [[RETURN [@PARSENUM !src]]]]
+        [CASE '8' [[RETURN [@PARSENUM !src]]]]
+        [CASE '9' [[RETURN [@PARSENUM !src]]]]
+        [CASE '-' [[RETURN [@PARSENUM !src]]]]
+        [CASE '.' [[RETURN [@PARSENUM !src]]]]
     ]
 
     [RETURN [NEW $NODE [NEW $NONE]]]

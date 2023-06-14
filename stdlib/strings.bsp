@@ -41,9 +41,9 @@
   [DEFINE !out [NEW $STRING]]
 
   # Handle negatives
-  [DEFINE !negative [= 0 1]]
+  [DEFINE !negative [@FALSE]]
   [IF [< !v 0] [
-    [DEFINE !negative [= 0 0]]
+    [DEFINE !negative [@TRUE]]
     [DEFINE !v [* -1 !v]]
   ] []]
 
@@ -65,7 +65,7 @@
   [RETURN [@REVERSE !out]]
 ]]
 
-# Adapted from https://stackoverflow.com/a/46678932/11388343, but wrong -- lots of trailing 0s and doesn't work with numbers with 0s after decimal (e.g. 123.000123)
+# Adapted from https://stackoverflow.com/a/46678932/11388343, but wrong -- lots of trailing 0s and doesn't work with numbers with 0s after decimal (e.g. 123.000123), or numbers like 0.123
 [FUNC @FTOA [[PARAM !v [FLOAT]] [RETURNS $STRING]] [
   # Get leading
   [DEFINE !start [@ITOA [@FLOOR !v]]]
@@ -91,13 +91,13 @@
 ]]
 
 [FUNC @STREQ [[PARAM !l $STRING] [PARAM !r $STRING] [RETURNS [BOOL]]] [
-  [IF [NEQ [LEN !l] [LEN !r]] [[RETURN [= 0 1]]] []]
+  [IF [NEQ [LEN !l] [LEN !r]] [[RETURN [@FALSE]]] []]
   [DEFINE !i 0]
   [WHILE [< !i [LEN !l]] [
     [IF [NEQ [GET !l !i] [GET !r !i]] [
-      [RETURN [= 0 1]]
+      [RETURN [@FALSE]]
     ] []]
     [DEFINE !i [+ !i 1]]
   ]]
-  [RETURN [= 0 0]]
+  [RETURN [@TRUE]]
 ]]
