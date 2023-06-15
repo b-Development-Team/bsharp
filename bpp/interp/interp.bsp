@@ -11,9 +11,20 @@
         [CASE !v $NODE_FLOAT [[RETURN !n]]]
         [CASE !v $NODE_ARRAY [[RETURN !n]]]
         [CASE !v $NODE_TAG [
+            # Interpret args
+            [DEFINE !args [GET !v .values]]
+            [DEFINE !iargs [NEW [ARRAY $NODE] [LEN !args]]]
+            [DEFINE !i 0]
+            [WHILE [< !i [LEN !args]] [
+                [DEFINE !res [@INTERP_NODE [GET !args !i] !c]]
+                [APPEND !iargs !res]
+                [DEFINE !i [+ !i 1]]
+            ]]         
             [MATCH [GET !v .name]
-                [CASE "VAR" []]
+                [CASE "VAR" [[RETURN [@VAR [GET !iargs 0] !c]]]]
+                [CASE "DEFINE" [[RETURN [@DEFINE !iargs !c]]]]
             ]
+            [PRINT [@CONCAT [ARR "UNIMPLEMENTED: " [GET !v .name]]]]
             [RETURN [NEW $NODE [NEW $NONE]]]
         ]]
     ]

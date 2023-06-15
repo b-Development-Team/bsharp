@@ -1,0 +1,14 @@
+[FUNC @DEFINE [[PARAM !n [ARRAY $NODE]] [PARAM !c $ICTX] [RETURNS $NODE]] [
+    [DEFINE !name [GET [GET [GET !n 0] $NODE_STRING] 0]]
+    [@MAP_SET [GET !c .vars] !name [BOX [GET !n 1]]]
+    [RETURN [@NODE_NONE]]
+]]
+
+[FUNC @VAR [[PARAM !n $NODE] [PARAM !c $ICTX] [RETURNS $NODE]] [
+    [DEFINE !name [GET [GET !n $NODE_STRING] 0]]
+    [DEFINE !v [@MAP_GET [GET !c .vars] !name]]
+    [IF [PEEK !v $MAP_NONE] [
+        [RETURN [@NODE_NONE]]
+    ] []]
+    [RETURN [UNBOX !v $NODE]]
+]]

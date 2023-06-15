@@ -61,6 +61,18 @@
   ]]
 ]]
 
+[FUNC @MAP_SET  [[PARAM !m $MAP] [PARAM !k $STRING] [PARAM !v [BX]]] [
+  # Insert or update
+  [DEFINE !ind [@MAP_KEYIND !m !k]]
+  [IF [< !ind 0] [
+    # Insert
+    [@MAP_INSERT !m !k !v]
+  ] [
+    # Update
+    [SET [GET [GET !m .buckets] !ind] [: .val !v]]
+  ]]
+]]
+
 [FUNC @MAP_KEYIND [[PARAM !m $MAP] [PARAM !k $STRING] [RETURNS [INT]]] [ # TODO: Perhaps in the future implement smart search? Unsure on performance gains, but relatively simple to implement
   [DEFINE !h [% [@HASH !k] [LEN [GET !m .buckets]]]]
   [DEFINE !psl 0]
