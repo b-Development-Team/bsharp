@@ -1,0 +1,14 @@
+[FUNC @INDEX [[PARAM !n [ARRAY $NODE]] [PARAM !c $ICTX] [RETURNS $NODE]] [
+    [DEFINE !ind [GET [GET [GET !n 1] $NODE_INT] 0]]
+
+    [MATCH [GET !n 0]
+        [CASE !arr $NODE_ARRAY [
+            [RETURN [GET !arr !ind]]
+        ]]
+        [CASE !s $NODE_STRING [
+            [RETURN [NEW $NODE [NEW $NODE_STRING [@CTOA [GET [GET !s 0] !ind]]]]]
+        ]]
+    ]
+    
+    [RETURN [NEW $NODE [NEW $NONE]]]
+]]

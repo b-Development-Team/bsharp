@@ -51,3 +51,13 @@
     [DEFINE !upper [GET [GET !rv $NODE_FLOAT] 0]]
     [RETURN [NEW $NODE [NEW $NODE_FLOAT [@RAND_FLOAT [GET !c .rand] !lower !upper]]]]
 ]]
+
+[FUNC @IFLOOR [[PARAM !n $NODE] [PARAM !c $ICTX] [RETURNS $NODE]] [
+    [DEFINE !n [GET [GET !n $NODE_FLOAT] 0]]
+    [RETURN [NEW $NODE [NEW $NODE_INT [@FLOOR !n]]]]
+]]
+
+[FUNC @ICEIL [[PARAM !n $NODE] [PARAM !c $ICTX] [RETURNS $NODE]] [
+    [DEFINE !n [GET [GET !n $NODE_FLOAT] 0]]
+    [RETURN [NEW $NODE [NEW $NODE_INT [@CEIL !n]]]]
+]]
