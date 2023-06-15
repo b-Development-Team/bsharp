@@ -25,9 +25,16 @@ impl Interp {
         }
     }
 
-    pub fn run_fn(&mut self, func: usize, args: Vec<Value>) -> Result<Value, InterpError> {
+    pub fn run_fn(
+        &mut self,
+        func: usize,
+        args: Vec<Value>,
+        callpos: Pos,
+    ) -> Result<Value, InterpError> {
         // Put in params
         let mut frame = StackFrame::default();
+        frame.pos = callpos;
+        frame.func = func;
         for (i, arg) in args.iter().enumerate() {
             frame
                 .vars

@@ -3,9 +3,11 @@ use super::*;
 impl IR {
     pub fn defpass(&mut self) -> Result<(), IRError> {
         // Go through files
-        for i in 0..self.fset.files.len() {
+        let mut i = 0;
+        while i < self.fset.files.len() {
             let f = self.fset.files[i].ast.as_ref().unwrap().ast.clone();
             self.defpass_file(f)?;
+            i += 1;
         }
 
         Ok(())

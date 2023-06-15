@@ -21,4 +21,6 @@ pub enum Value {
 pub struct StackFrame {
     pub vars: HashMap<usize, Value>,
     pub ret: Option<Value>,
+    pub pos: Pos,
+    pub func: usize,
 }

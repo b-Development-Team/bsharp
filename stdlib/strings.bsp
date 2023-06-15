@@ -101,3 +101,15 @@
   ]]
   [RETURN [@TRUE]]
 ]]
+
+[FUNC @TOLOWER [[PARAM !v $STRING] [RETURNS $STRING]] [
+  [DEFINE !res [NEW $STRING [LEN !v]]]
+  [DEFINE !i 0]
+  [WHILE [< !i [LEN !v]] [
+    [DEFINE !c [GET !v !i]]
+    [IF [| [> !c '@'] [< !c '[']] [DEFINE !c [+ !c [TOC 32]]] []]
+    [APPEND !res !c]
+    [DEFINE !i [+ !i 1]]
+  ]]
+  [RETURN !res]
+]]

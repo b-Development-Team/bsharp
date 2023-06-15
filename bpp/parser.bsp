@@ -25,6 +25,37 @@
     [RETURN [NEW $NODE [NEW $NODE_STRING !res]]]
 ]]
 
+[FUNC @PARSEIDENT [[PARAM !src $SRC] [RETURNS $STRING]] [
+    [@SRC_NEXT !src]
+    [DEFINE !res [NEW $STRING]]
+    [WHILE [& [| [NEQ ' ' [@SRC_PEEK !src]] [NEQ '\n' [@SRC_PEEK !src]]] [@SRC_HASNEXT !src]] [
+        [APPEND !res [@SRC_PEEK !src]]
+        [@SRC_NEXT !src]
+    ]]
+    [RETURN !res]
+]]
+
+[FUNC @PARSETAG [[PARAM !src $SRC] [RETURNS $NODE]] [
+    [@SRC_NEXT !src]
+
+    # Get tag
+    [DEFINE !name [@PARSEIDENT !src]]
+    [DEFINE !vals [NEW [ARRAY $NODE]]]
+
+    [WHILE [& [NEQ ']' [@SRC_PEEK !src]] [@SRC_HASNEXT !src]] [
+        [@SRC_NEXT !src]
+        # Remove whitespace
+        [WHILE [& [| [= ' ' [@SRC_PEEK !src]] [= '\n' [@SRC_PEEK !src]]] [@SRC_HASNEXT !src]] [
+            [@SRC_NEXT !src]
+        ]]
+
+        # Get node
+        [DEFINE !node [@PARSENODE !src]]
+        [APPEND !vals !node]
+    ]]
+    [RETURN [NEW $NODE [NEW $NODE_TAG [: .name !name] [: .values !vals]]]]
+]]
+
 [FUNC @PARSENUM [[PARAM !src $SRC] [RETURNS $NODE]] [
     [DEFINE !res [NEW $STRING]]
     [DEFINE !flt [@FALSE]]
@@ -56,7 +87,7 @@
         [APPEND !res [@SRC_PEEK !src]]
         [@SRC_NEXT !src]
     ]]
-    
+
     [IF !flt [
         [RETURN [NEW $NODE [NEW $NODE_FLOAT [@ATOF !res]]]]
     ] [
@@ -66,9 +97,7 @@
 
 [FUNC @PARSENODE [[PARAM !src $SRC] [RETURNS $NODE]] [
     [MATCH [@SRC_PEEK !src]
-        [CASE '"' [ # String
-            [RETURN [@PARSESTRING !src]]
-        ]]
+        [CASE '"' [[RETURN [@PARSESTRING !src]]]]
         [CASE '0' [[RETURN [@PARSENUM !src]]]]
         [CASE '1' [[RETURN [@PARSENUM !src]]]]
         [CASE '2' [[RETURN [@PARSENUM !src]]]]
@@ -81,6 +110,7 @@
         [CASE '9' [[RETURN [@PARSENUM !src]]]]
         [CASE '-' [[RETURN [@PARSENUM !src]]]]
         [CASE '.' [[RETURN [@PARSENUM !src]]]]
+        [CASE '[' [[RETURN [@PARSETAG !src]]]]
     ]
 
     [RETURN [NEW $NODE [NEW $NONE]]]

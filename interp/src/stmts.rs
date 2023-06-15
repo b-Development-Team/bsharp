@@ -6,7 +6,7 @@ impl Interp {
             IRNodeData::Block { body, .. } => self.exec_block(&body),
             IRNodeData::FnCall { func, args, .. } => {
                 let args = self.exec_args(args)?;
-                self.run_fn(*func, args)
+                self.run_fn(*func, args, node.pos)
             }
             IRNodeData::Boolean(left, op, right) => self.exec_boolop(*op, left, right),
             IRNodeData::Comparison(left, op, right) => self.exec_comp(*op, left, right),

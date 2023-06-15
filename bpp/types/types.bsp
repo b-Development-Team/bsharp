@@ -18,7 +18,7 @@
 [FUNC @FMT_NODE [[PARAM !node $NODE] [RETURNS $STRING]] [
     [MATCH !node
         [CASE !s $NODE_STRING [
-            [RETURN [@CONCAT [ARR "\"" [GET !s 0] "\""]]]
+            [RETURN [GET !s 0]]
         ]]
         [CASE !s $NODE_INT [
             [RETURN [@ITOA [GET !s 0]]]
