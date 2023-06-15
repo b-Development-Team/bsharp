@@ -1,0 +1,19 @@
+[TYPE $RAND [STRUCT
+    [FIELD .seed [INT]]
+]]
+
+[FUNC @RAND_NEW [[RETURNS $RAND]] [
+    [DEFINE !seed 0] # TODO: [DEFINE !seed [% [TIME NANO] 2147483647]]
+    [RETURN [NEW $RAND [: .seed !seed]]]
+]]
+
+[FUNC @RAND_INT [[PARAM !r $RAND] [PARAM !lower [INT]] [PARAM !upper [INT]] [RETURNS [INT]]] [
+    [SET !r [: .seed [% [+ [* 110351245 [GET !r .seed]] 12345] 2147483647]]] # Glibc rand algorithm
+    [RETURN [+ [% [GET !r .seed] [- !upper !lower]] !lower]]
+]]
+
+[FUNC @RAND_FLOAT [[PARAM !r $RAND] [PARAM !lower [FLOAT]] [PARAM !upper [FLOAT]] [RETURNS [FLOAT]]] [
+    [SET !r [: .seed [% [+ [* 110351245 [GET !r .seed]] 12345] 2147483647]]] # Glibc rand algorithm
+    [DEFINE !v [/ [TOF [GET !r .seed]] 2147483647.0]]
+    [RETURN [+ [* !v [- !upper !lower]] !lower]]
+]]

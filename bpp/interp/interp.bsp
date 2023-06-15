@@ -2,6 +2,7 @@
 
 [TYPE $ICTX [STRUCT 
     [FIELD .vars $MAP] # map[string]Node
+    [FIELD .rand $RAND]
 ]]
 
 [FUNC @INTERP_NODE [[PARAM !n $NODE] [PARAM !c $ICTX] [RETURNS $NODE]] [
@@ -23,6 +24,9 @@
             [MATCH [GET !v .name]
                 [CASE "VAR" [[RETURN [@VAR [GET !iargs 0] !c]]]]
                 [CASE "DEFINE" [[RETURN [@DEFINE !iargs !c]]]]
+                [CASE "MATH" [[RETURN [@MATH !iargs !c]]]]
+                [CASE "RANDINT" [[RETURN [@RANDINT !iargs !c]]]]
+                [CASE "RANDOM" [[RETURN [@RANDOM !iargs !c]]]]
             ]
             [PRINT [@CONCAT [ARR "UNIMPLEMENTED: " [GET !v .name]]]]
             [RETURN [NEW $NODE [NEW $NONE]]]
@@ -32,7 +36,7 @@
 
 [FUNC @INTERP [[PARAM !src [ARRAY $NODE]] [RETURNS [ARRAY $NODE]]] [
     [DEFINE !res [NEW [ARRAY $NODE] [LEN !src]]]
-    [DEFINE !ctx [NEW $ICTX [: .vars [@MAP_NEW]]]]
+    [DEFINE !ctx [NEW $ICTX [: .vars [@MAP_NEW]] [: .rand [@RAND_NEW]]]]
     [DEFINE !i 0]
     [WHILE [< !i [LEN !src]] [
         [DEFINE !r [@INTERP_NODE [GET !src !i] !ctx]]

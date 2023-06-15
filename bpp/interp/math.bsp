@@ -1,0 +1,53 @@
+[FUNC @MATH [[PARAM !n [ARRAY $NODE]] [PARAM !c $ICTX] [RETURNS $NODE]] [
+    [DEFINE !lv [GET !n 0]]
+    [DEFINE !rv [GET !n 2]]
+    [DEFINE !iop [@TRUE]]
+    [DEFINE !op [GET [GET [GET !n 1] $NODE_STRING] 0]]
+    [MATCH !lv [CASE !v $NODE_FLOAT [[DEFINE !iop [@FALSE]]]]]
+    [MATCH !rv [CASE !v $NODE_FLOAT [[DEFINE !iop [@FALSE]]]]]
+    [IF !iop [
+        [DEFINE !l [GET [GET !lv $NODE_INT] 0]]
+        [DEFINE !r [GET [GET !rv $NODE_INT] 0]]
+        [MATCH !op 
+            [CASE "+" [[RETURN [NEW $NODE [NEW $NODE_INT [+ !l !r]]]]]]
+            [CASE "/" [[RETURN [NEW $NODE [NEW $NODE_INT [/ !l !r]]]]]]
+            [CASE "*" [[RETURN [NEW $NODE [NEW $NODE_INT [+ !l !r]]]]]]
+            [CASE "-" [[RETURN [NEW $NODE [NEW $NODE_INT [+ !l !r]]]]]]
+            [CASE "^" [[RETURN [NEW $NODE [NEW $NODE_INT [+ !l !r]]]]]]
+        ]
+        [PRINT [@CONCAT [ARR "UNKNOWN OP: " !op]]]
+    ] [
+        [MATCH !lv [CASE !v $NODE_INT [[DEFINE !lv [NEW $NODE [NEW $NODE_FLOAT [TOF [GET !v 0]]]]]]]]
+        [MATCH !rv [CASE !v $NODE_INT [[DEFINE !rv [NEW $NODE [NEW $NODE_FLOAT [TOF [GET !v 0]]]]]]]]
+        [DEFINE !l [GET [GET !lv $NODE_FLOAT] 0]]
+        [DEFINE !r [GET [GET !rv $NODE_FLOAT] 0]]
+        [MATCH !op 
+            [CASE "+" [[RETURN [NEW $NODE [NEW $NODE_FLOAT [+ !l !r]]]]]]
+            [CASE "/" [[RETURN [NEW $NODE [NEW $NODE_FLOAT [/ !l !r]]]]]]
+            [CASE "*" [[RETURN [NEW $NODE [NEW $NODE_FLOAT [+ !l !r]]]]]]
+            [CASE "-" [[RETURN [NEW $NODE [NEW $NODE_FLOAT [+ !l !r]]]]]]
+            [CASE "^" [[RETURN [NEW $NODE [NEW $NODE_FLOAT [^ !l !r]]]]]]
+        ]
+        [PRINT [@CONCAT [ARR "UNKNOWN OP: " !op]]]
+    ]]
+
+    [RETURN [NEW $NODE [NEW $NONE]]]
+]]
+
+[FUNC @RANDINT [[PARAM !n [ARRAY $NODE]] [PARAM !c $ICTX] [RETURNS $NODE]] [
+    [DEFINE !lower [GET [GET [GET !n 0] $NODE_INT] 0]]
+    [DEFINE !upper [GET [GET [GET !n 1] $NODE_INT] 0]]
+    [RETURN [NEW $NODE [NEW $NODE_INT [@RAND_INT [GET !c .rand] !lower !upper]]]]
+]]
+
+[FUNC @RANDOM [[PARAM !n [ARRAY $NODE]] [PARAM !c $ICTX] [RETURNS $NODE]] [
+    # Convert to floats if necessary
+    [DEFINE !lv [GET !n 0]]
+    [DEFINE !rv [GET !n 1]]
+    [MATCH !lv [CASE !v $NODE_INT [[DEFINE !lv [NEW $NODE [NEW $NODE_FLOAT [TOF [GET !v 0]]]]]]]]
+    [MATCH !rv [CASE !v $NODE_INT [[DEFINE !rv [NEW $NODE [NEW $NODE_FLOAT [TOF [GET !v 0]]]]]]]]
+
+    [DEFINE !lower [GET [GET !lv $NODE_FLOAT] 0]]
+    [DEFINE !upper [GET [GET !rv $NODE_FLOAT] 0]]
+    [RETURN [NEW $NODE [NEW $NODE_FLOAT [@RAND_FLOAT [GET !c .rand] !lower !upper]]]]
+]]
