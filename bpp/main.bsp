@@ -1,6 +1,11 @@
 [IMPORT "bpp/types"]
 
 [FUNC @main [] [
-    [DEFINE !src [NEW $SRC [: .val "[ABC \"ABC\" 123 1.123]"] [: .pos 0]]]
-    [PRINT [@FMT_NODE [@PARSENODE !src]]]
+    [DEFINE !code [@PARSE "[DEFINE s \"toiswcbphfmdrelnagukvyjqzx\"]\n[DEFINE l \"etaoinshrdlucmfwypvbgkjqxz\"]\n[DEFINE length [RANDINT 3 9]]\n[DEFINE x [MATH 26 ^ 0.5]]\n[DEFINE c1 [INDEX [VAR s] [FLOOR [MATH [RANDOM 0 [VAR x]] ^ 2]]]]\n[DEFINE c2 [INDEX [VAR l] [FLOOR [MATH [RANDOM 0 [VAR x]] ^ 2]]]]\n[DEFINE c3 [INDEX [VAR l] [FLOOR [MATH [RANDOM 0 [VAR x]] ^ 2]]]]\n[DEFINE c4 [IF [COMPARE [VAR length] > 3] [INDEX [VAR l] [FLOOR [MATH [RANDOM 0 [VAR x]] ^ 2]]] \"\"]]\n[DEFINE c5 [IF [COMPARE [VAR length] > 4] [INDEX [VAR l] [FLOOR [MATH [RANDOM 0 [VAR x]] ^ 2]]] \"\"]]\n[DEFINE c6 [IF [COMPARE [VAR length] > 5] [INDEX [VAR l] [FLOOR [MATH [RANDOM 0 [VAR x]] ^ 2]]] \"\"]]\n[DEFINE c7 [IF [COMPARE [VAR length] > 6] [INDEX [VAR l] [FLOOR [MATH [RANDOM 0 [VAR x]] ^ 2]]] \"\"]]\n[DEFINE c8 [IF [COMPARE [VAR length] > 7] [INDEX [VAR l] [FLOOR [MATH [RANDOM 0 [VAR x]] ^ 2]]] \"\"]]\n I kin the word **[VAR c1][VAR c2][VAR c3][VAR c4][VAR c5][VAR c6][VAR c7][VAR c8]**.\nPing woooowoooo if the result is a real word. These words use common letters more frequently."]]
+    [DEFINE !i 0]
+    [WHILE [< !i [LEN !code]] [
+        [DEFINE !n [GET !code !i]]
+        [DEFINE !i [+ !i 1]]
+        [PRINT [@FMT_NODE !n]]
+    ]]
 ]]

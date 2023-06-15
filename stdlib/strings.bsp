@@ -113,3 +113,9 @@
   ]]
   [RETURN !res]
 ]]
+
+[FUNC @CTOA [[PARAM !v [CHAR]] [RETURNS $STRING]] [
+  [DEFINE !res [NEW $STRING 1]]
+  [APPEND !res !v]
+  [RETURN !res]
+]]
