@@ -26,6 +26,18 @@
         [CASE !s $NODE_FLOAT [
             [RETURN [@FTOA [GET !s 0]]]
         ]]
+        [CASE !s $NODE_TAG [
+            [DEFINE !out [ARR "[" [GET !s .name]]]
+            [DEFINE !i 0]
+            [WHILE [< !i [LEN [GET !s .values]]] [
+                [APPEND !out " "]
+                [DEFINE !v [@FMT_NODE [GET [GET !s .values] !i]]]
+                [APPEND !out !v]
+                [DEFINE !i [+ !i 1]]
+            ]]
+            [APPEND !out "]"]
+            [RETURN [@CONCAT !out]]
+        ]]
     ]
 
     [RETURN "UNIMPLEMENTED"]

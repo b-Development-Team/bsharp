@@ -1,5 +1,5 @@
 use clap::{error::ErrorKind, CommandFactory, Parser};
-use fset::{FSet, Pos};
+use fset::FSet;
 use interp::Interp;
 use ir::IR;
 

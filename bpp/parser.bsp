@@ -18,7 +18,7 @@
 [FUNC @PARSESTRING [[PARAM !src $SRC] [RETURNS $NODE]] [
     [@SRC_NEXT !src]
     [DEFINE !res [NEW $STRING]]
-    [WHILE [& [NEQ '"' [@SRC_PEEK !src]] [@SRC_HASNEXT !src]] [
+    [WHILE [& [@SRC_HASNEXT !src] [NEQ '"' [@SRC_PEEK !src]]] [
         [APPEND !res [@SRC_PEEK !src]]
         [@SRC_NEXT !src]
     ]]
@@ -26,9 +26,8 @@
 ]]
 
 [FUNC @PARSEIDENT [[PARAM !src $SRC] [RETURNS $STRING]] [
-    [@SRC_NEXT !src]
     [DEFINE !res [NEW $STRING]]
-    [WHILE [& [| [NEQ ' ' [@SRC_PEEK !src]] [NEQ '\n' [@SRC_PEEK !src]]] [@SRC_HASNEXT !src]] [
+    [WHILE [& [@SRC_HASNEXT !src] [& [NEQ ' ' [@SRC_PEEK !src]] [NEQ '\n' [@SRC_PEEK !src]]]] [
         [APPEND !res [@SRC_PEEK !src]]
         [@SRC_NEXT !src]
     ]]
@@ -42,10 +41,10 @@
     [DEFINE !name [@PARSEIDENT !src]]
     [DEFINE !vals [NEW [ARRAY $NODE]]]
 
-    [WHILE [& [NEQ ']' [@SRC_PEEK !src]] [@SRC_HASNEXT !src]] [
+    [WHILE [& [@SRC_HASNEXT !src] [NEQ ']' [@SRC_PEEK !src]]] [
         [@SRC_NEXT !src]
         # Remove whitespace
-        [WHILE [& [| [= ' ' [@SRC_PEEK !src]] [= '\n' [@SRC_PEEK !src]]] [@SRC_HASNEXT !src]] [
+        [WHILE [& [@SRC_HASNEXT !src] [| [= ' ' [@SRC_PEEK !src]] [= '\n' [@SRC_PEEK !src]]]] [
             [@SRC_NEXT !src]
         ]]
 

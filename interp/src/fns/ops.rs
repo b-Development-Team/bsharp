@@ -13,15 +13,29 @@ impl Interp {
             }
         }
 
-        let (left, right) = match (self.exec(left)?, self.exec(right.as_ref().unwrap())?) {
-            (Value::Bool(left), Value::Bool(right)) => (left, right),
+        // Do left first
+        let left = match self.exec(left)? {
+            Value::Bool(val) => val,
             _ => unreachable!(),
         };
-        match op {
-            BooleanOperator::AND => Ok(Value::Bool(left && right)),
-            BooleanOperator::OR => Ok(Value::Bool(left || right)),
+        match (op, left) {
+            (BooleanOperator::OR, true) => return Ok(Value::Bool(true)),
+            (BooleanOperator::AND, false) => return Ok(Value::Bool(false)),
+            _ => {}
+        };
+
+        // Do right
+        let right = match self.exec(right.as_ref().unwrap())? {
+            Value::Bool(val) => val,
             _ => unreachable!(),
-        }
+        };
+        match (op, right) {
+            (BooleanOperator::OR, true) => return Ok(Value::Bool(true)),
+            (BooleanOperator::OR, false) => return Ok(Value::Bool(false)),
+            (BooleanOperator::AND, false) => return Ok(Value::Bool(false)),
+            (BooleanOperator::AND, true) => return Ok(Value::Bool(true)),
+            _ => unreachable!(),
+        };
     }
 
     pub fn exec_comp(
