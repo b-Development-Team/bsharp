@@ -38,7 +38,20 @@
             [APPEND !out "]"]
             [RETURN [@CONCAT !out]]
         ]]
+        [CASE !s $NODE_ARRAY [
+            [DEFINE !out [ARR "[ARRAY"]]
+            [DEFINE !i 0]
+            [WHILE [< !i [LEN !s]] [
+                [APPEND !out " "]
+                [APPEND !out [@FMT_NODE [GET !s !i]]]
+                [DEFINE !i [+ !i 1]]
+            ]]
+            [RETURN [@CONCAT !out]]
+        ]]
+        [CASE !s $NONE [
+            [RETURN "UNIMPLEMENTED"]
+        ]]
     ]
 
-    [RETURN "UNIMPLEMENTED"]
+    [RETURN "UNKNOWN_NODE"]
 ]]

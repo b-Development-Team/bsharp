@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use tokens::Tokenizer;
 mod error;
 mod stdlib;
@@ -12,11 +14,15 @@ pub struct File {
 
 pub struct FSet {
     pub files: Vec<File>,
+    imported: HashSet<String>,
 }
 
 impl FSet {
     pub fn new() -> FSet {
-        let mut f = FSet { files: Vec::new() };
+        let mut f = FSet {
+            files: Vec::new(),
+            imported: HashSet::new(),
+        };
         f.include_stdlib();
         f
     }
@@ -39,6 +45,10 @@ impl FSet {
     }
 
     pub fn import(&mut self, dir: &std::path::Path) -> Result<(), FSetError> {
+        if self.imported.contains(&dir.to_str().unwrap().to_string()) {
+            return Ok(());
+        }
+        self.imported.insert(dir.to_str().unwrap().to_string());
         // Go through all files in the directory ending in .bsp
         for entry in std::fs::read_dir(dir)? {
             let entry = entry?;

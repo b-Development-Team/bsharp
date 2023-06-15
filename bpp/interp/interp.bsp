@@ -1,0 +1,32 @@
+[IMPORT "bpp/types"]
+
+[TYPE $ICTX [STRUCT 
+    [FIELD .vars $MAP] # map[string]Node
+]]
+
+[FUNC @INTERP_NODE [[PARAM !n $NODE] [PARAM !c $ICTX] [RETURNS $NODE]] [
+    [MATCH !n
+        [CASE !v $NODE_STRING [[RETURN !n]]]
+        [CASE !v $NODE_INT [[RETURN !n]]]
+        [CASE !v $NODE_FLOAT [[RETURN !n]]]
+        [CASE !v $NODE_ARRAY [[RETURN !n]]]
+        [CASE !v $NODE_TAG [
+            [MATCH [GET !v .name]
+                [CASE "VAR" []]
+            ]
+            [RETURN [NEW $NODE [NEW $NONE]]]
+        ]]
+    ]
+]]
+
+[FUNC @INTERP [[PARAM !src [ARRAY $NODE]] [RETURNS [ARRAY $NODE]]] [
+    [DEFINE !res [NEW [ARRAY $NODE] [LEN !src]]]
+    [DEFINE !ctx [NEW $ICTX [: .vars [@MAP_NEW]]]]
+    [DEFINE !i 0]
+    [WHILE [< !i [LEN !src]] [
+        [DEFINE !r [@INTERP_NODE [GET !src !i] !ctx]]
+        [APPEND !res !r]
+        [DEFINE !i [+ !i 1]]
+    ]]
+    [RETURN !res]
+]]
