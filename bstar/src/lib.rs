@@ -1,14 +1,14 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
+use ir::*;
+mod node;
+mod stmts;
+use node::*;
+
+pub struct BStar {
+    ir: IR,
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
+impl BStar {
+    pub fn new(ir: IR) -> BStar {
+        BStar { ir }
     }
 }
