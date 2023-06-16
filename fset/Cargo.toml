@@ -1,6 +1,6 @@
 [package]
 name = "bsharp_fset"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 
 license = "MIT"
@@ -11,6 +11,6 @@ keywords = ["language", "compiler"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tokens = { path = "../tokens", package = "bsharp_tokens", version = "0.1.0" }
-parser = { path = "../parser", package = "bsharp_parser", version = "0.1.0" }
+tokens = { path = "../tokens", package = "bsharp_tokens", version = "0.2.0" }
+parser = { path = "../parser", package = "bsharp_parser", version = "0.2.0" }
 include_dir = "0.7.3"
