@@ -1,0 +1,35 @@
+[FUNC @IF [[PARAM !n [ARRAY $NODE]] [PARAM !c $ICTX] [RETURNS $NODE]] [
+    [DEFINE !v [GET [GET [@INTERP_NODE [GET !n 0] !c] $NODE_INT] 0]]
+    [DEFINE !cond [> !v 0]]
+    [IF !cond [
+        [RETURN [@INTERP_NODE [GET !n 1] !c]]
+    ] [
+        [RETURN [@INTERP_NODE [GET !n 2] !c]]
+    ]]
+]]
+
+[FUNC @COMPARE [[PARAM !n [ARRAY $NODE]] [PARAM !c $ICTX] [RETURNS $NODE]] [
+    [DEFINE !op [GET [GET [GET !n 1] $NODE_STRING] 0]]
+
+    # Get floats
+    [DEFINE !l 0.0]
+    [DEFINE !r 0.0]
+    [MATCH [GET !n 0]
+        [CASE !v $NODE_INT [[DEFINE !l [TOF [GET !v 0]]]]]
+        [CASE !v $NODE_FLOAT [[DEFINE !l [GET !v 0]]]]
+    ]
+    [MATCH [GET !n 2]
+        [CASE !v $NODE_INT [[DEFINE !r [TOF [GET !v 0]]]]]
+        [CASE !v $NODE_FLOAT [[DEFINE !r [GET !v 0]]]]
+    ]
+
+    [DEFINE !res [@FALSE]]
+    [MATCH !op
+        [CASE ">" [[DEFINE !res [> !l !r]]]]
+        [CASE "<" [[DEFINE !res [< !l !r]]]]
+        [CASE "=" [[DEFINE !res [= !l !r]]]]
+        [CASE ">=" [[PRINT "UNKNOWN OP"]]]
+        [CASE "<=" [[PRINT "UNKNOWN OP"]]]
+    ]
+    [IF !res [RETURN [NEW $NODE [NEW $NODE_INT 1]]] [RETURN [NEW $NODE [NEW $NODE_INT 0]]]]
+]]

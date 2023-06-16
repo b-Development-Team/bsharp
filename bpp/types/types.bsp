@@ -57,6 +57,9 @@
         [CASE !s $NONE [
             [RETURN "UNIMPLEMENTED"]
         ]]
+        [CASE !s $NODE_NONE [
+            [RETURN ""]
+        ]]
     ]
 
     [RETURN "UNKNOWN_NODE"]

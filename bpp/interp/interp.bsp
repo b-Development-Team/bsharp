@@ -12,8 +12,13 @@
         [CASE !v $NODE_FLOAT [[RETURN !n]]]
         [CASE !v $NODE_ARRAY [[RETURN !n]]]
         [CASE !v $NODE_TAG [
-            # Interpret args
             [DEFINE !args [GET !v .values]]
+            # Block statement?
+            [MATCH [GET !v .name]
+                [CASE "IF" [[RETURN [@IF !args !c]]]]
+            ]
+
+            # Interpret args
             [DEFINE !iargs [NEW [ARRAY $NODE] [LEN !args]]]
             [DEFINE !i 0]
             [WHILE [< !i [LEN !args]] [
@@ -30,6 +35,7 @@
                 [CASE "FLOOR" [[RETURN [@IFLOOR [GET !iargs 0] !c]]]]
                 [CASE "CEIL" [[RETURN [@ICEIL [GET !iargs 0] !c]]]]
                 [CASE "INDEX" [[RETURN [@INDEX !iargs !c]]]]
+                [CASE "COMPARE" [[RETURN [@COMPARE !iargs !c]]]]
             ]
             [PRINT [@CONCAT [ARR "UNIMPLEMENTED: " [GET !v .name]]]]
             [RETURN [NEW $NODE [NEW $NONE]]]

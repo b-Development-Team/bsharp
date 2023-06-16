@@ -9,6 +9,7 @@
             [RETURN [NEW $NODE [NEW $NODE_STRING [@CTOA [GET [GET !s 0] !ind]]]]]
         ]]
     ]
-    
+
+    [PRINT "CANNOT INDEX"]
     [RETURN [NEW $NODE [NEW $NONE]]]
 ]]
