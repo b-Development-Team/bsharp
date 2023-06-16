@@ -11,4 +11,4 @@ keywords = ["language", "compiler"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-ir = { path = "../ir", package = "bsharp_ir", version = "0.2.0" }
+ir = { path = "../ir", package = "bsharp_ir", version = "0.2.1" }

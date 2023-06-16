@@ -7,4 +7,5 @@ members = [
   "fset",
   "ir",
   "interp",
+  "bstar",
 ]
