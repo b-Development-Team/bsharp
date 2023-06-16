@@ -1,11 +1,24 @@
-use clap::{error::ErrorKind, CommandFactory, Parser};
+use clap::{error::ErrorKind, CommandFactory, Parser, ValueEnum};
 use fset::FSet;
-use interp::Interp;
 use ir::IR;
+
+mod run;
+use run::run;
+mod bstar_run;
+use bstar_run::bstar;
+
+#[derive(ValueEnum, Clone, Copy)]
+enum Action {
+    Run,
+    Bstar,
+}
 
 #[derive(Parser)]
 #[command(name = "bsharp", about = "The B# programming language!")]
 struct Args {
+    #[arg(value_enum, help = "the action to perform on the code")]
+    action: Action,
+
     #[arg(help = "the directory to import")]
     dir: std::path::PathBuf,
 }
@@ -40,27 +53,8 @@ fn main() {
     }
 
     // Run
-    let mut interp = Interp::new(ir, Box::new(std::io::stdout()));
-    let mainind = interp.ir.funcs.iter().position(|f| f.name == "@main");
-    if mainind.is_none() {
-        panic!("main func not found");
+    match args.action {
+        Action::Run => run(ir),
+        Action::Bstar => bstar(ir),
     }
-    if let Err(err) = interp.run_fn(
-        mainind.unwrap(),
-        Vec::new(),
-        interp.ir.funcs[mainind.unwrap()].definition,
-    ) {
-        // Print stack trace
-        for frame in interp.stack.iter().rev() {
-            println!(
-                "{} at {}",
-                interp.ir.funcs[frame.func].name,
-                interp.ir.fset.display_pos(&frame.pos)
-            );
-        }
-
-        Args::command()
-            .error(ErrorKind::InvalidValue, err.fmt(&interp))
-            .exit();
-    };
 }
