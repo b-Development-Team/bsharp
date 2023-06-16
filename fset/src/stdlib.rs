@@ -1,7 +1,7 @@
 use super::*;
 use include_dir::{include_dir, Dir};
 
-static STDLIB: Dir = include_dir!("$CARGO_MANIFEST_DIR/../stdlib");
+static STDLIB: Dir = include_dir!("$CARGO_MANIFEST_DIR/stdlib");
 
 impl FSet {
     pub fn include_stdlib(&mut self) {
