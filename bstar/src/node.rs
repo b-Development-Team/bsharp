@@ -1,3 +1,4 @@
+use super::*;
 use std::fmt;
 
 pub enum Node {
@@ -22,4 +23,9 @@ impl fmt::Display for Node {
             }
         }
     }
+}
+
+#[derive(Debug)]
+pub enum BStarError {
+    UnknownNode(IRNode),
 }
