@@ -101,7 +101,7 @@ impl Interp {
                     Ok(Value::Int(left / right))
                 }
                 MathOperator::MODULO => Ok(Value::Int(left % right)),
-                MathOperator::POW => Ok(Value::Int(left.pow(right as u32))),
+                MathOperator::POWER => Ok(Value::Int(left.pow(right as u32))),
                 MathOperator::XOR => Ok(Value::Int(left ^ right)),
                 MathOperator::SHIFT => Ok(Value::Int(left.wrapping_shl(right as u32))),
                 MathOperator::BOR => Ok(Value::Int(left | right)),
@@ -117,7 +117,7 @@ impl Interp {
                     Ok(Value::Float(left / right))
                 }
                 MathOperator::MODULO => Ok(Value::Float(left % right)),
-                MathOperator::POW => Ok(Value::Float(left.powf(right))),
+                MathOperator::POWER => Ok(Value::Float(left.powf(right))),
                 MathOperator::XOR => Ok(Value::Float((left as i64 ^ right as i64) as f64)),
                 MathOperator::SHIFT => Ok(Value::Float(((left as i64) << (right as i64)) as f64)),
                 MathOperator::BOR => Ok(Value::Float((left as i64 | right as i64) as f64)),
@@ -133,7 +133,7 @@ impl Interp {
                     Ok(Value::Char(left / right))
                 }
                 MathOperator::MODULO => Ok(Value::Char(left % right)),
-                MathOperator::POW => Ok(Value::Char(left.pow(right as u32))),
+                MathOperator::POWER => Ok(Value::Char(left.pow(right as u32))),
                 MathOperator::XOR => Ok(Value::Char(left ^ right)),
                 MathOperator::SHIFT => Ok(Value::Char(left << right)),
                 MathOperator::BOR => Ok(Value::Char(left | right)),

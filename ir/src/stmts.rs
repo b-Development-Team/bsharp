@@ -126,7 +126,7 @@ impl IR {
                 "/" => self.build_mathop(*name_pos, v.pos, args, MathOperator::DIVIDE),
                 "*" => self.build_mathop(*name_pos, v.pos, args, MathOperator::MULTIPLY),
                 "%" => self.build_mathop(*name_pos, v.pos, args, MathOperator::MODULO),
-                "^" => self.build_mathop(*name_pos, v.pos, args, MathOperator::POW),
+                "^" => self.build_mathop(*name_pos, v.pos, args, MathOperator::POWER),
                 "XOR" => self.build_mathop(*name_pos, v.pos, args, MathOperator::XOR),
                 "SHIFT" => self.build_mathop(*name_pos, v.pos, args, MathOperator::SHIFT),
                 "BOR" => self.build_mathop(*name_pos, v.pos, args, MathOperator::BOR),
