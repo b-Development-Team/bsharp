@@ -1,6 +1,7 @@
 use ir::*;
 mod node;
 mod stmts;
+mod util;
 use node::*;
 
 pub struct BStar {

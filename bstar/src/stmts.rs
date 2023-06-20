@@ -69,6 +69,26 @@ impl BStar {
                     vec![l, Node::Ident(op.to_string()), r],
                 ))
             }
+            IRNodeData::Boolean(l, op, r) => {
+                if op == &BooleanOperator::NOT {
+                    let l = self.build_node(l)?;
+                    return Ok(Node::Tag(
+                        "MATH".to_string(),
+                        vec![Node::Int(1), Node::Ident("-".to_string()), l],
+                    ));
+                }
+                let l = self.build_node(l)?;
+                let r = self.build_node(r.as_ref().unwrap())?;
+                let o = match op {
+                    BooleanOperator::AND => "*",
+                    BooleanOperator::OR => "+",
+                    _ => unreachable!(),
+                };
+                Ok(Node::Tag(
+                    "MATH".to_string(),
+                    vec![l, Node::Ident(o.to_string()), r],
+                ))
+            }
             IRNodeData::Cast(val, _) => self.build_node(val),
             IRNodeData::Variable(var, _) => {
                 Ok(Node::Tag("VAR".to_string(), vec![self.fmt_var(*var)?]))
@@ -80,7 +100,10 @@ impl BStar {
             IRNodeData::GetArr { arr, ind } => {
                 let arr = self.build_node(arr)?;
                 let ind = self.build_node(ind)?;
-                Ok(Node::Tag("INDEX".to_string(), vec![arr, ind]))
+                Ok(Node::Tag(
+                    "INDEX".to_string(),
+                    vec![Node::Tag("HEAPGET".to_string(), vec![arr]), ind],
+                ))
             }
             IRNodeData::Return(val) => {
                 if let Some(v) = val {
@@ -89,6 +112,178 @@ impl BStar {
                     return Ok(Node::Tag("RETURN".to_string(), vec![]));
                 }
             }
+            IRNodeData::NewStruct(t, ops) => {
+                let names = self.structfields(t);
+
+                let mut res = vec![Node::Int(0); names.len()];
+                for op in ops {
+                    if let IRNodeData::StructOp { field, val } = &op.data {
+                        let v = self.build_node(&val)?;
+                        let ind = names.iter().position(|x| x == field).unwrap();
+                        res[ind] = v;
+                    }
+                }
+                Ok(Node::Tag(
+                    "HEAPADD".to_string(),
+                    vec![Node::Tag("ARRAY".to_string(), res)],
+                ))
+            }
+            IRNodeData::NewArrayLiteral(t, vals) => {
+                if t.data == TypeData::DEF(0) {
+                    let mut chars = Vec::new();
+                    for v in vals {
+                        if let IRNodeData::Char(c) = v.data {
+                            chars.push(c);
+                        } else {
+                            return Err(BStarError::UnknownNode(v.clone()));
+                        }
+                    }
+                    Ok(Node::String(String::from_utf8(chars).unwrap()))
+                } else {
+                    let mut res = Vec::new();
+                    for val in vals {
+                        res.push(self.build_node(val)?);
+                    }
+                    Ok(Node::Tag(
+                        "HEAPADD".to_string(),
+                        vec![Node::ArrayLiteral(res)],
+                    ))
+                }
+            }
+            IRNodeData::NewArray(_, _) => Ok(Node::Tag(
+                "HEAPADD".to_string(),
+                vec![Node::ArrayLiteral(vec![])],
+            )),
+            IRNodeData::NewBox(val) => {
+                let v = self.build_node(val)?;
+                Ok(Node::Tag(
+                    "HEAPADD".to_string(),
+                    vec![Node::Tag(
+                        "ARRAY".to_string(),
+                        vec![v, Node::String(self.hashtyp(&val.typ(&self.ir)))],
+                    )],
+                ))
+            }
+            IRNodeData::FnCall { func, args, .. } => {
+                let mut res = Vec::new();
+                for arg in args {
+                    res.push(self.build_node(arg)?);
+                }
+                Ok(Node::Tag(self.ir.funcs[*func].name.clone(), res))
+            }
+            IRNodeData::If {
+                cond, body, els, ..
+            } => {
+                let cond = self.build_node(cond)?;
+                let body = self.build_node(body)?;
+                let els = self.build_node(els)?;
+                Ok(Node::Tag("IF".to_string(), vec![cond, body, els]))
+            }
+            IRNodeData::GetStruct { strct, field } => {
+                let fields = self.structfields(&strct.typ(&self.ir));
+                let ind = fields.iter().position(|x| x == field).unwrap() as i64;
+                let strct = self.build_node(strct)?;
+                Ok(Node::Tag(
+                    "INDEX".to_string(),
+                    vec![
+                        Node::Tag("HEAPGET".to_string(), vec![strct]),
+                        Node::Int(ind),
+                    ],
+                ))
+            }
+            IRNodeData::Peek { bx, typ } => {
+                let bx = self.build_node(bx)?;
+                Ok(Node::Tag(
+                    "COMPARE".to_string(),
+                    vec![
+                        Node::Tag("INDEX".to_string(), vec![bx, Node::Int(1)]),
+                        Node::Ident("=".to_string()),
+                        Node::String(self.hashtyp(typ)),
+                    ],
+                ))
+            }
+            IRNodeData::SetArr { arr, ind, val } => {
+                let arr = self.build_node(arr)?;
+                let ind = self.build_node(ind)?;
+                let val = self.build_node(val)?;
+                Ok(Node::Tag(
+                    "HEAPSET".to_string(),
+                    vec![
+                        arr.clone(),
+                        Node::Tag(
+                            "SETINDEX".to_string(),
+                            vec![Node::Tag("HEAPGET".to_string(), vec![arr]), ind, val],
+                        ),
+                    ],
+                ))
+            }
+            IRNodeData::Append { arr, val } => {
+                let arr = self.build_node(arr)?;
+                let val = self.build_node(val)?;
+                Ok(Node::Tag(
+                    "HEAPSET".to_string(),
+                    vec![
+                        arr.clone(),
+                        Node::Tag(
+                            "CONCAT".to_string(),
+                            vec![Node::Tag("HEAPGET".to_string(), vec![arr]), val],
+                        ),
+                    ],
+                ))
+            }
+            IRNodeData::SetStruct { strct, vals } => {
+                let names = self.structfields(&strct.typ(&self.ir));
+                let strct = self.build_node(strct)?;
+                let mut res = Vec::new();
+                for v in vals {
+                    if let IRNodeData::StructOp { field, val } = &v.data {
+                        let v = self.build_node(&val)?;
+                        let ind = names.iter().position(|x| x == field).unwrap();
+
+                        // Set
+                        res.push(Node::Tag(
+                            "HEAPSET".to_string(),
+                            vec![
+                                strct.clone(),
+                                Node::Tag(
+                                    "SETINDEX".to_string(),
+                                    vec![
+                                        Node::Tag("HEAPGET".to_string(), vec![strct.clone()]),
+                                        Node::Int(ind as i64),
+                                        v,
+                                    ],
+                                ),
+                            ],
+                        ));
+                    }
+                }
+                Ok(Node::Tag("BLOCK".to_string(), res))
+            }
+            IRNodeData::NewTuple(_, vals) => {
+                let mut res = Vec::new();
+                for v in vals {
+                    res.push(self.build_node(v)?);
+                }
+                Ok(Node::Tag(
+                    "HEAPADD".to_string(),
+                    vec![Node::Tag("ARRAY".to_string(), res)],
+                ))
+            }
+            IRNodeData::GetTuple { tup, ind } => {
+                let tup = self.build_node(tup)?;
+                Ok(Node::Tag(
+                    "INDEX".to_string(),
+                    vec![
+                        Node::Tag("HEAPGET".to_string(), vec![tup]),
+                        Node::Int(*ind as i64),
+                    ],
+                ))
+            }
+            IRNodeData::Char(v) => Ok(Node::Int(*v as i64)),
+            IRNodeData::Print(v) => Ok(Node::Tag(
+                "CONCAT".to_string(),
+                vec![self.build_node(v)?, Node::String("\n".to_string())],
+            )),
             _ => Err(BStarError::UnknownNode(node.clone())),
         }
     }

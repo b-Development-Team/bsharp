@@ -1,12 +1,14 @@
 use super::*;
 use std::fmt;
 
+#[derive(Clone)]
 pub enum Node {
     String(String),
     Ident(String),
     Int(i64),
     Float(f64),
     Tag(String, Vec<Node>),
+    ArrayLiteral(Vec<Node>),
 }
 
 impl fmt::Display for Node {
@@ -22,6 +24,16 @@ impl fmt::Display for Node {
                     write!(f, " {}", val)?;
                 }
                 write!(f, "]")
+            }
+            Self::ArrayLiteral(vals) => {
+                write!(f, "{{")?;
+                for (i, val) in vals.iter().enumerate() {
+                    if i != 0 {
+                        write!(f, ", ")?;
+                    }
+                    write!(f, "{}", val)?;
+                }
+                write!(f, "}}")
             }
         }
     }

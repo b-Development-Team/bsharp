@@ -67,3 +67,12 @@
 
   [RETURN [INT [baseconv [INT [VAR out]] 2 10]]]
 ]]
+
+[DEFINE h [ARRAY "HEAP"]]
+[FUNC HEAPADD [ARRAY v] [BLOCK
+  [DEFINE res [LENGTH [VAR h]]]
+  [DEFINE h [CONCAT [VAR h] [ARRAY [VAR v]]]]
+  [RETURN [VAR res]]
+]]
+[FUNC HEAPGET [ARRAY ind] [INDEX [VAR h] [VAR ind]]]
+[FUNC HEAPSET [ARRAY v ind] [DEFINE h [SETINDEX [VAR h] [VAR ind] [VAR v]]]]
