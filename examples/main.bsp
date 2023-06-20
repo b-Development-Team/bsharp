@@ -1,4 +1,30 @@
 # Prints:
+# HI
+# HI
+# HI
+# HI
+# HI
+# HI
+# HI
+# HI
+# HI
+# HI
+# true
+# Hello
+# Hi
+# IT'S NONE
+# IT'S A
+# VAL 1 is Hello
+# VAL 2 is World
+# HI
+# HI
+# true
+# HELLO
+# IS 1+1=2?
+# true
+# 
+# 
+# HASHMAP TEST:
 # THIS IS THE FIRST
 # THIS IS THE SECOND
 # TRUE
@@ -9,6 +35,10 @@
 # VALUE: THIS IS THE THIRD
 
 [FUNC @main [] [
+  # Test
+  [@test]
+  [PRINT "\n\nHASHMAP TEST:"]
+
   # Hashmap example
   [DEFINE !m [@MAP_NEW]]
   [@MAP_INSERT !m "HELLO" [BOX "THIS IS THE FIRST"]]

@@ -44,7 +44,7 @@ impl BStar {
             let v = self.build_fn(i)?;
             res.push(v);
         }
-        res.push(Node::Tag("MAIN".to_string(), vec![]));
+        res.push(Node::Tag("@MAIN".to_string(), vec![]));
         Ok(res)
     }
 }
