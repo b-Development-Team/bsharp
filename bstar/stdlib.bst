@@ -26,6 +26,7 @@
 
 
 # bsharplib by nv7
+[DEFINE c "                                 ! #$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"]
 [FUNC XOR [ARRAY a b] [BLOCK
   [DEFINE l [STR [baseconv [VAR a] 10 2]]]
   [DEFINE r [STR [baseconv [VAR b] 10 2]]]

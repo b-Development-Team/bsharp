@@ -15,7 +15,11 @@ impl BStar {
 
     pub fn fmt_var(&mut self, ind: usize) -> Result<Node, BStarError> {
         let v = &self.ir.variables[ind];
-        Ok(Node::Ident(format!("{:x}{}", ind, v.name.clone())))
+        Ok(Node::Ident(format!(
+            "{}{:x}",
+            v.name.clone().split_at(1).1,
+            ind,
+        )))
     }
 
     pub fn build_fn(&mut self, f: usize) -> Result<Node, BStarError> {

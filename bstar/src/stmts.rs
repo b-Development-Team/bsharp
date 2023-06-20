@@ -98,11 +98,23 @@ impl BStar {
                 Ok(Node::Tag("LEN".to_string(), vec![val]))
             }
             IRNodeData::GetArr { arr, ind } => {
-                let arr = self.build_node(arr)?;
+                let a = self.build_node(arr)?;
                 let ind = self.build_node(ind)?;
+                if arr.typ(&self.ir).data == TypeData::DEF(0) {
+                    return Ok(Node::Tag(
+                        "INDEXOF".to_string(),
+                        vec![
+                            Node::Tag("VAR".to_string(), vec![Node::Ident("c".to_string())]),
+                            Node::Tag(
+                                "INDEX".to_string(),
+                                vec![Node::Tag("HEAPGET".to_string(), vec![a]), ind],
+                            ),
+                        ],
+                    ));
+                }
                 Ok(Node::Tag(
                     "INDEX".to_string(),
-                    vec![Node::Tag("HEAPGET".to_string(), vec![arr]), ind],
+                    vec![Node::Tag("HEAPGET".to_string(), vec![a]), ind],
                 ))
             }
             IRNodeData::Return(val) => {
@@ -150,10 +162,18 @@ impl BStar {
                     ))
                 }
             }
-            IRNodeData::NewArray(_, _) => Ok(Node::Tag(
-                "HEAPADD".to_string(),
-                vec![Node::ArrayLiteral(vec![])],
-            )),
+            IRNodeData::NewArray(t, _) => {
+                if t.data == TypeData::DEF(0) {
+                    return Ok(Node::Tag(
+                        "HEAPADD".to_string(),
+                        vec![Node::String("".to_string())],
+                    ));
+                }
+                Ok(Node::Tag(
+                    "HEAPADD".to_string(),
+                    vec![Node::ArrayLiteral(vec![])],
+                ))
+            }
             IRNodeData::NewBox(val) => {
                 let v = self.build_node(val)?;
                 Ok(Node::Tag(
@@ -205,28 +225,46 @@ impl BStar {
             IRNodeData::SetArr { arr, ind, val } => {
                 let arr = self.build_node(arr)?;
                 let ind = self.build_node(ind)?;
-                let val = self.build_node(val)?;
+                let mut v = self.build_node(val)?;
+                if val.typ(&self.ir).data == TypeData::CHAR {
+                    v = Node::Tag(
+                        "INDEX".to_string(),
+                        vec![
+                            Node::Tag("VAR".to_string(), vec![Node::Ident("c".to_string())]),
+                            v,
+                        ],
+                    );
+                }
                 Ok(Node::Tag(
                     "HEAPSET".to_string(),
                     vec![
                         arr.clone(),
                         Node::Tag(
                             "SETINDEX".to_string(),
-                            vec![Node::Tag("HEAPGET".to_string(), vec![arr]), ind, val],
+                            vec![Node::Tag("HEAPGET".to_string(), vec![arr]), ind, v],
                         ),
                     ],
                 ))
             }
             IRNodeData::Append { arr, val } => {
                 let arr = self.build_node(arr)?;
-                let val = self.build_node(val)?;
+                let mut v = self.build_node(val)?;
+                if val.typ(&self.ir).data == TypeData::CHAR {
+                    v = Node::Tag(
+                        "INDEX".to_string(),
+                        vec![
+                            Node::Tag("VAR".to_string(), vec![Node::Ident("c".to_string())]),
+                            v,
+                        ],
+                    );
+                }
                 Ok(Node::Tag(
                     "HEAPSET".to_string(),
                     vec![
                         arr.clone(),
                         Node::Tag(
                             "CONCAT".to_string(),
-                            vec![Node::Tag("HEAPGET".to_string(), vec![arr]), val],
+                            vec![Node::Tag("HEAPGET".to_string(), vec![arr]), v],
                         ),
                     ],
                 ))
