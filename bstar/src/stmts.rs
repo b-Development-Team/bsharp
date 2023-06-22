@@ -199,6 +199,13 @@ impl BStar {
                     )],
                 ))
             }
+            IRNodeData::Unbox { bx, .. } => {
+                let v = self.build_node(bx)?;
+                Ok(Node::Tag(
+                    "INDEX".to_string(),
+                    vec![Node::Tag("HEAPGET".to_string(), vec![v]), Node::Int(0)],
+                ))
+            }
             IRNodeData::FnCall { func, args, .. } => {
                 let mut res = Vec::new();
                 for arg in args {
@@ -343,6 +350,78 @@ impl BStar {
                         Node::String("\n".to_string()),
                     ],
                 ))
+            }
+            IRNodeData::NewEnum(val, _) => {
+                let tname = self.hashtyp(&val.typ(&self.ir));
+                let val = self.build_node(val)?;
+                Ok(Node::Tag(
+                    "ARRAY".to_string(),
+                    vec![val, Node::String(tname)],
+                ))
+            }
+            IRNodeData::GetEnum { enm, .. } => {
+                let v = self.build_node(enm)?;
+                Ok(Node::Tag("INDEX".to_string(), vec![v, Node::Int(0)]))
+            }
+            IRNodeData::TypeMatch { val, body } => {
+                let cond = self.build_node(val)?;
+                let typval = Node::Tag("INDEX".to_string(), vec![cond.clone(), Node::Int(1)]);
+                let varval = Node::Tag("INDEX".to_string(), vec![cond.clone(), Node::Int(0)]);
+                let mut res = Node::Tag("BLOCK".to_string(), vec![]);
+                for c in body {
+                    if let IRNodeData::TypeCase { var, typ, body } = &c.data {
+                        let t = self.hashtyp(typ);
+                        let body = self.build_node(body)?;
+                        let varname = self.fmt_var(*var)?;
+                        res = Node::Tag(
+                            "IF".to_string(),
+                            vec![
+                                Node::Tag(
+                                    "COMPARE".to_string(),
+                                    vec![
+                                        Node::String(t),
+                                        Node::Ident("=".to_string()),
+                                        typval.clone(),
+                                    ],
+                                ),
+                                Node::Tag(
+                                    "BLOCK".to_string(),
+                                    vec![
+                                        Node::Tag(
+                                            "DEFINE".to_string(),
+                                            vec![varname, varval.clone()],
+                                        ),
+                                        body,
+                                    ],
+                                ),
+                                res,
+                            ],
+                        )
+                    }
+                }
+                Ok(res)
+            }
+            IRNodeData::Match { val, body } => {
+                let cond = self.build_node(val)?;
+                let mut res = Node::Tag("BLOCK".to_string(), vec![]);
+                for c in body {
+                    if let IRNodeData::Case { val, body } = &c.data {
+                        let valcond = self.build_node(val)?;
+                        let body = self.build_node(body)?;
+                        res = Node::Tag(
+                            "IF".to_string(),
+                            vec![
+                                Node::Tag(
+                                    "COMPARE".to_string(),
+                                    vec![valcond, Node::Ident("=".to_string()), cond.clone()],
+                                ),
+                                body,
+                                res,
+                            ],
+                        )
+                    }
+                }
+                Ok(res)
             }
             _ => Err(BStarError::UnknownNode(node.clone())),
         }
