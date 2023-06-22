@@ -26,6 +26,8 @@
 
 
 # bsharplib by nv7
+[IMPORT baselib]
+
 [DEFINE c "                                 ! #$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"]
 [FUNC XOR [ARRAY a b] [BLOCK
   [DEFINE l [STR [baseconv [VAR a] 10 2]]]
@@ -76,4 +78,10 @@
   [RETURN [VAR res]]
 ]]
 [FUNC HEAPGET [ARRAY ind] [INDEX [VAR h] [VAR ind]]]
-[FUNC HEAPSET [ARRAY v ind] [DEFINE h [SETINDEX [VAR h] [VAR ind] [VAR v]]]]
+[FUNC HEAPSET [ARRAY ind v] [DEFINE h [SETINDEX [VAR h] [VAR ind] [VAR v]]]]
+
+[FUNC STRSETINDEX [ARRAY v ind val] [BLOCK 
+  [DEFINE l [SLICE [VAR v] 0 [VAR ind]]]
+  [DEFINE r [SLICE [VAR v] [MATH [VAR ind] + 1] [LENGTH [VAR v]]]]
+  [RETURN [CONCAT [VAR l] [VAR val] [VAR r]]]
+]]

@@ -41,7 +41,7 @@ impl BStar {
             IRNodeData::Math(l, op, r) => {
                 let l = self.build_node(l)?;
                 let r = self.build_node(r)?;
-                let op = match op {
+                let o = match op {
                     MathOperator::ADD => "+",
                     MathOperator::SUBTRACT => "-",
                     MathOperator::MULTIPLY => "*",
@@ -64,9 +64,18 @@ impl BStar {
                         ))
                     }
                 };
+                if *op == MathOperator::DIVIDE && node.typ(&self.ir).data == TypeData::INT {
+                    return Ok(Node::Tag(
+                        "INT".to_string(),
+                        vec![Node::Tag(
+                            "MATH".to_string(),
+                            vec![l, Node::Ident(o.to_string()), r],
+                        )],
+                    ));
+                }
                 Ok(Node::Tag(
                     "MATH".to_string(),
-                    vec![l, Node::Ident(op.to_string()), r],
+                    vec![l, Node::Ident(o.to_string()), r],
                 ))
             }
             IRNodeData::Boolean(l, op, r) => {
@@ -95,7 +104,10 @@ impl BStar {
             }
             IRNodeData::Len(val) => {
                 let val = self.build_node(val)?;
-                Ok(Node::Tag("LEN".to_string(), vec![val]))
+                Ok(Node::Tag(
+                    "LENGTH".to_string(),
+                    vec![Node::Tag("HEAPGET".to_string(), vec![val])],
+                ))
             }
             IRNodeData::GetArr { arr, ind } => {
                 let a = self.build_node(arr)?;
@@ -150,7 +162,10 @@ impl BStar {
                             return Err(BStarError::UnknownNode(v.clone()));
                         }
                     }
-                    Ok(Node::String(String::from_utf8(chars).unwrap()))
+                    Ok(Node::Tag(
+                        "HEAPADD".to_string(),
+                        vec![Node::String(String::from_utf8(chars).unwrap())],
+                    ))
                 } else {
                     let mut res = Vec::new();
                     for val in vals {
@@ -223,7 +238,7 @@ impl BStar {
                 ))
             }
             IRNodeData::SetArr { arr, ind, val } => {
-                let arr = self.build_node(arr)?;
+                let a = self.build_node(arr)?;
                 let ind = self.build_node(ind)?;
                 let mut v = self.build_node(val)?;
                 if val.typ(&self.ir).data == TypeData::CHAR {
@@ -235,14 +250,15 @@ impl BStar {
                         ],
                     );
                 }
+                let mut f = "SETINDEX".to_string();
+                if arr.typ(&self.ir).data == TypeData::DEF(0) {
+                    f = "STRSETINDEX".to_string();
+                }
                 Ok(Node::Tag(
                     "HEAPSET".to_string(),
                     vec![
-                        arr.clone(),
-                        Node::Tag(
-                            "SETINDEX".to_string(),
-                            vec![Node::Tag("HEAPGET".to_string(), vec![arr]), ind, v],
-                        ),
+                        a.clone(),
+                        Node::Tag(f, vec![Node::Tag("HEAPGET".to_string(), vec![a]), ind, v]),
                     ],
                 ))
             }
@@ -318,10 +334,16 @@ impl BStar {
                 ))
             }
             IRNodeData::Char(v) => Ok(Node::Int(*v as i64)),
-            IRNodeData::Print(v) => Ok(Node::Tag(
-                "CONCAT".to_string(),
-                vec![self.build_node(v)?, Node::String("\n".to_string())],
-            )),
+            IRNodeData::Print(v) => {
+                let val = self.build_node(v)?;
+                Ok(Node::Tag(
+                    "CONCAT".to_string(),
+                    vec![
+                        Node::Tag("HEAPGET".to_string(), vec![val]),
+                        Node::String("\n".to_string()),
+                    ],
+                ))
+            }
             _ => Err(BStarError::UnknownNode(node.clone())),
         }
     }
