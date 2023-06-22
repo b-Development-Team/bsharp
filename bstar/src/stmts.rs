@@ -52,15 +52,18 @@ impl BStar {
                     MathOperator::BOR => return Ok(Node::Tag("BOR".to_string(), vec![l, r])),
                     MathOperator::SHIFT => {
                         return Ok(Node::Tag(
-                            "MATH".to_string(),
-                            vec![
-                                l,
-                                Node::Ident("*".to_string()),
-                                Node::Tag(
-                                    "MATH".to_string(),
-                                    vec![Node::Int(2), Node::Ident("^".to_string()), r],
-                                ),
-                            ],
+                            "INT".to_string(),
+                            vec![Node::Tag(
+                                "MATH".to_string(),
+                                vec![
+                                    l,
+                                    Node::Ident("*".to_string()),
+                                    Node::Tag(
+                                        "MATH".to_string(),
+                                        vec![Node::Int(2), Node::Ident("^".to_string()), r],
+                                    ),
+                                ],
+                            )],
                         ))
                     }
                 };
@@ -133,7 +136,10 @@ impl BStar {
                 if let Some(v) = val {
                     return Ok(Node::Tag("RETURN".to_string(), vec![self.build_node(v)?]));
                 } else {
-                    return Ok(Node::Tag("RETURN".to_string(), vec![]));
+                    return Ok(Node::Tag(
+                        "RETURN".to_string(),
+                        vec![Node::String("".to_string())],
+                    ));
                 }
             }
             IRNodeData::NewStruct(t, ops) => {
@@ -234,7 +240,7 @@ impl BStar {
                 ))
             }
             IRNodeData::Peek { bx, typ } => {
-                let bx = self.build_node(bx)?;
+                let bx = Node::Tag("HEAPGET".to_string(), vec![self.build_node(bx)?]);
                 Ok(Node::Tag(
                     "COMPARE".to_string(),
                     vec![
