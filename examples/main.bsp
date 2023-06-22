@@ -34,7 +34,7 @@
 # KEY: ABC
 # VALUE: THIS IS THE THIRD
 
-[FUNC @main [] [
+[FUNC @MAIN [] [
   # Test
   [@test]
   [PRINT "\n\nHASHMAP TEST:"]

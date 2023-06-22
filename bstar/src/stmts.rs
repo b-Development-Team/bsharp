@@ -149,7 +149,7 @@ impl BStar {
                 }
                 Ok(Node::Tag(
                     "HEAPADD".to_string(),
-                    vec![Node::Tag("ARRAY".to_string(), res)],
+                    vec![Node::ArrayLiteral(res)],
                 ))
             }
             IRNodeData::NewArrayLiteral(t, vals) => {

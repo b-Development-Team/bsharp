@@ -3,7 +3,7 @@ use interp::Interp;
 
 pub fn run(ir: IR) {
     let mut interp = Interp::new(ir, Box::new(std::io::stdout()));
-    let mainind = interp.ir.funcs.iter().position(|f| f.name == "@main");
+    let mainind = interp.ir.funcs.iter().position(|f| f.name == "@MAIN");
     if mainind.is_none() {
         panic!("main func not found");
     }
