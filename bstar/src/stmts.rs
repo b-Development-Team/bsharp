@@ -198,19 +198,13 @@ impl BStar {
             IRNodeData::NewBox(val) => {
                 let v = self.build_node(val)?;
                 Ok(Node::Tag(
-                    "HEAPADD".to_string(),
-                    vec![Node::Tag(
-                        "ARRAY".to_string(),
-                        vec![v, Node::String(self.hashtyp(&val.typ(&self.ir)))],
-                    )],
+                    "ARRAY".to_string(),
+                    vec![v, Node::String(self.hashtyp(&val.typ(&self.ir)))],
                 ))
             }
             IRNodeData::Unbox { bx, .. } => {
                 let v = self.build_node(bx)?;
-                Ok(Node::Tag(
-                    "INDEX".to_string(),
-                    vec![Node::Tag("HEAPGET".to_string(), vec![v]), Node::Int(0)],
-                ))
+                Ok(Node::Tag("INDEX".to_string(), vec![v, Node::Int(0)]))
             }
             IRNodeData::FnCall { func, args, .. } => {
                 let mut res = Vec::new();
@@ -240,7 +234,7 @@ impl BStar {
                 ))
             }
             IRNodeData::Peek { bx, typ } => {
-                let bx = Node::Tag("HEAPGET".to_string(), vec![self.build_node(bx)?]);
+                let bx = self.build_node(bx)?;
                 Ok(Node::Tag(
                     "COMPARE".to_string(),
                     vec![
@@ -286,6 +280,8 @@ impl BStar {
                             v,
                         ],
                     );
+                } else {
+                    v = Node::ArrayLiteral(vec![v])
                 }
                 Ok(Node::Tag(
                     "HEAPSET".to_string(),
