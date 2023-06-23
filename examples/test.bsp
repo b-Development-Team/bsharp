@@ -44,8 +44,8 @@
 [FUNC @test [] [
   [DEFINE !i 0]
   [WHILE [< !i 10] [
-    [DEFINE !i [+ !i 1]]
     [PRINT "HI"]
+    [DEFINE !i [+ !i 1]]
   ]]
 
   [@PRINTBOOL [NOT [& [> 1 1] [| [< 1 1] [> 1 1]]]]]
