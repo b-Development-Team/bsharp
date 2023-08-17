@@ -28,7 +28,11 @@
 # bsharplib by nv7
 [IMPORT baselib]
 
-[DEFINE c "                                 ! #$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"]
+[DEFINE c "          \n                      ! #$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~"]
+[FUNC GETBYTE [ARRAY v] [BLOCK
+  [IF [COMPARE [VAR v] = " "] [RETURN 32] [BLOCK]]
+  [RETURN [INDEXOF [VAR c] [VAR v]]]
+]]
 [FUNC XOR [ARRAY a b] [BLOCK
   [DEFINE l [STR [baseconv [VAR a] 10 2]]]
   [DEFINE r [STR [baseconv [VAR b] 10 2]]]

@@ -117,14 +117,11 @@ impl BStar {
                 let ind = self.build_node(ind)?;
                 if arr.typ(&self.ir).data == TypeData::DEF(0) {
                     return Ok(Node::Tag(
-                        "INDEXOF".to_string(),
-                        vec![
-                            Node::Tag("VAR".to_string(), vec![Node::Ident("c".to_string())]),
-                            Node::Tag(
-                                "INDEX".to_string(),
-                                vec![Node::Tag("HEAPGET".to_string(), vec![a]), ind],
-                            ),
-                        ],
+                        "GETBYTE".to_string(),
+                        vec![Node::Tag(
+                            "INDEX".to_string(),
+                            vec![Node::Tag("HEAPGET".to_string(), vec![a]), ind],
+                        )],
                     ));
                 }
                 Ok(Node::Tag(
@@ -404,11 +401,20 @@ impl BStar {
                 Ok(res)
             }
             IRNodeData::Match { val, body } => {
-                let cond = self.build_node(val)?;
+                let mut cond = self.build_node(val)?;
                 let mut res = Node::Tag("BLOCK".to_string(), vec![]);
+                if val.typ(&self.ir).data == TypeData::DEF(0) {
+                    // String match
+                    cond = Node::Tag("HEAPGET".to_string(), vec![cond]);
+                }
                 for c in body {
                     if let IRNodeData::Case { val, body } = &c.data {
-                        let valcond = self.build_node(val)?;
+                        let mut valcond = self.build_node(val)?;
+                        if val.typ(&self.ir).data == TypeData::DEF(0) {
+                            // TODO: Instead of adding and instantly getting from the heap, just put a string literal
+                            // String match
+                            valcond = Node::Tag("HEAPGET".to_string(), vec![valcond]);
+                        }
                         let body = self.build_node(body)?;
                         res = Node::Tag(
                             "IF".to_string(),
