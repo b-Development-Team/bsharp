@@ -17,6 +17,9 @@
 		"value": {
 			"patterns": [
 				{
+					"include": "#call"
+				},
+				{
 					"include": "#node"
 				},
 				{
