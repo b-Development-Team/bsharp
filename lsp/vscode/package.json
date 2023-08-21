@@ -1,0 +1,34 @@
+{
+  "name": "bsharp",
+  "displayName": "bsharp",
+  "description": "The B# programming languaage!",
+  "version": "2.0.0",
+  "engines": {
+    "vscode": "^1.81.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "bsharp",
+        "aliases": [
+          "B#",
+          "bsharp"
+        ],
+        "extensions": [
+          ".bsp"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "bsharp",
+        "scopeName": "source.bsharp",
+        "path": "./syntaxes/bsharp.tmLanguage.json"
+      }
+    ]
+  }
+}
