@@ -1,11 +1,3 @@
 [workspace]
 
-members = [
-  "bsharp",
-  "tokens",
-  "parser",
-  "fset",
-  "ir",
-  "interp",
-  "bstar",
-]
+members = ["bsharp", "tokens", "parser", "fset", "ir", "interp", "bstar", "lsp"]

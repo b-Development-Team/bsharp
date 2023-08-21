@@ -1,9 +1,9 @@
 [package]
 name = "bsharp_bstar"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-ir = { path = "../ir", package = "bsharp_ir", version = "0.2.1" }
+ir = { path = "../ir", package = "bsharp_ir", version = "0.2.2" }

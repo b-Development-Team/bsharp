@@ -1,5 +1,5 @@
 [package]
-name = "bsharp"
+name = "lsp"
 version = "0.2.2"
 edition = "2021"
 
@@ -13,6 +13,3 @@ keywords = ["language", "compiler"]
 [dependencies]
 fset = { path = "../fset", package = "bsharp_fset", version = "0.2.2" }
 ir = { path = "../ir", package = "bsharp_ir", version = "0.2.2" }
-interp = { path = "../interp", package = "bsharp_interp", version = "0.2.2" }
-bstar = { path = "../bstar", package = "bsharp_bstar", version = "0.2.2" }
-clap = { version = "4.1.13", features = ["derive"] }
