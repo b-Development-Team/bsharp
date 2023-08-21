@@ -1,5 +1,6 @@
 use std::collections::HashMap;
-mod tokenize;
+mod compile;
+mod completion;
 
 use fset::{FSet, Token};
 use ir::IR;
@@ -41,6 +42,19 @@ impl LanguageServer for Backend {
                     }),
                     file_operations: None,
                 }),
+                completion_provider: Some(CompletionOptions {
+                    resolve_provider: Some(false),
+                    trigger_characters: Some(vec![
+                        "!".to_string(),
+                        "@".to_string(),
+                        "$".to_string(),
+                        "[".to_string(),
+                        ".".to_string(), // TODO: struct field completion
+                    ]),
+                    work_done_progress_options: WorkDoneProgressOptions::default(),
+                    all_commit_characters: None,
+                    completion_item: None,
+                }),
                 ..ServerCapabilities::default()
             },
         })
@@ -67,6 +81,10 @@ impl LanguageServer for Backend {
     async fn did_save(&self, _: DidSaveTextDocumentParams) {
         let mut state = self.state.lock().await;
         state.compile(&self.client).await;
+    }
+
+    async fn completion(&self, p: CompletionParams) -> Result<Option<CompletionResponse>> {
+        self.complete(p).await
     }
 
     async fn shutdown(&self) -> Result<()> {
