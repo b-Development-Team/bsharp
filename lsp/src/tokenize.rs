@@ -18,22 +18,27 @@ impl State {
     pub async fn compile(&mut self, client: &Client) {
         // Compile
         let mut fset = FSet::new();
-        if let Err(_) = fset.import(Path::new(&self.root)) {
-            return;
-        };
-        let mut ir = IR::new(fset);
-        if let Err(_) = ir.build() {
-            return;
-        };
-        self.ir = ir;
+        let mut errors: Vec<IRError> = Vec::new();
+        if let Err(e) = fset.import(Path::new(&self.root)) {
+            errors.push(IRError::FSetError(e));
+            self.ir.fset = fset;
+        } else {
+            let mut ir = IR::new(fset);
+            if let Err(e) = ir.build() {
+                ir.errors.push(e);
+            };
+            errors = ir.errors;
+            ir.errors = Vec::new();
+            self.ir = ir;
+        }
 
         // Send diagnostics
         let mut diags: HashMap<String, Vec<Diagnostic>> = HashMap::new();
-        for err in self.ir.errors.iter() {
-            if let IRError::FSetError(_) = err {
+        for err in errors.iter() {
+            if err.pos().is_none() {
                 continue;
             }
-            let pos = err.pos();
+            let pos = err.pos().unwrap();
             let msg = err.msg(&self.ir);
             let diag = Diagnostic {
                 range: Range {

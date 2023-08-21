@@ -28,6 +28,50 @@ impl From<std::io::Error> for FSetError {
 
 // Impl display for FSetError
 impl FSetError {
+    pub fn pos(&self) -> Option<Pos> {
+        match self {
+            FSetError::IOError(_) => None,
+            FSetError::ParseError(e) => match e {
+                ParseError::UnexpectedToken(t) => Some(t.pos),
+                ParseError::EOF => None,
+            },
+            FSetError::TokenizeError(e) => match e {
+                TokenizeError::UnexpectedToken { got: t, .. } => Some(t.pos),
+                TokenizeError::EOF => None,
+                TokenizeError::UnexpectedChar(_, pos) => Some(*pos),
+                TokenizeError::InvalidEscapeCode(_, pos) => Some(*pos),
+                TokenizeError::InvalidInt(_, pos) => Some(*pos),
+                TokenizeError::InvalidFloat(_, pos) => Some(*pos),
+            },
+        }
+    }
+
+    pub fn msg(&self) -> String {
+        match self {
+            FSetError::ParseError(e) => match e {
+                ParseError::UnexpectedToken(_) => "unexpected token".to_string(),
+                ParseError::EOF => "parse error: un-closed bracket".to_string(),
+            },
+            FSetError::TokenizeError(e) => match e {
+                TokenizeError::UnexpectedToken { .. } => "unexpected token".to_string(),
+                TokenizeError::EOF => format!("tokenize error: unexpected EOF"),
+                TokenizeError::UnexpectedChar(c, ..) => {
+                    format!("invalid character '{}'", c)
+                }
+                TokenizeError::InvalidEscapeCode(c, ..) => {
+                    format!("invalid escape code '{}'", c)
+                }
+                TokenizeError::InvalidInt(val, ..) => {
+                    format!("invalid integer '{}'", val)
+                }
+                TokenizeError::InvalidFloat(val, ..) => {
+                    format!("invalid float '{}'", val)
+                }
+            },
+            FSetError::IOError(e) => e.to_string(),
+        }
+    }
+
     pub fn fmt(&self, fset: &FSet) -> String {
         match self {
             FSetError::ParseError(e) => match e {

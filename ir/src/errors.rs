@@ -1,4 +1,5 @@
 use super::*;
+use fset::FSetError;
 
 pub enum IRError {
     UnexpectedNode(ASTNode),
@@ -61,10 +62,10 @@ impl From<FSetError> for IRError {
 }
 
 impl IRError {
-    pub fn pos(&self) -> Pos {
+    pub fn pos(&self) -> Option<Pos> {
         match self {
-            IRError::UnexpectedNode(node) => node.pos,
-            IRError::InvalidGlobalDef(node) => node.pos,
+            IRError::UnexpectedNode(node) => Some(node.pos),
+            IRError::InvalidGlobalDef(node) => Some(node.pos),
             IRError::UnknownStmt { pos, .. }
             | IRError::InvalidArgumentCount { pos, .. }
             | IRError::InvalidType { pos, .. }
@@ -78,10 +79,10 @@ impl IRError {
             | IRError::DuplicateType(pos, _)
             | IRError::DuplicateFunction(pos, _)
             | IRError::DuplicateVariable(pos, _)
-            | IRError::UnknownType { pos, .. } => *pos,
-            IRError::InvalidASTArgument { got, .. } => got.pos,
-            IRError::InvalidArgument { got, .. } => got.pos,
-            IRError::FSetError(_) => Pos::default(),
+            | IRError::UnknownType { pos, .. } => Some(*pos),
+            IRError::InvalidASTArgument { got, .. } => Some(got.pos),
+            IRError::InvalidArgument { got, .. } => Some(got.pos),
+            IRError::FSetError(e) => e.pos(),
         }
     }
 
@@ -105,7 +106,7 @@ impl IRError {
                 expected.fmt(ir),
                 got.typ(ir).data.fmt(ir),
             ),
-            IRError::FSetError(e) => e.fmt(&ir.fset),
+            IRError::FSetError(e) => e.msg(),
             IRError::InvalidType { expected, got, .. } => {
                 format!("invalid type, expected {:?}, got {:?}", expected, got)
             }
@@ -151,9 +152,10 @@ impl IRError {
     }
 
     pub fn fmt(&self, ir: &IR) -> String {
-        if let Self::FSetError(_) = self {
+        let pos = self.pos();
+        if let None = pos {
             return self.msg(ir);
         }
-        format!("{}: {}", ir.fset.display_pos(&self.pos()), self.msg(ir))
+        format!("{}: {}", ir.fset.display_pos(&pos.unwrap()), self.msg(ir))
     }
 }
