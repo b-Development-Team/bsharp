@@ -4,7 +4,7 @@ use super::*;
 mod tokenize;
 
 pub struct Tokenizer {
-    tokens: Vec<Token>,
+    pub tokens: Vec<Token>,
     stream: Stream,
     index: usize,
 }

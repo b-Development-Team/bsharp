@@ -61,100 +61,99 @@ impl From<FSetError> for IRError {
 }
 
 impl IRError {
-    pub fn fmt(&self, ir: &IR) -> String {
+    pub fn pos(&self) -> Pos {
         match self {
-            IRError::UnexpectedNode(node) => {
-                format!("{}: unexpected node", ir.fset.display_pos(&node.pos))
+            IRError::UnexpectedNode(node) => node.pos,
+            IRError::InvalidGlobalDef(node) => node.pos,
+            IRError::UnknownStmt { pos, .. }
+            | IRError::InvalidArgumentCount { pos, .. }
+            | IRError::InvalidType { pos, .. }
+            | IRError::UnknownVariable { pos, .. }
+            | IRError::UnknownField { pos, .. }
+            | IRError::UnknownFunction { pos, .. }
+            | IRError::MissingStructFields { pos, .. }
+            | IRError::ReturnStatementOutsideFunction(pos)
+            | IRError::StructOpOutsideDef(pos)
+            | IRError::CaseOutsideMatch(pos)
+            | IRError::DuplicateType(pos, _)
+            | IRError::DuplicateFunction(pos, _)
+            | IRError::DuplicateVariable(pos, _)
+            | IRError::UnknownType { pos, .. } => *pos,
+            IRError::InvalidASTArgument { got, .. } => got.pos,
+            IRError::InvalidArgument { got, .. } => got.pos,
+            IRError::FSetError(_) => Pos::default(),
+        }
+    }
+
+    pub fn msg(&self, ir: &IR) -> String {
+        match self {
+            IRError::UnexpectedNode(_) => "unexpected node".to_string(),
+            IRError::UnknownStmt { name, .. } => {
+                format!("unknown statement '{}'", name)
             }
-            IRError::UnknownStmt { pos, name } => {
-                format!("{}: unknown statement '{}'", ir.fset.display_pos(pos), name)
+            IRError::InvalidGlobalDef(node) => "invalid in global scope".to_string(),
+            IRError::InvalidArgumentCount { expected, got, .. } => {
+                format!("invalid argument count, expected {}, got {}", expected, got)
             }
-            IRError::InvalidGlobalDef(node) => {
-                format!(
-                    "{}: invalid in global scope",
-                    ir.fset.display_pos(&node.pos)
-                )
-            }
-            IRError::InvalidArgumentCount { pos, expected, got } => format!(
-                "{}: invalid argument count, expected {}, got {}",
-                ir.fset.display_pos(pos),
-                expected,
-                got
-            ),
             IRError::InvalidASTArgument { expected, got } => format!(
-                "{}: invalid argument kind, expected {:?}, got {:?}",
-                ir.fset.display_pos(&got.pos),
+                "invalid argument kind, expected {:?}, got {:?}",
                 expected,
                 got.data.typ()
             ),
             IRError::InvalidArgument { expected, got } => format!(
-                "{}: invalid argument type, expected {}, got {}",
-                ir.fset.display_pos(&got.pos),
+                "invalid argument type, expected {}, got {}",
                 expected.fmt(ir),
                 got.typ(ir).data.fmt(ir),
             ),
             IRError::FSetError(e) => e.fmt(&ir.fset),
-            IRError::InvalidType { pos, expected, got } => format!(
-                "{}: invalid type, expected {:?}, got {:?}",
-                ir.fset.display_pos(pos),
-                expected,
-                got
-            ),
-            IRError::UnknownType { pos, name } => {
-                format!("{}: unknown type '{}'", ir.fset.display_pos(pos), name)
+            IRError::InvalidType { expected, got, .. } => {
+                format!("invalid type, expected {:?}, got {:?}", expected, got)
             }
-            IRError::UnknownVariable { pos, name } => {
-                format!("{}: unknown variable '{}'", ir.fset.display_pos(pos), name)
+            IRError::UnknownType { name, .. } => {
+                format!("unknown type '{}'", name)
             }
-            IRError::UnknownField { pos, name } => {
-                format!("{}: unknown field '{}'", ir.fset.display_pos(pos), name)
+            IRError::UnknownVariable { name, .. } => {
+                format!("unknown variable '{}'", name)
             }
-            IRError::UnknownFunction { pos, name } => {
-                format!("{}: unknown function '{}'", ir.fset.display_pos(pos), name)
+            IRError::UnknownField { name, .. } => {
+                format!("unknown field '{}'", name)
             }
-            IRError::MissingStructFields { pos, missing } => {
+            IRError::UnknownFunction { name, .. } => {
+                format!("unknown function '{}'", name)
+            }
+            IRError::MissingStructFields { missing, .. } => {
+                format!("missing struct fields: {}", missing.join(", "))
+            }
+            IRError::ReturnStatementOutsideFunction(_) => {
+                "return statement outside function".to_string()
+            }
+            IRError::StructOpOutsideDef(_) => "struct op outside struct definition".to_string(),
+            IRError::CaseOutsideMatch(_) => "case outside match statement".to_string(),
+            IRError::DuplicateType(_, orig) => {
                 format!(
-                    "{}: missing struct fields: {}",
-                    ir.fset.display_pos(pos),
-                    missing.join(", ")
-                )
-            }
-            IRError::ReturnStatementOutsideFunction(pos) => {
-                format!(
-                    "{}: return statement outside function",
-                    ir.fset.display_pos(pos)
-                )
-            }
-            IRError::StructOpOutsideDef(pos) => {
-                format!(
-                    "{}: struct op outside struct definition",
-                    ir.fset.display_pos(pos)
-                )
-            }
-            IRError::CaseOutsideMatch(pos) => {
-                format!("{}: case outside match statement", ir.fset.display_pos(pos))
-            }
-            IRError::DuplicateType(pos, orig) => {
-                format!(
-                    "{}: duplicate type (originally defined at {})",
-                    ir.fset.display_pos(pos),
+                    "duplicate type (originally defined at {})",
                     ir.fset.display_pos(&ir.types[*orig].pos)
                 )
             }
-            IRError::DuplicateFunction(pos, orig) => {
+            IRError::DuplicateFunction(_, orig) => {
                 format!(
-                    "{}: duplicate function (originally defined at {})",
-                    ir.fset.display_pos(pos),
+                    "duplicate function (originally defined at {})",
                     ir.fset.display_pos(&ir.funcs[*orig].definition)
                 )
             }
-            IRError::DuplicateVariable(pos, orig) => {
+            IRError::DuplicateVariable(_, orig) => {
                 format!(
-                    "{}: duplicate variable (originally defined at {})",
-                    ir.fset.display_pos(pos),
+                    "duplicate variable (originally defined at {})",
                     ir.fset.display_pos(&ir.variables[*orig].definition)
                 )
             }
         }
+    }
+
+    pub fn fmt(&self, ir: &IR) -> String {
+        if let Self::FSetError(_) = self {
+            return self.msg(ir);
+        }
+        format!("{}: {}", ir.fset.display_pos(&self.pos()), self.msg(ir))
     }
 }

@@ -1,5 +1,5 @@
 [package]
-name = "lsp"
+name = "bsharp_lsp"
 version = "0.2.2"
 edition = "2021"
 
@@ -7,9 +7,13 @@ license = "MIT"
 description = "The B# programming language!"
 readme = "../README.md"
 keywords = ["language", "compiler"]
+exclude = ["vscode"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 fset = { path = "../fset", package = "bsharp_fset", version = "0.2.2" }
 ir = { path = "../ir", package = "bsharp_ir", version = "0.2.2" }
+tokens = { path = "../tokens", package = "bsharp_tokens", version = "0.2.2" }
+tokio = { version = "1.32.0", features = ["full"] }
+tower-lsp = "0.20.0"

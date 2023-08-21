@@ -12,6 +12,7 @@ mod stmts;
 use errors::*;
 mod defpass;
 mod typecheck;
+pub use errors::*;
 use typecheck::*;
 
 pub struct IR {
