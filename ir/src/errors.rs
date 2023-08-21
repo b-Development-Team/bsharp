@@ -92,7 +92,7 @@ impl IRError {
             IRError::UnknownStmt { name, .. } => {
                 format!("unknown statement '{}'", name)
             }
-            IRError::InvalidGlobalDef(node) => "invalid in global scope".to_string(),
+            IRError::InvalidGlobalDef(_) => "invalid in global scope".to_string(),
             IRError::InvalidArgumentCount { expected, got, .. } => {
                 format!("invalid argument count, expected {}, got {}", expected, got)
             }

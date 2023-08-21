@@ -1,7 +1,7 @@
 use super::*;
 
 pub struct Stream {
-    source: String,
+    source: Vec<char>,
     index: usize,
 
     file: usize,
@@ -12,7 +12,7 @@ pub struct Stream {
 impl Stream {
     pub fn new(source: String, file: usize) -> Stream {
         Stream {
-            source,
+            source: source.chars().collect(),
             index: 0,
             line: 0,
             col: 0,
@@ -21,7 +21,11 @@ impl Stream {
     }
 
     pub fn peek(&self) -> Option<char> {
-        self.source.chars().nth(self.index)
+        if self.index < self.source.len() {
+            Some(self.source[self.index])
+        } else {
+            None
+        }
     }
 
     pub fn eat(&mut self) -> Option<char> {
