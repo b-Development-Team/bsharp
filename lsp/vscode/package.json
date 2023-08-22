@@ -3,6 +3,8 @@
   "displayName": "bsharp",
   "description": "The B# programming languaage!",
   "version": "2.0.0",
+  "author": "Nv7",
+  "publisher": "Nv7",
   "engines": {
     "vscode": "^1.81.0"
   },
