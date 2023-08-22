@@ -3,6 +3,7 @@
  * Licensed under the MIT License. See License.txt in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
+import { existsSync } from 'fs';
 import { homedir } from 'os';
 import * as path from 'path';
 import { workspace, ExtensionContext } from 'vscode';
@@ -17,7 +18,7 @@ import {
 let client: LanguageClient;
 
 export function activate(context: ExtensionContext) {
-	// The server is implemented in node
+	// Get paths
 	const debugPath = path.resolve(path.join(context.extensionPath, "../../target/debug/bsharp_lsp"));
 	const releasePath = path.join(homedir(), ".cargo", "bin", "bsharp_lsp");
 
