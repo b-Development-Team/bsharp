@@ -9,6 +9,8 @@
   "categories": [
     "Programming Languages"
   ],
+  "license": "MIT",
+  "repository": "https://github.com/Nv7-Github/bsharp",
   "contributes": {
     "languages": [
       {
