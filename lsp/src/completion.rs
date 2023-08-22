@@ -8,6 +8,8 @@ impl Backend {
             return Ok(None);
         }
         let trigger = p.context.unwrap().trigger_character.unwrap();
+        let path = get_path(&p.text_document_position.text_document.uri);
+        let pos = p.text_document_position.position;
         let ir = &self.state.lock().await.ir;
         match trigger.as_str() {
             "@" => {
@@ -35,6 +37,14 @@ impl Backend {
                 // Variables
                 let mut res = Vec::new();
                 for v in ir.variables.iter() {
+                    // Check if in context
+                    if !(ir.scopes[v.scope].pos.start_line <= pos.line as usize
+                        && ir.scopes[v.scope].pos.end_line >= pos.line as usize
+                        && path.ends_with(&ir.fset.files[ir.scopes[v.scope].pos.file].name))
+                    {
+                        continue;
+                    }
+
                     // Name
                     let mut n = v.name.clone();
                     n.remove(0);
