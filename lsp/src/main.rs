@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 mod compile;
 mod completion;
+mod definition;
 mod hover;
 
 use fset::{FSet, Token};
@@ -57,6 +58,7 @@ impl LanguageServer for Backend {
                     all_commit_characters: None,
                     completion_item: None,
                 }),
+                definition_provider: Some(OneOf::Left(true)),
                 hover_provider: Some(HoverProviderCapability::Simple(true)),
                 ..ServerCapabilities::default()
             },
@@ -96,6 +98,13 @@ impl LanguageServer for Backend {
 
     async fn shutdown(&self) -> Result<()> {
         Ok(())
+    }
+
+    async fn goto_definition(
+        &self,
+        p: GotoDefinitionParams,
+    ) -> Result<Option<GotoDefinitionResponse>> {
+        self.definition(p).await
     }
 }
 
@@ -146,7 +155,6 @@ fn pos_range(pos: Pos) -> Range {
 pub fn fn_string(f: &Function, ir: &IR) -> String {
     let mut desc = format!("[{}", f.name);
     for p in f.params.iter() {
-        //detail.push_str(&format!(" {}", ir.variables[*p].typ.data.fmt(&ir)));
         desc.push_str(&format!(
             " [PARAM {} {}]",
             ir.variables[*p].name,
