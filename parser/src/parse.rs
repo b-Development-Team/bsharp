@@ -107,7 +107,7 @@ impl super::Parser {
                     let n = self.parse_node()?;
                     nodes.push(n);
                 }
-                pos.extend(self.tok.eat()?.pos); // Eat ]
+                pos = pos.extend(self.tok.eat()?.pos); // Eat ]
                 return Ok(ASTNode {
                     data: ASTNodeData::Block(nodes),
                     pos,

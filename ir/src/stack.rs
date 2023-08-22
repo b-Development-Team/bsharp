@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use super::*;
 
+#[derive(Debug)]
 pub struct Scope {
     pub kind: ScopeKind,
     pub vars: HashMap<String, usize>,
@@ -34,7 +35,7 @@ pub struct TypeDef {
     pub typ: Type,
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Debug)]
 pub enum ScopeKind {
     Global,
     Type,

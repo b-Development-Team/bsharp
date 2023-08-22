@@ -41,16 +41,7 @@ impl State {
             let pos = err.pos().unwrap();
             let msg = err.msg(&self.ir);
             let diag = Diagnostic {
-                range: Range {
-                    start: Position {
-                        line: pos.start_line as u32,
-                        character: pos.start_col as u32,
-                    },
-                    end: Position {
-                        line: pos.end_line as u32,
-                        character: pos.end_col as u32,
-                    },
-                },
+                range: pos_range(pos),
                 severity: Some(DiagnosticSeverity::ERROR),
                 code: None,
                 code_description: None,

@@ -4,7 +4,7 @@ pub use fset::*;
 use std::collections::HashMap;
 pub use types::*;
 mod stack;
-use stack::*;
+pub use stack::*;
 mod ir;
 pub use ir::*;
 mod errors;

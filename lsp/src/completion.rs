@@ -15,16 +15,7 @@ impl Backend {
                 let mut res = Vec::new();
                 for f in ir.funcs.iter() {
                     // Detail
-                    let mut detail = format!("[{}", f.name);
-                    for p in f.params.iter() {
-                        //detail.push_str(&format!(" {}", ir.variables[*p].typ.data.fmt(&ir)));
-                        detail.push_str(&format!(" {}", ir.variables[*p].name));
-                    }
-                    detail.push_str("]");
-                    if (f.ret_typ.data != TypeData::VOID) && (f.ret_typ.data != TypeData::INVALID) {
-                        detail.push_str(" -> ");
-                        detail.push_str(&f.ret_typ.data.fmt(&ir));
-                    }
+                    let detail = fn_string(&f, &ir);
 
                     // Name
                     let mut n = f.name.clone();
@@ -91,7 +82,7 @@ impl Backend {
             "[" => {
                 // Functions
                 let mut res = Vec::new();
-                for f in builtinFuncs() {
+                for f in builtin_funcs() {
                     // Detail
                     let mut detail = format!("[{}", f.name);
                     for p in f.params.iter() {
@@ -118,8 +109,8 @@ impl Backend {
     }
 }
 
-// Builtin funcs
-enum bPt {
+// builtin param type
+enum Bpt {
     TYPE,
     NUMBER,
     BOX,
@@ -127,8 +118,8 @@ enum bPt {
     STRUCT,
     BOOL,
     FIELD,
-    OPT(Box<bPt>),
-    VARIADIC(Box<bPt>),
+    OPT(Box<Bpt>),
+    VARIADIC(Box<Bpt>),
     BLOCK,
     ANY,
     ARRAY,
@@ -137,306 +128,305 @@ enum bPt {
     STRING,
 }
 
-// builtin param type
-impl bPt {
+impl Bpt {
     fn name(&self) -> String {
         match self {
-            bPt::TYPE => "TYPE".to_string(),
-            bPt::NUMBER => "NUMBER".to_string(),
-            bPt::BOX => "BOX".to_string(),
-            bPt::VARIABLE => "VARIABLE".to_string(),
-            bPt::STRUCT => "STRUCT".to_string(),
-            bPt::BOOL => "BOOL".to_string(),
-            bPt::FIELD => "FIELD".to_string(),
-            bPt::OPT(v) => v.name() + "?",
-            bPt::VARIADIC(v) => v.name() + "...",
-            bPt::BLOCK => "BLOCK".to_string(),
-            bPt::ANY => "ANY".to_string(),
-            bPt::ARRAY => "ARRAY".to_string(),
-            bPt::ENUM => "ENUM".to_string(),
-            bPt::TUPLE => "TUPLE".to_string(),
-            bPt::STRING => "$STRING".to_string(),
+            Bpt::TYPE => "TYPE".to_string(),
+            Bpt::NUMBER => "NUMBER".to_string(),
+            Bpt::BOX => "BOX".to_string(),
+            Bpt::VARIABLE => "VARIABLE".to_string(),
+            Bpt::STRUCT => "STRUCT".to_string(),
+            Bpt::BOOL => "BOOL".to_string(),
+            Bpt::FIELD => "FIELD".to_string(),
+            Bpt::OPT(v) => v.name() + "?",
+            Bpt::VARIADIC(v) => v.name() + "...",
+            Bpt::BLOCK => "BLOCK".to_string(),
+            Bpt::ANY => "ANY".to_string(),
+            Bpt::ARRAY => "ARRAY".to_string(),
+            Bpt::ENUM => "ENUM".to_string(),
+            Bpt::TUPLE => "TUPLE".to_string(),
+            Bpt::STRING => "$STRING".to_string(),
         }
     }
 }
 
 struct BuiltinFunc {
     name: &'static str,
-    params: Vec<bPt>,
-    ret: Option<bPt>,
+    params: Vec<Bpt>,
+    ret: Option<Bpt>,
 }
 
-fn builtinFuncs() -> Vec<BuiltinFunc> {
+fn builtin_funcs() -> Vec<BuiltinFunc> {
     vec![
         BuiltinFunc {
             name: "ARRAY",
-            params: vec![bPt::TYPE, bPt::OPT(Box::new(bPt::NUMBER))],
-            ret: Some(bPt::TYPE),
+            params: vec![Bpt::TYPE, Bpt::OPT(Box::new(Bpt::NUMBER))],
+            ret: Some(Bpt::TYPE),
         },
         BuiltinFunc {
             name: "STRUCT",
-            params: vec![bPt::VARIADIC(Box::new(bPt::FIELD))],
-            ret: Some(bPt::TYPE),
+            params: vec![Bpt::VARIADIC(Box::new(Bpt::FIELD))],
+            ret: Some(Bpt::TYPE),
         },
         BuiltinFunc {
             name: "TUPLE",
-            params: vec![bPt::VARIADIC(Box::new(bPt::TYPE))],
-            ret: Some(bPt::TYPE),
+            params: vec![Bpt::VARIADIC(Box::new(Bpt::TYPE))],
+            ret: Some(Bpt::TYPE),
         },
         BuiltinFunc {
             name: "ENUM",
-            params: vec![bPt::VARIADIC(Box::new(bPt::TYPE))],
-            ret: Some(bPt::TYPE),
+            params: vec![Bpt::VARIADIC(Box::new(Bpt::TYPE))],
+            ret: Some(Bpt::TYPE),
         },
         BuiltinFunc {
             name: "FIELD",
-            params: vec![bPt::VARIABLE, bPt::TYPE],
-            ret: Some(bPt::TYPE),
+            params: vec![Bpt::VARIABLE, Bpt::TYPE],
+            ret: Some(Bpt::TYPE),
         },
         BuiltinFunc {
             name: "CHAR",
             params: vec![],
-            ret: Some(bPt::TYPE),
+            ret: Some(Bpt::TYPE),
         },
         BuiltinFunc {
             name: "INT",
             params: vec![],
-            ret: Some(bPt::TYPE),
+            ret: Some(Bpt::TYPE),
         },
         BuiltinFunc {
             name: "FLOAT",
             params: vec![],
-            ret: Some(bPt::TYPE),
+            ret: Some(Bpt::TYPE),
         },
         BuiltinFunc {
             name: "BOOL",
             params: vec![],
-            ret: Some(bPt::TYPE),
+            ret: Some(Bpt::TYPE),
         },
         BuiltinFunc {
             name: "BX",
             params: vec![],
-            ret: Some(bPt::TYPE),
+            ret: Some(Bpt::TYPE),
         },
         BuiltinFunc {
             name: "PARAM",
-            params: vec![bPt::VARIABLE, bPt::TYPE],
+            params: vec![Bpt::VARIABLE, Bpt::TYPE],
             ret: None,
         },
         BuiltinFunc {
             name: "RETURN",
-            params: vec![bPt::ANY],
+            params: vec![Bpt::ANY],
             ret: None,
         },
         BuiltinFunc {
             name: "ARR",
-            params: vec![bPt::VARIADIC(Box::new(bPt::ANY))],
+            params: vec![Bpt::VARIADIC(Box::new(Bpt::ANY))],
             ret: None,
         },
         BuiltinFunc {
             name: "+",
-            params: vec![bPt::NUMBER, bPt::NUMBER],
-            ret: Some(bPt::NUMBER),
+            params: vec![Bpt::NUMBER, Bpt::NUMBER],
+            ret: Some(Bpt::NUMBER),
         },
         BuiltinFunc {
             name: "-",
-            params: vec![bPt::NUMBER, bPt::NUMBER],
-            ret: Some(bPt::NUMBER),
+            params: vec![Bpt::NUMBER, Bpt::NUMBER],
+            ret: Some(Bpt::NUMBER),
         },
         BuiltinFunc {
             name: "/",
-            params: vec![bPt::NUMBER, bPt::NUMBER],
-            ret: Some(bPt::NUMBER),
+            params: vec![Bpt::NUMBER, Bpt::NUMBER],
+            ret: Some(Bpt::NUMBER),
         },
         BuiltinFunc {
             name: "*",
-            params: vec![bPt::NUMBER, bPt::NUMBER],
-            ret: Some(bPt::NUMBER),
+            params: vec![Bpt::NUMBER, Bpt::NUMBER],
+            ret: Some(Bpt::NUMBER),
         },
         BuiltinFunc {
             name: "^",
-            params: vec![bPt::NUMBER, bPt::NUMBER],
-            ret: Some(bPt::NUMBER),
+            params: vec![Bpt::NUMBER, Bpt::NUMBER],
+            ret: Some(Bpt::NUMBER),
         },
         BuiltinFunc {
             name: "XOR",
-            params: vec![bPt::NUMBER, bPt::NUMBER],
-            ret: Some(bPt::NUMBER),
+            params: vec![Bpt::NUMBER, Bpt::NUMBER],
+            ret: Some(Bpt::NUMBER),
         },
         BuiltinFunc {
             name: "SHIFT",
-            params: vec![bPt::NUMBER, bPt::NUMBER],
-            ret: Some(bPt::NUMBER),
+            params: vec![Bpt::NUMBER, Bpt::NUMBER],
+            ret: Some(Bpt::NUMBER),
         },
         BuiltinFunc {
             name: "BOR",
-            params: vec![bPt::NUMBER, bPt::NUMBER],
-            ret: Some(bPt::NUMBER),
+            params: vec![Bpt::NUMBER, Bpt::NUMBER],
+            ret: Some(Bpt::NUMBER),
         },
         BuiltinFunc {
             name: ">",
-            params: vec![bPt::ANY, bPt::ANY],
-            ret: Some(bPt::BOOL),
+            params: vec![Bpt::ANY, Bpt::ANY],
+            ret: Some(Bpt::BOOL),
         },
         BuiltinFunc {
             name: ">=",
-            params: vec![bPt::ANY, bPt::ANY],
-            ret: Some(bPt::BOOL),
+            params: vec![Bpt::ANY, Bpt::ANY],
+            ret: Some(Bpt::BOOL),
         },
         BuiltinFunc {
             name: "<",
-            params: vec![bPt::ANY, bPt::ANY],
-            ret: Some(bPt::BOOL),
+            params: vec![Bpt::ANY, Bpt::ANY],
+            ret: Some(Bpt::BOOL),
         },
         BuiltinFunc {
             name: "<=",
-            params: vec![bPt::ANY, bPt::ANY],
-            ret: Some(bPt::BOOL),
+            params: vec![Bpt::ANY, Bpt::ANY],
+            ret: Some(Bpt::BOOL),
         },
         BuiltinFunc {
             name: "=",
-            params: vec![bPt::ANY, bPt::ANY],
-            ret: Some(bPt::BOOL),
+            params: vec![Bpt::ANY, Bpt::ANY],
+            ret: Some(Bpt::BOOL),
         },
         BuiltinFunc {
             name: "NEQ",
-            params: vec![bPt::ANY, bPt::ANY],
-            ret: Some(bPt::BOOL),
+            params: vec![Bpt::ANY, Bpt::ANY],
+            ret: Some(Bpt::BOOL),
         },
         BuiltinFunc {
             name: "NOT",
-            params: vec![bPt::BOOL],
-            ret: Some(bPt::BOOL),
+            params: vec![Bpt::BOOL],
+            ret: Some(Bpt::BOOL),
         },
         BuiltinFunc {
             name: "&",
-            params: vec![bPt::BOOL, bPt::BOOL],
-            ret: Some(bPt::BOOL),
+            params: vec![Bpt::BOOL, Bpt::BOOL],
+            ret: Some(Bpt::BOOL),
         },
         BuiltinFunc {
             name: "|",
-            params: vec![bPt::BOOL, bPt::BOOL],
-            ret: Some(bPt::BOOL),
+            params: vec![Bpt::BOOL, Bpt::BOOL],
+            ret: Some(Bpt::BOOL),
         },
         BuiltinFunc {
             name: "DEFINE",
-            params: vec![bPt::VARIABLE, bPt::ANY],
+            params: vec![Bpt::VARIABLE, Bpt::ANY],
             ret: None,
         },
         BuiltinFunc {
             name: "WHILE",
-            params: vec![bPt::BOOL, bPt::BLOCK],
+            params: vec![Bpt::BOOL, Bpt::BLOCK],
             ret: None,
         },
         BuiltinFunc {
             name: "LEN",
-            params: vec![bPt::ARRAY],
-            ret: Some(bPt::NUMBER),
+            params: vec![Bpt::ARRAY],
+            ret: Some(Bpt::NUMBER),
         },
         BuiltinFunc {
             name: "APPEND",
-            params: vec![bPt::ARRAY, bPt::ANY],
+            params: vec![Bpt::ARRAY, Bpt::ANY],
             ret: None,
         },
         BuiltinFunc {
             name: "GET",
-            params: vec![bPt::STRUCT, bPt::FIELD],
-            ret: Some(bPt::ANY),
+            params: vec![Bpt::STRUCT, Bpt::FIELD],
+            ret: Some(Bpt::ANY),
         },
         BuiltinFunc {
             name: "GET",
-            params: vec![bPt::ENUM, bPt::NUMBER],
-            ret: Some(bPt::ANY),
+            params: vec![Bpt::ENUM, Bpt::NUMBER],
+            ret: Some(Bpt::ANY),
         },
         BuiltinFunc {
             name: "GET",
-            params: vec![bPt::ARRAY, bPt::NUMBER],
-            ret: Some(bPt::ANY),
+            params: vec![Bpt::ARRAY, Bpt::NUMBER],
+            ret: Some(Bpt::ANY),
         },
         BuiltinFunc {
             name: "GET",
-            params: vec![bPt::TUPLE, bPt::NUMBER],
-            ret: Some(bPt::ANY),
+            params: vec![Bpt::TUPLE, Bpt::NUMBER],
+            ret: Some(Bpt::ANY),
         },
         BuiltinFunc {
             name: "NEW",
-            params: vec![bPt::TYPE, bPt::ANY],
-            ret: Some(bPt::ANY),
+            params: vec![Bpt::TYPE, Bpt::ANY],
+            ret: Some(Bpt::ANY),
         },
         BuiltinFunc {
             name: "PRINT",
-            params: vec![bPt::STRING],
+            params: vec![Bpt::STRING],
             ret: None,
         },
         BuiltinFunc {
             name: "IF",
-            params: vec![bPt::BOOL, bPt::BLOCK, bPt::BLOCK],
+            params: vec![Bpt::BOOL, Bpt::BLOCK, Bpt::BLOCK],
             ret: None,
         },
         BuiltinFunc {
             name: "BOX",
-            params: vec![bPt::ANY],
-            ret: Some(bPt::BOX),
+            params: vec![Bpt::ANY],
+            ret: Some(Bpt::BOX),
         },
         BuiltinFunc {
             name: "PEEK",
-            params: vec![bPt::BOX, bPt::TYPE],
-            ret: Some(bPt::BOOL),
+            params: vec![Bpt::BOX, Bpt::TYPE],
+            ret: Some(Bpt::BOOL),
         },
         BuiltinFunc {
             name: "UNBOX",
-            params: vec![bPt::BOX],
-            ret: Some(bPt::ANY),
+            params: vec![Bpt::BOX],
+            ret: Some(Bpt::ANY),
         },
         BuiltinFunc {
             name: ":",
-            params: vec![bPt::FIELD, bPt::ANY],
-            ret: Some(bPt::FIELD),
+            params: vec![Bpt::FIELD, Bpt::ANY],
+            ret: Some(Bpt::FIELD),
         },
         BuiltinFunc {
             name: "SET",
-            params: vec![bPt::STRUCT, bPt::VARIADIC(Box::new(bPt::FIELD))],
+            params: vec![Bpt::STRUCT, Bpt::VARIADIC(Box::new(Bpt::FIELD))],
             ret: None,
         },
         BuiltinFunc {
             name: "SET",
-            params: vec![bPt::ENUM, bPt::NUMBER, bPt::ANY],
+            params: vec![Bpt::ENUM, Bpt::NUMBER, Bpt::ANY],
             ret: None,
         },
         BuiltinFunc {
             name: "SET",
-            params: vec![bPt::TUPLE, bPt::NUMBER, bPt::ANY],
+            params: vec![Bpt::TUPLE, Bpt::NUMBER, Bpt::ANY],
             ret: None,
         },
         BuiltinFunc {
             name: "SET",
-            params: vec![bPt::ARRAY, bPt::NUMBER, bPt::ANY],
+            params: vec![Bpt::ARRAY, Bpt::NUMBER, Bpt::ANY],
             ret: None,
         },
         BuiltinFunc {
             name: "MATCH",
-            params: vec![bPt::ANY, bPt::VARIADIC(Box::new(bPt::BLOCK))],
+            params: vec![Bpt::ANY, Bpt::VARIADIC(Box::new(Bpt::BLOCK))],
             ret: None,
         },
         BuiltinFunc {
             name: "CASE",
-            params: vec![bPt::ANY, bPt::BLOCK],
+            params: vec![Bpt::ANY, Bpt::BLOCK],
             ret: None,
         },
         BuiltinFunc {
             name: "TOI",
-            params: vec![bPt::NUMBER],
-            ret: Some(bPt::NUMBER),
+            params: vec![Bpt::NUMBER],
+            ret: Some(Bpt::NUMBER),
         },
         BuiltinFunc {
             name: "TOF",
-            params: vec![bPt::NUMBER],
-            ret: Some(bPt::NUMBER),
+            params: vec![Bpt::NUMBER],
+            ret: Some(Bpt::NUMBER),
         },
         BuiltinFunc {
             name: "TOC",
-            params: vec![bPt::NUMBER],
-            ret: Some(bPt::NUMBER),
+            params: vec![Bpt::NUMBER],
+            ret: Some(Bpt::NUMBER),
         },
     ]
 }

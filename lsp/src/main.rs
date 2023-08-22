@@ -1,9 +1,11 @@
 use std::collections::HashMap;
 mod compile;
 mod completion;
+mod hover;
 
 use fset::{FSet, Token};
-use ir::IR;
+use ir::{Function, TypeData, IR};
+use tokens::Pos;
 use tokio::sync::Mutex;
 use tower_lsp::jsonrpc::Result;
 use tower_lsp::lsp_types::*;
@@ -55,6 +57,7 @@ impl LanguageServer for Backend {
                     all_commit_characters: None,
                     completion_item: None,
                 }),
+                hover_provider: Some(HoverProviderCapability::Simple(true)),
                 ..ServerCapabilities::default()
             },
         })
@@ -87,6 +90,10 @@ impl LanguageServer for Backend {
         self.complete(p).await
     }
 
+    async fn hover(&self, p: HoverParams) -> Result<Option<Hover>> {
+        self.handle_hover(p).await
+    }
+
     async fn shutdown(&self) -> Result<()> {
         Ok(())
     }
@@ -107,4 +114,50 @@ async fn main() {
     });
 
     Server::new(stdin, stdout, socket).serve(service).await;
+}
+
+// Util funcs
+fn get_tok(pos: Position, f: &Vec<Token>) -> Option<&Token> {
+    for tok in f {
+        if tok.pos.start_line <= pos.line as usize
+            && tok.pos.end_line >= pos.line as usize
+            && tok.pos.start_col <= pos.character as usize
+            && tok.pos.end_col >= pos.character as usize
+        {
+            return Some(tok);
+        }
+    }
+    None
+}
+
+fn pos_range(pos: Pos) -> Range {
+    Range {
+        start: Position {
+            line: pos.start_line as u32,
+            character: pos.start_col as u32,
+        },
+        end: Position {
+            line: pos.end_line as u32,
+            character: pos.end_col as u32,
+        },
+    }
+}
+
+pub fn fn_string(f: &Function, ir: &IR) -> String {
+    let mut desc = format!("[{}", f.name);
+    for p in f.params.iter() {
+        //detail.push_str(&format!(" {}", ir.variables[*p].typ.data.fmt(&ir)));
+        desc.push_str(&format!(
+            " [PARAM {} {}]",
+            ir.variables[*p].name,
+            ir.variables[*p].typ.data.fmt(&ir)
+        ));
+    }
+    if (f.ret_typ.data != TypeData::VOID) && (f.ret_typ.data != TypeData::INVALID) {
+        desc.push_str(" [RETURNS ");
+        desc.push_str(&f.ret_typ.data.fmt(&ir));
+        desc.push_str("]");
+    }
+    desc.push_str("]");
+    desc
 }

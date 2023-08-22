@@ -31,42 +31,36 @@ impl TypeData {
             TypeData::ARRAY(v) => format!("Array<{}>", v.data.fmt(ir)),
             TypeData::STRUCT(v) => {
                 let mut s = String::new();
-                s.push_str("STRUCT<");
+                s.push_str("[STRUCT");
                 for f in v {
-                    s.push_str(&format!("{}: {}, ", f.name, f.typ.data.fmt(ir)));
+                    s.push_str(&format!(" [FIELD {} {}]", f.name, f.typ.data.fmt(ir)));
                 }
-                s.push_str(">");
+                s.push_str("]");
                 s
             }
             TypeData::TUPLE(v) => {
                 let mut s = String::new();
-                s.push_str("TUPLE<");
-                let mut first = true;
+                s.push_str("[TUPLE");
                 for f in v {
-                    if !first {
-                        s.push_str(", ");
-                    } else {
-                        first = true;
-                    }
-                    s.push_str(&format!("{}", f.data.fmt(ir)));
+                    s.push_str(&format!(" {}", f.data.fmt(ir)));
                 }
-                s.push_str(">");
+                s.push_str("]");
                 s
             }
             TypeData::ENUM(v) => {
                 let mut s = String::new();
-                s.push_str("ENUM<");
+                s.push_str("[ENUM");
                 for f in v {
-                    s.push_str(&format!("{}, ", f.data.fmt(ir)));
+                    s.push_str(&format!(" {}", f.data.fmt(ir)));
                 }
-                s.push_str(">");
+                s.push_str("]");
                 s
             }
-            TypeData::INT => "INT".to_string(),
-            TypeData::FLOAT => "FLOAT".to_string(),
-            TypeData::CHAR => "CHAR".to_string(),
-            TypeData::BOOL => "BOOL".to_string(),
-            TypeData::BOX => "BOX".to_string(),
+            TypeData::INT => "[INT]".to_string(),
+            TypeData::FLOAT => "[FLOAT]".to_string(),
+            TypeData::CHAR => "[CHAR]".to_string(),
+            TypeData::BOOL => "[BOOL]".to_string(),
+            TypeData::BOX => "[BX]".to_string(),
             TypeData::INVALID => "INVALID".to_string(),
             TypeData::PARAM => "PARAM".to_string(),
             TypeData::FIELD => "FIELD".to_string(),
